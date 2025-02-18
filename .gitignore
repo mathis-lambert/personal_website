@@ -181,3 +181,12 @@ cython_debug/
 .DS_Store
 .DS_Store?
 ._*
+
+# Javascript dependencies
+node_modules/
+package-lock.json
+
+# Yarn
+yarn-error.log
+.pnp.*
+.yarn-integrity
