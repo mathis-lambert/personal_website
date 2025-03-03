@@ -1,7 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+
+$glass-bg: rgba(255, 255, 255, 0.15);
+$glass-border: rgba(255, 255, 255, 0.3);
+$glass-shadow: rgba(0, 0, 0, 0.1);
+$glass-blur: 10px;
+$transition: 0.3s ease-in-out;
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Lato', serif;
   font-weight: 400;
+  font-style: normal;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -13,7 +21,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-*, *:before, *:after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -22,42 +32,155 @@
 a {
   font-weight: 500;
   color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  text-decoration: none;
+  transition: color $transition;
+
+  &:hover {
+    color: #535bf2;
+  }
 }
 
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
+}
+
+.lato-thin {
+  font-family: 'Lato', serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.lato-light {
+  font-family: 'Lato', serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.lato-regular {
+  font-family: 'Lato', serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.lato-bold {
+  font-family: 'Lato', serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.lato-black {
+  font-family: 'Lato', serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.lato-thin-italic {
+  font-family: 'Lato', serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.lato-light-italic {
+  font-family: 'Lato', serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.lato-regular-italic {
+  font-family: 'Lato', serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.lato-bold-italic {
+  font-family: 'Lato', serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.lato-black-italic {
+  font-family: 'Lato', serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+.fira-code {
+  font-family: 'Fira Code', serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
 }
 
 h1 {
   font-size: 3.2em;
+  font-weight: 700;
   line-height: 1.1;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 12px;
+  border: 1px solid $glass-border;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background: $glass-bg;
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  box-shadow: 0 4px 6px $glass-shadow;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition:
+    border-color $transition,
+    box-shadow $transition;
+
+  &:hover {
+    border-color: #646cff;
+    box-shadow: 0 6px 12px rgba(100, 108, 255, 0.3);
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
 }
-button:hover {
-  border-color: #646cff;
+
+.card {
+  background: $glass-bg;
+  border: 1px solid $glass-border;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px $glass-shadow;
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  max-width: 1200px;
+  color: white;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+.input {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid $glass-border;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur($glass-blur);
+  -webkit-backdrop-filter: blur($glass-blur);
+  color: white;
+  font-size: 1em;
+  transition: all $transition;
+
+  &:focus {
+    border-color: #646cff;
+    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.2);
+  }
+}
+
+ul {
+  list-style: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -65,10 +188,13 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
-    background-color: #f9f9f9;
+    background: rgba(249, 249, 249, 0.6);
+    color: black;
   }
 }

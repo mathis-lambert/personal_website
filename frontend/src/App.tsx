@@ -1,35 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './style/App.scss';
+import useChatCompletion from './hooks/useChatCompletion';
+import ChatInput from './components/chatInput/chatInput';
+import MarkdownView from './components/markdownView/markdownView';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface ChatCompletionsRequest {
+  model: string;
+  input: string;
+  prompt: string;
+  history: Message[];
+  temperature: number;
+  max_tokens: number;
+  top_p: number;
+  stream: boolean;
 }
 
-export default App
+interface Message {
+  role: string;
+  content: string;
+}
+
+function App() {
+  const [response, setResponse] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [request, setRequest] = useState<ChatCompletionsRequest>({
+    model: 'mistral-small-latest',
+    input: '',
+    prompt: 'You are a helpful assistant.',
+    history: [],
+    temperature: 0.7,
+    max_tokens: 512,
+    top_p: 1,
+    stream: false,
+  });
+
+  const chatResponse = useChatCompletion(request, request.input.trim() !== '');
+
+  useEffect(() => {
+    if (chatResponse) {
+      setResponse(chatResponse);
+    }
+  }, [chatResponse]);
+
+  const handleSendMessage = (message: string): void => {
+    const newRequest: ChatCompletionsRequest = {
+      ...request,
+      input: message,
+      stream: isStreaming,
+    };
+    setRequest(newRequest);
+    setResponse(''); // Réinitialiser avant chaque nouvelle requête
+  };
+
+  const toggleStreaming = (): void => {
+    setIsStreaming((prev) => !prev);
+  };
+
+  return (
+    <div className="card">
+      <h1>Chat Completions</h1>
+      <div className="chat-output">
+        <MarkdownView content={response} />
+      </div>
+      <br />
+      <ChatInput onSendMessage={handleSendMessage} />
+      <label>
+        <input
+          type="checkbox"
+          checked={isStreaming}
+          onChange={toggleStreaming}
+        />
+        Enable Streaming
+      </label>
+    </div>
+  );
+}
+
+export default App;

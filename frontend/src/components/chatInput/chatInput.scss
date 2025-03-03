@@ -1,0 +1,110 @@
+.chat-input-container {
+  position: relative;
+  padding: 10px;
+
+  .chat-input-form {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .chat-input {
+    flex: 1;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 24px;
+    padding: 0 20px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    }
+  }
+
+  .send-button {
+    position: absolute;
+    right: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    display: flex;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.9);
+
+    svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+
+      svg {
+        transform: translateX(2px);
+      }
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// For dark backgrounds (adjust as needed for your app)
+@media (prefers-color-scheme: dark) {
+  .chat-input-container {
+    .chat-input {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// For light backgrounds
+@media (prefers-color-scheme: light) {
+  .chat-input-container {
+    .chat-input {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.05);
+      color: rgba(0, 0, 0, 0.8);
+
+      &::placeholder {
+        color: rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .send-button {
+      background: rgba(0, 0, 0, 0.1);
+      color: rgba(0, 0, 0, 0.7);
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
