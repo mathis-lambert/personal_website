@@ -1,40 +1,24 @@
 services:
-  api:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api
+    container_name: backend
     ports:
-      - "3001:3001"
+      - "8081:8081"
     env_file:
       - .env
     depends_on:
-      - qdrant
-      - mongodb
+      - mongo
     volumes:
       - .:/app
-    command: [ "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+    command: [ "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8081", "--reload" ]
     networks:
       - app-network
 
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: qdrant
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - ./qdrant/storage/data:/qdrant/storage/data
-      - ./qdrant/storage/snapshots:/qdrant/storage/snapshots
-      - ./qdrant/config/config.yaml:/qdrant/config/config.yaml
-    environment:
-      RUN_MODE: ${RUN_MODE:-production}
-      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
-
-
-  mongodb:
+  mongo:
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongo
     ports:
       - "27017:27017"
     environment:
@@ -45,17 +29,7 @@ services:
       - ./mongodb/data/:/data/db
     networks:
       - app-network
-
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - qdrant
-      - api
-      - mongodb
+    restart: always
 
 networks:
   app-network:
