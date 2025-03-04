@@ -1,24 +1,24 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+/* ============================================
+   COMPONENTS & UTILITIES
+============================================ */
 
+/* Logo Styles */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+
+  &:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+
+  &.react:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
 }
 
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
+/* Logo Spin Animation */
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -28,45 +28,55 @@
   }
 }
 
+/* Apply animation for users without reduced motion preference */
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* Card Component */
 .card {
   padding: 2em;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Informational Text */
 .read-the-docs {
   color: #888;
 }
 
+/* Layout Outlet */
+.layout-outlet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* ============================================
+   CHAT OUTPUT & CODE BLOCKS
+============================================ */
+
 .chat-output {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(100px);
+  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 1rem;
   border-radius: 10px;
   font-family: 'Lato', serif;
   font-weight: 400;
   font-style: normal;
   overflow-x: auto;
-  max-height: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  height: 700px;
 
-  pre {
-    border-radius: 10px;
-    overflow-x: auto;
-  }
-
-  code {
-    background: none !important;
-    font-family: 'Fira Code', serif !important;
-    font-optical-sizing: auto;
-    font-weight: 300;
-    font-style: normal;
-    font-size: 0.9rem;
+  p {
+    transition: all 0.3s ease;
   }
 
   ul,
@@ -79,10 +89,46 @@
     font-style: normal;
   }
 
-  p {
-    transition: all 0.3s ease;
+  pre {
+    border-radius: 10px;
+    overflow-x: auto;
+  }
+
+  code {
+    background: none !important;
+    font-family: 'Fira Code', monospace !important;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 0.9rem;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lato', serif;
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  h4 {
+    font-size: 1.125rem;
   }
 }
+
+/* ============================================
+   LIGHT THEME OVERRIDES
+============================================ */
 
 @media (prefers-color-scheme: light) {
   .chat-output {
@@ -102,20 +148,9 @@
       color: rgba(0, 0, 0, 0.9);
     }
 
-    .input {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-      color: rgba(0, 0, 0, 0.9);
-    }
-
-    button {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-      color: rgba(0, 0, 0, 0.9);
-    }
-
+    /* Shared styles for inputs, buttons, and chat input field */
+    .input,
+    button,
     .chat-input {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.18);

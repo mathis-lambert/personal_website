@@ -1,110 +1,103 @@
+$btn-size: 40px;
+
 .chat-input-container {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 1rem;
+  width: calc(100% - 2rem);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.chat-input-form {
   position: relative;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
 
-  .chat-input-form {
-    display: flex;
-    align-items: center;
-    position: relative;
+.chat-input {
+  width: 100%;
+  min-height: 1rem;
+  max-height: 200px;
+  border: none;
+  padding: 0;
+  font-size: 16px;
+  color: #eee;
+  resize: none;
+  overflow-y: auto;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: calc(#{$btn-size} + 0.5rem);
+  background: transparent; // Suppression du background color
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
   }
 
-  .chat-input {
-    flex: 1;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 24px;
-    padding: 0 20px;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 16px;
+  &:focus {
     outline: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    &:focus {
-      border-color: rgba(255, 255, 255, 0.4);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    }
   }
 
-  .send-button {
-    position: absolute;
-    right: 6px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: none;
-    display: flex;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: rgba(255, 255, 255, 0.9);
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
 
-    svg {
-      width: 16px;
-      height: 16px;
-      transition: transform 0.2s ease;
-    }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.25);
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
 
-      svg {
-        transform: translateX(2px);
-      }
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 }
 
-// For dark backgrounds (adjust as needed for your app)
-@media (prefers-color-scheme: dark) {
-  .chat-input-container {
-    .chat-input {
-      background: rgba(255, 255, 255, 0.08);
-    }
+.send-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: $btn-size;
+  height: $btn-size;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  color: #eee;
+  padding: 0;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
   }
-}
 
-// For light backgrounds
-@media (prefers-color-scheme: light) {
-  .chat-input-container {
-    .chat-input {
-      background: rgba(0, 0, 0, 0.05);
-      border-color: rgba(0, 0, 0, 0.05);
-      color: rgba(0, 0, 0, 0.8);
+  &:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
 
-      &::placeholder {
-        color: rgba(0, 0, 0, 0.3);
-      }
-    }
+  &:active {
+    transform: scale(0.95);
+  }
 
-    .send-button {
-      background: rgba(0, 0, 0, 0.1);
-      color: rgba(0, 0, 0, 0.7);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.15);
-      }
-    }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
