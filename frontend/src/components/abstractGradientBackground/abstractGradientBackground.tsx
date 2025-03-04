@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import './AbstractGradientBackground.scss';
+import './abstractGradientBackground.scss';
 
 interface Point {
     x: number;
