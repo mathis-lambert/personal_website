@@ -15,6 +15,8 @@ async def chat_completions(
     api_client: APIClient = Depends(get_api_client),
 ):
     try:
+        api_client.logger.info(f"API Client token: {api_client.auth_token}")
+        api_client.logger.info(f"API Client key: {api_client.api_key}")
         if body.stream:
             # Utilisez StreamingResponse pour retransmettre le flux SSE brut
             return StreamingResponse(

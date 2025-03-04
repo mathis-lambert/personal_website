@@ -190,3 +190,15 @@ package-lock.json
 yarn-error.log
 .pnp.*
 .yarn-integrity
+
+
+mongodb/
+
+# Local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Log files
+npm-debug.log*
