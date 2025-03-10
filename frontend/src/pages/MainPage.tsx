@@ -1,15 +1,15 @@
-import { Flex, Grid, Heading } from '@chakra-ui/react';
+import { Grid, Heading } from '@chakra-ui/react';
 import '../style/MainPage.scss';
 import GlassCard from '@/components/GlassCard/GlassCard.tsx';
 
 const MainPage = () => {
-
-
   return (
     <div className={'main-page'}>
       <div className="heading-titles">
         <Heading as="h1">Hi, I'm Mathis Lambert !</Heading>
-        <Heading as="h1"><span className="translucent">I'm an</span> engineering student</Heading>
+        <Heading as="h1">
+          <span className="translucent">I'm an</span> engineering student
+        </Heading>
         <Heading as="h1">
           <span className="translucent">in</span>&nbsp;
           <span className="highlight">AI</span>&nbsp;
@@ -53,9 +53,7 @@ const MainPage = () => {
             programming.
           </p>
         </GlassCard>
-
       </Grid>
-
     </div>
   );
 };

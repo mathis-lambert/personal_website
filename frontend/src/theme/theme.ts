@@ -7,12 +7,12 @@ const customConfig = defineConfig({
         customTextColor: {
           value: {
             _light: '#1a202c', // Couleur du texte en mode clair
-            _dark: '#f7fafc'  // Couleur du texte en mode sombre
-          }
-        }
-      }
-    }
-  }
+            _dark: '#f7fafc', // Couleur du texte en mode sombre
+          },
+        },
+      },
+    },
+  },
 });
 
 const system = createSystem(defaultConfig, customConfig);

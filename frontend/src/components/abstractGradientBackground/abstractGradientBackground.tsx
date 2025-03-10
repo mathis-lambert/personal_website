@@ -18,7 +18,10 @@ interface Props {
   sphereColors?: string[];
 }
 
-const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }) => {
+const AbstractGradientBackground: React.FC<Props> = ({
+  className,
+  sphereColors,
+}) => {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const blurCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -55,9 +58,24 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
     // Target areas for spheres
     const targetAreas = [
       { xMin: 0, xMax: targetSize, yMin: height - targetSize, yMax: height }, // Bottom left
-      { xMin: width - targetSize, xMax: width, yMin: height - targetSize, yMax: height }, // Bottom right
-      { xMin: width / 2 - targetSize / 2, xMax: width / 2 + targetSize / 2, yMin: height - targetSize, yMax: height }, // Middle bottom
-      { xMin: width - targetSize, xMax: width, yMin: height / 2 - targetSize / 2, yMax: height / 2 + targetSize / 2 } // Middle right
+      {
+        xMin: width - targetSize,
+        xMax: width,
+        yMin: height - targetSize,
+        yMax: height,
+      }, // Bottom right
+      {
+        xMin: width / 2 - targetSize / 2,
+        xMax: width / 2 + targetSize / 2,
+        yMin: height - targetSize,
+        yMax: height,
+      }, // Middle bottom
+      {
+        xMin: width - targetSize,
+        xMax: width,
+        yMin: height / 2 - targetSize / 2,
+        yMax: height / 2 + targetSize / 2,
+      }, // Middle right
     ];
 
     // Function to get a random target
@@ -87,7 +105,7 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
         color: colors[Math.floor(Math.random() * colors.length)],
         opacity: Math.random() * 0.5 + 0.5,
         targetX,
-        targetY
+        targetY,
       };
     });
 
@@ -107,13 +125,23 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
       ctx.fillRect(0, 0, width, height);
 
       // Draw each sphere
-      points.forEach(point => {
+      points.forEach((point) => {
         const gradient = ctx.createRadialGradient(
-          point.x, point.y, 0,
-          point.x, point.y, point.r
+          point.x,
+          point.y,
+          0,
+          point.x,
+          point.y,
+          point.r,
         );
-        gradient.addColorStop(0, getColorWithOpacity(point.color, point.opacity));
-        gradient.addColorStop(0.7, getColorWithOpacity(point.color, point.opacity * 0.5));
+        gradient.addColorStop(
+          0,
+          getColorWithOpacity(point.color, point.opacity),
+        );
+        gradient.addColorStop(
+          0.7,
+          getColorWithOpacity(point.color, point.opacity * 0.5),
+        );
         gradient.addColorStop(1, getColorWithOpacity(point.color, 0));
 
         ctx.fillStyle = gradient;
@@ -141,7 +169,8 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
         point.y += point.vy;
 
         // Check if sphere has reached its target
-        const distanceSquared = (point.x - point.targetX) ** 2 + (point.y - point.targetY) ** 2;
+        const distanceSquared =
+          (point.x - point.targetX) ** 2 + (point.y - point.targetY) ** 2;
         if (distanceSquared < (point.r / 2) ** 2) {
           const { x: newTargetX, y: newTargetY } = getRandomTarget();
           point.targetX = newTargetX;
@@ -188,7 +217,7 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
       targetAreas[3].yMax = height / 2 + targetSize / 2;
 
       // Reset points
-      points.forEach(point => {
+      points.forEach((point) => {
         const r = Math.random() * (r_max - r_min) + r_min;
         point.x = Math.random() * width;
         point.y = Math.random() * height;
@@ -210,7 +239,10 @@ const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }
   }, [className, sphereColors]);
 
   return (
-    <div ref={parentRef} className={`gradient-background-container ${className}`}>
+    <div
+      ref={parentRef}
+      className={`gradient-background-container ${className}`}
+    >
       <canvas ref={canvasRef} className="gradient-canvas-hidden" />
       <canvas ref={blurCanvasRef} className="gradient-canvas-blur" />
       <div className="grain"></div>

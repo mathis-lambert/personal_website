@@ -15,7 +15,9 @@ const Layout = () => {
   return (
     <>
       {/* Background universel */}
-      <AbstractGradientBackground className={`layout-background ${colorMode}`} />
+      <AbstractGradientBackground
+        className={`layout-background ${colorMode}`}
+      />
       {/* Contenu dynamique selon la route */}
       <MainContainer>
         <Outlet />

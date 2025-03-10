@@ -32,7 +32,9 @@ $btn-size: 40px;
   color: #eee;
   resize: none;
   overflow-y: auto;
-  transition: border 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    border 0.3s ease,
+    box-shadow 0.3s ease;
   margin-bottom: calc(#{$btn-size} + 0.5rem);
   background: transparent; // Suppression du background color
 
@@ -78,7 +80,9 @@ $btn-size: 40px;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
   color: #eee;
   padding: 0;
 
