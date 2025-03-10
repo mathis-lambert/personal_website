@@ -12,9 +12,16 @@
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "@chakra-ui/css-reset": "^2.3.0",
+    "@chakra-ui/react": "^3.12.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "framer-motion": "^12.4.11",
     "lucide-react": "^0.476.0",
+    "next-themes": "^0.4.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
     "react-markdown": "^10.0.1",
     "react-router-dom": "^7.2.0",
     "react-syntax-highlighter": "^15.6.1",
@@ -40,6 +47,7 @@
     "sass-embedded": "^1.85.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

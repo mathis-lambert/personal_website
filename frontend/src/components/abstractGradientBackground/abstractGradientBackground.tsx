@@ -1,126 +1,221 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import './abstractGradientBackground.scss';
 
 interface Point {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    r: number;
-    color: string;
-    opacity: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+  color: string;
+  opacity: number;
+  targetX: number;
+  targetY: number;
 }
 
-const AbstractGradientBackground: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const blurCanvasRef = useRef<HTMLCanvasElement | null>(null);
+interface Props {
+  className?: string;
+  sphereColors?: string[];
+}
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const blurCanvas = blurCanvasRef.current;
-        if (!canvas || !blurCanvas) return;
+const AbstractGradientBackground: React.FC<Props> = ({ className, sphereColors }) => {
+  const parentRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const blurCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-        const ctx = canvas.getContext('2d');
-        const blurCtx = blurCanvas.getContext('2d');
-        if (!ctx || !blurCtx) return;
+  useEffect(() => {
+    const parent = parentRef.current;
+    const canvas = canvasRef.current;
+    const blurCanvas = blurCanvasRef.current;
+    if (!parent || !canvas || !blurCanvas) return;
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+    // get parent background color
+    const backgroundColor = window.getComputedStyle(parent).backgroundColor;
 
-        // Définir les dimensions des canvas
-        canvas.width = blurCanvas.width = width;
-        canvas.height = blurCanvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const blurCtx = blurCanvas.getContext('2d');
+    if (!ctx || !blurCtx) return;
 
-        // Couleurs à utiliser
-        const colors = ['#9213C6', '#1B5FD9', '#29E6EA'];
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-        // Création des points
-        const points: Point[] = Array.from({length: 10}, () => ({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            vx: Math.random() * 0.6 - 0.3,
-            vy: Math.random() * 0.6 - 0.3,
-            r: Math.random() * 350 + 200, // Rayon aléatoire entre 200 et 450
-            color: colors[Math.floor(Math.random() * colors.length)],
-            opacity: Math.random() * 0.7 + 0.5,
-        }));
+    // Set dimensions of canvases
+    canvas.width = blurCanvas.width = width;
+    canvas.height = blurCanvas.height = height;
 
-        // Fonction utilitaire pour convertir une couleur hexadécimale en rgba
-        const getColorWithOpacity = (hexColor: string, opacity: number): string => {
-            const r = parseInt(hexColor.substring(1, 3), 16);
-            const g = parseInt(hexColor.substring(3, 5), 16);
-            const b = parseInt(hexColor.substring(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        };
+    // Colors of spheres
+    const colors = sphereColors || ['#9213C6', '#1B5FD9', '#29E6EA'];
 
-        const drawGradient = () => {
-            // Effacer le canvas principal et remplir avec du noir
-            ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-            ctx.fillRect(0, 0, width, height);
+    // Number of points
+    const numPoints = 6;
 
-            // Dessiner chaque gradient
-            points.forEach(point => {
-                const gradient = ctx.createRadialGradient(
-                    point.x, point.y, 0,
-                    point.x, point.y, point.r
-                );
-                gradient.addColorStop(0, getColorWithOpacity(point.color, point.opacity));
-                gradient.addColorStop(0.7, getColorWithOpacity(point.color, point.opacity * 0.3));
-                gradient.addColorStop(1, getColorWithOpacity(point.color, 0));
+    // Target size
+    let targetSize = Math.min(width, height) * 0.1;
 
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, point.r, 0, Math.PI * 2);
-                ctx.fill();
+    // Target areas for spheres
+    const targetAreas = [
+      { xMin: 0, xMax: targetSize, yMin: height - targetSize, yMax: height }, // Bottom left
+      { xMin: width - targetSize, xMax: width, yMin: height - targetSize, yMax: height }, // Bottom right
+      { xMin: width / 2 - targetSize / 2, xMax: width / 2 + targetSize / 2, yMin: height - targetSize, yMax: height }, // Middle bottom
+      { xMin: width - targetSize, xMax: width, yMin: height / 2 - targetSize / 2, yMax: height / 2 + targetSize / 2 } // Middle right
+    ];
 
-                // Mise à jour de la position et rebond sur les bords
-                point.x += point.vx;
-                point.y += point.vy;
+    // Function to get a random target
+    const getRandomTarget = () => {
+      const area = targetAreas[Math.floor(Math.random() * targetAreas.length)];
+      const x = Math.random() * (area.xMax - area.xMin) + area.xMin;
+      const y = Math.random() * (area.yMax - area.yMin) + area.yMin;
+      return { x, y };
+    };
 
-                if (point.x < -point.r) point.x = width + point.r;
-                if (point.x > width + point.r) point.x = -point.r;
-                if (point.y < -point.r) point.y = height + point.r;
-                if (point.y > height + point.r) point.y = -point.r;
-            });
+    // Range of radii for spheres
+    const r_min = 250;
+    const r_max = Math.min(width, height) / 3;
 
-            // Appliquer l'effet de traînée sur le canvas de flou
-            blurCtx.globalAlpha = 0.92;
-            blurCtx.drawImage(canvas, 0, 0);
+    // Initialize points (spheres)
+    const points: Point[] = Array.from({ length: numPoints }, () => {
+      const r = Math.random() * (r_max - r_min) + r_min;
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const { x: targetX, y: targetY } = getRandomTarget();
+      return {
+        x,
+        y,
+        vx: Math.random() * 0.6 - 0.3,
+        vy: Math.random() * 0.6 - 0.3,
+        r,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: Math.random() * 0.5 + 0.5,
+        targetX,
+        targetY
+      };
+    });
 
-            requestAnimationFrame(drawGradient);
-        };
+    // Function to get color with opacity
+    const getColorWithOpacity = (hexColor: string, opacity: number): string => {
+      const r = parseInt(hexColor.substring(1, 3), 16);
+      const g = parseInt(hexColor.substring(3, 5), 16);
+      const b = parseInt(hexColor.substring(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    };
 
-        // Initialiser le canvas de flou avec un fond noir
-        blurCtx.fillStyle = '#000';
-        blurCtx.fillRect(0, 0, width, height);
+    // Drawing function
+    const drawGradient = () => {
+      // Clear and fill main canvas with background color
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, width, height);
 
-        drawGradient();
+      // Draw each sphere
+      points.forEach(point => {
+        const gradient = ctx.createRadialGradient(
+          point.x, point.y, 0,
+          point.x, point.y, point.r
+        );
+        gradient.addColorStop(0, getColorWithOpacity(point.color, point.opacity));
+        gradient.addColorStop(0.7, getColorWithOpacity(point.color, point.opacity * 0.5));
+        gradient.addColorStop(1, getColorWithOpacity(point.color, 0));
 
-        // Gestion du redimensionnement
-        const handleResize = () => {
-            const newWidth = window.innerWidth;
-            const newHeight = window.innerHeight;
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, point.r, 0, Math.PI * 2);
+        ctx.fill();
 
-            canvas.width = blurCanvas.width = newWidth;
-            canvas.height = blurCanvas.height = newHeight;
+        // Attraction force towards target
+        const attractionStrength = 0.000015;
+        const dx = point.targetX - point.x;
+        const dy = point.targetY - point.y;
+        point.vx += attractionStrength * dx;
+        point.vy += attractionStrength * dy;
 
-            blurCtx.fillStyle = '#000';
-            blurCtx.fillRect(0, 0, newWidth, newHeight);
-        };
+        // Add random noise for organic movement
+        point.vx += Math.random() * 0.1 - 0.05;
+        point.vy += Math.random() * 0.1 - 0.05;
 
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
+        // Damping velocity
+        point.vx *= 0.99;
+        point.vy *= 0.99;
 
-    return (
-        <div className="gradient-background-container">
-            <canvas ref={canvasRef} className="gradient-canvas-hidden"/>
-            <canvas ref={blurCanvasRef} className="gradient-canvas-blur"/>
-        </div>
-    );
+        // Update position
+        point.x += point.vx;
+        point.y += point.vy;
+
+        // Check if sphere has reached its target
+        const distanceSquared = (point.x - point.targetX) ** 2 + (point.y - point.targetY) ** 2;
+        if (distanceSquared < (point.r / 2) ** 2) {
+          const { x: newTargetX, y: newTargetY } = getRandomTarget();
+          point.targetX = newTargetX;
+          point.targetY = newTargetY;
+        }
+      });
+
+      // Apply blur effect
+      blurCtx.globalAlpha = 0.45;
+      blurCtx.drawImage(canvas, 0, 0);
+
+      // Continue animation
+      requestAnimationFrame(drawGradient);
+    };
+
+    // Initialize blur canvas with background color
+    blurCtx.fillStyle = backgroundColor;
+    blurCtx.fillRect(0, 0, width, height);
+
+    // Start drawing
+    drawGradient();
+
+    // Resize handler
+    const handleResize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = blurCanvas.width = width;
+      canvas.height = blurCanvas.height = height;
+
+      targetSize = Math.min(width, height) * 0.1;
+
+      // Update target areas
+      targetAreas[0].xMax = targetSize;
+      targetAreas[0].yMin = height - targetSize;
+      targetAreas[1].xMin = width - targetSize;
+      targetAreas[1].yMin = height - targetSize;
+      targetAreas[2].xMin = width / 2 - targetSize / 2;
+      targetAreas[2].xMax = width / 2 + targetSize / 2;
+      targetAreas[2].yMin = height - targetSize;
+      targetAreas[2].yMax = height;
+      targetAreas[3].xMin = width - targetSize;
+      targetAreas[3].xMax = width;
+      targetAreas[3].yMin = height / 2 - targetSize / 2;
+      targetAreas[3].yMax = height / 2 + targetSize / 2;
+
+      // Reset points
+      points.forEach(point => {
+        const r = Math.random() * (r_max - r_min) + r_min;
+        point.x = Math.random() * width;
+        point.y = Math.random() * height;
+        const { x: newTargetX, y: newTargetY } = getRandomTarget();
+        point.targetX = newTargetX;
+        point.targetY = newTargetY;
+        point.r = r;
+      });
+
+      // Reset blur canvas
+      blurCtx.fillStyle = backgroundColor;
+      blurCtx.fillRect(0, 0, width, height);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [className, sphereColors]);
+
+  return (
+    <div ref={parentRef} className={`gradient-background-container ${className}`}>
+      <canvas ref={canvasRef} className="gradient-canvas-hidden" />
+      <canvas ref={blurCanvasRef} className="gradient-canvas-blur" />
+      <div className="grain"></div>
+    </div>
+  );
 };
 
 export default AbstractGradientBackground;

@@ -1,10 +1,17 @@
 .gradient-background-container {
   width: 100%;
   height: 100vh;
-  background-color: #000;
   overflow: hidden;
   position: fixed;
   z-index: -1;
+
+  &.dark {
+    background-color: var(--dark-black);
+  }
+
+  &.light {
+    background-color: var(--light-white);
+  }
 }
 
 .gradient-canvas-hidden {
@@ -17,6 +24,23 @@
   left: 0;
   width: 100%;
   height: 100%;
-  filter: blur(100px) contrast(1.3) brightness(1.2);
-  -webkit-filter: blur(100px) contrast(1.3) brightness(1.2);
+  filter: blur(50px) brightness(1.2);
+  -webkit-filter: blur(50px) brightness(1.2);
+}
+
+.grain {
+  position: fixed;
+  overflow: hidden;
+  pointer-events: none;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  background-image: url("https://cdn.shopify.com/s/files/1/0564/7617/2332/files/GrainBackround.gif?v=1667804647");
+  background-position: 0 0;
+  background-size: 70%;
+  background-repeat: repeat;
+  background-attachment: fixed;
+  opacity: .1;
 }

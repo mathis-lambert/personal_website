@@ -15,17 +15,6 @@ $glass-blur: 10px;
 $transition: 0.3s ease-in-out;
 
 /* --------------------------------------------
-   GLOBAL RESET
--------------------------------------------- */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* --------------------------------------------
    ROOT & BASE TYPOGRAPHY
 -------------------------------------------- */
 :root {
@@ -33,12 +22,20 @@ $transition: 0.3s ease-in-out;
   font-weight: 400;
   font-style: normal;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
   background-color: transparent;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --dark-white: #E8E8E8;
+  --light-white: #F8F8F8;
+  --clear-white: #FEFEFE;
+  --pure-white: #FFFFFF;
+  --light-black: #1A1A1A;
+  --clear-black: #0E0E0E;
+  --pure-black: #000000;
+  --dark-black: #040404;
 }
 
 /* --------------------------------------------
@@ -65,6 +62,7 @@ a {
    TYPOGRAPHY
 -------------------------------------------- */
 h1 {
+  font-family: 'Lato', serif !important;
   font-size: 3.2em;
   font-weight: 700;
   line-height: 1.1;
@@ -75,6 +73,7 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: 'Lato', serif !important;
   font-weight: 600;
   margin-bottom: 0.5em;
   line-height: 1.2;
@@ -161,77 +160,15 @@ ol {
 }
 
 /* --------------------------------------------
-   COMMON COMPONENT STYLES
+   ANIMATIONS
 -------------------------------------------- */
-.card {
-  background: $glass-bg;
-  border: 1px solid $glass-border;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 8px 16px $glass-shadow;
-  backdrop-filter: blur($glass-blur);
-  -webkit-backdrop-filter: blur($glass-blur);
-  max-width: 1200px;
-  color: white;
-}
-
-.input {
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid $glass-border;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur($glass-blur);
-  -webkit-backdrop-filter: blur($glass-blur);
-  color: white;
-  font-size: 1em;
-  transition: all $transition;
-
-  &:focus {
-    border-color: #646cff;
-    box-shadow: 0 4px 8px rgba(100, 108, 255, 0.2);
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
-}
-
-button {
-  border-radius: 12px;
-  border: 1px solid $glass-border;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background: $glass-bg;
-  backdrop-filter: blur($glass-blur);
-  -webkit-backdrop-filter: blur($glass-blur);
-  box-shadow: 0 4px 6px $glass-shadow;
-  cursor: pointer;
-  transition: border-color $transition, box-shadow $transition;
-
-  &:hover {
-    border-color: #646cff;
-    box-shadow: 0 6px 12px rgba(100, 108, 255, 0.3);
-  }
-
-  &:focus,
-  &:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-  }
-}
-
-/* --------------------------------------------
-   MEDIA QUERIES - LIGHT THEME
--------------------------------------------- */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background: rgba(249, 249, 249, 0.6);
-    color: black;
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
