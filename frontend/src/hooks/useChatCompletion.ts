@@ -28,11 +28,19 @@ interface ChatCompletionsResult {
   job_id: string;
 }
 
+interface ChatCompletionResponse {
+  result: string;
+  finish_reason: string;
+  job_id: string;
+}
+
 const useChatCompletion = (
   request: ChatCompletionsRequest,
-  isActive: boolean,
-): string => {
+  isActive: boolean
+): ChatCompletionResponse => {
   const [response, setResponse] = useState<string>('');
+  const [finishReason, setFinishReason] = useState<string>('');
+  const [jobId, setJobId] = useState<string>('');
   const controllerRef = useRef<AbortController | null>(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -48,10 +56,10 @@ const useChatCompletion = (
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Accept: request.stream ? 'text/event-stream' : 'application/json',
+            Accept: request.stream ? 'text/event-stream' : 'application/json'
           },
           body: JSON.stringify(request),
-          signal: controller.signal,
+          signal: controller.signal
         });
 
         if (!res.ok) {
@@ -80,7 +88,7 @@ const useChatCompletion = (
 
               const lines = event.split('\n');
               const eventTypeLine = lines.find((line) =>
-                line.startsWith('event:'),
+                line.startsWith('event:')
               );
               const dataLine = lines.find((line) => line.startsWith('data:'));
 
@@ -90,10 +98,16 @@ const useChatCompletion = (
                   if (eventTypeLine?.includes('done')) {
                     const jsonResponse: ChatCompletionsResult =
                       JSON.parse(data);
+                    console.log('Result SSE :', jsonResponse);
                     setResponse(jsonResponse.result);
+                    setJobId(jsonResponse.job_id);
+                    setFinishReason(jsonResponse.finish_reason);
                   } else {
                     const jsonResponse: ChatCompletionsChunk = JSON.parse(data);
+                    console.log('Chunk SSE :', jsonResponse);
                     setResponse((prev) => prev + jsonResponse.chunk);
+                    setJobId(jsonResponse.job_id);
+                    setFinishReason(jsonResponse.finish_reason || '');
                   }
                 } catch (e) {
                   console.error('Échec du parsing du chunk SSE :', data, e);
@@ -105,6 +119,8 @@ const useChatCompletion = (
           // Mode non-streaming
           const data: ChatCompletionsResult = await res.json();
           setResponse(data.result);
+          setFinishReason(data.finish_reason);
+          setJobId(data.job_id);
         }
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
@@ -115,14 +131,16 @@ const useChatCompletion = (
 
     // Réinitialiser la réponse avant chaque nouvelle requête
     setResponse('');
+    setFinishReason('');
+    setJobId('');
     fetchData();
 
     return () => {
       controller.abort();
     };
-  }, [request, isActive]); // Dépendances : request et isActive
+  }, [request.input, isActive]); // Dépendances : request.input et isActive
 
-  return response;
+  return { result: response, finish_reason: finishReason, job_id: jobId };
 };
 
 export default useChatCompletion;

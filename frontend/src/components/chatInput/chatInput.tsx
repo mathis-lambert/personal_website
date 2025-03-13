@@ -1,6 +1,7 @@
 import React, { FormEvent, useState, useRef } from 'react';
 import { ArrowUp } from 'lucide-react';
 import './chatInput.scss';
+import { Textarea } from '@chakra-ui/react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -36,6 +37,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
       if (message.trim()) {
         onSendMessage(message);
         setMessage('');
+        if (textAreaRef.current) {
+          textAreaRef.current.style.height = 'auto';
+        }
       }
     }
   };
@@ -43,14 +47,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
   return (
     <div className="chat-input-container">
       <form onSubmit={handleSubmit} className="chat-input-form">
-        <textarea
+        <Textarea
           ref={textAreaRef}
-          className="chat-input lato-bold"
+          size={'sm'}
+          className="chat-input lato-regular"
           placeholder="Poser une question"
           value={message}
-          onInput={handleInput}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
+          resize="none"
+          onInput={handleInput}
         />
         <button
           type="submit"
