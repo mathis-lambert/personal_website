@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import React, { JSX } from 'react';
+import ReactMarkdown, { ExtraProps } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkMath from 'remark-math';
@@ -16,16 +16,16 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({ content }) => {
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        code(props) {
-          const { children, className, node, ...rest } = props;
-          const match = /language-(\w+)/.exec(className || '')
+        code: (props: JSX.IntrinsicElements['code'] & ExtraProps) => {
+          const { children, className, style, ...rest } = props;
+          const match = /language-(\w+)/.exec(className || '');
           const language = match ? match[1] : 'text';
 
           const handleCopy = () => {
             navigator.clipboard.writeText(String(children));
           };
 
-          return (
+          return match ? (
             <div className="code-block">
               <div className="code-header">
                 <span className="language">{language}</span>
@@ -33,18 +33,24 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({ content }) => {
                   Copy
                 </button>
               </div>
+              {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+              {/* @ts-expect-error */}
               <SyntaxHighlighter
-                style={materialDark}
+                {...rest}
+                children={String(children).replace(/\n$/, '')}
                 PreTag="div"
                 className="code-value"
-                children={String(children).replace(/\n$/, '')}
                 language={language}
-                {...rest}
+                style={materialDark}
               />
             </div>
+          ) : (
+            <code className={className} style={style} {...rest}>
+              {children}
+            </code>
           );
         },
-        pre(props) {
+        pre({ ...props }) {
           return <pre {...props} />;
         },
         br() {
