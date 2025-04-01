@@ -1,9 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout';
-import ChatPage from './pages/ChatPage';
-import MainPage from '@/pages/MainPage.tsx';
+import Home from '@/pages/Home.tsx';
 import { useEffect, useState } from 'react';
-import Loader from '@/components/Loader/Loader.tsx';
+import Loader from '@/components/ui/Loader.tsx';
 
 function App() {
   const [maintenanceMode] = useState(import.meta.env.VITE_MAINTENANCE_MODE);
@@ -28,15 +27,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {maintenanceMode && (
-          <Route path="*" element={<Layout />}>
-            <Route index element={<ChatPage />} />
-          </Route>
-        )}
         {!maintenanceMode && (
           <Route path="/" element={<Layout />}>
-            <Route index element={<MainPage />} />
-            <Route path="chat" element={<ChatPage />} />
+            <Route index element={<Home />} />
           </Route>
         )}
       </Routes>

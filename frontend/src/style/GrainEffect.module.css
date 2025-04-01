@@ -1,0 +1,73 @@
+
+:global {
+    @keyframes grainSizzle {
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+        10% {
+            transform: translate(-1%, -1%);
+        }
+        20% {
+            transform: translate(1%, 1%);
+        }
+        30% {
+            transform: translate(-2%, 1%);
+        }
+        40% {
+            transform: translate(2%, -1%);
+        }
+        50% {
+            transform: translate(-1%, 2%);
+        }
+        60% {
+            transform: translate(1%, -2%);
+        }
+        70% {
+            transform: translate(-2%, -2%);
+        }
+        80% {
+            transform: translate(2%, 2%);
+        }
+        90% {
+            transform: translate(-1%, 1%);
+        }
+    }
+}
+
+.fixedOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
+.fixedOverlay::before {
+    content: "";
+    position: absolute;
+
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    pointer-events: none;
+
+    filter: var(--grain-filter-url);
+
+    opacity: var(--grain-opacity);
+
+    mix-blend-mode: overlay;
+    animation-duration: 0.75s;
+    animation-timing-function: steps(5, end);
+    animation-iteration-count: infinite;
+}
+
+.svgFilter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    left: -9999px;
+}

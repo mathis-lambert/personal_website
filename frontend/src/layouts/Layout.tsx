@@ -1,28 +1,20 @@
 import { Outlet } from 'react-router-dom';
-import AbstractGradientBackground from '@/components/abstractGradientBackground/abstractGradientBackground.tsx';
-import { useColorMode } from '@/components/ui/color-mode.tsx';
 import { useEffect } from 'react';
-import MainContainer from '@/components/MainContainer/MainContainer.tsx';
+import AbstractGradientBackground from '@/components/ui/AbstractGradientBackground';
 
 const Layout = () => {
-  const { colorMode, setColorMode } = useColorMode();
-
-  // force color mode to light
   useEffect(() => {
-    setColorMode('light');
-  }, [setColorMode]);
+    // Forcer le mode clair en retirant la classe "dark"
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   return (
-    <>
-      {/* Background universel */}
-      <AbstractGradientBackground
-        className={`layout-background ${colorMode}`}
-      />
-      {/* Contenu dynamique selon la route */}
-      <MainContainer>
+    <div className="min-h-screen bg-transparent">
+      <AbstractGradientBackground className="layout-background light" />
+      <div className={'bg-transparent relative'}>
         <Outlet />
-      </MainContainer>
-    </>
+      </div>
+    </div>
   );
 };
 
