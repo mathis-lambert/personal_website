@@ -37,7 +37,7 @@
   right: 0;
   bottom: 0;
   z-index: 99;
-  background-image: url("https://cdn.shopify.com/s/files/1/0564/7617/2332/files/GrainBackround.gif?v=1667804647");
+  background-image: url('https://cdn.shopify.com/s/files/1/0564/7617/2332/files/GrainBackround.gif?v=1667804647');
   background-position: 0 0;
   background-size: 90%;
   background-repeat: repeat;

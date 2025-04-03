@@ -1,33 +1,46 @@
 // src/components/GrainEffect.tsx
 import React, { useMemo, useId } from 'react';
+import { useTheme } from '@/components/theme-provider.tsx';
 
 interface GrainEffectProps {
   size?: number;
   speed?: number;
   resolution?: number;
+  darkOpacityMultiplier?: number; // Contrôle l'augmentation de l'opacité en mode sombre
   className?: string;
 }
 
 const GrainEffect: React.FC<GrainEffectProps> = ({
-                                                   size = 15,
-                                                   speed = 3,
-                                                   resolution = 50,
-                                                   className = ''
-                                                 }) => {
+  size = 15,
+  speed = 3,
+  resolution = 50,
+  darkOpacityMultiplier = 0.5, // Valeur par défaut pour le multiplicateur d'opacité
+  className = '',
+}) => {
   const filterId = useId();
   const uniqueFilterId = `grain-filter-${filterId}`;
+  const { resolvedTheme } = useTheme(); // Récupère le thème résolu (light/dark)
 
   const grainOpacity = useMemo(() => {
     const clampedSize = Math.max(1, Math.min(100, size));
-    return (Math.pow(clampedSize / 100, 1.5) * 0.4) + 0.01;
-  }, [size]);
+    // Calcul de l'opacité de base
+    const baseOpacity = Math.pow(clampedSize / 100, 1.5) * 0.4 + 0.01;
+
+    // Appliquer le multiplicateur si le thème est sombre
+    const finalOpacity =
+      resolvedTheme === 'dark'
+        ? baseOpacity * darkOpacityMultiplier
+        : baseOpacity;
+
+    // S'assurer que l'opacité reste dans l'intervalle [0, 1]
+    return Math.max(0, Math.min(1, finalOpacity));
+  }, [size, resolvedTheme, darkOpacityMultiplier]); // Ajout des dépendances
 
   const baseFrequency = useMemo(() => {
     const clampedResolution = Math.max(1, Math.min(100, resolution));
     return (0.05 + (clampedResolution / 100) * 0.95).toFixed(3);
   }, [resolution]);
 
-  // Durée de l'animation basée sur la vitesse
   const animationDuration = useMemo(() => {
     const clampedSpeed = Math.max(1, Math.min(10, speed));
     return (1 / clampedSpeed) * 2;
@@ -43,25 +56,26 @@ const GrainEffect: React.FC<GrainEffectProps> = ({
             50% { transform: translate(-1%, 3%); }
             60% { transform: translate(1%, -3%); }
             70% { transform: translate(-3%, -3%); }
-            80% { transform: translate(3%, 3%); }
+            80% { translate(3%, 3%); }
             90% { transform: translate(-2%, 2%); }
         }
     `;
 
   const animationStyle = {
-    animation: `grainSizzleInline ${animationDuration.toFixed(2)}s steps(5, end) infinite`
+    animation: `grainSizzleInline ${animationDuration.toFixed(2)}s steps(5, end) infinite`,
   };
 
   return (
     <div
-      className={`fixed top-0 left-0 w-screen h-screen pointer-events-none ${className}`}
+      className={`fixed inset-0 w-screen h-screen pointer-events-none overflow-hidden ${className}`}
       aria-hidden="true"
     >
-      {/* Style pour l'animation */}
       <style>{animationCSS}</style>
-
-      {/* SVG Filter */}
-      <svg className="absolute w-0 h-0 overflow-hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        className="absolute w-0 h-0 overflow-hidden"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
           <filter id={uniqueFilterId}>
             <feTurbulence
@@ -71,25 +85,25 @@ const GrainEffect: React.FC<GrainEffectProps> = ({
               stitchTiles="stitch"
             />
             <feComponentTransfer>
-              <feFuncA
-                type="gamma"
-                amplitude="3"
-                exponent="0.2"
-                offset="0"
-              />
+              <feFuncA type="gamma" amplitude="3" exponent="0.2" offset="0" />
             </feComponentTransfer>
             <feColorMatrix type="saturate" values="0.2" />
+            <feBlend
+              in="SourceGraphic"
+              in2="turbulence"
+              mode="multiply"
+              result="blend"
+            />
           </filter>
         </defs>
       </svg>
-
-      {/* Grain Overlay avec animation inline */}
       <div
-        className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] mix-blend-overlay pointer-events-none"
+        // Utilisation de inset pour le positionnement
+        className="absolute inset-[-10%] mix-blend-overlay pointer-events-none"
         style={{
           filter: `url(#${uniqueFilterId})`,
           opacity: grainOpacity,
-          ...animationStyle
+          ...animationStyle,
         }}
       />
     </div>

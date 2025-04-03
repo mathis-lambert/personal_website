@@ -1,38 +1,33 @@
+import React, { Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout';
-import Home from '@/pages/Home.tsx';
-import { useEffect, useState } from 'react';
 import Loader from '@/components/ui/Loader.tsx';
 
+const Home = React.lazy(() => import('@/pages/HomePage.tsx'));
+const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage.tsx'));
+// const About = React.lazy(() => import('@/pages/About.tsx'));
+
 function App() {
-  const [maintenanceMode] = useState(import.meta.env.VITE_MAINTENANCE_MODE);
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simuler un délai de chargement (remplace par une vraie vérification si besoin)
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  if (loading) {
-    return (
-      <Loader />
-    );
-  }
+  const [maintenanceMode] = useState(
+    import.meta.env.VITE_MAINTENANCE_MODE === 'true',
+  );
 
   return (
     <BrowserRouter>
-      <Routes>
-        {!maintenanceMode && (
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-          </Route>
-        )}
-      </Routes>
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          {maintenanceMode ? (
+            <Route path="*" element={<div>Application en maintenance.</div>} />
+          ) : (
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              {/* <Route path="/about" element={<About />} /> */}
+            </Route>
+          )}
+          {/* Fallback route */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

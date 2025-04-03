@@ -1,25 +1,38 @@
+import { motion } from 'framer-motion';
 import React from 'react';
 
 interface GlassCardProps {
   title?: string;
-  pt?: number;
   size?: string; // 'small' | 'medium' | 'large'
   children: React.ReactNode;
 }
 
-const GlassCard: React.FC<GlassCardProps> = ({ title, pt = 5, size, children }) => {
+const GlassCard: React.FC<GlassCardProps> = ({
+  title,
+  size = 'small',
+  children,
+}) => {
   return (
-    <div
-      className={`glass-card ${size} p-5 border bg-[rgba(245,245,245,0.1)] dark:bg-[rgba(20,20,20,0.3)] border-[rgba(254,254,254,1)] dark:border-[rgba(40,40,40,1)]`}
-      style={{ paddingTop: pt }}
+    <motion.div
+      className={`${size === 'small' ? 'col-span-1 row-span-1' : size === 'medium' ? 'col-span-2 row-span-1' : size === 'large' ? 'col-span-3 row-span-1' : ''}`}
+      initial={{ opacity: 0, y: 50, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      exit={{ opacity: 0, y: 50, scale: 0.95 }}
     >
-      {title && (
-        <div className="glass-card__title bg-[rgba(254,254,254,1)] dark:bg-[rgba(40,40,40,1)] p-2 mb-4">
-          <span>{title}</span>
-        </div>
-      )}
-      {children}
-    </div>
+      <div
+        className={`flex h-full rounded-3xl backdrop-blur-2xl border-1 border-white color relative shadow-lg transition-all duration-300 ease-in-out  px-3 pt-15 hover:scale-102 dark:bg-gray-800/5 dark:text-white dark:border-white/20`}
+      >
+        {title && (
+          <div
+            className={`z-10 absolute px-3 py-2 text-sm font-bold rounded-full shadow-lg bg-white backdrop-blur-2xl border-1 border-white color top-2 left-2 dark:bg-gray-700/60 dark:text-white dark:border-white/20`}
+          >
+            <span>{title}</span>
+          </div>
+        )}
+        {children}
+      </div>
+    </motion.div>
   );
 };
 
