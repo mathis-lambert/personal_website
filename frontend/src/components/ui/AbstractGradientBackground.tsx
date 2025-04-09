@@ -364,7 +364,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
   return (
     <div
       ref={parentRef}
-      className={`w-full h-full overflow-hidden fixed ${className}`}
+      className={`w-full h-full overflow-hidden fixed ${className} -z-10`}
     >
       <canvas ref={canvasRef} className="hidden" />
       <canvas

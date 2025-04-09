@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Badge.tsx';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="">
       {/* Titres principaux */}
       <div className="mt-52 mb-24 space-y-4">
         <Heading1 delay={0.1}>Hi, I'm Mathis Lambert !</Heading1>

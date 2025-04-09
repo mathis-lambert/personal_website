@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useChat } from '@/contexts/ChatContext.tsx';
 
 const Navbar = () => {
+  const { isChatOpen, openChat, closeChat } = useChat();
+
   return (
     <motion.div
       className="fixed top-0 left-0 w-full h-14 lg:h-20 z-50 lg:py-3"
@@ -11,7 +14,7 @@ const Navbar = () => {
       exit={{ opacity: 0, y: -50 }}
     >
       <div className="absolute w-2/3 h-32 blur-3xl bg-gradient-to-t from-blue-300 to-blue-700 opacity-15 rounded-full  left-1/2 transform -translate-x-1/2 -z-10 -translate-y-1/2 lg:mx-6" />
-      <div className="flex items-center justify-between h-full max-w-[1000px] mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-gray-700 px-2 py-4">
+      <div className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-gray-700 px-2 py-4">
         <div className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
           <img
             src="/images/me.jpeg"
@@ -44,6 +47,20 @@ const Navbar = () => {
             className="text-gray-800 dark:text-white hover:text-blue-600 transition-colors duration-300"
           >
             About
+          </Link>
+          <Link
+            to={'#'}
+            onClick={(e) => {
+              e.preventDefault();
+              if (isChatOpen) {
+                closeChat();
+              } else {
+                openChat();
+              }
+            }}
+            className="text-gray-800 dark:text-white hover:text-blue-600 transition-colors duration-300"
+          >
+            Chat
           </Link>
         </nav>
         <div className="flex items-center space-x-4">

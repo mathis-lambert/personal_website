@@ -1,16 +1,21 @@
 import { motion } from 'framer-motion';
 import React from 'react';
+import { cn } from '@/lib/utils.ts';
 
 interface GlassCardProps {
   title?: string;
   size?: string; // 'small' | 'medium' | 'large'
   children: React.ReactNode;
+  px?: number; // Padding X
+  pt?: number; // Padding Top
 }
 
 const GlassCard: React.FC<GlassCardProps> = ({
   title,
   size = 'small',
   children,
+  px = 3,
+  pt = 15,
 }) => {
   return (
     <motion.div
@@ -21,7 +26,9 @@ const GlassCard: React.FC<GlassCardProps> = ({
       exit={{ opacity: 0, y: 50, scale: 0.95 }}
     >
       <div
-        className={`flex h-full rounded-3xl backdrop-blur-2xl border-1 border-white color relative shadow-lg transition-all duration-300 ease-in-out  px-3 pt-15 hover:scale-102 dark:bg-gray-800/5 dark:text-white dark:border-white/20`}
+        className={cn(
+          `flex h-full rounded-3xl backdrop-blur-2xl border-1 border-white color relative shadow-lg overflow-hidden transition-all duration-300 ease-in-out hover:scale-102 dark:bg-gray-800/5 dark:text-white dark:border-white/20 px-${px} pt-${pt}`,
+        )}
       >
         {title && (
           <div

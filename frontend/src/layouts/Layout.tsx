@@ -1,9 +1,10 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import AbstractGradientBackground from '@/components/ui/AbstractGradientBackground';
-import InPageChatInput from '@/components/ui/InPageChatInput.tsx';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/ui/Navbar.tsx';
+import InPageChatInput from '@/components/ui/InPageChatInput.tsx';
+import Footer from '@/components/ui/Footer.tsx';
 
 const Layout = () => {
   useEffect(() => {
@@ -12,7 +13,7 @@ const Layout = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 relative">
+    <div className="min-h-screen relative">
       <AbstractGradientBackground
         numSpheres={8}
         attractionStrength={0.000009}
@@ -22,14 +23,9 @@ const Layout = () => {
         blurIntensity={'blur-[125px]'}
         // sphereColors={['#3357FF']}
       />
-      <InPageChatInput
-        onSendMessage={(message) => {
-          console.log('Message envoyé depuis le layout :', message);
-        }}
-      />
       <Navbar />
       <motion.div
-        className={'bg-transparent relative w-full p-4'}
+        className={'relative w-full p-4'}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.75, ease: 'easeOut' }}
@@ -39,6 +35,10 @@ const Layout = () => {
           <Outlet />
         </div>
       </motion.div>
+
+      <InPageChatInput />
+
+      <Footer />
     </div>
   );
 };
