@@ -45,6 +45,7 @@ app.add_middleware(
         "mathislambert.fr",
         "localhost",
         "localhost:8080",
+        "http://localhost:5173",
         "http://localhost:8080",
         "https://chat.mathislambert.fr",
         "chat.mathislambert.fr",
