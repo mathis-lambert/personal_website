@@ -1,11 +1,5 @@
-import React, {
-  FormEvent,
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-} from 'react';
-import { ArrowUp, Loader2, X } from 'lucide-react'; // Import X icon
+import React, { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ArrowUp, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useChat } from '@/contexts/ChatContext';
@@ -15,8 +9,8 @@ interface ChatInputProps {
 }
 
 const InPageChatInput: React.FC<ChatInputProps> = ({
-  placeholder = 'Poser une question',
-}) => {
+                                                     placeholder = 'Poser une question'
+                                                   }) => {
   const [message, setMessage] = useState<string>('');
   const { sendMessage, isLoading, isChatOpen, closeChat } = useChat();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -29,7 +23,7 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
       textArea.style.height = 'auto';
       const newHeight = Math.max(
         minHeight,
-        Math.min(textArea.scrollHeight, maxHeight),
+        Math.min(textArea.scrollHeight, maxHeight)
       );
       textArea.style.height = `${newHeight}px`;
       textArea.style.lineHeight =
@@ -75,13 +69,17 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
     setMessage('');
   };
 
+  const closeButtonSize = 'w-9 h-9';
+
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-center space-x-2 w-full px-4">
+    <div
+      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
       <motion.div
-        className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-xl p-2 dark:bg-gray-800/10 dark:border-white/20"
+        className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-xl p-2 dark:bg-gray-800/10 dark:border-white/20 flex-shrink" // Allow shrinking if needed but prioritize max-width
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
+        layout
       >
         <form
           onSubmit={handleSubmit}
@@ -124,7 +122,7 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
               maxHeight: `${maxHeight}px`,
               height: `${minHeight}px`,
               lineHeight: message.trim() === '' ? `${minHeight}px` : 'normal',
-              paddingBlock: message.trim() === '' ? `0` : '0.5rem',
+              paddingBlock: message.trim() === '' ? `0` : '0.5rem'
             }}
           />
           <Button
@@ -161,36 +159,40 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
         </form>
       </motion.div>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isChatOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            exit={{ opacity: 0, scale: 0.5 }}
-          >
-            <Button
-              type="button"
-              size="icon"
-              variant="destructive"
-              className="
-                w-9 h-9
-                bg-red-500/50
-                hover:bg-red-500/70
-                dark:bg-red-600/50
-                dark:hover:bg-red-600/70
-                text-white
-                rounded-full
-                shadow-lg
-                backdrop-blur-lg
-                flex items-center justify-center
-                "
-              onClick={handleCloseChat}
-              aria-label="Fermer le chat"
+          <div className={`${closeButtonSize} flex-shrink-0`}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="relative w-full h-full"
             >
-              <X size={18} />
-            </Button>
-          </motion.div>
+              <Button
+                type="button"
+                size="icon"
+                variant="destructive"
+                className={`
+                  absolute left-0 bottom-1.5 ${closeButtonSize}
+                  bg-red-500/50
+                  hover:bg-red-500/70
+                  dark:bg-red-600/50
+                  dark:hover:bg-red-600/70
+                  text-white
+                  rounded-full
+                  shadow-lg
+                  backdrop-blur-lg
+                  flex items-center justify-center
+                  transition-colors duration-200 ease-in-out
+                  `}
+                onClick={handleCloseChat}
+                aria-label="Fermer le chat"
+              >
+                <X size={18} />
+              </Button>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

@@ -1,16 +1,16 @@
 import { Outlet } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import AbstractGradientBackground from '@/components/ui/AbstractGradientBackground';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/ui/Navbar.tsx';
 import InPageChatInput from '@/components/ui/InPageChatInput.tsx';
 import Footer from '@/components/ui/Footer.tsx';
+import { MaintenanceDialog } from '@/components/ui/MaintenanceDialog.tsx';
 
 const Layout = () => {
-  useEffect(() => {
-    // Forcer le mode clair en retirant la classe "dark"
-    document.documentElement.classList.remove('dark');
-  }, []);
+  const [maintenanceMode] = useState(
+    import.meta.env.VITE_MAINTENANCE_MODE === 'true'
+  );
 
   return (
     <div className="min-h-screen relative">
@@ -21,7 +21,6 @@ const Layout = () => {
         maxSphereRadiusFactor={0.5}
         opacityRange={[0.4, 0.6]}
         blurIntensity={'blur-[125px]'}
-        // sphereColors={['#3357FF']}
       />
       <Navbar />
       <motion.div
@@ -39,6 +38,10 @@ const Layout = () => {
       <InPageChatInput />
 
       <Footer />
+
+      {maintenanceMode && (
+        <MaintenanceDialog />
+      )}
     </div>
   );
 };

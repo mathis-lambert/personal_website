@@ -1,150 +1,225 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, useAnimation, useReducedMotion } from 'framer-motion';
+import { useTheme } from '@/components/theme-provider.tsx';
+
 import {
-  FaPython,
-  FaDocker,
-  FaReact,
-  FaNodeJs,
-  FaGitAlt,
-  FaAws,
-} from 'react-icons/fa';
-import {
-  SiPycharm,
-  SiTailwindcss,
-  SiTypescript,
-  SiVercel,
-  SiPostgresql,
-  SiNextdotjs,
-  SiNestjs,
-} from 'react-icons/si';
-import { AiOutlineApi } from 'react-icons/ai';
+  Arc,
+  BashDark,
+  BashLight,
+  Docker,
+  FastAPI,
+  Figma,
+  GitHubDark,
+  GitHubLight,
+  GitLab,
+  Linux,
+  MistralAI,
+  PyCharm,
+  Python,
+  ReactDark,
+  ReactLight,
+  ShadcnUiDark,
+  ShadcnUiLight,
+  TailwindCSS,
+  TypeScript,
+  Vite
+} from '@ridemountainpig/svgl-react';
 
 // --- Configuration ---
-const ICON_SIZE = 32;
-const ITEM_WIDTH_HEIGHT = 'w-16 h-16 lg:w-22 lg:h-22';
+const ICON_SIZE = 36;
+const ITEM_WIDTH_HEIGHT = 'w-16 h-16';
 const ITEM_SPACING = 'space-x-2';
-const SCROLL_DURATION = 30;
+const SCROLL_DURATION = 20;
+const MOBILE_BREAKPOINT = 768;
 // --- End Configuration ---
 
-// Define your tools with icons (using updated ICON_SIZE)
 const allTools = [
   {
     name: 'Python',
-    icon: <FaPython size={ICON_SIZE} className="text-blue-500" />,
+    icons: {
+      light: <Python width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <Python width={ICON_SIZE} height={ICON_SIZE} />
+    }
+  },
+  {
+    name: 'FastAPI',
+    icons: {
+      light: <FastAPI width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <FastAPI width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
     name: 'Docker',
-    icon: <FaDocker size={ICON_SIZE} className="text-blue-600" />,
+    icons: {
+      light: <Docker width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <Docker width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
     name: 'PyCharm',
-    icon: <SiPycharm size={ICON_SIZE} className="text-green-500" />,
+    icons: {
+      light: <PyCharm width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <PyCharm width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
     name: 'React',
-    icon: <FaReact size={ICON_SIZE} className="text-cyan-400" />,
+    icons: {
+      light: <ReactLight width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <ReactDark width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
     name: 'TypeScript',
-    icon: <SiTypescript size={ICON_SIZE} className="text-blue-700" />,
+    icons: {
+      light: <TypeScript width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <TypeScript width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
-    name: 'Next.js',
-    icon: (
-      <SiNextdotjs size={ICON_SIZE} className="text-black dark:text-white" />
-    ),
+    name: 'Linux',
+    icons: {
+      light: <Linux width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <Linux width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
-    name: 'Node.js',
-    icon: <FaNodeJs size={ICON_SIZE} className="text-green-600" />,
+    name: 'Bash',
+    icons: {
+      light: <BashLight width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <BashDark width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
-    name: 'TailwindCSS',
-    icon: <SiTailwindcss size={ICON_SIZE} className="text-teal-500" />,
-  },
-  {
-    name: 'Git',
-    icon: <FaGitAlt size={ICON_SIZE} className="text-orange-600" />,
-  },
-  {
-    name: 'PostgreSQL',
-    icon: <SiPostgresql size={ICON_SIZE} className="text-blue-800" />,
-  },
-  { name: 'AWS', icon: <FaAws size={ICON_SIZE} className="text-orange-500" /> },
-  {
-    name: 'Vercel',
-    icon: <SiVercel size={ICON_SIZE} className="text-black dark:text-white" />,
-  },
-  {
-    name: 'NestJS',
-    icon: <SiNestjs size={ICON_SIZE} className="text-red-600" />,
+    name: 'Tailwind',
+    icons: {
+      light: <TailwindCSS width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <TailwindCSS width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
   {
     name: 'Mistral',
-    icon: <AiOutlineApi size={ICON_SIZE} className="text-purple-500" />,
+    icons: {
+      light: <MistralAI width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <MistralAI width={ICON_SIZE} height={ICON_SIZE} />
+    }
   },
+  {
+    name: 'Github',
+    icons: {
+      light: <GitHubLight width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <GitHubDark width={ICON_SIZE} height={ICON_SIZE} />
+    }
+  },
+  {
+    name: 'GitLab',
+    icons: {
+      light: <GitLab width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <GitLab width={ICON_SIZE} height={ICON_SIZE} />
+    }
+  },
+  {
+    name: 'Shadcn',
+    icons: {
+      light: <ShadcnUiLight width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <ShadcnUiDark width={ICON_SIZE} height={ICON_SIZE} />
+    }
+  },
+  {
+    name: 'Arc',
+    icons: { light: <Arc width={ICON_SIZE} height={ICON_SIZE} />, dark: <Arc width={ICON_SIZE} height={ICON_SIZE} /> }
+  },
+  {
+    name: 'Figma',
+    icons: {
+      light: <Figma width={ICON_SIZE} height={ICON_SIZE} />,
+      dark: <Figma width={ICON_SIZE} height={ICON_SIZE} />
+    }
+  },
+  {
+    name: 'Vite',
+    icons: { light: <Vite width={ICON_SIZE} height={ICON_SIZE} />, dark: <Vite width={ICON_SIZE} height={ICON_SIZE} /> }
+  }
 ];
 
 const midPoint = Math.ceil(allTools.length / 2);
 const topRowTools = allTools.slice(0, midPoint);
 const bottomRowTools = allTools.slice(midPoint);
 
-const ToolCarousel: React.FC = () => {
+const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
+                                                               showToolNames = false
+                                                             }) => {
   const controlsTop = useAnimation();
   const controlsBottom = useAnimation();
   const shouldReduceMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+  const { resolvedTheme } = useTheme();
+  // Assurez-vous d'avoir une valeur par défaut si le thème n'est pas immédiatement disponible
+  const currentTheme = resolvedTheme || 'light';
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+      setIsMobile(mediaQuery.matches);
+    };
+    checkScreenSize();
+    const mediaQueryList = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const handleResize = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    mediaQueryList.addEventListener('change', handleResize);
+    return () => mediaQueryList.removeEventListener('change', handleResize);
+  }, []);
 
   const startScrolling = () => {
     if (shouldReduceMotion) return;
-
     controlsTop.start({
       x: '-50%',
-      transition: {
-        duration: SCROLL_DURATION,
-        ease: 'linear',
-        repeat: Infinity,
-      },
+      transition: { duration: SCROLL_DURATION, ease: 'linear', repeat: Infinity }
     });
-    // Bottom row starts from -50% and goes to 0% to simulate reverse direction
     controlsBottom.start({
       x: ['-50%', '0%'],
-      transition: {
-        duration: SCROLL_DURATION,
-        ease: 'linear',
-        repeat: Infinity,
-      },
+      transition: { duration: SCROLL_DURATION, ease: 'linear', repeat: Infinity }
     });
   };
 
   const stopScrolling = () => {
-    controlsTop.start({
-      x: '0%',
-      transition: { duration: 0.8, ease: 'easeOut' },
-    });
-    controlsBottom.start({
-      x: '-50%',
-      transition: { duration: 0.8, ease: 'easeOut' },
-    });
+    if (isMobile || shouldReduceMotion) return;
+    controlsTop.stop();
+    controlsBottom.stop();
+    controlsTop.start({ x: '0%', transition: { duration: 0.6, type: 'spring', stiffness: 100 } });
+    controlsBottom.start({ x: '-50%', transition: { duration: 0.6, type: 'spring', stiffness: 100 } });
   };
 
-  const renderRow = (tools: typeof allTools, controls: typeof controlsTop) => (
-    <div className="relative w-full overflow-hidden min-h-[7rem]">
+  useEffect(() => {
+    if (isMobile && !shouldReduceMotion) {
+      startScrolling();
+    } else {
+      controlsTop.stop();
+      controlsBottom.stop();
+      controlsTop.set({ x: '0%' });
+      controlsBottom.set({ x: '-50%' });
+    }
+  }, [isMobile, shouldReduceMotion, controlsTop, controlsBottom]);
+
+  const renderRow = (tools: typeof allTools, controls: typeof controlsTop, initialX: string = '0%') => (
+    <div className="relative w-full overflow-hidden min-h-[4rem]">
       <motion.div
-        className={`absolute left-0 inline-flex ${ITEM_SPACING} whitespace-nowrap`}
+        className={`absolute left-0 top-0 flex flex-nowrap ${ITEM_SPACING}`}
+        initial={{ x: initialX }}
         animate={controls}
-        initial={{ x: '0%' }}
       >
         {[...tools, ...tools].map((tool, index) => (
           <div
             key={`${tool.name}-${index}`}
-            className={`flex flex-col items-center justify-center rounded-lg ${ITEM_WIDTH_HEIGHT} p-2`}
+            className={`flex-shrink-0 flex flex-col items-center justify-center rounded-lg ${ITEM_WIDTH_HEIGHT}`}
           >
             <div className="flex-grow flex items-center justify-center">
-              {tool.icon}
+              {currentTheme === 'dark' ? tool.icons.dark : tool.icons.light}
             </div>
-            <span className="mt-1 text-xs font-medium text-center text-gray-800 dark:text-gray-200">
-              {tool.name}
-            </span>
+            {showToolNames && (
+              <div className="text-xs text-center mt-1 text-gray-700/40 dark:text-gray-200/40">
+                {tool.name}
+              </div>
+            )}
           </div>
         ))}
       </motion.div>
@@ -153,17 +228,15 @@ const ToolCarousel: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col min-w-full w-full h-full overflow-hidden cursor-pointer"
-      onMouseEnter={startScrolling}
-      onMouseLeave={stopScrolling}
+      className="flex flex-col justify-start gap-0 sm:gap-4 lg:gap-8 lg:mt-2 min-w-full w-full h-full overflow-hidden cursor-pointer"
+      onMouseEnter={isMobile ? undefined : startScrolling}
+      onMouseLeave={isMobile ? undefined : stopScrolling}
     >
-      {/* Top Row - Ensure enough height for items */}
-      <div className="flex w-full overflow-hidden min-h-[4rem]  lg:min-h-[7rem]">
-        {renderRow(topRowTools, controlsTop)}
+      <div className="flex w-full">
+        {renderRow(topRowTools, controlsTop, '0%')}
       </div>
-      {/* Bottom Row - Ensure enough height for items */}
-      <div className="flex w-full overflow-hidden min-h-[4rem] lg:min-h-[7rem]">
-        {renderRow(bottomRowTools, controlsBottom)}
+      <div className="flex w-full">
+        {renderRow(bottomRowTools, controlsBottom, '-50%')}
       </div>
     </div>
   );
