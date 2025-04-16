@@ -29,14 +29,14 @@ const Navbar = () => {
       { to: 'projects', text: 'Projects' },
       { to: 'blog', text: 'Blog' },
       { to: 'about', text: 'About' },
-      { to: '#', text: 'Chat', onClick: handleChatToggle }
+      { to: '#', text: 'Chat', onClick: handleChatToggle },
     ],
-    [isChatOpen, closeChat, openChat]
+    [isChatOpen, closeChat, openChat],
   );
 
   const connectLink: NavLink = {
     to: 'contact',
-    text: 'Let\'s connect'
+    text: "Let's connect",
   };
 
   const toggleMenu = () => {
@@ -53,12 +53,12 @@ const Navbar = () => {
     middleOpen: { opacity: 0 },
     middleClosed: { opacity: 1 },
     bottomOpen: { rotate: -45, y: -8 },
-    bottomClosed: { rotate: 0, y: 0 }
+    bottomClosed: { rotate: 0, y: 0 },
   };
 
   const menuOverlayVariants = {
     hidden: { opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } },
-    visible: { opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } }
+    visible: { opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } },
   };
 
   const menuItemVariants = {
@@ -69,8 +69,8 @@ const Navbar = () => {
       transition: {
         delay: i * 0.1 + 0.3,
         duration: 0.3,
-        ease: 'easeOut'
-      }
+        ease: 'easeOut',
+      },
     }),
     exit: (i: number) => ({
       opacity: 0,
@@ -78,9 +78,9 @@ const Navbar = () => {
       transition: {
         delay: i * 0.05,
         duration: 0.2,
-        ease: 'easeIn'
-      }
-    })
+        ease: 'easeIn',
+      },
+    }),
   };
 
   return (
@@ -92,18 +92,19 @@ const Navbar = () => {
         transition={{ duration: 0.5, ease: 'easeOut' }}
         exit={{ opacity: 0, y: -50 }}
       >
-        <div
-          className="absolute w-2/3 h-32 blur-3xl bg-gradient-to-t from-blue-300 to-blue-700 opacity-15 rounded-full left-1/2 transform -translate-x-1/2 -z-10 -translate-y-1/2 lg:mx-6" />
-        <div
-          className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-gray-700 px-2 py-2">
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0 group" onClick={closeMenu}>
+        <div className="absolute w-2/3 h-32 blur-3xl bg-gradient-to-t from-blue-300 to-blue-700 opacity-15 rounded-full left-1/2 transform -translate-x-1/2 -z-10 -translate-y-1/2 lg:mx-6" />
+        <div className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-gray-700 px-2 py-2">
+          <Link
+            to="/"
+            className="flex items-center gap-2 flex-shrink-0 group"
+            onClick={closeMenu}
+          >
             <img
               src="/images/me.jpeg"
               alt="Profile pic"
               className="aspect-square inline-block bg-white rounded-full w-10 h-10 object-contain group-hover:transform group-hover:scale-105 transition-transform duration-300"
             />
-            <span
-              className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+            <span className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
               Mathis
             </span>
           </Link>

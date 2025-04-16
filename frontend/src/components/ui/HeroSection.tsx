@@ -31,7 +31,7 @@ const stickerData: StickerConfig[] = [
     left: 'left-[25%]',
     rotation: 5,
     zIndex: 20,
-    animationDelay: 0.6
+    animationDelay: 0.6,
   },
   {
     id: 3,
@@ -43,7 +43,7 @@ const stickerData: StickerConfig[] = [
     left: 'left-[-1.5rem]', // Example: -24px from left edge
     rotation: 10,
     zIndex: 30,
-    animationDelay: 0.7
+    animationDelay: 0.7,
   },
   {
     id: 4,
@@ -55,14 +55,13 @@ const stickerData: StickerConfig[] = [
     right: 'right-4', // Example: 16px from right edge
     rotation: -15,
     zIndex: 10,
-    animationDelay: 0.7
-  }
+    animationDelay: 0.7,
+  },
 ];
 
 export const HeroSection: React.FC = () => {
   return (
-    <div className="flex flex-col-reverse md:flex-row items-center md:items-start mt-32 md:mt-52 mb-24 gap-12 md:gap-8">
-
+    <div className="flex flex-col-reverse md:flex-row items-center md:items-start mt-24 md:mt-30 mb-24 gap-12 md:gap-8">
       {/* Text Content Section */}
       <div className="w-full md:w-3/4">
         <div className="space-y-4">
@@ -95,16 +94,18 @@ export const HeroSection: React.FC = () => {
             </div>
           </motion.div>
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: -50, y: 0 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.75, ease: 'easeInOut', delay: 0.2 }}
+            exit={{ opacity: 0, y: -50 }}
             className="mt-8"
           >
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Passionate about AI, machine learning, and data science, I focus on developing innovative solutions in a
-              collaborative environment. <br />With a strong commitment to technical rigor and continuous learning, I
-              contribute
-              actively to projects that are shaping the future.
+              I'm passionate about AI, machine learning, and data science, and I
+              enjoy working on practical and innovative solutions within a
+              collaborative environment. <br />
+              With a focus on continuous learning and technical reliability, I
+              aim to grow through meaningful, hands-on projects.
             </p>
           </motion.div>
         </div>
@@ -114,7 +115,6 @@ export const HeroSection: React.FC = () => {
       <div className="w-full md:w-1/4 flex justify-center md:justify-start">
         <Patchwork stickers={stickerData} />
       </div>
-
     </div>
   );
 };

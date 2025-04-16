@@ -1,4 +1,10 @@
-import React, { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { ArrowUp, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -9,8 +15,8 @@ interface ChatInputProps {
 }
 
 const InPageChatInput: React.FC<ChatInputProps> = ({
-                                                     placeholder = 'Poser une question'
-                                                   }) => {
+  placeholder = 'Poser une question',
+}) => {
   const [message, setMessage] = useState<string>('');
   const { sendMessage, isLoading, isChatOpen, closeChat } = useChat();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -23,7 +29,7 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
       textArea.style.height = 'auto';
       const newHeight = Math.max(
         minHeight,
-        Math.min(textArea.scrollHeight, maxHeight)
+        Math.min(textArea.scrollHeight, maxHeight),
       );
       textArea.style.height = `${newHeight}px`;
       textArea.style.lineHeight =
@@ -72,8 +78,7 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
   const closeButtonSize = 'w-9 h-9';
 
   return (
-    <div
-      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
+    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
       <motion.div
         className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-xl p-2 dark:bg-gray-800/10 dark:border-white/20 flex-shrink" // Allow shrinking if needed but prioritize max-width
         initial={{ opacity: 0, y: 50 }}
@@ -122,7 +127,7 @@ const InPageChatInput: React.FC<ChatInputProps> = ({
               maxHeight: `${maxHeight}px`,
               height: `${minHeight}px`,
               lineHeight: message.trim() === '' ? `${minHeight}px` : 'normal',
-              paddingBlock: message.trim() === '' ? `0` : '0.5rem'
+              paddingBlock: message.trim() === '' ? `0` : '0.5rem',
             }}
           />
           <Button

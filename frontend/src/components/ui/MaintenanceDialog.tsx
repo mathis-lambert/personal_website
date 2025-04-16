@@ -7,17 +7,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogOverlay,
-  DialogTitle
+  DialogTitle,
 } from '@/components/ui/dialog';
 
 export function MaintenanceDialog() {
   return (
     <Dialog defaultOpen modal>
-      <DialogOverlay className={'fixed inset-0 bg-black/50 dark:bg-white/10 backdrop-blur'} />
+      <DialogOverlay
+        className={'fixed inset-0 bg-white/30 dark:bg-white/10 backdrop-blur'}
+      />
       <DialogContent
         className="
           sm:max-w-[425px]
-          bg-white/10 dark:bg-gray-900/20
+          bg-white/50 dark:bg-gray-900/40
           backdrop-blur-lg
           border border-white/20 dark:border-gray-700/30
           shadow-xl
@@ -30,8 +32,9 @@ export function MaintenanceDialog() {
             ⚠️ Information importante ⚠️
           </DialogTitle>
           <DialogDescription className="text-gray-700 dark:text-gray-300 pt-2">
-            Ce site est actuellement en cours de construction 👷🏼‍♂️ 🚧 ! Pour patienter vous pouvez utiliser Nexia 🤖, mon
-            assistant personnel qui saura répondre à toutes vos questions. À très vite !
+            Ce site est actuellement en cours de construction 👷🏼‍♂️ 🚧 ! Pour
+            patienter vous pouvez utiliser Nexia 🤖, mon assistant personnel qui
+            saura répondre à toutes vos questions. À très vite !
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="pt-4">
