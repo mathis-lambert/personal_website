@@ -27,7 +27,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
           hidden: {
             opacity: 0,
             scale: 0.5,
-            rotate: sticker.rotation - 30
+            rotate: sticker.rotation - 30,
           },
           visible: {
             opacity: 1,
@@ -37,8 +37,8 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
               delay: sticker.animationDelay,
               type: 'spring',
               stiffness: 150,
-              damping: 15
-            }
+              damping: 15,
+            },
           },
           hover: {
             scale: 1.1,
@@ -46,9 +46,9 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
               delay: 0,
               type: 'spring',
               stiffness: 200,
-              damping: 15
-            }
-          }
+              damping: 15,
+            },
+          },
         };
 
         return (
@@ -58,7 +58,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
             alt={sticker.alt}
             className={`absolute object-contain ${sticker.width} ${sticker.height} ${sticker.top} ${sticker.left ?? ''} ${sticker.right ?? ''}`}
             style={{
-              zIndex: sticker.zIndex
+              zIndex: sticker.zIndex,
             }}
             variants={stickerVariants}
             initial="hidden"
