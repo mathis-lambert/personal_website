@@ -5,16 +5,16 @@ services:
       dockerfile: Dockerfile
     container_name: personal_frontend
     restart: unless-stopped
+    env_file: [ "./.env" ]
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.personal-frontend.rule=Host(`mathislambert.fr`,`www.mathislambert.fr`)"
+      - "traefik.http.routers.personal-frontend.rule=Host(`mathislambert.fr`)"
       - "traefik.http.routers.personal-frontend.entrypoints=websecure"
       - "traefik.http.routers.personal-frontend.tls=true"
       - "traefik.http.routers.personal-frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.personal-frontend.loadbalancer.server.port=8080"
-    networks:
-      - proxy
+    networks: [proxy, monitor]
 
   backend:
     build:
@@ -22,6 +22,7 @@ services:
       dockerfile: Dockerfile
     container_name: personal_backend
     restart: unless-stopped
+    env_file: [ "./.env" ]
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -30,9 +31,12 @@ services:
       - "traefik.http.routers.personal-backend.tls=true"
       - "traefik.http.routers.personal-backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.personal-backend.loadbalancer.server.port=8081"
-    networks:
-      - proxy
+    networks: [proxy, databases, monitor]
 
 networks:
   proxy:
+    external: true
+  databases:
+    external: true
+  monitor:
     external: true

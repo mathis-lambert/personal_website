@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir .
 
 # Déclare une commande HEALTHCHECK intégrée à l'image
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://127.0.0.1:8081/v1/health || exit 1
+  CMD curl -f http://127.0.0.1:8081/api/health || exit 1
 
 # Expose le port sur lequel l'application va tourner
 EXPOSE 8081
