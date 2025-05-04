@@ -1,36 +1,38 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: personal_frontend
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.personal-frontend.rule=Host(`mathislambert.fr`,`www.mathislambert.fr`)"
+      - "traefik.http.routers.personal-frontend.entrypoints=websecure"
+      - "traefik.http.routers.personal-frontend.tls=true"
+      - "traefik.http.routers.personal-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.personal-frontend.loadbalancer.server.port=8080"
+    networks:
+      - proxy
+
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: backend
-    ports:
-      - "8081:8081"
-    env_file:
-      - .env
-    depends_on:
-      - mongo
-    volumes:
-      - .:/app
-    command: [ "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8081", "--reload" ]
+    container_name: personal_backend
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.personal-backend.rule=Host(`mathislambert.fr`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.personal-backend.entrypoints=websecure"
+      - "traefik.http.routers.personal-backend.tls=true"
+      - "traefik.http.routers.personal-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.personal-backend.loadbalancer.server.port=8081"
     networks:
-      - app-network
-
-  mongo:
-    image: mongo:latest
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - ./mongodb/config/init-db.js:/docker-entrypoint-initdb.d/init-db.js
-      - ./mongodb/data/:/data/db
-    networks:
-      - app-network
-    restart: always
+      - proxy
 
 networks:
-  app-network:
-    driver: bridge
+  proxy:
+    external: true
