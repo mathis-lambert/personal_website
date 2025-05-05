@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+        xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                          http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Page d’accueil -->
+    <url>
+        <loc>https://mathislambert.fr/</loc>
+        <lastmod>2025-05-05</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.00</priority>
+    </url>
+
+    <!-- Liste des projets -->
+    <url>
+        <loc>https://mathislambert.fr/projects</loc>
+        <lastmod>2025-05-05</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.80</priority>
+    </url>
+
+    <!-- Exemple de page de détail de projet -->
+    <!-- Répète ce bloc pour chaque projectId réel de ton site -->
+    <url>
+        <loc>https://mathislambert.fr/projects/project-1</loc>
+        <lastmod>2025-05-05</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.64</priority>
+    </url>
+    <!-- … autres URLs projets … -->
+
+    <!-- Blog principal -->
+    <url>
+        <loc>https://mathislambert.fr/blog</loc>
+        <lastmod>2025-05-05</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.75</priority>
+    </url>
+
+</urlset>
