@@ -1,5 +1,7 @@
 import GlassCard from '@/components/ui/GlassCard.tsx';
 import ToolCarousel from '@/components/ui/ToolCarousel.tsx';
+import { LocationMap } from '@/components/ui/LocationMap.tsx';
+import { ExperienceTimeline } from '@/components/ui/ExperienceTImeline.tsx';
 
 const GlassCardsList = () => {
   return (
@@ -7,17 +9,17 @@ const GlassCardsList = () => {
       <GlassCard title="My Favourite Tools" px={0}>
         <ToolCarousel />
       </GlassCard>
-      <GlassCard title="Expériences">
-        <p>🚧 Création en cours...</p>
+      <GlassCard title="Expériences" px={0}>
+        <ExperienceTimeline />
       </GlassCard>
       <GlassCard title="Études">
-        <p>🚧 Création en cours...</p>
+        <p>🚧 Work in progress...</p>
       </GlassCard>
-      <GlassCard title="Localisation">
-        <p>🚧 Création en cours...</p>
+      <GlassCard title="Location" px={0} pt={0}>
+        <LocationMap />
       </GlassCard>
       <GlassCard title="Chatbot" size="medium">
-        <p>🚧 Création en cours...</p>
+        <p>🚧 Work in progress...</p>
       </GlassCard>
     </div>
   );

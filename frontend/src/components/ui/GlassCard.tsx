@@ -9,6 +9,7 @@ interface GlassCardProps {
   px?: number; // Padding X (en rem)
   pt?: number; // Padding Top (en rem)
   animationDelay?: number; // Délai d'animation
+  className?: string; // Classes supplémentaires
 }
 
 const GlassCard: React.FC<GlassCardProps> = ({
@@ -18,6 +19,7 @@ const GlassCard: React.FC<GlassCardProps> = ({
   px = 1,
   pt = 3.5,
   animationDelay = 0.5,
+  className = '',
 }) => {
   // Styles dynamiques
   const dynamicStyles = {
@@ -28,7 +30,10 @@ const GlassCard: React.FC<GlassCardProps> = ({
 
   return (
     <motion.div
-      className={`${size === 'small' ? 'col-span-1 xs:row-span-1' : size === 'medium' ? 'col-span-1 xs:col-span-2 row-span-1' : size === 'large' ? 'col-span-1 xs:col-span-3 row-span-1' : ''}`}
+      className={
+        `${size === 'small' ? 'col-span-1 xs:row-span-1' : size === 'medium' ? 'col-span-1 xs:col-span-2 row-span-1' : size === 'large' ? 'col-span-1 xs:col-span-3 row-span-1' : ''}` +
+        ` ${className}`
+      }
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{
         opacity: 1,
