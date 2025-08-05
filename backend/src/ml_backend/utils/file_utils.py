@@ -8,6 +8,6 @@ def load_prompt_from_file(file_path: str) -> str:
     Returns:
         str: The loaded prompt.
     """
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         prompt = file.read()
     return prompt

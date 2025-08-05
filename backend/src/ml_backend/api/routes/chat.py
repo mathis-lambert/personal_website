@@ -1,14 +1,14 @@
-import json
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 import aiohttp
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from ml_api_client import APIClient
-from ml_api_client.models import RagRetrieveRequest, ChatCompletionsRequest
+from ml_api_client.models import ChatCompletionsRequest, RagRetrieveRequest
+from pydantic import BaseModel
+
 from ml_backend.api.services import get_api_client
 from ml_backend.utils import load_prompt_from_file
-from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -20,33 +20,32 @@ class BackendCompletionsRequest(BaseModel):
 
 @router.post("/completions")
 async def chat_completions(
-        body: BackendCompletionsRequest,
-        api_client: APIClient = Depends(get_api_client),
+    body: BackendCompletionsRequest,
+    api_client: APIClient = Depends(get_api_client),
 ):
     try:
         # Vérifiez si le modèle est spécifié, sinon utilisez le modèle par défaut
 
-        top_k = await api_client.rag.retrieve("mathis_bio", RagRetrieveRequest(
-            query=body.input,
-            model="mistral-embed",
-            limit=5,
-        ))
+        top_k = await api_client.rag.retrieve(
+            "mathis_bio",
+            RagRetrieveRequest(
+                query=body.input,
+                model="mistral-embed",
+                limit=5,
+            ),
+        )
 
         if not top_k:
-            top_k = "Aucun document trouvé pour la requête."
+            top_k = "No docs found."
 
-        rag_prompt = load_prompt_from_file('./src/ml_backend/prompts/rag_main.txt')
+        rag_prompt = load_prompt_from_file("./src/ml_backend/prompts/rag_main.txt")
 
-        user_input = f"""# CONTEXTE DE LA REQUÊTE UTILISATEUR
+        user_input = f"""
+`user_question`: {body.input}
 
-`question_utilisateur`: {body.input}
-
-`documents_recuperes`: {top_k if top_k else "Aucun document trouvé pour la requête."}
-
-# RÉPONSE DE NEXIA (Basée exclusivement sur les documents fournis) :
+`retrieved_documents`: {top_k if top_k else "No docs found."}
 """
 
-        # Utilisez StreamingResponse pour retransmettre le flux SSE brut
         return StreamingResponse(
             api_client.chat.stream_sse(
                 ChatCompletionsRequest(
@@ -59,7 +58,8 @@ async def chat_completions(
                     stream=True,
                     model="mistral-small-latest",
                 )
-            ), media_type="text/event-stream"
+            ),
+            media_type="text/event-stream",
         )
 
     except aiohttp.ClientResponseError as e:

@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime, timezone
 
@@ -26,6 +27,47 @@ class MongoDBConnector:
             username=self.username,
             password=self.password,
         )
+
+    async def insert_initial_data(self):
+        """
+        Insère les données initiales dans la base MongoDB à partir des fichiers JSON présents dans le dossier 'data'.
+        Cette méthode est appelée une seule fois lors de l'initialisation du service.
+        """
+        self.logger.info("Populating MongoDB with initial data...")
+
+        data_dir = os.path.join(os.path.dirname(__file__), "data")
+        file_map = {
+            "experiences": "experiences.json",
+            "studies": "studies.json",
+            "works": "works.json",
+            "blog": "blog.json",
+        }
+
+        db = self.get_database()
+
+        for collection_name, filename in file_map.items():
+            path = os.path.join(data_dir, filename)
+
+            try:
+                with open(path, "r", encoding="utf-8") as file:
+                    data = json.load(file)
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                self.logger.error(f"Failed to load data from {filename}: {e}")
+                continue
+
+            if not isinstance(data, list):
+                self.logger.warning(f"Data in {filename} is not a list. Skipping.")
+                continue
+
+            try:
+                await db[collection_name].insert_many(data)
+                self.logger.info(f"Inserted data into '{collection_name}' collection.")
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to insert data into '{collection_name}': {e}"
+                )
+
+        self.logger.info("MongoDB initial data population complete.")
 
     async def check_connection(self):
         try:

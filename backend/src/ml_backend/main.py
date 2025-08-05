@@ -18,7 +18,14 @@ logger = CustomLogger().get_logger("main")
 async def lifespan(app: FastAPI):
     # Code de démarrage
     mongodb, apiclient = await ensure_starting()
+
+    populate_mongo = os.getenv("POPULATE_MONGODB", "false").lower() == "true"
+
     app.mongodb_client = mongodb
+
+    if populate_mongo:
+        await mongodb.insert_initial_data()
+
     app.apiclient = apiclient
     logger.info("Clients MongoDB and API initialized.")
 
