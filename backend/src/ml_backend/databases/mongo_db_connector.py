@@ -35,7 +35,12 @@ class MongoDBConnector:
         """
         self.logger.info("Populating MongoDB with initial data...")
 
-        data_dir = os.path.join(os.path.dirname(__file__), "data")
+        current_dir = os.path.dirname(__file__)
+        project_root = os.path.abspath(os.path.join(current_dir, "../../../"))
+        data_dir = os.path.join(project_root, "src", "ml_backend", "databases", "data")
+
+        self.logger.info(f"Data dir resolved at runtime: {data_dir}")
+
         file_map = {
             "experiences": "experiences.json",
             "studies": "studies.json",
