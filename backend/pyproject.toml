@@ -92,3 +92,6 @@ python_version = "3.13"
 warn_return_any = true
 ignore_missing_imports = true
 strict = true
+
+[tool.setuptools.package-data]
+ml_backend = ["databases/data/*.json", "prompts/*.txt"]
