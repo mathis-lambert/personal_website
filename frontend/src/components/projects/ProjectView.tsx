@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom'; // Assuming React Router
-import { Project } from '@/components/projects/ProjectCard.tsx';
+import type { Project } from '@/components/projects/ProjectCard.tsx';
 import { cn } from '@/lib/utils';
 import { Calendar, ExternalLink } from 'lucide-react';
 import { BsGithub } from 'react-icons/bs';

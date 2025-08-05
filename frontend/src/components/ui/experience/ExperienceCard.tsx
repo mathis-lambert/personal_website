@@ -1,4 +1,4 @@
-import { Experience } from '@/types.ts';
+import type { Experience } from '@/types.ts';
 import { motion } from 'framer-motion';
 
 interface ExperienceCardProps {

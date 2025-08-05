@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import ProjectCard, { Project } from '@/components/projects/ProjectCard';
+import ProjectCard, { type Project } from '@/components/projects/ProjectCard';
 import { cn } from '@/lib/utils';
 import { SearchIcon } from 'lucide-react';
 
 // --- Mock Data for Projects ---
+// eslint-disable-next-line react-refresh/only-export-components
 export const mockProjects: Project[] = [
   {
     id: 'proj-1',

@@ -1,4 +1,4 @@
-import { SectionProps } from '@/types.ts';
+import type { SectionProps } from '@/types.ts';
 import { motion } from 'framer-motion';
 
 export const ResumeSection: React.FC<SectionProps> = ({

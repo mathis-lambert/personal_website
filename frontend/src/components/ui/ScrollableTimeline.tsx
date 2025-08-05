@@ -1,5 +1,5 @@
-import { animate, motion, PanInfo, useMotionValue } from 'framer-motion';
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { animate, motion, type PanInfo, useMotionValue } from 'framer-motion';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 export type TimelineData = {
   title: string;

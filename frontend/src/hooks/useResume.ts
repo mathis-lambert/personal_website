@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { initialResumeData } from '../data';
 import { callGeminiAPI } from '../api/gemini';
-import { IsLoadingState, ResumeData } from '../types';
+import type { IsLoadingState, ResumeData } from '../types';
 
 type AiInteractionType = 'summary' | 'experience' | 'coverLetter' | 'funFact';
 

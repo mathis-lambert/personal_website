@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProjectView from '@/components/projects/ProjectView.tsx';
-import { Project } from '@/components/projects/ProjectCard.tsx';
+import type { Project } from '@/components/projects/ProjectCard.tsx';
 import { mockProjects } from '@/components/projects/ProjectsList.tsx';
 
 const ProjectDetailPage: React.FC = () => {

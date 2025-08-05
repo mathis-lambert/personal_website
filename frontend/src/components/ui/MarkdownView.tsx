@@ -1,12 +1,12 @@
-import React, { useState, JSX } from 'react';
-import ReactMarkdown, { Options, ExtraProps } from 'react-markdown';
+import React, { type JSX, useState } from 'react';
+import ReactMarkdown, { type ExtraProps, type Options } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
-import { Clipboard, Check, Loader2 } from 'lucide-react';
+import { Check, Clipboard, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils.ts'; // Import Loader2
 
 interface MarkdownViewProps {

@@ -4,7 +4,7 @@ import ToolCarousel from '@/components/ui/ToolCarousel.tsx';
 import { LocationMap } from '@/components/ui/LocationMap.tsx';
 import {
   ScrollableTimeline,
-  TimelineData,
+  type TimelineData,
 } from '@/components/ui/ScrollableTimeline';
 
 const GlassCardsList = () => {

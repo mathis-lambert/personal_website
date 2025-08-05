@@ -1,46 +1,11 @@
-import { useEffect, useRef, useReducer } from 'react';
-
-// --- Interfaces (assuming these are defined elsewhere or keep them here) ---
-
-export interface ChatCompletionsRequest {
-  input: string;
-  history: Message[];
-}
-
-export interface Message {
-  role: string;
-  content: string;
-}
-
-interface ChatCompletionsChunk {
-  chunk: string;
-  finish_reason: string | null;
-  job_id: string;
-}
-
-interface ChatCompletionsResult {
-  result: string;
-  finish_reason: string;
-  job_id: string;
-}
-
-// --- State and Action Types for Reducer ---
-
-interface ChatState {
-  result: string;
-  finishReason: string | null;
-  jobId: string | null;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-type ChatAction =
-  | { type: 'FETCH_START' }
-  | { type: 'STREAM_CHUNK'; payload: ChatCompletionsChunk }
-  | { type: 'STREAM_DONE'; payload: ChatCompletionsResult }
-  | { type: 'FETCH_SUCCESS'; payload: ChatCompletionsResult }
-  | { type: 'FETCH_ERROR'; payload: Error }
-  | { type: 'RESET' };
+import { useEffect, useReducer, useRef } from 'react';
+import type {
+  ChatAction,
+  ChatCompletionsChunk,
+  ChatCompletionsRequest,
+  ChatCompletionsResult,
+  ChatState,
+} from '@/types.ts';
 
 // --- Initial State ---
 

@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react';
-import { Experience } from '@/types.ts';
+import type { Experience } from '@/types.ts';
 import { motion } from 'framer-motion';
 
 interface HighlightCardProps {

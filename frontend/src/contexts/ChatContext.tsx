@@ -1,20 +1,18 @@
 import React, {
-  useState,
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useRef,
-  createContext,
-  useContext,
-  useCallback,
-  ReactNode,
+  useState,
 } from 'react';
-import useChatCompletion, {
-  Message,
-  ChatCompletionsRequest,
-} from '@/hooks/useChatCompletion';
+import useChatCompletion from '@/hooks/useChatCompletion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MarkdownView from '@/components/ui/MarkdownView';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import type { ChatCompletionsRequest, Message } from '@/types.ts';
 
 interface ChatContextType {
   isChatOpen: boolean;

@@ -1,5 +1,5 @@
 import React, {
-  FormEvent,
+  type FormEvent,
   useCallback,
   useEffect,
   useRef,
@@ -8,7 +8,7 @@ import React, {
 import { ArrowUp, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useChat } from '@/contexts/ChatContext';
+import { useChat } from '@/contexts/ChatContext.tsx';
 
 interface ChatInputProps {
   placeholder?: string;

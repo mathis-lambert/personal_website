@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { Link, To } from 'react-router-dom';
+import { AnimatePresence, motion, type Variants } from 'framer-motion';
+import { Link, type To } from 'react-router-dom';
 import { useChat } from '@/contexts/ChatContext.tsx';
 
 interface NavLink {

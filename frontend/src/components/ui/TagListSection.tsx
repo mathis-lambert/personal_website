@@ -1,6 +1,6 @@
 import { GlassCard } from '@/components/ui/GlassCard';
 import { ResumeSection } from '@/components/ui/ResumeSection';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface TagListSectionProps {
   icon: LucideIcon;

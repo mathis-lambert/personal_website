@@ -1,4 +1,4 @@
-import { ResumeData } from './types';
+import type { ResumeData } from './types';
 
 export const initialResumeData: ResumeData = {
   name: 'Mathis Lambert',

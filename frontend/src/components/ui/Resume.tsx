@@ -23,27 +23,10 @@ export default function Resume() {
   const { resumeData, isLoading, handleAiInteraction } = useResume();
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  const handleExportPdf = async () => {
-    // if (!resumeRef.current) return;
-    // setIsLoading((prev) => ({ ...prev, pdf: true }));
-    // try {
-    //   await exportToPdf(resumeRef.current, 'Mathis_Lambert_Resume.pdf');
-    // } catch (error) {
-    //   console.error('Failed to export PDF:', error);
-    // } finally {
-    //   setIsLoading((prev) => ({ ...prev, pdf: false }));
-    // }
-    window.print();
-  };
-
   return (
     <div className=" text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <ResumeHeader
-          name={resumeData.name}
-          onExportPdf={handleExportPdf}
-          isPdfLoading={isLoading.pdf}
-        />
+        <ResumeHeader name={resumeData.name} />
 
         {/* The ref is now on a dedicated wrapper for more precise PDF capture */}
         <div id="resume-content" ref={resumeRef}>
