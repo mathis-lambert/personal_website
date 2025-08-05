@@ -62,8 +62,18 @@ class MongoDBConnector:
                 continue
 
             try:
-                await db[collection_name].insert_many(data)
-                self.logger.info(f"Inserted data into '{collection_name}' collection.")
+                collection = db[collection_name]
+
+                await collection.delete_many({})
+                self.logger.info(f"Purged collection: '{collection_name}'.")
+
+                if data:
+                    await collection.insert_many(data)
+                    self.logger.info(
+                        f"Inserted data into '{collection_name}' collection."
+                    )
+                else:
+                    self.logger.info(f"No data to insert into '{collection_name}'.")
             except Exception as e:
                 self.logger.error(
                     f"Failed to insert data into '{collection_name}': {e}"
