@@ -36,8 +36,7 @@ class MongoDBConnector:
         self.logger.info("Populating MongoDB with initial data...")
 
         current_dir = os.path.dirname(__file__)
-        project_root = os.path.abspath(os.path.join(current_dir, "../../../"))
-        data_dir = os.path.join(project_root, "src", "ml_backend", "databases", "data")
+        data_dir = os.path.join(current_dir, "data")
 
         self.logger.info(f"Data dir resolved at runtime: {data_dir}")
 
