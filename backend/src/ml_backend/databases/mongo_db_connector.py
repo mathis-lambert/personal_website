@@ -38,13 +38,11 @@ class MongoDBConnector:
         current_dir = os.path.dirname(__file__)
         data_dir = os.path.join(current_dir, "data")
 
-        self.logger.info(f"Data dir resolved at runtime: {data_dir}")
-
         file_map = {
             "experiences": "experiences.json",
             "studies": "studies.json",
             "works": "works.json",
-            "blog": "blog.json",
+            "articles": "articles.json",
         }
 
         db = self.get_database()

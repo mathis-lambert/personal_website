@@ -16,13 +16,13 @@ class BackendCompletionsRequest(BaseModel):
 
 
 @router.get("/all")
-async def get_all_experiences(
+async def get_all_works(
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     try:
         db = mongodb.get_database()
-        experiences = await db["experiences"].find({}).to_list(length=None)
-        return {"experiences": [mongodb.serialize(exp) for exp in experiences]}
+        works = await db["works"].find({}).to_list(length=None)
+        return {"works": [mongodb.serialize(exp) for exp in works]}
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API
         print(f"Erreur de réponse de l'API : {e}")

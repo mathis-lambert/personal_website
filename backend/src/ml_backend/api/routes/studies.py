@@ -15,7 +15,7 @@ class BackendCompletionsRequest(BaseModel):
     history: List[Dict[str, Any]] = []
 
 
-@router.get("/get")
+@router.get("/all")
 async def get_all_studies(
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
