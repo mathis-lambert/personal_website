@@ -6,6 +6,7 @@ import ProjectDetailPage from '@/pages/ProjectDetailPage.tsx';
 
 const Home = React.lazy(() => import('@/pages/HomePage.tsx'));
 const Projects = React.lazy(() => import('@/pages/ProjectsPage.tsx'));
+const Resume = React.lazy(() => import('@/pages/ResumePage.tsx'));
 const Blog = React.lazy(() => import('@/pages/BlogPage.tsx'));
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage.tsx'));
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/resume" element={<Resume />} />
             <Route
               path="/projects/:projectId"
               element={<ProjectDetailPage />}

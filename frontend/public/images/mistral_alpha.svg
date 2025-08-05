@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" id="a" width="500" height="360" viewBox="0 0 212.121 151.515" version="1.1">
-  <defs id="defs10"/>
-  <rect x="30.303001" y="0" width="30.302999" height="30.302999" fill="#ffd700" stroke-width="0" id="rect1"/>
-  <rect x="151.515" y="0" width="30.302999" height="30.302999" fill="#ffd700" stroke-width="0" id="rect2"/>
-  <rect x="30.303001" y="30.303001" width="60.605999" height="30.302999" fill="#ffaf00" stroke-width="0" id="rect3"/>
-  <rect x="121.21201" y="30.303001" width="60.605999" height="30.302999" fill="#ffaf00" stroke-width="0" id="rect4"/>
-  <rect x="30.303001" y="60.606003" width="151.515" height="30.302999" fill="#ff8205" stroke-width="0" id="rect5"/>
-  <rect x="30.303001" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect6"/>
-  <rect x="90.908997" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect7"/>
-  <rect x="151.515" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect8"/>
-  <rect x="0" y="121.21201" width="90.908997" height="30.302999" fill="#e10500" stroke-width="0" id="rect9"/>
-  <rect x="121.21201" y="121.21201" width="90.908997" height="30.302999" fill="#e10500" stroke-width="0" id="rect10"/>
+    <defs id="defs10"/>
+    <rect x="30.303001" y="0" width="30.302999" height="30.302999" fill="#ffd700" stroke-width="0" id="rect1"/>
+    <rect x="151.515" y="0" width="30.302999" height="30.302999" fill="#ffd700" stroke-width="0" id="rect2"/>
+    <rect x="30.303001" y="30.303001" width="60.605999" height="30.302999" fill="#ffaf00" stroke-width="0" id="rect3"/>
+    <rect x="121.21201" y="30.303001" width="60.605999" height="30.302999" fill="#ffaf00" stroke-width="0" id="rect4"/>
+    <rect x="30.303001" y="60.606003" width="151.515" height="30.302999" fill="#ff8205" stroke-width="0" id="rect5"/>
+    <rect x="30.303001" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect6"/>
+    <rect x="90.908997" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect7"/>
+    <rect x="151.515" y="90.908997" width="30.302999" height="30.302999" fill="#fa500f" stroke-width="0" id="rect8"/>
+    <rect x="0" y="121.21201" width="90.908997" height="30.302999" fill="#e10500" stroke-width="0" id="rect9"/>
+    <rect x="121.21201" y="121.21201" width="90.908997" height="30.302999" fill="#e10500" stroke-width="0" id="rect10"/>
 </svg>

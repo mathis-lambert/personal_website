@@ -28,7 +28,7 @@ const Navbar = () => {
       { to: '/', text: 'Home' },
       { to: 'projects', text: 'Projects' },
       { to: 'blog', text: 'Blog' },
-      { to: 'about', text: 'About' },
+      { to: 'resume', text: 'Resume' },
       { to: '#', text: 'Chat', onClick: handleChatToggle },
     ],
     // Dependencies for useMemo

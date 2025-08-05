@@ -175,3 +175,31 @@ button {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Hide elements you don't want in the PDF */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure the resume content is the only thing visible */
+  #resume-content {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  /* You might need to reset card styles for print */
+  .glass-card-print-reset {
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+}
