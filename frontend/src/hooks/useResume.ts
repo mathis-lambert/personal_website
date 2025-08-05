@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { initialResumeData } from '../data';
-import { callGeminiAPI } from '../api/gemini';
+import { callPersonalApi } from '@/api/personalApi.ts';
 import type { IsLoadingState, ResumeData } from '../types';
 
 type AiInteractionType = 'summary' | 'experience' | 'coverLetter' | 'funFact';
@@ -24,43 +24,48 @@ export const useResume = () => {
 
       try {
         switch (type) {
-          case 'summary':
+          case 'summary': {
             prompt = `Rewrite this summary in a more professional tone, keeping it professional and under 50 words: "${resumeData.summary}"`;
-            const newSummary = await callGeminiAPI(prompt);
+            const newSummary = await callPersonalApi({
+              input: prompt,
+              history: [],
+            });
+
+            console.log('New summary:', newSummary);
+            if (!newSummary || !newSummary.result) {
+              setAiResponse('Failed to generate summary. Please try again.');
+              return;
+            }
+
             setResumeData((prev) => ({
               ...prev,
-              summary: newSummary.replace(/"/g, ''),
+              summary: newSummary.result.replace(/"/g, ''),
             }));
             break;
+          }
 
-          case 'experience':
+          case 'experience': {
             const expText = resumeData.experiences
               .map(
                 (e) => `${e.role} at ${e.company}: ${e.description.join('. ')}`,
               )
               .join('\n');
             prompt = `Summarize the following career experience into a powerful, 2-sentence paragraph for a resume: \n${expText}`;
-            const expSummary = await callGeminiAPI(prompt);
-            setAiResponse(expSummary);
-            break;
+            const expSummary = await callPersonalApi({
+              input: prompt,
+              history: [],
+            });
 
-          case 'funFact':
-            prompt =
-              'Tell me a fun, little-known fact about technology or computer science.';
-            const funFact = await callGeminiAPI(prompt);
-            setAiResponse(funFact);
-            break;
-
-          case 'coverLetter':
-            if (!jobDescription.trim()) {
-              setAiResponse('Please enter a job description first.');
+            console.log('Experience summary:', expSummary);
+            if (!expSummary || !expSummary.result) {
+              setAiResponse(
+                'Failed to summarize experience. Please try again.',
+              );
               return;
             }
-            const resumeString = `Name: ${resumeData.name}, Skills: ${[...resumeData.technologies, ...resumeData.skills].join(', ')}, Experience: ${resumeData.experiences.map((e) => `${e.role} at ${e.company}: ${e.description.join('. ')}`).join('; ')}`;
-            prompt = `Based on this resume:\n---\n${resumeString}\n---\nAnd this job description:\n---\n${jobDescription}\n---\nWrite a professional, concise cover letter. Highlight relevant skills and experience. Address it to "Hiring Manager".`;
-            const letter = await callGeminiAPI(prompt);
-            setAiResponse(letter);
+            setAiResponse(expSummary.result);
             break;
+          }
         }
       } catch (error) {
         console.error(`Error during AI interaction type "${type}":`, error);
@@ -69,7 +74,7 @@ export const useResume = () => {
         setIsLoading((prev) => ({ ...prev, [type]: false }));
       }
     },
-    [resumeData, jobDescription],
+    [resumeData],
   );
 
   return {

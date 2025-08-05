@@ -10,8 +10,8 @@ export const ResumeSection: React.FC<SectionProps> = ({
 }) => (
   <div className="mb-8 last:mb-0">
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut', delay }}
     >
       <div className="flex justify-between items-center mb-4">

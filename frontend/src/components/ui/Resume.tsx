@@ -1,16 +1,5 @@
 import { useRef } from 'react';
-import {
-  Briefcase,
-  Code,
-  Cpu,
-  GraduationCap,
-  Heart,
-  Home,
-  Linkedin,
-  Mail,
-  Phone,
-  Sparkles,
-} from 'lucide-react';
+import { Briefcase, Code, Cpu, GraduationCap, Heart, Home, Mail, Phone, Sparkles } from 'lucide-react';
 import { useResume } from '@/hooks/useResume.ts';
 import { ResumeHeader } from '@/components/layout/ResumeHeader.tsx';
 import { GlassCard } from '@/components/ui/GlassCard.tsx';
@@ -18,6 +7,7 @@ import { ResumeSection } from '@/components/ui/ResumeSection.tsx';
 import { TagListSection } from '@/components/ui/TagListSection.tsx';
 import { HighlightCard } from '@/components/ui/experience/HighlightCard.tsx';
 import { ExperienceCard } from '@/components/ui/experience/ExperienceCard.tsx';
+import { FaLinkedin } from 'react-icons/fa';
 
 export default function Resume() {
   const { resumeData, isLoading, handleAiInteraction } = useResume();
@@ -25,14 +15,14 @@ export default function Resume() {
 
   return (
     <div className=" text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto py-8">
         <ResumeHeader name={resumeData.name} />
 
         {/* The ref is now on a dedicated wrapper for more precise PDF capture */}
         <div id="resume-content" ref={resumeRef}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <main className="lg:col-span-2 space-y-8">
-              <GlassCard delay={0.2} className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <main className="lg:col-span-2 space-y-6">
+              <GlassCard className="p-6">
                 <ResumeSection
                   icon={Briefcase}
                   title="About Me"
@@ -55,22 +45,22 @@ export default function Resume() {
                 </ResumeSection>
               </GlassCard>
 
-              <GlassCard delay={0.3} className="p-6">
+              <GlassCard className="p-6">
                 <ResumeSection icon={Cpu} title="Experience">
                   {resumeData.experiences.map((exp, i) =>
                     exp.highlight ? (
                       <HighlightCard
                         key={i}
                         experience={exp}
-                        delay={0.4 + i * 0.1}
+                        // // delay={0.4 + i * 0.1}
                       />
                     ) : (
                       <ExperienceCard
                         key={i}
                         experience={exp}
-                        delay={0.4 + i * 0.1}
+                        // // delay={0.4 + i * 0.1}
                       />
-                    ),
+                    )
                   )}
                 </ResumeSection>
               </GlassCard>
@@ -80,12 +70,12 @@ export default function Resume() {
                 title="Passions"
                 items={resumeData.passions}
                 colorClass="bg-rose-400/10 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
-                delay={0.7}
+                // delay={0.7}
               />
             </main>
 
-            <aside className="lg:col-span-1 space-y-8 lg:sticky lg:top-8 self-start">
-              <GlassCard delay={0.4} className="p-6">
+            <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-8 self-start">
+              <GlassCard className="p-6">
                 <ResumeSection icon={Home} title="Contact">
                   <div className="space-y-2 text-sm">
                     <a
@@ -108,14 +98,14 @@ export default function Resume() {
                       rel="noopener noreferrer"
                       className="flex items-center hover:text-cyan-500 transition-colors"
                     >
-                      <Linkedin size={14} className="mr-3 shrink-0" />
+                      <FaLinkedin size={14} className="mr-3 shrink-0" />
                       linkedin.com/in/{resumeData.contact.linkedin}
                     </a>
                   </div>
                 </ResumeSection>
               </GlassCard>
 
-              <GlassCard delay={0.8} className="p-6">
+              <GlassCard className="p-6">
                 <ResumeSection icon={GraduationCap} title="Education">
                   {resumeData.education.map((edu, i) => (
                     <div key={i} className="mb-3 last:mb-0">
@@ -138,7 +128,7 @@ export default function Resume() {
                 title="Technologies"
                 items={resumeData.technologies}
                 colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                delay={0.5}
+                // delay={0.5}
               />
 
               <TagListSection
@@ -146,7 +136,7 @@ export default function Resume() {
                 title="Professional Skills"
                 items={resumeData.skills}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
-                delay={0.6}
+                // delay={0.6}
               />
             </aside>
           </div>

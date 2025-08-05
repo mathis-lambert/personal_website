@@ -3,12 +3,12 @@ import { motion } from 'framer-motion';
 
 interface ExperienceCardProps {
   experience: Experience;
-  delay: number;
+  delay?: number;
 }
 
 export const ExperienceCard: React.FC<ExperienceCardProps> = ({
   experience,
-  delay,
+  delay = 0,
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}

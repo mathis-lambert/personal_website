@@ -4,12 +4,12 @@ import { motion } from 'framer-motion';
 
 interface HighlightCardProps {
   experience: Experience;
-  delay: number;
+  delay?: number;
 }
 
 export const HighlightCard: React.FC<HighlightCardProps> = ({
   experience,
-  delay,
+  delay = 0,
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
