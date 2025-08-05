@@ -7,9 +7,9 @@ interface StickerConfig {
   alt: string;
   width: string;
   height: string;
-  top: string; // e.g., 'top-4', 'top-[10%]', 'top-[-1rem]'
-  left?: string; // e.g., 'left-8', 'left-[20%]', 'left-[-2rem]'
-  right?: string; // e.g., 'right-2', 'right-[15%]', 'right-[-0.5rem]'
+  top: string;
+  left?: string;
+  right?: string;
   rotation: number;
   zIndex: number;
   animationDelay: number;
@@ -49,7 +49,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
               damping: 15,
             },
           },
-        };
+        } as const;
 
         return (
           <motion.img

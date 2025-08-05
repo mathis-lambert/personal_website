@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { Link, To } from 'react-router-dom';
 import { useChat } from '@/contexts/ChatContext.tsx';
 
@@ -20,7 +20,7 @@ const Navbar = () => {
     } else {
       openChat();
     }
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Also close the mobile menu
   };
 
   const navLinks = useMemo<NavLink[]>(
@@ -31,6 +31,7 @@ const Navbar = () => {
       { to: 'about', text: 'About' },
       { to: '#', text: 'Chat', onClick: handleChatToggle },
     ],
+    // Dependencies for useMemo
     [isChatOpen, closeChat, openChat],
   );
 
@@ -47,7 +48,8 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  const burgerVariants = {
+  // Explicitly type variants with the 'Variants' type from framer-motion
+  const burgerVariants: Variants = {
     topOpen: { rotate: 45, y: 8 },
     topClosed: { rotate: 0, y: 0 },
     middleOpen: { opacity: 0 },
@@ -56,12 +58,12 @@ const Navbar = () => {
     bottomClosed: { rotate: 0, y: 0 },
   };
 
-  const menuOverlayVariants = {
+  const menuOverlayVariants: Variants = {
     hidden: { opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } },
     visible: { opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } },
   };
 
-  const menuItemVariants = {
+  const menuItemVariants: Variants = {
     hidden: { opacity: 0, y: -20 },
     visible: (i: number) => ({
       opacity: 1,
@@ -178,19 +180,17 @@ const Navbar = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="w-full px-8 flex justify-center" // Ensure container allows full width for hover effect
+                className="w-full px-8 flex justify-center"
               >
                 <Link
                   to={link.to}
                   onClick={(e) => {
-                    // No need to check isChatOpen here, closeChat does nothing if already closed
-                    closeChat(); // Always attempt to close chat when navigating from mobile overlay
-
+                    // Simplified logic: call the link's specific onClick if it exists,
+                    // otherwise just close the menu for standard navigation.
                     if (link.onClick) {
-                      link.onClick(e); // This handles the chat toggle specifically
-                      // Keep menu open for chat toggle interaction if needed, handled in handleChatToggle
+                      link.onClick(e); // This is handleChatToggle, which now also closes the menu.
                     } else {
-                      closeMenu(); // Close menu for regular navigation links
+                      closeMenu();
                     }
                   }}
                   className="block text-center text-3xl font-medium text-gray-800 dark:text-white px-6 py-3 rounded-lg transform transition-all duration-300 ease-out hover:bg-blue-500/10 dark:hover:bg-blue-400/10 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-1 hover:scale-105"
