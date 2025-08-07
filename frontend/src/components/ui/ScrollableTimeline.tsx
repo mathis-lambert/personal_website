@@ -1,5 +1,4 @@
-import { animate, motion, type PanInfo, useMotionValue } from 'framer-motion';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 
 export type TimelineData = {
   title: string;
@@ -31,7 +30,7 @@ export type ClassNames = {
   scrollHintIcon?: string;
 };
 
-export type ScrollableTimelineProps<T extends Record<string, any>> = {
+export type ScrollableTimelineProps<T extends Record<string, unknown>> = {
   data: T[];
   keyMappings?: Partial<Record<keyof TimelineData, keyof T>>;
   mobileBreakpoint?: number;
@@ -40,36 +39,39 @@ export type ScrollableTimelineProps<T extends Record<string, any>> = {
   accentColor?: string;
   showScrollHint?: boolean;
   showGradients?: boolean;
-  blockPageScroll?: boolean;
   classNames?: ClassNames;
 };
 
 const defaultClassNames: Required<ClassNames> = {
-  root: 'relative h-full w-full overflow-hidden group',
+  root:
+    'relative h-full w-full overflow-hidden group select-none overscroll-none',
   gradientTop:
-    'absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white dark:from-slate-950 to-transparent z-10 pointer-events-none',
+    'absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none',
   gradientBottom:
-    'absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-slate-950 to-transparent z-10 pointer-events-none',
-  motionDiv: 'absolute left-0 top-0 w-full',
+    'absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none',
+  motionDiv:
+    'relative left-0 top-0 h-full w-full overflow-y-auto overscroll-contain will-change-scroll touch-none',
   itemContainer: 'relative flex flex-col',
-  line: 'absolute left-6 top-0 h-full w-0.5 bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-50',
-  item: 'relative w-full py-3 pl-12 pr-4 group/item',
-  dotContainerWrapper: 'absolute left-[18px] top-1/2 -translate-y-1/2',
-  dotWrapper: 'relative',
+  line:
+    'absolute left-6 top-0 h-full w-px bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-70',
+  item: 'relative w-full py-4 pl-14 pr-4 group/item',
+  dotContainerWrapper:
+    'absolute left-6 top-1/2 -translate-x-1/2 -translate-y-1/2',
+  dotWrapper: 'relative h-3 w-3',
   dotOuter:
-    'absolute inset-0 h-3 w-3 rounded-full bg-[var(--accent-color)] opacity-20 group-hover/item:scale-[2.5] transition-transform duration-300',
+    'absolute inset-0 rounded-full bg-[var(--accent-color)] opacity-30 blur-[0.5px] group-hover/item:scale-[2.2] transition-transform duration-300',
   dotInner:
-    'relative h-3 w-3 rounded-full bg-[var(--accent-color)] border-2 border-white dark:border-slate-900 group-hover/item:scale-110 transition-transform duration-300',
+    'relative h-3 w-3 rounded-full bg-[var(--accent-color)] ring-2 ring-white dark:ring-slate-900 group-hover/item:scale-110 transition-transform duration-300',
   dotConnector:
-    'absolute left-8 top-1/2 w-4 h-0.5 bg-gradient-to-r from-[var(--accent-color)] to-transparent opacity-0 group-hover/item:opacity-50 transition-opacity duration-300',
+    'absolute left-8 top-1/2 w-6 h-0.5 bg-gradient-to-r from-[var(--accent-color)] to-transparent opacity-0 group-hover/item:opacity-60 transition-opacity duration-300',
   contentWrapper:
-    'text-left rounded-lg p-3 -ml-3 transition-all duration-300 group-hover/item:bg-slate-50 dark:group-hover/item:bg-slate-800/50 group-hover/item:shadow-lg group-hover/item:shadow-[var(--accent-color)]/10',
+    'text-left rounded-xl p-4 -ml-3 transition-all duration-300 backdrop-blur-sm bg-white/40 dark:bg-slate-900/20 ring-1 ring-slate-900/5 dark:ring-white/10 group-hover/item:shadow-xl group-hover/item:shadow-[var(--accent-color)]/20 group-hover/item:translate-x-0.5',
   title:
     'text-base font-bold text-slate-800 dark:text-slate-100 group-hover/item:text-[var(--accent-color)] transition-colors duration-300',
   company: 'text-sm font-semibold text-slate-600 dark:text-slate-400',
   date: 'mt-1 text-xs text-slate-400 dark:text-slate-500',
   description:
-    'mt-2 text-xs text-slate-500 dark:text-slate-400 opacity-0 max-h-0 group-hover/item:opacity-100 group-hover/item:max-h-20 transition-all duration-300 overflow-hidden',
+    'mt-2 text-xs text-slate-600 dark:text-slate-400 opacity-0 max-h-0 group-hover/item:opacity-100 group-hover/item:max-h-24 transition-all duration-300 overflow-hidden',
   scrollHintContainer:
     'absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300',
   scrollHint:
@@ -81,8 +83,11 @@ const DEFAULT_SCROLL_SPEED = 4;
 const DEFAULT_WHEEL_SENSITIVITY = 2;
 const DEFAULT_MOBILE_BREAKPOINT = 768;
 const DEFAULT_ACCENT_COLOR = 'oklch(68.5% 0.169 237.323)';
+// Nombre de répétitions du dataset pour créer un ruban continu
+const REPEAT_COUNT = 5;
+const CENTER_INDEX = Math.floor(REPEAT_COUNT / 2);
 
-export function ScrollableTimeline<T extends Record<string, any>>({
+export function ScrollableTimeline<T extends Record<string, unknown>>({
   data,
   keyMappings = {
     title: 'title',
@@ -96,22 +101,22 @@ export function ScrollableTimeline<T extends Record<string, any>>({
   accentColor = DEFAULT_ACCENT_COLOR,
   showScrollHint = true,
   showGradients = true,
-  blockPageScroll = true,
   classNames = {},
 }: ScrollableTimelineProps<T>) {
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
 
-  const motionDivRef = useRef<HTMLDivElement>(null);
-  const y = useMotionValue(0);
-  const animationRef = useRef<any>(null);
-  const contentHeightRef = useRef(0);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const firstHalfRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<number | null>(null);
+  const contentHeightRef = useRef<number>(0);
+  const virtualTopRef = useRef<number>(0);
 
   const finalClassNames = { ...defaultClassNames, ...classNames };
 
-  // Determine if we're on mobile
   useEffect(() => {
     const checkScreenSize = () =>
       setIsMobile(window.innerWidth < mobileBreakpoint);
@@ -120,72 +125,115 @@ export function ScrollableTimeline<T extends Record<string, any>>({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [mobileBreakpoint]);
 
-  // Calculate content height and update ref
-  const updateContentHeight = () => {
-    if (!motionDivRef.current) return 0;
-    const height = motionDivRef.current.scrollHeight / 2;
+  const updateContentHeight = useCallback(() => {
+    if (!firstHalfRef.current) return 0;
+    const height = firstHalfRef.current.scrollHeight;
     contentHeightRef.current = height;
     return height;
-  };
+  }, []);
 
-  // Stop any ongoing animation
-  const stopAnimation = () => {
-    if (animationRef.current) {
-      animationRef.current.stop();
-      animationRef.current = null;
+  // Recentrage doux pour rester dans la zone centrale (évite tout saut visible)
+  const recenter = useCallback(
+    (top: number) => {
+      const setHeight = contentHeightRef.current || updateContentHeight();
+      if (setHeight <= 0) return top;
+      // On garde le scroll dans [setHeight, (REPEAT_COUNT-1)*setHeight]
+      const min = setHeight;
+      const max = setHeight * (REPEAT_COUNT - 1);
+      if (top < min) return top + setHeight;
+      if (top >= max) return top - setHeight;
+      return top;
+    },
+    [updateContentHeight]
+  );
+
+  const centerScrollPosition = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const setHeight = contentHeightRef.current || updateContentHeight();
+    if (setHeight <= 0) return;
+    const target = setHeight * CENTER_INDEX;
+    virtualTopRef.current = target;
+    scroller.scrollTop = target;
+  }, [updateContentHeight]);
+
+  const stopAnimation = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     }
-  };
+    lastTimestampRef.current = null;
+  }, []);
 
-  // Reset animation with consistent speed
-  const resetAnimation = (newY: number) => {
+  const startAnimation = useCallback(() => {
     stopAnimation();
-    if (isMobile || isHovered || isDragging || !motionDivRef.current) return;
-
+    if (isHovered || isInteracting) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
     const contentHeight = contentHeightRef.current || updateContentHeight();
     if (contentHeight <= 0) return;
 
-    // Calculate remaining distance and duration for consistent speed
-    const remainingDistance = contentHeight - Math.abs(newY % contentHeight);
-    const duration =
-      (remainingDistance / contentHeight) * data.length * scrollSpeed;
+    // Vitesse minimale plus basse pour que le défilement soit perceptible même à faible scrollSpeed
+    const speedPxPerSec = Math.max(2, 16 * scrollSpeed);
+    // Synchronise la position virtuelle au scroll réel au démarrage
+    if (virtualTopRef.current === 0) {
+      // Première initialisation: centre la position
+      centerScrollPosition();
+    } else {
+      virtualTopRef.current = scroller.scrollTop;
+    }
 
-    animationRef.current = animate(y, newY - contentHeight, {
-      duration,
-      ease: 'linear',
-      onComplete: () => {
-        y.set(newY);
-        resetAnimation(newY);
-      },
+    const tick = (ts: number) => {
+      if (isHovered || isInteracting) {
+        rafRef.current = null;
+        lastTimestampRef.current = null;
+        return;
+      }
+      if (lastTimestampRef.current == null) {
+        lastTimestampRef.current = ts;
+      }
+      const dt = (ts - lastTimestampRef.current) / 1000;
+      lastTimestampRef.current = ts;
+      // Accumule en flottant, puis recentre si besoin sans coupure visuelle
+      let newTop = virtualTopRef.current + speedPxPerSec * dt;
+      newTop = recenter(newTop);
+      virtualTopRef.current = newTop;
+      scroller.scrollTop = Math.floor(newTop);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }, [centerScrollPosition, isHovered, isInteracting, recenter, scrollSpeed, stopAnimation, updateContentHeight]);
+
+  useEffect(() => {
+    const handle = () => {
+      updateContentHeight();
+      centerScrollPosition();
+      startAnimation();
+    };
+    handle();
+    window.addEventListener('resize', handle);
+    return () => window.removeEventListener('resize', handle);
+  }, [centerScrollPosition, startAnimation, updateContentHeight]);
+
+  // Relance l'animation au chargement initial des données et à chaque changement de données/mappage
+  useEffect(() => {
+    // Si pas de données, on stoppe l'animation et on attend la prochaine mise à jour
+    if (!data || data.length === 0) {
+      stopAnimation();
+      return;
+    }
+
+    // Attendre un frame pour s'assurer que le DOM a été rendu avec les nouvelles données
+    const rafId = requestAnimationFrame(() => {
+      updateContentHeight();
+      centerScrollPosition();
+      startAnimation();
     });
-  };
 
-  // Start the infinite scroll animation
-  const startAnimation = () => {
-    stopAnimation();
-    if (isMobile || isHovered || isDragging || !motionDivRef.current) return;
+    return () => cancelAnimationFrame(rafId);
+  }, [centerScrollPosition, data, keyMappings, startAnimation, stopAnimation, updateContentHeight]);
 
-    const contentHeight = contentHeightRef.current || updateContentHeight();
-    if (contentHeight <= 0) return;
-
-    const currentY = y.get();
-    const progress = Math.abs(currentY % contentHeight) / contentHeight;
-    const duration = data.length * scrollSpeed * (1 - progress);
-
-    animationRef.current = animate(
-      y,
-      currentY - contentHeight * (1 - progress),
-      {
-        duration,
-        ease: 'linear',
-        onComplete: () => {
-          y.set(currentY - contentHeight * (1 - progress));
-          resetAnimation(y.get());
-        },
-      },
-    );
-  };
-
-  // Handle automatic scrolling
   useEffect(() => {
     startAnimation();
     return () => {
@@ -194,41 +242,9 @@ export function ScrollableTimeline<T extends Record<string, any>>({
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [isHovered, isDragging, isMobile, data.length, scrollSpeed, y]);
+  }, [isHovered, isInteracting, startAnimation, stopAnimation]);
 
-  // Handle blocking page scroll
-  useEffect(() => {
-    if (isHovered && !isMobile && blockPageScroll) {
-      const scrollY = window.scrollY;
-      document.body.style.overflow = 'hidden';
-
-      const preventDefault = (e: Event) => {
-        e.preventDefault();
-      };
-
-      const events: Array<[string, EventListener, { passive: boolean }?]> = [
-        ['wheel', preventDefault, { passive: false }],
-        ['touchmove', preventDefault, { passive: false }],
-        ['scroll', () => window.scrollTo(0, scrollY)],
-      ];
-
-      events.forEach(([event, listener, options]) =>
-        window.addEventListener(
-          event,
-          listener,
-          options as AddEventListenerOptions,
-        ),
-      );
-
-      return () => {
-        document.body.style.overflow = '';
-        events.forEach(([event, listener]) =>
-          window.removeEventListener(event, listener),
-        );
-        window.scrollTo(0, scrollY);
-      };
-    }
-  }, [isHovered, isMobile, blockPageScroll]);
+  // Prévention du scroll de page: gérée localement dans les handlers wheel/touch.
 
   // Handle mouse events
   const handleMouseEnter = () => {
@@ -240,103 +256,84 @@ export function ScrollableTimeline<T extends Record<string, any>>({
   const handleMouseLeave = () => {
     if (isMobile) return;
     setIsHovered(false);
-    // Debounce animation restart to prevent conflicts
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
     scrollTimeoutRef.current = setTimeout(() => {
       startAnimation();
-    }, 100);
+    }, 120);
   };
 
   // Handle smooth wheel scrolling
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (isMobile || !isHovered) return;
-
+    if (isMobile) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    e.preventDefault();
     stopAnimation();
-
-    const currentY = y.get();
-    let newY = currentY - e.deltaY * wheelSensitivity;
-    const contentHeight = contentHeightRef.current || updateContentHeight();
-
-    if (contentHeight <= 0) return;
-
-    // Smooth wrapping without jumps
-    newY = newY % (contentHeight * 2);
-    if (newY > 0) newY -= contentHeight * 2;
-    if (newY < -contentHeight * 2) newY += contentHeight * 2;
-
-    y.set(newY);
-
-    // Restart animation after scrolling stops
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(() => {
-      if (!isDragging) startAnimation();
-    }, 150);
-  };
-
-  // Handle drag scrolling
-  const handleDragStart = () => {
-    setIsDragging(true);
-    stopAnimation();
-  };
-
-  const handleDragEnd = () => {
-    setIsDragging(false);
-    // Normalize position after drag
-    const currentY = y.get();
-    const contentHeight = contentHeightRef.current || updateContentHeight();
-    if (contentHeight > 0) {
-      const normalizedY =
-        ((currentY % (contentHeight * 2)) + contentHeight * 2) %
-        (contentHeight * 2);
-      y.set(
-        normalizedY > contentHeight
-          ? normalizedY - contentHeight * 2
-          : normalizedY,
-      );
-    }
-    // Restart animation after drag stops
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
+    const setHeight = contentHeightRef.current || updateContentHeight();
+    if (setHeight <= 0) return;
+    let newTop = scroller.scrollTop + e.deltaY * wheelSensitivity;
+    newTop = recenter(newTop);
+    virtualTopRef.current = newTop;
+    scroller.scrollTop = Math.floor(newTop);
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
       startAnimation();
     }, 150);
   };
 
-  const handleDrag = (_event: any, info: PanInfo) => {
-    if (isMobile) return;
+  // Touch scrolling without page scroll
+  const touchStartYRef = useRef<number | null>(null);
 
-    const currentY = y.get();
-    const newY = currentY + info.delta.y;
-    const contentHeight = contentHeightRef.current || updateContentHeight();
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setIsInteracting(true);
+    stopAnimation();
+    touchStartYRef.current = e.touches[0]?.clientY ?? null;
+  };
 
-    if (contentHeight <= 0) return;
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const startY = touchStartYRef.current;
+    if (startY == null) return;
+    e.preventDefault();
+    const currentY = e.touches[0]?.clientY ?? startY;
+    const delta = startY - currentY; // positive when moving up -> scroll down
+    const setHeight = contentHeightRef.current || updateContentHeight();
+    if (setHeight <= 0) return;
+    let newTop = scroller.scrollTop + delta;
+    newTop = recenter(newTop);
+    virtualTopRef.current = newTop;
+    scroller.scrollTop = Math.floor(newTop);
+    touchStartYRef.current = currentY;
+  };
 
-    // Smooth wrapping during drag
-    y.set(newY % (contentHeight * 2));
+  const handleTouchEnd = () => {
+    touchStartYRef.current = null;
+    setIsInteracting(false);
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      startAnimation();
+    }, 150);
   };
 
   // Map data with provided key mappings
   const mappedData = data.map((item) => ({
-    title: item[keyMappings.title ?? 'title'],
-    company: item[keyMappings.company ?? 'company'],
-    date: item[keyMappings.date ?? 'date'],
-    description: item[keyMappings.description ?? 'description'],
+    title: String(item[keyMappings.title ?? 'title'] ?? ''),
+    company: String(item[keyMappings.company ?? 'company'] ?? ''),
+    date: String(item[keyMappings.date ?? 'date'] ?? ''),
+    description: String(item[keyMappings.description ?? 'description'] ?? ''),
   }));
 
-  // Duplicate data for seamless looping
-  const duplicatedData = [...mappedData, ...mappedData];
+  // On rend plusieurs copies pour créer un ruban continu sans couture visible
 
   return (
     <div
       className={finalClassNames.root}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onWheel={handleWheel}
+      onWheelCapture={handleWheel}
       style={{ '--accent-color': accentColor } as CSSProperties}
     >
       {showGradients && (
@@ -346,41 +343,43 @@ export function ScrollableTimeline<T extends Record<string, any>>({
         </>
       )}
 
-      <motion.div
-        ref={motionDivRef}
-        className={finalClassNames.motionDiv}
-        style={{ y }}
-        drag={isHovered && !isMobile ? 'y' : false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDrag={handleDrag}
+      <style>{`.no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+
+      <div
+        ref={scrollerRef}
+        className={finalClassNames.motionDiv + ' no-scrollbar'}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div className={finalClassNames.itemContainer}>
           <div className={finalClassNames.line} />
 
-          {duplicatedData.map((exp, index) => (
-            <div key={`${exp.title}-${index}`} className={finalClassNames.item}>
-              <div className={finalClassNames.dotContainerWrapper}>
-                <div className={finalClassNames.dotWrapper}>
-                  <div className={finalClassNames.dotOuter} />
-                  <div className={finalClassNames.dotInner} />
+          {Array.from({ length: REPEAT_COUNT }).map((_, copyIndex) => (
+            <div key={`copy-${copyIndex}`} ref={copyIndex === 0 ? firstHalfRef : undefined}>
+              {mappedData.map((exp, index) => (
+                <div key={`copy-${copyIndex}-${exp.title}-${index}`} className={finalClassNames.item}>
+                  <div className={finalClassNames.dotContainerWrapper}>
+                    <div className={finalClassNames.dotWrapper}>
+                      <div className={finalClassNames.dotOuter} />
+                      <div className={finalClassNames.dotInner} />
+                    </div>
+                  </div>
+
+                  <div className={finalClassNames.dotConnector} />
+
+                  <div className={finalClassNames.contentWrapper}>
+                    <h3 className={finalClassNames.title}>{exp.title}</h3>
+                    <p className={finalClassNames.company}>{exp.company}</p>
+                    <p className={finalClassNames.date}>{exp.date}</p>
+                    <p className={finalClassNames.description}>{exp.description}</p>
+                  </div>
                 </div>
-              </div>
-
-              <div className={finalClassNames.dotConnector} />
-
-              <div className={finalClassNames.contentWrapper}>
-                <h3 className={finalClassNames.title}>{exp.title}</h3>
-                <p className={finalClassNames.company}>{exp.company}</p>
-                <p className={finalClassNames.date}>{exp.date}</p>
-                <p className={finalClassNames.description}>{exp.description}</p>
-              </div>
+              ))}
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {!isMobile && showScrollHint && (
         <div className={finalClassNames.scrollHintContainer}>

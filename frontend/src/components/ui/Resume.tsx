@@ -14,8 +14,8 @@ export default function Resume() {
   const resumeRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className=" text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
-      <div className="max-w-7xl mx-auto py-8">
+    <div className="text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <ResumeHeader name={resumeData.name} />
 
         {/* The ref is now on a dedicated wrapper for more precise PDF capture */}
@@ -31,13 +31,13 @@ export default function Resume() {
                       title="Rewrite Summary with AI"
                       onClick={() => handleAiInteraction('summary')}
                       disabled={isLoading.summary}
-                      className="p-1.5 text-slate-500 hover:text-cyan-500 disabled:opacity-50 transition-colors"
+                      className="p-1.5 text-slate-500 hover:text-cyan-500 disabled:opacity-50 transition-colors rounded-md hover:bg-cyan-500/10"
                     >
                       <Sparkles size={16} />
                     </button>
                   }
                 >
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[15px] sm:text-base">
                     {isLoading.summary
                       ? 'The AI is thinking...'
                       : resumeData.summary}
@@ -52,13 +52,13 @@ export default function Resume() {
                       <HighlightCard
                         key={i}
                         experience={exp}
-                        // // delay={0.4 + i * 0.1}
+                        delay={0.05 * i}
                       />
                     ) : (
                       <ExperienceCard
                         key={i}
                         experience={exp}
-                        // // delay={0.4 + i * 0.1}
+                        delay={0.05 * i}
                       />
                     )
                   )}
@@ -70,7 +70,7 @@ export default function Resume() {
                 title="Passions"
                 items={resumeData.passions}
                 colorClass="bg-rose-400/10 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
-                // delay={0.7}
+                delay={0.1}
               />
             </main>
 
@@ -128,7 +128,7 @@ export default function Resume() {
                 title="Technologies"
                 items={resumeData.technologies}
                 colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                // delay={0.5}
+                delay={0.08}
               />
 
               <TagListSection
@@ -136,7 +136,7 @@ export default function Resume() {
                 title="Professional Skills"
                 items={resumeData.skills}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
-                // delay={0.6}
+                delay={0.09}
               />
             </aside>
           </div>

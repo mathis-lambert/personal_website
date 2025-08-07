@@ -23,7 +23,7 @@ export const TagListSection: React.FC<TagListSectionProps> = ({
         {items.map((item) => (
           <span
             key={item}
-            className={`${colorClass} text-xs font-medium px-3 py-1 rounded-full`}
+            className={`${colorClass} text-xs font-medium px-3 py-1 rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10`}
           >
             {item}
           </span>

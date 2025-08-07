@@ -15,8 +15,8 @@ const GlassCardsList = () => {
     const fetchData = async () => {
       try {
         const [experiencesResponse, studiesResponse] = await Promise.all([
-          fetch('/api/experiences/all'),
-          fetch('/api/studies/all'),
+          fetch(`${import.meta.env.VITE_API_URL}/api/experiences/all`),
+          fetch(`${import.meta.env.VITE_API_URL}/api/studies/all`),
         ]);
 
         if (!experiencesResponse.ok || !studiesResponse.ok) {
@@ -46,13 +46,15 @@ const GlassCardsList = () => {
           data={experiences}
           showGradients={false}
           accentColor={'#FF6F61'}
+          scrollSpeed={3}
         />
       </GlassCardHero>
-      <GlassCardHero title="Studies">
+      <GlassCardHero title="Studies" px={0}>
         <ScrollableTimeline
           data={studies}
           showGradients={false}
           accentColor={'#4A90E2'}
+          scrollSpeed={3}
         />
       </GlassCardHero>
       <GlassCardHero title="Location" px={0} pt={0}>

@@ -12,10 +12,11 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
   delay = 0,
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: 'easeOut', delay }}
-    className="mb-6 relative p-5 rounded-2xl border-2 border-cyan-500/50 bg-cyan-400/10 shadow-2xl shadow-cyan-500/10"
+    initial={{ opacity: 0, y: 12 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.1 }}
+    transition={{ duration: 0.55, ease: 'easeOut', delay }}
+    className="mb-6 relative p-5 rounded-2xl border-2 border-cyan-500/50 bg-gradient-to-br from-cyan-400/10 via-cyan-400/5 to-transparent shadow-2xl shadow-cyan-500/10"
   >
     <div className="absolute -top-3 -left-3 bg-cyan-500 text-white p-2 rounded-full shadow-lg">
       <Star size={20} />
