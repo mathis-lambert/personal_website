@@ -4,12 +4,12 @@ import { cn } from '@/lib/utils.ts';
 
 interface GlassCardProps {
   title?: string;
-  size?: string; // 'small' | 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large';
   children: React.ReactNode;
-  px?: number; // Padding X (en rem)
-  pt?: number; // Padding Top (en rem)
-  animationDelay?: number; // Délai d'animation
-  className?: string; // Classes supplémentaires
+  px?: number;
+  pt?: number;
+  animationDelay?: number;
+  className?: string;
 }
 
 const GlassCardHero: React.FC<GlassCardProps> = ({
