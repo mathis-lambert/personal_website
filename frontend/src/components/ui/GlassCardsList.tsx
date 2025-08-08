@@ -85,7 +85,7 @@ const GlassCardsList = () => {
         />
       </GlassCardHero>
 
-      <GlassCardHero title="Top Skills" px={1} size="small" className="flex items-center">
+      <GlassCardHero title="Top Skills" px={1} size="small">
         <ScrollArea className="h-48 thin-scrollbar pr-1 w-full">
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 gap-2 pr-1">
             {topSkills.map((tech) => (
@@ -95,8 +95,8 @@ const GlassCardsList = () => {
         </ScrollArea>
       </GlassCardHero>
 
-      <GlassCardHero title="Ask about me" px={1.5} size="small">
-        <div className="flex flex-col gap-5 sm:gap-6 pb-4 pr-1">
+      <GlassCardHero title="Ask about me" size="small">
+        <div className="flex flex-col gap-5 sm:gap-6 pb-4 pr-1 h-full justify-between">
           <p className="text-sm sm:text-base opacity-85 leading-relaxed">
             Chat with my AI persona - ask about my resume, projects, and experience.
           </p>
