@@ -106,11 +106,20 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-body {
+html {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
   background: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: inherit;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 button {
