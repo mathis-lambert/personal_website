@@ -37,11 +37,14 @@ const GlassCardsList = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[repeat(2,250px)] sm:grid-rows-[repeat(3,225px)] grid-rows-[repeat(3,200px)] gap-4 sm:gap-6 lg:gap-8 mb-10">
-      <GlassCardHero title="My Favourite Tools" px={0}>
+    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-[repeat(2,250px)] sm:grid-rows-[repeat(3,225px)] grid-rows-[repeat(3,200px)] lg:auto-rows-[250px] sm:auto-rows-[225px] auto-rows-[200px] gap-4 sm:gap-6 lg:gap-8 mb-10">
+      <GlassCardHero title="Location" px={0} pt={0}>
+        <LocationMap />
+      </GlassCardHero>
+      <GlassCardHero title="My Favourite Tools" px={0} size='medium'>
         <ToolCarousel />
       </GlassCardHero>
-      <GlassCardHero title="Experiences" px={0}>
+      <GlassCardHero title="Experiences" px={0} size='medium'>
         <ScrollableTimeline
           data={experiences}
           showGradients={false}
@@ -56,12 +59,6 @@ const GlassCardsList = () => {
           accentColor={'#4A90E2'}
           scrollSpeed={3}
         />
-      </GlassCardHero>
-      <GlassCardHero title="Location" px={0} pt={0}>
-        <LocationMap />
-      </GlassCardHero>
-      <GlassCardHero title="Chatbot" size="medium">
-        <p>🚧 Work in progress...</p>
       </GlassCardHero>
     </div>
   );

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import AbstractGradientBackground from '@/components/ui/AbstractGradientBackground';
 import Navbar from '@/components/ui/Navbar.tsx';
-import InPageChatInput from '@/components/ui/InPageChatInput.tsx';
+import ChatPanel from '@/components/chat/ChatPanel';
+import FloatingChatInput from '@/components/chat/FloatingChatInput';
 import Footer from '@/components/ui/Footer.tsx';
 import { MaintenanceDialog } from '@/components/ui/MaintenanceDialog.tsx';
 import AnimatedOutlet from '@/components/AnimatedOutlet';
@@ -28,7 +29,8 @@ const Layout = () => {
 
       <AnimatedOutlet />
 
-      <InPageChatInput />
+      <ChatPanel />
+      <FloatingChatInput />
       <Footer />
 
       {maintenanceMode && <MaintenanceDialog />}

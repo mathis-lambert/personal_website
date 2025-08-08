@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import { Link, type To } from 'react-router-dom';
-import { useChat } from '@/contexts/ChatContext.tsx';
+import { useChat } from '@/hooks/useChat';
 
 interface NavLink {
   to: To;
@@ -13,15 +13,20 @@ const Navbar = () => {
   const { isChatOpen, openChat, closeChat } = useChat();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleChatToggle = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    if (isChatOpen) {
-      closeChat();
-    } else {
-      openChat();
-    }
-    setIsMenuOpen(false); // Also close the mobile menu
-  };
+  const handleChatToggle = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      if (isChatOpen) {
+        closeChat();
+      } else {
+        openChat();
+      }
+      setIsMenuOpen(false); // Also close the mobile menu
+      // scroll to the top of the page
+      window.scrollTo(0, 0);
+    },
+    [isChatOpen, closeChat, openChat],
+  );
 
   const navLinks = useMemo<NavLink[]>(
     () => [
@@ -31,8 +36,7 @@ const Navbar = () => {
       { to: 'resume', text: 'Resume' },
       { to: '#', text: 'Chat', onClick: handleChatToggle },
     ],
-    // Dependencies for useMemo
-    [isChatOpen, closeChat, openChat],
+    [handleChatToggle],
   );
 
   const connectLink: NavLink = {

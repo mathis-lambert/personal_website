@@ -84,25 +84,28 @@ export async function callPersonalApi(
       );
     }
 
-    // --- Streaming Logic ---
-    if (isStreaming && response.body) {
+    // --- Streaming Logic (also auto-detect SSE in non-streaming mode) ---
+    const contentType = response.headers.get('content-type') || '';
+    if ((isStreaming || contentType.includes('text/event-stream')) && response.body) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
+      // Accumulator for non-callback usage (fallback when server sends SSE even if we didn't request it)
+      let aggregatedResult = '';
+      let aggregatedJobId: string | null = null;
+      let aggregatedFinish: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          // The stream can end without a final 'done' event from the server.
-          // The 'done' event handler below is the primary completion signal.
           break;
         }
 
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+        const text = decoder.decode(value, { stream: true });
+        buffer += text;
 
         const events = buffer.split('\n\n');
-        buffer = events.pop() || ''; // Keep incomplete event fragment
+        buffer = events.pop() || '';
 
         for (const event of events) {
           if (!event.trim()) continue;
@@ -114,28 +117,47 @@ export async function callPersonalApi(
             .split('\n')
             .find((line) => line.startsWith('event:'));
 
-          if (dataLine) {
-            const data = dataLine.substring(5).trim();
-            try {
-              const jsonResponse = JSON.parse(data);
-              // Check for the specific 'done' event from the server
-              if (eventTypeLine?.includes('done')) {
-                if (callbacks.onDone) {
-                  callbacks.onDone(jsonResponse as ChatCompletionsResult);
-                }
-                return; // End the function once the done event is processed
-              } else {
-                // This is a regular data chunk
-                callbacks.onChunk(jsonResponse as ChatCompletionsChunk);
+          if (!dataLine) continue;
+          const data = dataLine.substring(5).trim();
+          try {
+            const parsed = JSON.parse(data);
+            const isDoneEvent = !!eventTypeLine?.includes('done');
+
+            if (isDoneEvent) {
+              const donePayload = parsed as ChatCompletionsResult;
+              if (callbacks?.onDone) {
+                callbacks.onDone(donePayload);
+                return; // finish streaming mode
               }
-            } catch (e) {
-              console.error('Failed to parse SSE chunk data:', data, e);
-              // Optionally call onError for parsing errors
+              // Return full result in non-streaming mode
+              return donePayload;
             }
+
+            // Regular data chunk
+            const chunkPayload = parsed as ChatCompletionsChunk;
+            if (callbacks?.onChunk) {
+              callbacks.onChunk(chunkPayload);
+            } else {
+              aggregatedResult += chunkPayload.chunk ?? '';
+              aggregatedJobId = chunkPayload.job_id ?? aggregatedJobId;
+              aggregatedFinish = chunkPayload.finish_reason ?? aggregatedFinish;
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE chunk data:', data, e);
+            // Continue; optionally callbacks?.onError(e as Error)
           }
         }
       }
-      return; // Streaming is finished
+
+      // If server didn't send an explicit done event, but we aggregated content, return it
+      if (!isStreaming && aggregatedResult) {
+        return {
+          result: aggregatedResult,
+          finish_reason: aggregatedFinish ?? 'stop',
+          job_id: aggregatedJobId ?? '',
+        } as ChatCompletionsResult;
+      }
+      return; // Streaming finished with callbacks
     }
 
     // --- Non-Streaming Logic ---

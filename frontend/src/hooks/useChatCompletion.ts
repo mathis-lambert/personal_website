@@ -72,9 +72,9 @@ const useChatCompletion = (
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
     ? JSON.stringify({
-        input: request.input,
-        history: request.history,
-      })
+      input: request.input,
+      history: request.history,
+    })
     : null;
 
   useEffect(() => {
@@ -104,8 +104,6 @@ const useChatCompletion = (
             dispatch({ type: 'STREAM_CHUNK', payload: chunk });
           },
           onDone: (result) => {
-            // The API function now handles the final 'done' event
-            // so you might dispatch FETCH_SUCCESS here instead of STREAM_DONE
             dispatch({ type: 'FETCH_SUCCESS', payload: result });
           },
           onError: (error) => {
