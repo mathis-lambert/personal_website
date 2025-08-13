@@ -30,3 +30,17 @@ async def get_all_projects(
     except Exception as e:
         # Gestion générique des autres erreurs
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/{project_id}")
+async def get_project_by_id(
+    project_id: str,
+    mongodb: MongoDBConnector = Depends(get_mongo_client),
+):
+    try:
+        db = mongodb.get_database()
+        project = await db["projects"].find_one({"id": project_id})
+        return {"project": mongodb.serialize(project)}
+    except aiohttp.ClientResponseError as e:
+        # Gestion spécifique des erreurs HTTP de l’API
+        print(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e))
