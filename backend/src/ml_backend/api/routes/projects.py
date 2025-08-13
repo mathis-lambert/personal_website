@@ -32,7 +32,7 @@ async def get_all_projects(
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.get("/{project_slug}")
-async def get_project_by_id(
+async def get_project_by_slug(
     project_slug: str,
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
