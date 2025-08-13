@@ -44,3 +44,7 @@ async def get_project_by_slug(
         # Gestion spécifique des erreurs HTTP de l’API
         print(f"Erreur de réponse de l'API : {e}")
         raise HTTPException(status_code=e.status, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
