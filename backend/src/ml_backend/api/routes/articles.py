@@ -30,3 +30,21 @@ async def get_all_articles(
     except Exception as e:
         # Gestion générique des autres erreurs
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/{article_slug}")
+async def get_article_by_slug(
+    article_slug: str,
+    mongodb: MongoDBConnector = Depends(get_mongo_client),
+):
+    try:
+        db = mongodb.get_database()
+        article = await db["articles"].find_one({"slug": article_slug})
+        return {"article": mongodb.serialize(article)}
+    except aiohttp.ClientResponseError as e:
+        # Gestion spécifique des erreurs HTTP de l’API
+        print(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
