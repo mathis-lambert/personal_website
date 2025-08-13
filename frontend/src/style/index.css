@@ -57,16 +57,24 @@
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
 :root {
   font-family: Lato, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  height: 100%;
-  width: 100%;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
+
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  min-height: -moz-available;
+  min-height: fill-available;
+
+  view-transition-name: root;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -106,20 +114,11 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-html {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  min-height: 100dvh;
-  background: transparent;
-}
-
 body {
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  min-height: inherit;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  min-height: 100vh;
 }
 
 button {
@@ -205,34 +204,6 @@ button {
   }
 
   body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@media print {
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  /* Hide elements you don't want in the PDF */
-  .no-print {
-    display: none !important;
-  }
-
-  /* Ensure the resume content is the only thing visible */
-  #resume-content {
-    max-width: 100%;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    border: none;
-  }
-
-  /* You might need to reset card styles for print */
-  .glass-card-print-reset {
-    background: none;
-    border: none;
-    box-shadow: none;
+    @apply text-foreground;
   }
 }

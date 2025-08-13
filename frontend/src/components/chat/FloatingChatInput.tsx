@@ -78,11 +78,11 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   const closeButtonSize = 'w-9 h-9';
 
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
+    <div className="fixed top-[92%] left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
       <motion.div
         className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-xl p-2 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
         layout
       >
