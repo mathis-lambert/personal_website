@@ -4,21 +4,31 @@ import { cn } from '@/lib/utils';
 export type SortOrder = 'newest' | 'oldest' | 'a-z' | 'z-a' | 'featured';
 
 interface SortSelectProps {
-  value: SortOrder;
-  onChange: (value: SortOrder) => void;
+  value: SortOrder | string;
+  onChange: (value: SortOrder | string) => void;
   label?: string;
+  options?: Array<{ value: SortOrder | string; label: string }>;
 }
+
+const defaultOptions: Array<{ value: SortOrder; label: string }> = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'a-z', label: 'A → Z' },
+  { value: 'z-a', label: 'Z → A' },
+  { value: 'featured', label: 'Featured first' },
+];
 
 const SortSelect: React.FC<SortSelectProps> = ({
   value,
   onChange,
   label = 'Sort by',
+  options = defaultOptions,
 }) => {
   return (
     <div>
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value as SortOrder)}
+        onChange={(e) => onChange(e.target.value)}
         aria-label={label}
         className={cn(
           'appearance-none pl-4 pr-10 h-9 rounded-full text-sm font-medium border transition-all duration-200 ease-out backdrop-blur-sm cursor-pointer w-full',
@@ -34,36 +44,15 @@ const SortSelect: React.FC<SortSelectProps> = ({
           backgroundSize: '1.25em 1.25em',
         }}
       >
-        <option
-          value="newest"
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          Newest first
-        </option>
-        <option
-          value="oldest"
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          Oldest first
-        </option>
-        <option
-          value="a-z"
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          A → Z
-        </option>
-        <option
-          value="z-a"
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          Z → A
-        </option>
-        <option
-          value="featured"
-          className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          Featured first
-        </option>
+        {options.map((opt) => (
+          <option
+            key={String(opt.value)}
+            value={String(opt.value)}
+            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
+            {opt.label}
+          </option>
+        ))}
       </select>
     </div>
   );

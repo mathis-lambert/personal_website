@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ProjectCard from '@/components/projects/ProjectCard';
 import type { Project } from '@/types';
 import { getProjects } from '@/api/projects';
-import FiltersBar from '@/components/projects/filters/FiltersBar';
+import FiltersBar from '@/components/filters/FiltersBar';
 
 // --- Debounce Hook (same as before) ---
 function useDebounce<T>(value: T, delay: number): T {
@@ -175,8 +175,6 @@ const ProjectsList: React.FC = () => {
     sortOrder,
   ]);
 
-  // (subcomponents moved to dedicated files in filters/)
-
   return (
     <section className="w-full max-w-7xl mx-auto py-12 md:py-16 px-0 sm:px-6 lg:px-8 min-h-[60vh]">
       {/* Filter Controls */}
@@ -188,18 +186,8 @@ const ProjectsList: React.FC = () => {
         <FiltersBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          allTechnologies={allTechnologies}
-          selectedTechnologies={selectedTechnologies}
-          onSelectTechnologies={setSelectedTechnologies}
-          allCategories={allCategories}
-          selectedCategories={selectedCategories}
-          onSelectCategories={setSelectedCategories}
-          selectedStatuses={selectedStatuses}
-          onSelectStatuses={setSelectedStatuses}
-          featuredOnly={featuredOnly}
-          onFeaturedChange={setFeaturedOnly}
           sortOrder={sortOrder}
-          onSortChange={setSortOrder}
+          onSortChange={(v) => setSortOrder(v as SortOrder)}
           filteredCount={filteredAndSortedProjects.length}
           onReset={() => {
             setSearchQuery('');
@@ -209,6 +197,45 @@ const ProjectsList: React.FC = () => {
             setFeaturedOnly(false);
             setSortOrder('newest');
           }}
+          sections={[
+            {
+              type: 'multiselect',
+              label: 'Technologies',
+              items: allTechnologies.map((t) => ({ value: t, label: t })),
+              selected: selectedTechnologies,
+              onChange: setSelectedTechnologies,
+            },
+            {
+              type: 'multiselect',
+              label: 'Categories',
+              items: allCategories.map((c) => ({ value: c, label: c })),
+              selected: selectedCategories,
+              onChange: setSelectedCategories,
+            },
+            {
+              type: 'multiselect',
+              label: 'Status',
+              items: [
+                { value: 'in-progress', label: 'In progress' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'archived', label: 'Archived' },
+              ],
+              selected: selectedStatuses,
+              onChange: setSelectedStatuses,
+            },
+          ]}
+          showFeaturedToggle
+          featuredOnly={featuredOnly}
+          onFeaturedChange={setFeaturedOnly}
+          searchPlaceholder="Search by title, description, technology, client..."
+          searchAriaLabel="Search projects"
+          sortOptions={[
+            { value: 'newest', label: 'Newest first' },
+            { value: 'oldest', label: 'Oldest first' },
+            { value: 'a-z', label: 'A → Z' },
+            { value: 'z-a', label: 'Z → A' },
+            { value: 'featured', label: 'Featured first' },
+          ]}
         />
       </motion.div>
 

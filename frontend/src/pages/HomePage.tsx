@@ -2,56 +2,19 @@ import { useEffect, useState } from 'react';
 import GlassCardsList from '@/components/ui/GlassCardsList.tsx';
 import { HeroSection } from '@/components/ui/HeroSection.tsx';
 import ProjectCard from '@/components/projects/ProjectCard';
-import type { Project } from '@/types';
+import type { Project, Article } from '@/types';
 import BlogArticleCard from '@/components/blog/BlogArticleCard';
 import { Link } from 'react-router-dom';
 import { getProjects } from '@/api/projects';
-
-type Article = {
-  id: string | number;
-  title: string;
-  excerpt: string;
-  imageUrl: string;
-  date: string;
-  readTime: string;
-  tags: string[];
-};
-
-const articlesPreview: Article[] = [
-  {
-    id: 'a1',
-    title: 'The Future of AI in Everyday Life',
-    excerpt:
-      'Discover how artificial intelligence is transforming daily tasks...',
-    imageUrl: '/images/blog/article1.jpg',
-    date: '2025-04-15',
-    readTime: '5 min read',
-    tags: ['AI', 'Technology'],
-  },
-  {
-    id: 'a2',
-    title: 'Design Trends 2025: Minimalism and Beyond',
-    excerpt: 'A look into the emerging design trends...',
-    imageUrl: '/images/blog/article2.jpeg',
-    date: '2025-03-22',
-    readTime: '7 min read',
-    tags: ['Design', 'UI/UX'],
-  },
-  {
-    id: 'a3',
-    title: 'How to Build Modern Web Applications',
-    excerpt: 'Explore the best practices and modern technologies...',
-    imageUrl: '/images/blog/article3.avif',
-    date: '2025-02-10',
-    readTime: '6 min read',
-    tags: ['Web', 'React'],
-  },
-];
+import { getArticles } from '@/api/articles';
 
 const HomePage = () => {
   const [featured, setFeatured] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
+  const [isArticlesLoading, setIsArticlesLoading] = useState<boolean>(true);
+  const [articlesError, setArticlesError] = useState<string | null>(null);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -77,6 +40,30 @@ const HomePage = () => {
       }
     }
     fetchFeatured();
+    return () => ac.abort();
+  }, []);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    async function fetchArticles() {
+      try {
+        setIsArticlesLoading(true);
+        setArticlesError(null);
+        const normalized: Article[] = await getArticles({ signal: ac.signal });
+        const byDateDesc = (a: Article, b: Article) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime();
+        const top = normalized.sort(byDateDesc).slice(0, 3);
+        setLatestArticles(top);
+      } catch (e: unknown) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        console.error('Failed to fetch latest articles:', e);
+        setArticlesError('Impossible de charger les articles.');
+        setLatestArticles([]);
+      } finally {
+        setIsArticlesLoading(false);
+      }
+    }
+    fetchArticles();
     return () => ac.abort();
   }, []);
 
@@ -121,10 +108,26 @@ const HomePage = () => {
           </Link>
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {articlesPreview.map((a, i) => (
-            <BlogArticleCard key={a.id} article={a} animationDelay={i * 0.08} />
-          ))}
+          {isArticlesLoading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
+                />
+              ))
+            : latestArticles.map((a, i) => (
+                <BlogArticleCard
+                  key={a.id}
+                  article={a}
+                  animationDelay={i * 0.08}
+                />
+              ))}
         </div>
+        {!isArticlesLoading && latestArticles.length === 0 && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+            {articlesError ?? 'Aucun article disponible.'}
+          </p>
+        )}
       </section>
     </>
   );

@@ -5,11 +5,13 @@ import { cn } from '@/lib/utils';
 interface FeaturedToggleProps {
   checked: boolean;
   onChange: (next: boolean) => void;
+  label?: string;
 }
 
 const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
   checked,
   onChange,
+  label = 'Featured only',
 }) => {
   return (
     <button
@@ -20,14 +22,14 @@ const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
       className={cn(
         'inline-flex items-center h-9 px-2 rounded-full border transition-colors select-none',
         checked
-          ? 'bg-yellow-400/70 border-yellow-300/70'
-          : 'bg-gray-400/30 border-white/20 dark:bg-gray-800/30 dark:border-white/10',
+          ? 'bg-yellow-200/70 border-yellow-300/70 hover:bg-yellow-200/80 hover:border-yellow-300/80'
+          : 'bg-gray-400/10  border-white/30 dark:border-white/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40',
       )}
     >
       <span
         className={cn(
           'relative inline-flex items-center w-10 h-6 rounded-full transition-colors',
-          checked ? 'bg-yellow-500/80' : 'bg-gray-500/40',
+          checked ? 'bg-yellow-500/80' : 'bg-gray-500/30',
         )}
       >
         <span
@@ -38,7 +40,7 @@ const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
         />
       </span>
       <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
-        <Star className="w-4 h-4 text-yellow-400" /> Featured only
+        <Star className="w-4 h-4 text-yellow-400" /> {label}
       </span>
     </button>
   );

@@ -146,3 +146,41 @@ export interface Project {
   highlights?: string[];
   color?: string; // accent color for card/header theming
 }
+
+// ---------------- Blog / Articles DTO ----------------
+
+export interface ArticleLinks {
+  canonical?: string; // canonical URL
+  discussion?: string; // link to discussion/thread
+}
+
+export interface ArticleMedia {
+  thumbnailUrl?: string;
+  imageUrl?: string;
+  gallery?: string[];
+}
+
+export interface ArticleMetrics {
+  views?: number;
+  likes?: number;
+  shares?: number;
+}
+
+export interface Article {
+  id: string;
+  slug?: string;
+  title: string;
+  excerpt: string;
+  content: string; // markdown or html
+  author?: string;
+  date: string; // canonical date for sorting
+  readTimeMin?: number; // estimated reading time in minutes
+  tags: string[];
+  categories?: string[];
+  isFeatured?: boolean;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  links?: ArticleLinks;
+  media?: ArticleMedia;
+  metrics?: ArticleMetrics;
+}

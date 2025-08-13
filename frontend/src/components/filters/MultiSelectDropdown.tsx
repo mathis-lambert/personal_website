@@ -11,11 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-type Item = { value: string; label: string };
+export type MultiSelectItem = { value: string; label: string };
 
 interface MultiSelectDropdownProps {
   label: string;
-  items: Item[];
+  items: MultiSelectItem[];
   selectedValues: string[];
   onChange: (next: string[]) => void;
   contentClassName?: string;
@@ -47,7 +47,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="h-9 rounded-full px-3 text-sm whitespace-nowrap"
+          className="h-9 rounded-full px-3 text-sm whitespace-nowrap border-white/30 dark:border-white/10 bg-gray-400/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40 text-gray-700 dark:text-gray-300"
         >
           {triggerText}
         </Button>
@@ -56,14 +56,14 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         className={contentClassName ? contentClassName : 'w-56'}
       >
         <div className="flex items-center justify-between px-2 py-1">
-          <DropdownMenuLabel className="p-0 text-xs uppercase tracking-wide text-muted-foreground">
+          <DropdownMenuLabel className="p-0 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {label}
           </DropdownMenuLabel>
           {count > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs"
+              className="h-7 px-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-white/30 dark:hover:bg-gray-700/40"
               onClick={clearAll}
             >
               Clear

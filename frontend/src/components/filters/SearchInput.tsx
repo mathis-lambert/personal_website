@@ -5,17 +5,24 @@ import { cn } from '@/lib/utils';
 interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  ariaLabel?: string;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
+const SearchInput: React.FC<SearchInputProps> = ({
+  value,
+  onChange,
+  placeholder = 'Search...',
+  ariaLabel,
+}) => {
   return (
     <div className="relative w-full">
       <input
         type="text"
-        placeholder="Search by title, description, technology, client..."
+        placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        aria-label="Search projects"
+        aria-label={ariaLabel || placeholder}
         className={cn(
           'w-full pl-11 pr-4 h-11 rounded-full backdrop-blur-lg shadow-sm',
           'bg-white/5 border border-white/20 placeholder-gray-500 dark:placeholder-gray-400',
