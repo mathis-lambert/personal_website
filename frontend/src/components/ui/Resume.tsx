@@ -28,11 +28,10 @@ export default function Resume() {
       <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <ResumeHeader name={resumeData.name} />
 
-        {/* The ref is now on a dedicated wrapper for more precise PDF capture */}
         <div id="resume-content" ref={resumeRef}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <main className="lg:col-span-2 space-y-6">
-              <GlassCard className="p-6">
+              <GlassCard className="p-6" delay={0}>
                 <ResumeSection
                   icon={Briefcase}
                   title="About Me"
@@ -55,7 +54,7 @@ export default function Resume() {
                 </ResumeSection>
               </GlassCard>
 
-              <GlassCard className="p-6">
+              <GlassCard className="p-6" delay={0.08}>
                 <ResumeSection icon={Cpu} title="Experience">
                   {resumeData.experiences.map((exp, i) =>
                     exp.highlight ? (
@@ -80,12 +79,12 @@ export default function Resume() {
                 title="Passions"
                 items={resumeData.passions}
                 colorClass="bg-rose-400/10 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
-                delay={0.1}
+                delay={0.16}
               />
             </main>
 
             <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-8 self-start">
-              <GlassCard className="p-6">
+              <GlassCard className="p-6" delay={0.24}>
                 <ResumeSection icon={Home} title="Contact">
                   <div className="space-y-2 text-sm">
                     <a
@@ -115,7 +114,7 @@ export default function Resume() {
                 </ResumeSection>
               </GlassCard>
 
-              <GlassCard className="p-6">
+              <GlassCard className="p-6" delay={0.32}>
                 <ResumeSection icon={GraduationCap} title="Education">
                   {resumeData.education.map((edu, i) => (
                     <div key={i} className="mb-3 last:mb-0">
@@ -138,7 +137,7 @@ export default function Resume() {
                 title="Technologies"
                 items={resumeData.technologies}
                 colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                delay={0.08}
+                delay={0.4}
               />
 
               <TagListSection
@@ -146,7 +145,7 @@ export default function Resume() {
                 title="Professional Skills"
                 items={resumeData.skills}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
-                delay={0.09}
+                delay={0.48}
               />
             </aside>
           </div>
