@@ -1,21 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom'; // Assuming you still want a detail page
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { ExternalLink } from 'lucide-react';
-import { BsGithub } from 'react-icons/bs'; // Import icons
-
-// --- Interface for Project Data ---
-export interface Project {
-  id: number | string;
-  title: string;
-  description: string; // Changed from excerpt
-  imageUrl: string;
-  date: string; // e.g., 'YYYY-MM-DD' or just 'YYYY-MM' if sorting by month/year
-  technologies: string[]; // Changed from tags
-  projectUrl?: string; // Optional: Link to live project
-  repoUrl?: string; // Optional: Link to code repository
-}
+import { ExternalLink, Star } from 'lucide-react';
+import { BsGithub } from 'react-icons/bs';
+import type { Project } from '@/types';
 
 interface ProjectCardProps {
   project: Project;
@@ -34,6 +23,24 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     timeZone: 'UTC', // Add timezone to avoid off-by-one day issues
   });
 
+  const liveUrl = project.links?.live || project.projectUrl;
+  const repoUrl = project.links?.repo || project.repoUrl;
+  const imageSrc =
+    project.media?.thumbnailUrl ||
+    project.thumbnailUrl ||
+    project.media?.imageUrl ||
+    project.imageUrl ||
+    '/images/projects/project1.jpg';
+  const isFeatured = Boolean(project.isFeatured);
+  const status = project.status || 'completed';
+
+  const statusClass =
+    status === 'completed'
+      ? 'bg-emerald-500/80 text-white border-white/10'
+      : status === 'in-progress'
+        ? 'bg-amber-500/80 text-white border-white/10'
+        : 'bg-gray-500/70 text-white border-white/10';
+
   return (
     <motion.div
       className="group w-full h-full"
@@ -48,7 +55,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     >
       {/* Link the whole card to a project detail page */}
       <Link
-        to={`/projects/${project.id}`} // Example detail page route
+        to={`/projects/${project.slug || project.id}`}
         className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/10 dark:focus-visible:ring-offset-black/30 rounded-3xl"
         aria-label={`View details for ${project.title}`}
       >
@@ -62,18 +69,36 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           {/* Image Section */}
           <div className="relative w-full h-40 sm:h-48 overflow-hidden">
             <img
-              src={project.imageUrl}
+              src={imageSrc}
               alt={`Screenshot of ${project.title}`}
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+            {isFeatured && (
+              <span className="absolute top-3 right-3 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-yellow-400/90 text-black backdrop-blur-sm border border-black/10 shadow-sm">
+                <Star className="w-3.5 h-3.5" /> Featured
+              </span>
+            )}
             {/* Optionally display first technology like a primary tag */}
             {project.technologies.length > 0 && (
               <span className="absolute top-3 left-3 text-xs px-2 py-0.5 rounded-full bg-teal-500/70 text-white backdrop-blur-sm border border-white/10 shadow-sm">
                 {project.technologies[0]}
               </span>
             )}
+            {/* Status badge */}
+            <span
+              className={cn(
+                'absolute bottom-3 left-3 text-[10px] px-2 py-0.5 rounded-full border shadow-sm',
+                statusClass,
+              )}
+            >
+              {status === 'in-progress'
+                ? 'In progress'
+                : status === 'archived'
+                  ? 'Archived'
+                  : 'Completed'}
+            </span>
           </div>
 
           {/* Content Section */}
@@ -82,6 +107,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 line-clamp-2">
               {project.title}
             </h3>
+            {project.subtitle && (
+              <p className="-mt-1 mb-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                {project.subtitle}
+              </p>
+            )}
 
             {/* Project Description */}
             <p
@@ -108,7 +138,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               </div>
             )}
 
-            {/* Footer: Date and Links */}
+            {/* Footer: Date and Links + metrics */}
             <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/20 dark:border-white/15">
               {/* Formatted Date */}
               <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -117,9 +147,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
               {/* External Links (Live Demo, Repo) */}
               <div className="flex items-center gap-3">
-                {project.projectUrl && (
+                {typeof project.metrics?.stars === 'number' && (
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
+                    <Star className="w-4 h-4 text-yellow-400" />
+                    {project.metrics.stars}
+                  </span>
+                )}
+                {liveUrl && (
                   <Link
-                    to={project.projectUrl}
+                    to={liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()} // Prevent card link navigation
@@ -130,9 +166,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     <ExternalLink className="w-4 h-4" />
                   </Link>
                 )}
-                {project.repoUrl && (
+                {repoUrl && (
                   <Link
-                    to={project.repoUrl}
+                    to={repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()} // Prevent card link navigation

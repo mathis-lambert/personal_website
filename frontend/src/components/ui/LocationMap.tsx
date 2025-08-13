@@ -92,27 +92,71 @@ export function LocationMap() {
       elementType: 'labels.text.fill',
       stylers: [{ color: '#9ca3af' }],
     },
-    { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#111827' }] },
+    {
+      featureType: 'poi.park',
+      elementType: 'geometry',
+      stylers: [{ color: '#111827' }],
+    },
     {
       featureType: 'poi.park',
       elementType: 'labels.text.fill',
       stylers: [{ color: '#86efac' }],
     },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#374151' }] },
-    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#111827' }] },
-    { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#d1d5db' }] },
-    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#4b5563' }] },
-    { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#111827' }] },
-    { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#fcd34d' }] },
-    { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#111827' }] },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [{ color: '#374151' }],
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#111827' }],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#d1d5db' }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry',
+      stylers: [{ color: '#4b5563' }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#111827' }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#fcd34d' }],
+    },
+    {
+      featureType: 'transit',
+      elementType: 'geometry',
+      stylers: [{ color: '#111827' }],
+    },
     {
       featureType: 'transit.station',
       elementType: 'labels.text.fill',
       stylers: [{ color: '#d1d5db' }],
     },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0b1220' }] },
-    { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#64748b' }] },
-    { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#0b1220' }] },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#0b1220' }],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#64748b' }],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.stroke',
+      stylers: [{ color: '#0b1220' }],
+    },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
   ];
 

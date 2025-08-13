@@ -1,150 +1,141 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, useAnimation, useReducedMotion } from 'framer-motion';
-import { useTheme } from '@/components/theme-provider.tsx';
+import SvgIcon from '@/components/ui/SvgIcon';
+import { LOGOS } from '@/components/ui/logos';
 
-import {
-  Arc,
-  BashDark,
-  BashLight,
-  Docker,
-  FastAPI,
-  Figma,
-  GitHubDark,
-  GitHubLight,
-  GitLab,
-  Linux,
-  MistralAI,
-  PyCharm,
-  Python,
-  ReactDark,
-  ReactLight,
-  ShadcnUiDark,
-  ShadcnUiLight,
-  TailwindCSS,
-  TypeScript,
-  Vite,
-} from '@ridemountainpig/svgl-react';
-
-// --- Configuration ---
 const ICON_SIZE = 36;
 const ITEM_WIDTH_HEIGHT = 'w-16 h-16';
 const ITEM_SPACING = 'space-x-2';
 const SCROLL_DURATION = 20;
 const MOBILE_BREAKPOINT = 768;
-// --- End Configuration ---
 
-const allTools = [
+// Chemins des logos détaillés (multicolores) dans public/svgs/logos
+const logo = LOGOS;
+
+type ToolItem = { name: string; icon: React.ReactNode };
+
+const allTools: ToolItem[] = [
   {
     name: 'Python',
-    icons: {
-      light: <Python width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Python width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.python} alt="Python" size={ICON_SIZE} />,
   },
   {
     name: 'FastAPI',
-    icons: {
-      light: <FastAPI width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <FastAPI width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.fastapi} alt="FastAPI" size={ICON_SIZE} />,
   },
   {
     name: 'Docker',
-    icons: {
-      light: <Docker width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Docker width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.docker} alt="Docker" size={ICON_SIZE} />,
   },
   {
     name: 'PyCharm',
-    icons: {
-      light: <PyCharm width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <PyCharm width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.pycharm} alt="PyCharm" size={ICON_SIZE} />,
   },
   {
     name: 'React',
-    icons: {
-      light: <ReactLight width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <ReactDark width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.react} alt="React" size={ICON_SIZE} />,
   },
   {
     name: 'TypeScript',
-    icons: {
-      light: <TypeScript width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <TypeScript width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.typescript} alt="TypeScript" size={ICON_SIZE} />,
   },
   {
     name: 'Linux',
-    icons: {
-      light: <Linux width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Linux width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.linux} alt="Linux" size={ICON_SIZE} />,
   },
   {
     name: 'Bash',
-    icons: {
-      light: <BashLight width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <BashDark width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: (
+      <SvgIcon
+        path={logo.bashLight}
+        darkPath={logo.bashDark}
+        alt="Bash"
+        size={ICON_SIZE}
+      />
+    ),
   },
   {
     name: 'Tailwind',
-    icons: {
-      light: <TailwindCSS width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <TailwindCSS width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.tailwind} alt="Tailwind" size={ICON_SIZE} />,
   },
   {
     name: 'Mistral',
-    icons: {
-      light: <MistralAI width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <MistralAI width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: (
+      <SvgIcon
+        path={logo.mistralLight}
+        darkPath={logo.mistralDark}
+        alt="Mistral"
+        size={ICON_SIZE}
+      />
+    ),
+  },
+  {
+    name: 'OpenAI',
+    icon: (
+      <SvgIcon
+        path={logo.openaiLight}
+        darkPath={logo.openaiDark}
+        alt="OpenAI"
+        size={ICON_SIZE}
+      />
+    ),
   },
   {
     name: 'Github',
-    icons: {
-      light: <GitHubLight width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <GitHubDark width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: (
+      <SvgIcon
+        path={logo.githubLight}
+        darkPath={logo.githubDark}
+        alt="GitHub"
+        size={ICON_SIZE}
+      />
+    ),
   },
   {
     name: 'GitLab',
-    icons: {
-      light: <GitLab width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <GitLab width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.gitlab} alt="GitLab" size={ICON_SIZE} />,
   },
   {
-    name: 'Shadcn',
-    icons: {
-      light: <ShadcnUiLight width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <ShadcnUiDark width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    name: 'Hugging Face',
+    icon: (
+      <SvgIcon path={logo.huggingface} alt="Hugging Face" size={ICON_SIZE} />
+    ),
   },
   {
     name: 'Arc',
-    icons: {
-      light: <Arc width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Arc width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.arc} alt="Arc" size={ICON_SIZE} />,
+  },
+
+  {
+    name: 'Vite',
+    icon: <SvgIcon path={logo.vite} alt="Vite" size={ICON_SIZE} />,
+  },
+  {
+    name: 'vLLM',
+    icon: <SvgIcon path={logo.vllmColor} alt="vLLM" size={ICON_SIZE} />,
+  },
+  {
+    name: 'Qdrant',
+    icon: <SvgIcon path={logo.qdrant} alt="Qdrant" size={ICON_SIZE} />,
+  },
+  {
+    name: 'NVIDIA',
+    icon: <SvgIcon path={logo.nvidia} alt="NVIDIA" size={ICON_SIZE} />,
+  },
+  {
+    name: 'Shadcn',
+    icon: (
+      <SvgIcon
+        path={logo.shadcnLight}
+        darkPath={logo.shadcnDark}
+        alt="shadcn/ui"
+        size={ICON_SIZE}
+      />
+    ),
   },
   {
     name: 'Figma',
-    icons: {
-      light: <Figma width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Figma width={ICON_SIZE} height={ICON_SIZE} />,
-    },
-  },
-  {
-    name: 'Vite',
-    icons: {
-      light: <Vite width={ICON_SIZE} height={ICON_SIZE} />,
-      dark: <Vite width={ICON_SIZE} height={ICON_SIZE} />,
-    },
+    icon: <SvgIcon path={logo.figma} alt="Figma" size={ICON_SIZE} />,
   },
 ];
 
@@ -159,9 +150,7 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
   const controlsBottom = useAnimation();
   const shouldReduceMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
-  const { resolvedTheme } = useTheme();
-  // Assurez-vous d'avoir une valeur par défaut si le thème n'est pas immédiatement disponible
-  const currentTheme = resolvedTheme || 'light';
+  // Icônes gèrent elles-mêmes le thème via SvgIcon
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -180,7 +169,7 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
     return () => mediaQueryList.removeEventListener('change', handleResize);
   }, []);
 
-  const startScrolling = () => {
+  const startScrolling = useCallback(() => {
     if (shouldReduceMotion) return;
     controlsTop.start({
       x: '-50%',
@@ -198,9 +187,9 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
         repeat: Infinity,
       },
     });
-  };
+  }, [shouldReduceMotion, controlsTop, controlsBottom]);
 
-  const stopScrolling = () => {
+  const stopScrolling = useCallback(() => {
     if (isMobile || shouldReduceMotion) return;
     controlsTop.stop();
     controlsBottom.stop();
@@ -212,7 +201,7 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
       x: '-50%',
       transition: { duration: 0.6, type: 'spring', stiffness: 100 },
     });
-  };
+  }, [isMobile, shouldReduceMotion, controlsTop, controlsBottom]);
 
   useEffect(() => {
     if (isMobile && !shouldReduceMotion) {
@@ -223,7 +212,13 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
       controlsTop.set({ x: '0%' });
       controlsBottom.set({ x: '-50%' });
     }
-  }, [isMobile, shouldReduceMotion, controlsTop, controlsBottom]);
+  }, [
+    isMobile,
+    shouldReduceMotion,
+    controlsTop,
+    controlsBottom,
+    startScrolling,
+  ]);
 
   const renderRow = (
     tools: typeof allTools,
@@ -242,7 +237,7 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
             className={`flex-shrink-0 flex flex-col items-center justify-center rounded-lg ${ITEM_WIDTH_HEIGHT}`}
           >
             <div className="flex-grow flex items-center justify-center">
-              {currentTheme === 'dark' ? tool.icons.dark : tool.icons.light}
+              {tool.icon}
             </div>
             {showToolNames && (
               <div className="text-xs text-center mt-1 text-gray-700/40 dark:text-gray-200/40">

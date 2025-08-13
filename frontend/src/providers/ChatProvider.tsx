@@ -4,92 +4,98 @@ import type { ChatCompletionsRequest, Message } from '@/types.ts';
 import { ChatContext, type ChatContextType } from '@/hooks/useChat';
 
 interface ChatProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-    const [history, setHistory] = useState<Message[]>([]);
-    const [currentRequest, setCurrentRequest] =
-        useState<ChatCompletionsRequest | null>(null);
-    const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [history, setHistory] = useState<Message[]>([]);
+  const [currentRequest, setCurrentRequest] =
+    useState<ChatCompletionsRequest | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
-    const responseAddedRef = useRef<boolean>(false);
+  const responseAddedRef = useRef<boolean>(false);
 
-    const { result, isLoading, error, finishReason, jobId } = useChatCompletion(
-        currentRequest,
-        !!currentRequest,
-    );
+  const { result, isLoading, error, finishReason, jobId } = useChatCompletion(
+    currentRequest,
+    !!currentRequest,
+  );
 
-    useEffect(() => {
+  useEffect(() => {
+    if (
+      !isLoading &&
+      result &&
+      finishReason &&
+      !responseAddedRef.current &&
+      currentRequest
+    ) {
+      setHistory((prevHistory) => {
+        const lastMessage = prevHistory[prevHistory.length - 1];
         if (
-            !isLoading &&
-            result &&
-            finishReason &&
-            !responseAddedRef.current &&
-            currentRequest
+          lastMessage?.role === 'assistant' &&
+          lastMessage.content === result
         ) {
-            setHistory((prevHistory) => {
-                const lastMessage = prevHistory[prevHistory.length - 1];
-                if (lastMessage?.role === 'assistant' && lastMessage.content === result) {
-                    return prevHistory;
-                }
-                const historyWithoutPartial = prevHistory.filter(
-                    (msg) => !(msg.role === 'assistant' && msg.content === ''),
-                );
-                return [...historyWithoutPartial, { role: 'assistant', content: result }];
-            });
-            setCurrentRequest(null);
-            responseAddedRef.current = true;
+          return prevHistory;
         }
+        const historyWithoutPartial = prevHistory.filter(
+          (msg) => !(msg.role === 'assistant' && msg.content === ''),
+        );
+        return [
+          ...historyWithoutPartial,
+          { role: 'assistant', content: result },
+        ];
+      });
+      setCurrentRequest(null);
+      responseAddedRef.current = true;
+    }
 
-        if (isLoading && currentRequest && !responseAddedRef.current) {
-            responseAddedRef.current = false;
-        }
-    }, [isLoading, result, finishReason, currentRequest, jobId]);
+    if (isLoading && currentRequest && !responseAddedRef.current) {
+      responseAddedRef.current = false;
+    }
+  }, [isLoading, result, finishReason, currentRequest, jobId]);
 
-    const openChat = useCallback(() => {
+  const openChat = useCallback(() => {
+    setIsChatOpen(true);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsChatOpen(false);
+  }, []);
+
+  const sendMessage = useCallback(
+    (message: string) => {
+      if (!message.trim() || (isLoading && !!currentRequest)) return;
+
+      if (!isChatOpen) {
         setIsChatOpen(true);
-    }, []);
+      }
 
-    const closeChat = useCallback(() => {
-        setIsChatOpen(false);
-    }, []);
+      const userMessage: Message = { role: 'user', content: message };
+      const updatedHistory = [...history, userMessage];
+      setHistory(updatedHistory);
 
-    const sendMessage = useCallback(
-        (message: string) => {
-            if (!message.trim() || (isLoading && !!currentRequest)) return;
+      const newRequest: ChatCompletionsRequest = {
+        input: message,
+        history: updatedHistory,
+      };
 
-            if (!isChatOpen) {
-                setIsChatOpen(true);
-            }
+      setCurrentRequest(newRequest);
+      responseAddedRef.current = false;
+    },
+    [history, isLoading, currentRequest, isChatOpen],
+  );
 
-            const userMessage: Message = { role: 'user', content: message };
-            const updatedHistory = [...history, userMessage];
-            setHistory(updatedHistory);
+  const contextValue: ChatContextType = {
+    isChatOpen,
+    history,
+    isLoading: isLoading && !!currentRequest,
+    error,
+    streamingResult: isLoading && !!currentRequest && result ? result : '',
+    openChat,
+    closeChat,
+    sendMessage,
+  };
 
-            const newRequest: ChatCompletionsRequest = {
-                input: message,
-                history: updatedHistory,
-            };
-
-            setCurrentRequest(newRequest);
-            responseAddedRef.current = false;
-        },
-        [history, isLoading, currentRequest, isChatOpen],
-    );
-
-    const contextValue: ChatContextType = {
-        isChatOpen,
-        history,
-        isLoading: isLoading && !!currentRequest,
-        error,
-        streamingResult: isLoading && !!currentRequest && result ? result : '',
-        openChat,
-        closeChat,
-        sendMessage,
-    };
-
-    return <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>;
+  return (
+    <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
+  );
 };
-
-

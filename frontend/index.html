@@ -1,55 +1,66 @@
 <!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Responsive -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <!-- Responsive -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Titre et description pour le SEO -->
+    <title>Mathis LAMBERT — Ingénieur & Développeur Web</title>
+    <meta
+      name="description"
+      content="Portfolio de Mathis LAMBERT, apprenti ingénieur passionné par la techno, l’IA, la moto et le handball. Découvrez mes projets..."
+    />
 
-  <!-- Titre et description pour le SEO -->
-  <title>Mathis LAMBERT — Ingénieur & Développeur Web</title>
-  <meta name="description"
-    content="Portfolio de Mathis LAMBERT, apprenti ingénieur passionné par la techno, l’IA, la moto et le handball. Découvrez mes projets..." />
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mathislambert.fr/" />
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://mathislambert.fr/" />
+    <!-- Open Graph (Facebook, LinkedIn…) -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Mathis LAMBERT — Ingénieur & Développeur Web"
+    />
+    <meta
+      property="og:description"
+      content="Portfolio de Mathis LAMBERT, apprenti ingénieur passionné par la techno, l’IA, la moto et le handball."
+    />
+    <meta property="og:url" content="https://mathislambert.fr/" />
+    <meta
+      property="og:image"
+      content="https://mathislambert.fr/images/me.jpeg"
+    />
 
-  <!-- Open Graph (Facebook, LinkedIn…) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Mathis LAMBERT — Ingénieur & Développeur Web" />
-  <meta property="og:description"
-    content="Portfolio de Mathis LAMBERT, apprenti ingénieur passionné par la techno, l’IA, la moto et le handball." />
-  <meta property="og:url" content="https://mathislambert.fr/" />
-  <meta property="og:image" content="https://mathislambert.fr/images/me.jpeg" />
+    <!-- Favicon et Manifest PWA -->
+    <link rel="icon" type="image/png" href="/icons/favicon.ico" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#317EFB" />
 
-  <!-- Favicon et Manifest PWA -->
-  <link rel="icon" type="image/png" href="/icons/favicon.ico" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#317EFB" />
-
-  <!-- JSON-LD Structured Data (Person Schema) -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Mathis LAMBERT",
-      "url": "https://mathislambert.fr/",
-      "sameAs": [
-        "https://github.com/mathis-lambert",
-        "https://linkedin.com/in/mathis-lambert"
-      ],
-      "jobTitle": "Apprenti ingénieur",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "CPE Lyon"
+    <!-- JSON-LD Structured Data (Person Schema) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Mathis LAMBERT",
+        "url": "https://mathislambert.fr/",
+        "sameAs": [
+          "https://github.com/mathis-lambert",
+          "https://linkedin.com/in/mathis-lambert"
+        ],
+        "jobTitle": "Apprenti ingénieur",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "CPE Lyon"
+        }
       }
-    }
-  </script>
-</head>
+    </script>
+  </head>
 
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
-
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

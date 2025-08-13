@@ -1,5 +1,15 @@
 import { useRef } from 'react';
-import { Briefcase, Code, Cpu, GraduationCap, Heart, Home, Mail, Phone, Sparkles } from 'lucide-react';
+import {
+  Briefcase,
+  Code,
+  Cpu,
+  GraduationCap,
+  Heart,
+  Home,
+  Mail,
+  Phone,
+  Sparkles,
+} from 'lucide-react';
 import { useResume } from '@/hooks/useResume.ts';
 import { ResumeHeader } from '@/components/layout/ResumeHeader.tsx';
 import { GlassCard } from '@/components/ui/GlassCard.tsx';
@@ -60,7 +70,7 @@ export default function Resume() {
                         experience={exp}
                         delay={0.05 * i}
                       />
-                    )
+                    ),
                   )}
                 </ResumeSection>
               </GlassCard>

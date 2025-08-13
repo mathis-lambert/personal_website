@@ -1,4 +1,10 @@
-import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 export type TimelineData = {
   title: string;
@@ -43,8 +49,7 @@ export type ScrollableTimelineProps<T extends Record<string, unknown>> = {
 };
 
 const defaultClassNames: Required<ClassNames> = {
-  root:
-    'relative h-full w-full overflow-hidden group select-none overscroll-none',
+  root: 'relative h-full w-full overflow-hidden group select-none overscroll-none',
   gradientTop:
     'absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none',
   gradientBottom:
@@ -52,8 +57,7 @@ const defaultClassNames: Required<ClassNames> = {
   motionDiv:
     'relative left-0 top-0 h-full w-full overflow-y-auto overscroll-contain will-change-scroll touch-none',
   itemContainer: 'relative flex flex-col',
-  line:
-    'absolute left-6 top-0 h-full w-px bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-70',
+  line: 'absolute left-6 top-0 h-full w-px bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-70',
   item: 'relative w-full py-4 pl-14 pr-4 group/item',
   dotContainerWrapper:
     'absolute left-6 top-1/2 -translate-x-1/2 -translate-y-1/2',
@@ -144,7 +148,7 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
       if (top >= max) return top - setHeight;
       return top;
     },
-    [updateContentHeight]
+    [updateContentHeight],
   );
 
   const centerScrollPosition = useCallback(() => {
@@ -203,7 +207,15 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
     };
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [centerScrollPosition, isHovered, isInteracting, recenter, scrollSpeed, stopAnimation, updateContentHeight]);
+  }, [
+    centerScrollPosition,
+    isHovered,
+    isInteracting,
+    recenter,
+    scrollSpeed,
+    stopAnimation,
+    updateContentHeight,
+  ]);
 
   useEffect(() => {
     const handle = () => {
@@ -232,7 +244,14 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [centerScrollPosition, data, keyMappings, startAnimation, stopAnimation, updateContentHeight]);
+  }, [
+    centerScrollPosition,
+    data,
+    keyMappings,
+    startAnimation,
+    stopAnimation,
+    updateContentHeight,
+  ]);
 
   useEffect(() => {
     startAnimation();
@@ -356,9 +375,15 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
           <div className={finalClassNames.line} />
 
           {Array.from({ length: REPEAT_COUNT }).map((_, copyIndex) => (
-            <div key={`copy-${copyIndex}`} ref={copyIndex === 0 ? firstHalfRef : undefined}>
+            <div
+              key={`copy-${copyIndex}`}
+              ref={copyIndex === 0 ? firstHalfRef : undefined}
+            >
               {mappedData.map((exp, index) => (
-                <div key={`copy-${copyIndex}-${exp.title}-${index}`} className={finalClassNames.item}>
+                <div
+                  key={`copy-${copyIndex}-${exp.title}-${index}`}
+                  className={finalClassNames.item}
+                >
                   <div className={finalClassNames.dotContainerWrapper}>
                     <div className={finalClassNames.dotWrapper}>
                       <div className={finalClassNames.dotOuter} />
@@ -372,7 +397,9 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
                     <h3 className={finalClassNames.title}>{exp.title}</h3>
                     <p className={finalClassNames.company}>{exp.company}</p>
                     <p className={finalClassNames.date}>{exp.date}</p>
-                    <p className={finalClassNames.description}>{exp.description}</p>
+                    <p className={finalClassNames.description}>
+                      {exp.description}
+                    </p>
                   </div>
                 </div>
               ))}

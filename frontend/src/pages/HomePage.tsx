@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import GlassCardsList from '@/components/ui/GlassCardsList.tsx';
 import { HeroSection } from '@/components/ui/HeroSection.tsx';
-import ProjectCard, { type Project } from '@/components/projects/ProjectCard';
-import { mockProjects } from '@/components/projects/ProjectsList';
+import ProjectCard from '@/components/projects/ProjectCard';
+import type { Project } from '@/types';
 import BlogArticleCard from '@/components/blog/BlogArticleCard';
 import { Link } from 'react-router-dom';
+import { getProjects } from '@/api/projects';
 
 type Article = {
   id: string | number;
@@ -19,7 +21,8 @@ const articlesPreview: Article[] = [
   {
     id: 'a1',
     title: 'The Future of AI in Everyday Life',
-    excerpt: 'Discover how artificial intelligence is transforming daily tasks...',
+    excerpt:
+      'Discover how artificial intelligence is transforming daily tasks...',
     imageUrl: '/images/blog/article1.jpg',
     date: '2025-04-15',
     readTime: '5 min read',
@@ -46,7 +49,36 @@ const articlesPreview: Article[] = [
 ];
 
 const HomePage = () => {
-  const featured = mockProjects.slice(0, 3) as Project[];
+  const [featured, setFeatured] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    async function fetchFeatured() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const normalized: Project[] = await getProjects({ signal: ac.signal });
+        const byDateDesc = (a: Project, b: Project) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime();
+        const featuredOnly = normalized.filter((p) => p.isFeatured);
+        const top = (featuredOnly.length ? featuredOnly : normalized)
+          .sort(byDateDesc)
+          .slice(0, 3);
+        setFeatured(top);
+      } catch (e: unknown) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        console.error('Failed to fetch featured projects:', e);
+        setError('Impossible de charger les projets à la une.');
+        setFeatured([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchFeatured();
+    return () => ac.abort();
+  }, []);
 
   return (
     <>
@@ -54,23 +86,39 @@ const HomePage = () => {
       <GlassCardsList />
 
       {/* Featured Projects */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section className="max-w-7xl mx-auto py-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Featured Projects</h2>
-          <Link to="/projects" className="text-sky-600 hover:underline">Voir tous</Link>
+          <Link to="/projects" className="text-sky-600 hover:underline">
+            See all
+          </Link>
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((p, i) => (
-            <ProjectCard key={p.id} project={p} animationDelay={i * 0.08} />
-          ))}
+          {isLoading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
+                />
+              ))
+            : featured.map((p, i) => (
+                <ProjectCard key={p.id} project={p} animationDelay={i * 0.08} />
+              ))}
         </div>
+        {!isLoading && featured.length === 0 && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+            {error ?? 'Aucun projet disponible.'}
+          </p>
+        )}
       </section>
 
       {/* Latest Articles */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <section className="max-w-7xl mx-auto pb-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Latest Articles</h2>
-          <Link to="/blog" className="text-sky-600 hover:underline">Voir tous</Link>
+          <Link to="/blog" className="text-sky-600 hover:underline">
+            See all
+          </Link>
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {articlesPreview.map((a, i) => (

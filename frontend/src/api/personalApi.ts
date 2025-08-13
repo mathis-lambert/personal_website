@@ -86,7 +86,10 @@ export async function callPersonalApi(
 
     // --- Streaming Logic (also auto-detect SSE in non-streaming mode) ---
     const contentType = response.headers.get('content-type') || '';
-    if ((isStreaming || contentType.includes('text/event-stream')) && response.body) {
+    if (
+      (isStreaming || contentType.includes('text/event-stream')) &&
+      response.body
+    ) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer = '';

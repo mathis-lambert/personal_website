@@ -41,10 +41,14 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
         });
       };
 
+      type MdNode = {
+        position?: { start: { line: number }; end: { line: number } };
+        value?: string;
+      };
+      const mdNode = node as unknown as MdNode | undefined;
       const isBlock =
-        (node as any)?.position?.start.line !==
-          (node as any)?.position?.end.line ||
-        (node as any)?.value?.includes('\n');
+        mdNode?.position?.start.line !== mdNode?.position?.end.line ||
+        (mdNode?.value?.includes('\n') ?? false);
 
       if (isBlock && match) {
         return (

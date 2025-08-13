@@ -91,3 +91,58 @@ export type ChatAction =
   | { type: 'FETCH_SUCCESS'; payload: ChatCompletionsResult }
   | { type: 'FETCH_ERROR'; payload: Error }
   | { type: 'RESET' };
+
+// ---------------- Projects / Works DTO ----------------
+
+export type ProjectStatus = 'completed' | 'in-progress' | 'archived';
+
+export interface ProjectLinks {
+  live?: string; // Live demo or website
+  repo?: string; // Source code repository
+  docs?: string; // Documentation
+  video?: string; // Demo video
+}
+
+export interface ProjectMedia {
+  thumbnailUrl?: string; // Thumbnail used in list/cards
+  imageUrl?: string; // Backward-compat: main image
+  gallery?: string[]; // Optional gallery for detail page
+  videoUrl?: string; // Embedded/hosted video
+}
+
+export interface ProjectMetrics {
+  stars?: number;
+  downloads?: number;
+  users?: number;
+}
+
+// Shared Project interface for cards, list and detail view
+export interface Project {
+  id: string;
+  slug?: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  date: string; // canonical date for sorting (usually end date)
+  startDate?: string;
+  endDate?: string;
+  technologies: string[];
+  categories?: string[];
+  status?: ProjectStatus;
+  isFeatured?: boolean;
+  // Backward-compat flat fields
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  projectUrl?: string;
+  repoUrl?: string;
+  // Structured fields
+  links?: ProjectLinks;
+  media?: ProjectMedia;
+  metrics?: ProjectMetrics;
+  // Contextual info
+  role?: string;
+  client?: string;
+  teamSize?: number;
+  highlights?: string[];
+  color?: string; // accent color for card/header theming
+}

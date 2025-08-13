@@ -1,33 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProjectView from '@/components/projects/ProjectView.tsx';
-import type { Project } from '@/components/projects/ProjectCard.tsx';
-import { mockProjects } from '@/components/projects/ProjectsList.tsx';
+import type { Project } from '@/types';
+import { getProjectBySlug } from '@/api/projects';
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  console.log('Project ID:', projectId);
   const [project, setProject] = useState<Project | null | undefined>(undefined); // Start as undefined for loading state
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
-    // --- Simulate fetching project data ---
-    // In a real app, you'd fetch from an API:
-    // fetch(`/api/projects/${projectId}`)
-    //   .then(res => res.json())
-    //   .then(data => setProject(data))
-    //   .catch(() => setProject(null)) // Handle not found
-    //   .finally(() => setIsLoading(false));
+    const ac = new AbortController();
 
-    // Using mock data for this example:
-    const foundProject = mockProjects.find((p) => p.id === projectId);
-    setTimeout(() => {
-      // Simulate network delay
-      setProject(foundProject || null); // Set to null if not found
-      setIsLoading(false);
-    }, 300);
-    // --- End simulation ---
+    async function fetchProject() {
+      try {
+        setIsLoading(true);
+        if (!projectId) {
+          setProject(null);
+          return;
+        }
+        const result = await getProjectBySlug(projectId, { signal: ac.signal });
+        setProject(result);
+      } catch (e: unknown) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        console.error('Failed to fetch project detail:', e);
+        setProject(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchProject();
+    return () => ac.abort();
   }, [projectId]);
 
   return <ProjectView project={project} isLoading={isLoading} />;
