@@ -1,0 +1,143 @@
+[
+    {
+        "id": "proj-1",
+        "slug": "portfolio-website-v3",
+        "title": "Portfolio Website V3",
+        "subtitle": "Site personnel moderne, rapide et animé",
+        "description": "Mon portfolio personnel mettant en avant mes compétences, mes projets et mes services, construit avec Next.js, Tailwind et Framer Motion. Pages statiques, animations fluides, SEO et dark mode.",
+        "date": "2025-03-15",
+        "technologies": [
+            "Next.js",
+            "React",
+            "TypeScript",
+            "Tailwind CSS",
+            "Framer Motion"
+        ],
+        "categories": [
+            "Website",
+            "Frontend"
+        ],
+        "status": "completed",
+        "isFeatured": true,
+        "projectUrl": "https: //your-portfolio-url.com",
+        "repoUrl": "https: //github.com/your-username/portfolio-v3",
+        "links": {
+            "live": "https: //your-portfolio-url.com",
+            "repo": "https: //github.com/your-username/portfolio-v3",
+            "docs": "https: //your-portfolio-url.com/docs"
+        },
+        "media": {
+            "thumbnailUrl": "/images/projects/project1.jpg",
+            "imageUrl": "/images/projects/project1.jpg"
+        },
+        "metrics": {
+            "stars": 128
+        },
+        "highlights": [
+            "Design glassmorphism + gradients",
+            "Animations orchestrées (Framer Motion)",
+            "Accessibilité et SEO soignés"
+        ],
+        "role": "Fullstack",
+        "client": "Personnel",
+        "teamSize": 1,
+        "color": "#3b82f6"
+    },
+    {
+        "id": "proj-2",
+        "slug": "ecommerce-platform",
+        "title": "E-commerce Platform",
+        "subtitle": "Monorepo full-stack avec paiements",
+        "description": "Site e-commerce full-stack avec authentification, gestion produits et intégration Stripe. Panneau admin, panier persistant et webhooks fiabilisés.",
+        "date": "2024-11-20",
+        "technologies": [
+            "React",
+            "Node.js",
+            "Express",
+            "MongoDB",
+            "Redux",
+            "Stripe API"
+        ],
+        "categories": [
+            "Web App",
+            "E-commerce"
+        ],
+        "status": "in-progress",
+        "links": {
+            "live": "https: //example-ecommerce.com",
+            "repo": "https: //github.com/your-username/ecommerce-platform"
+        },
+        "media": {
+            "thumbnailUrl": "/images/projects/project3.avif"
+        },
+        "metrics": {
+            "users": 3500
+        },
+        "highlights": [
+            "Paiements Stripe",
+            "Back-office sécurisé",
+            "Recherche full-text"
+        ],
+        "role": "Frontend",
+        "teamSize": 3,
+        "color": "#10b981"
+    },
+    {
+        "id": "proj-3",
+        "slug": "data-viz-dashboard",
+        "title": "Data Visualization Dashboard",
+        "subtitle": "Analytique interactive avec D3.js",
+        "description": "Dashboard interactif affichant des jeux de données complexes avec D3.js et React. Filtres avancés, zoom et brushing.",
+        "date": "2024-06-01",
+        "technologies": [
+            "React",
+            "D3.js",
+            "JavaScript",
+            "CSS",
+            "Python",
+            "Flask"
+        ],
+        "categories": [
+            "DataViz",
+            "Frontend"
+        ],
+        "status": "completed",
+        "links": {
+            "repo": "https: //github.com/your-username/data-viz-dashboard"
+        },
+        "media": {
+            "thumbnailUrl": "/images/projects/project4.jpeg"
+        },
+        "metrics": {
+            "stars": 42
+        },
+        "role": "Frontend",
+        "teamSize": 2
+    },
+    {
+        "id": "proj-4",
+        "slug": "weather-app-mobile",
+        "title": "Mobile Weather App",
+        "subtitle": "Météo en temps réel cross-platform",
+        "description": "Application mobile cross-platform fournissant des mises à jour météo en temps réel avec notifications locales et widgets.",
+        "date": "2025-01-10",
+        "technologies": [
+            "React Native",
+            "Expo",
+            "TypeScript",
+            "Weather API"
+        ],
+        "categories": [
+            "Mobile"
+        ],
+        "status": "archived",
+        "links": {
+            "repo": "https: //github.com/your-username/weather-app-mobile"
+        },
+        "media": {
+            "thumbnailUrl": "/images/projects/project2.jpeg"
+        },
+        "role": "Mobile",
+        "teamSize": 1
+    }
+]

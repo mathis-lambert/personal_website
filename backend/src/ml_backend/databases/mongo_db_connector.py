@@ -41,7 +41,7 @@ class MongoDBConnector:
         file_map = {
             "experiences": "experiences.json",
             "studies": "studies.json",
-            "works": "works.json",
+            "projects": "projects.json",
             "articles": "articles.json",
         }
 

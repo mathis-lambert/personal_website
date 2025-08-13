@@ -5,7 +5,7 @@ from .routes import (
     experiences_router,
     studies_router,
     articles_router,
-    works_router,
+    projects_router,
 )
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router.include_router(chat_router, prefix="/chat", tags=["Chat inference"])
 router.include_router(experiences_router, prefix="/experiences", tags=["Experiences"])
 router.include_router(studies_router, prefix="/studies", tags=["Studies"])
 router.include_router(articles_router, prefix="/articles", tags=["Articles"])
-router.include_router(works_router, prefix="/works", tags=["Works"])
+router.include_router(projects_router, prefix="/projects", tags=["projects"])
 
 
 # Health check
