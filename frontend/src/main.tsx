@@ -4,13 +4,18 @@ import './style/index.css';
 import App from './App.tsx';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
 import { ChatProvider } from '@/providers/ChatProvider.tsx';
+import { AuthProvider } from '@/providers/AuthProvider.tsx';
+import { Toaster } from "@/components/ui/sonner"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider storageKey="vite-ui-theme">
-      <ChatProvider>
-        <App />
-      </ChatProvider>
+      <AuthProvider>
+        <ChatProvider>
+          <App />
+          <Toaster />
+        </ChatProvider>
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 );

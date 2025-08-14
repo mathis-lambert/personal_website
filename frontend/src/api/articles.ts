@@ -42,6 +42,7 @@ export function normalizeArticleApi(a: ApiArticle): Article {
 }
 
 export async function getArticles(options?: {
+  token?: string;
   signal?: AbortSignal;
 }): Promise<Article[]> {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -49,6 +50,7 @@ export async function getArticles(options?: {
   const res = await fetchWithTimeout(`${apiUrl}/api/articles/all`, {
     signal: options?.signal,
     timeoutMs: 10000,
+    authToken: options?.token,
   });
   if (!res.ok) throw new Error(`Articles request failed: ${res.status}`);
   const data = await res.json();
@@ -60,7 +62,7 @@ export async function getArticles(options?: {
 
 export async function getArticleBySlug(
   slug: string,
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ): Promise<Article | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
@@ -69,6 +71,7 @@ export async function getArticleBySlug(
     const res = await fetchWithTimeout(`${apiUrl}/api/articles/${slug}`, {
       signal: options?.signal,
       timeoutMs: 10000,
+      authToken: options?.token,
     });
     if (res.ok) {
       const data = await res.json();
@@ -90,7 +93,7 @@ export type ArticleEventType = 'like' | 'share' | 'read';
 export async function sendArticleEvent(
   type: ArticleEventType,
   payload: { id?: string; slug?: string },
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ): Promise<ArticleMetrics | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) return null;
@@ -101,6 +104,7 @@ export async function sendArticleEvent(
       body: JSON.stringify({ id: payload.id, slug: payload.slug }),
       signal: options?.signal,
       timeoutMs: 8000,
+      authToken: options?.token,
     });
     if (!res.ok) {
       console.warn('Article event failed', type, res.status);
@@ -125,7 +129,7 @@ export async function sendArticleEvent(
 
 export async function trackArticleRead(
   article: Article,
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ) {
   return sendArticleEvent(
     'read',
@@ -136,7 +140,7 @@ export async function trackArticleRead(
 
 export async function trackArticleLike(
   article: Article,
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ) {
   return sendArticleEvent(
     'like',
@@ -147,7 +151,7 @@ export async function trackArticleLike(
 
 export async function trackArticleShare(
   article: Article,
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ) {
   return sendArticleEvent(
     'share',
@@ -158,7 +162,7 @@ export async function trackArticleShare(
 
 export async function getArticleMetrics(
   payload: { id?: string; slug?: string },
-  options?: { signal?: AbortSignal },
+  options?: { token?: string; signal?: AbortSignal },
 ): Promise<ArticleMetrics | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
@@ -170,6 +174,7 @@ export async function getArticleMetrics(
     {
       signal: options?.signal,
       timeoutMs: 8000,
+      authToken: options?.token,
     },
   );
   if (!res.ok) return null;

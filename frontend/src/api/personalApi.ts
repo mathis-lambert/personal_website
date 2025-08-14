@@ -3,6 +3,7 @@ import type {
   ChatCompletionsRequest,
   ChatCompletionsResult,
 } from '@/types.ts';
+import { getAuthHeaders } from './auth';
 
 /**
  * Optional callbacks for handling streaming responses.
@@ -29,23 +30,24 @@ export interface ApiCallbacks {
  * Calls the personal chat completions API, supporting both streaming and non-streaming responses.
  *
  * - **Non-streaming mode (default):** If no callbacks are provided, the function returns a Promise
- * that resolves with the full API response.
+ *   that resolves with the full API response.
  * - **Streaming mode:** If an `onChunk` callback is provided, the function will process the
- * response as a stream, invoking the callbacks as data arrives.
+ *   response as a stream, invoking the callbacks as data arrives.
  *
  * @param request The chat completion request object.
- * @param options An optional object containing an AbortSignal and/or streaming callbacks.
+ * @param options An optional object containing a token, AbortSignal and/or streaming callbacks.
  * @returns A Promise that resolves with the full result (non-streaming) or void (streaming).
  */
 export async function callPersonalApi(
   request: ChatCompletionsRequest,
   options?: {
+    token?: string;
     signal?: AbortSignal;
     callbacks?: ApiCallbacks;
   },
 ): Promise<ChatCompletionsResult | void> {
   const apiUrl = import.meta.env.VITE_API_URL;
-  const { signal, callbacks } = options || {};
+  const { token, signal, callbacks } = options || {};
   const isStreaming = !!callbacks?.onChunk;
 
   if (!apiUrl) {
@@ -66,6 +68,7 @@ export async function callPersonalApi(
         'Content-Type': 'application/json',
         // Request a stream only if we have a callback to handle it
         Accept: isStreaming ? 'text/event-stream' : 'application/json',
+        ...getAuthHeaders(token),
       },
       body: JSON.stringify(request),
       signal,
