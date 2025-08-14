@@ -63,7 +63,6 @@ export async function fetchToken(): Promise<string> {
     throw new Error(`Network error during token request: ${(err as Error).message}`);
   }
 
-  if (!tokenRes.ok) {
     if (tokenRes.status === 401 || tokenRes.status === 403) {
       throw new Error('Authentication failed during token request');
     } else if (tokenRes.status >= 500) {
