@@ -5,7 +5,7 @@ const API_URL = (import.meta.env.VITE_API_URL as string)?.replace(/\/$/, "");
 const USERNAME = import.meta.env.VITE_API_USERNAME as string;
 const PASSWORD = import.meta.env.VITE_API_PASSWORD as string;
 
-if (!API_URL) throw new Error("API url must be set");
+if (!API_URL) throw new Error("API URL must be set");
 if (!USERNAME || !PASSWORD) throw new Error("API username and password must be set");
 
 type ChallengeResponse = { nonce: string };
