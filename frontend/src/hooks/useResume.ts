@@ -33,7 +33,7 @@ export const useResume = () => {
                 input: prompt,
                 history: [],
               },
-              { token },
+              { token: token ?? undefined },
             );
 
             console.log('New summary:', newSummary);
@@ -61,7 +61,7 @@ export const useResume = () => {
                 input: prompt,
                 history: [],
               },
-              { token },
+              { token: token ?? undefined },
             );
 
             console.log('Experience summary:', expSummary);

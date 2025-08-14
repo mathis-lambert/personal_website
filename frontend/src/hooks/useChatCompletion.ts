@@ -74,9 +74,9 @@ const useChatCompletion = (
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
     ? JSON.stringify({
-        input: request.input,
-        history: request.history,
-      })
+      input: request.input,
+      history: request.history,
+    })
     : null;
 
   useEffect(() => {
@@ -100,7 +100,7 @@ const useChatCompletion = (
       controllerRef.current = controller;
 
       await callPersonalApi(request, {
-        token,
+        token: token ?? undefined,
         signal: controller.signal,
         callbacks: {
           onChunk: (chunk) => {
