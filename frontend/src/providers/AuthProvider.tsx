@@ -4,7 +4,11 @@ import { AuthContext } from '@/hooks/useAuth';
 import { fetchToken } from '@/api/auth';
 
 // Token expiration time (in seconds) provided by Vite
-const TOKEN_EXPIRATION_SEC = Number(import.meta.env.VITE_TOKEN_EXPIRATION_TIME ?? '60');
+const TOKEN_EXPIRATION_SEC = (() => {
+  const raw = import.meta.env.VITE_TOKEN_EXPIRATION_TIME as string | undefined;
+  const parsed = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 60;
+})();
 
 interface AuthProviderProps {
   children: React.ReactNode;
