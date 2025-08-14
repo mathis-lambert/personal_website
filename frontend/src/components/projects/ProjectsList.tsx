@@ -4,6 +4,7 @@ import ProjectCard from '@/components/projects/ProjectCard';
 import type { Project } from '@/types';
 import { getProjects } from '@/api/projects';
 import FiltersBar from '@/components/filters/FiltersBar';
+import { useAuth } from '@/hooks/useAuth';
 
 // --- Debounce Hook (same as before) ---
 function useDebounce<T>(value: T, delay: number): T {
@@ -35,7 +36,7 @@ const ProjectsList: React.FC = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
-
+  const { token } = useAuth();
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Fetch projects from API
@@ -46,7 +47,7 @@ const ProjectsList: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const normalized = await getProjects({ signal: ac.signal });
+        const normalized = await getProjects({ signal: ac.signal, token: token ?? undefined });
         setProjects(normalized.length ? normalized : []);
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -60,7 +61,7 @@ const ProjectsList: React.FC = () => {
 
     fetchProjects();
     return () => ac.abort();
-  }, []);
+  }, [token]);
 
   // Calculate all unique technologies from the projects
   const allTechnologies = useMemo(() => {

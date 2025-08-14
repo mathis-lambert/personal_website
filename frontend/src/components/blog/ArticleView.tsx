@@ -19,6 +19,7 @@ import {
     trackArticleShare,
     trackArticleRead,
 } from '@/api/articles';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ArticleViewProps {
     article: Article | null | undefined;
@@ -26,7 +27,7 @@ interface ArticleViewProps {
 }
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
-    // Hooks must be top-level
+    const { token } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
     const [copiedShare, setCopiedShare] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
@@ -49,12 +50,12 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     // Track read when article becomes available (hook must not be conditional)
     useEffect(() => {
         if (!article) return;
-        trackArticleRead(article)
+        trackArticleRead(article, { token: token ?? undefined })
             .then((m) => {
                 if (m) setMetrics(m);
             })
             .catch(() => { });
-    }, [article]);
+    }, [article, token]);
 
     if (isLoading) {
         return (
@@ -141,7 +142,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
-                trackArticleShare(article)
+                trackArticleShare(article, { token: token ?? undefined })
                     .then((m) => {
                         if (m) setMetrics(m);
                     })
@@ -154,7 +155,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
         try {
             await navigator.clipboard.writeText(url);
             setCopiedShare(true);
-            trackArticleShare(article)
+            trackArticleShare(article, { token: token ?? undefined })
                 .then((m) => {
                     if (m) setMetrics(m);
                 })
@@ -281,7 +282,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                                 onClick={() => setIsLiked((v) => !v)}
                                 aria-pressed={isLiked}
                                 onMouseUp={() =>
-                                    trackArticleLike(article)
+                                    trackArticleLike(article, { token: token ?? undefined })
                                         .then((m) => {
                                             if (m) setMetrics(m);
                                         })
@@ -317,7 +318,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                                 aria-label="Share on Twitter"
                                 title="Share on Twitter"
                                 onMouseUp={() =>
-                                    trackArticleShare(article)
+                                    trackArticleShare(article, { token: token ?? undefined })
                                         .then((m) => {
                                             if (m) setMetrics(m);
                                         })
@@ -337,7 +338,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                                 }}
                                 aria-label="Share on LinkedIn"
                                 title="Share on LinkedIn"
-                                onMouseUp={() => trackArticleShare(article).catch(() => { })}
+                                onMouseUp={() => trackArticleShare(article, { token: token ?? undefined }).catch(() => { })}
                             >
                                 <Linkedin className="w-4 h-4" /> LinkedIn
                             </button>
@@ -354,7 +355,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                                             window.location?.href ?? '',
                                         );
                                         setCopiedLink(true);
-                                        trackArticleShare(article)
+                                        trackArticleShare(article, { token: token ?? undefined })
                                             .then((m) => {
                                                 if (m) setMetrics(m);
                                             })
