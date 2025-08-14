@@ -3,11 +3,13 @@ import { useParams } from 'react-router-dom';
 import ProjectView from '@/components/projects/ProjectView.tsx';
 import type { Project } from '@/types';
 import { getProjectBySlug } from '@/api/projects';
+import { useAuth } from '@/hooks/useAuth';
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const [project, setProject] = useState<Project | null | undefined>(undefined); // Start as undefined for loading state
+  const [project, setProject] = useState<Project | null | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -19,7 +21,7 @@ const ProjectDetailPage: React.FC = () => {
           setProject(null);
           return;
         }
-        const result = await getProjectBySlug(projectId, { signal: ac.signal });
+        const result = await getProjectBySlug(projectId, { signal: ac.signal, token: token ?? undefined });
         setProject(result);
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -32,7 +34,7 @@ const ProjectDetailPage: React.FC = () => {
 
     fetchProject();
     return () => ac.abort();
-  }, [projectId]);
+  }, [projectId, token]);
 
   return <ProjectView project={project} isLoading={isLoading} />;
 };

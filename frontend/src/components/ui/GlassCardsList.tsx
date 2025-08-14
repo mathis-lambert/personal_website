@@ -10,6 +10,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/hooks/useChat';
 import { MessageCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { getExperiences } from '@/api/experiences';
+import { getStudies } from '@/api/studies';
 
 // lazy load du map
 const LocationMapLazy = lazy(() =>
@@ -22,26 +25,18 @@ const GlassCardsList = () => {
   const [experiences, setExperiences] = useState<TimelineData[]>([]);
   const [studies, setStudies] = useState<TimelineData[]>([]);
   const { openChat } = useChat();
+  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
     const fetchData = async () => {
       try {
-        const [experiencesResponse, studiesResponse] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/api/experiences/all`, {
-            signal: ac.signal,
-          }),
-          fetch(`${import.meta.env.VITE_API_URL}/api/studies/all`, {
-            signal: ac.signal,
-          }),
+        const [experiencesData, studiesData] = await Promise.all([
+          getExperiences({ token: token ?? undefined, signal: ac.signal }),
+          getStudies({ token: token ?? undefined, signal: ac.signal }),
         ]);
-        if (!experiencesResponse.ok || !studiesResponse.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const experiencesData = await experiencesResponse.json();
-        const studiesData = await studiesResponse.json();
-        setExperiences(experiencesData.experiences);
-        setStudies(studiesData.studies);
+        setExperiences(experiencesData);
+        setStudies(studiesData);
       } catch (error: unknown) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           console.error('Failed to fetch timeline data:', error);
@@ -50,7 +45,7 @@ const GlassCardsList = () => {
     };
     fetchData();
     return () => ac.abort();
-  }, []);
+  }, [token]);
 
   const topSkills = [
     'LLMs',
