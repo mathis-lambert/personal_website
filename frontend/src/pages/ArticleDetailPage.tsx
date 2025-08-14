@@ -21,14 +21,7 @@ const ArticleDetailPage: React.FC = () => {
           return;
         }
         const result = await getArticleBySlug(articleId, { signal: ac.signal, token: token ?? undefined });
-        setArticle((prevArticle) => {
-          const prevId = prevArticle?.id;
-          const newId = result?.id;
-          if (prevId !== newId) {
-            return result;
-          }
-          return prevArticle;
-        });
+        setArticle((prev) => (prev?.id !== result?.id ? result : prev));
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch article detail:', e);
@@ -39,7 +32,8 @@ const ArticleDetailPage: React.FC = () => {
     }
     fetchArticle();
     return () => ac.abort();
-  }, [articleId, token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleId]);
 
   return <ArticleView article={article} isLoading={isLoading} />;
 };

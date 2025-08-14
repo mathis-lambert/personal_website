@@ -283,24 +283,46 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
     }, 120);
   };
 
-  // Handle smooth wheel scrolling
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+  function handleNativeWheel(
+    e: WheelEvent,
+    el: HTMLDivElement,
+    {
+      isMobile,
+      wheelSensitivity,
+      stopAnimation,
+      startAnimation,
+      recenter,
+      updateContentHeight,
+      virtualTopRef,
+      contentHeightRef,
+      scrollTimeoutRef,
+    }: {
+      isMobile: boolean;
+      wheelSensitivity: number;
+      stopAnimation: () => void;
+      startAnimation: () => void;
+      recenter: (top: number) => number;
+      updateContentHeight: () => number;
+      virtualTopRef: React.MutableRefObject<number>;
+      contentHeightRef: React.MutableRefObject<number>;
+      scrollTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
+    }
+  ) {
     if (isMobile) return;
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    e.preventDefault();
+    e.preventDefault(); // OK ici car listener non-passif
     stopAnimation();
+
     const setHeight = contentHeightRef.current || updateContentHeight();
     if (setHeight <= 0) return;
-    let newTop = scroller.scrollTop + e.deltaY * wheelSensitivity;
+
+    let newTop = el.scrollTop + e.deltaY * wheelSensitivity;
     newTop = recenter(newTop);
     virtualTopRef.current = newTop;
-    scroller.scrollTop = Math.floor(newTop);
+    el.scrollTop = Math.floor(newTop);
+
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    scrollTimeoutRef.current = setTimeout(() => {
-      startAnimation();
-    }, 150);
-  };
+    scrollTimeoutRef.current = setTimeout(() => startAnimation(), 150);
+  }
 
   // Touch scrolling without page scroll
   const touchStartYRef = useRef<number | null>(null);
@@ -311,12 +333,40 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
     touchStartYRef.current = e.touches[0]?.clientY ?? null;
   };
 
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const wheelListener = (e: WheelEvent) =>
+      handleNativeWheel(e, el, {
+        isMobile,
+        wheelSensitivity,
+        stopAnimation,
+        startAnimation,
+        recenter,
+        updateContentHeight,
+        virtualTopRef,
+        contentHeightRef,
+        scrollTimeoutRef,
+      });
+
+    el.addEventListener('wheel', wheelListener, { passive: false });
+    return () => el.removeEventListener('wheel', wheelListener);
+  }, [
+    isMobile,
+    wheelSensitivity,
+    stopAnimation,
+    startAnimation,
+    recenter,
+    updateContentHeight,
+  ]);
+
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
     const startY = touchStartYRef.current;
     if (startY == null) return;
-    e.preventDefault();
+
     const currentY = e.touches[0]?.clientY ?? startY;
     const delta = startY - currentY; // positive when moving up -> scroll down
     const setHeight = contentHeightRef.current || updateContentHeight();
@@ -352,7 +402,6 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
       className={finalClassNames.root}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onWheelCapture={handleWheel}
       style={{ '--accent-color': accentColor } as CSSProperties}
     >
       {showGradients && (

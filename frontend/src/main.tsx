@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style/index.css';
 import App from './App.tsx';
@@ -8,14 +7,12 @@ import { AuthProvider } from '@/providers/AuthProvider.tsx';
 import { Toaster } from "@/components/ui/sonner"
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ThemeProvider storageKey="vite-ui-theme">
-      <AuthProvider>
-        <ChatProvider>
-          <App />
-          <Toaster />
-        </ChatProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </StrictMode>,
+  <ThemeProvider storageKey="vite-ui-theme">
+    <AuthProvider>
+      <ChatProvider>
+        <App />
+        <Toaster />
+      </ChatProvider>
+    </AuthProvider>
+  </ThemeProvider>
 );
