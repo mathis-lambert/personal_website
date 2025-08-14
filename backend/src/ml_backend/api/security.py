@@ -6,7 +6,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change_me")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY environment variable must be set and not use a weak default in production.")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("JWT_EXPIRE_SECONDS", "60"))
 AUDIENCE = os.getenv("TOKEN_AUDIENCE", "https://mathislambert.fr")
