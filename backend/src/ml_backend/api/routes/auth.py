@@ -47,7 +47,6 @@ async def issue_token(req: TokenRequest, request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Expired nonce"
         )
 
-    origin = request.headers.get("origin") or request.headers.get("referer")
     allowed_url = urlparse(ALLOWED_ORIGIN)
     origin_header = request.headers.get("origin")
     referer_header = request.headers.get("referer")
