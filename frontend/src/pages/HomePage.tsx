@@ -7,6 +7,7 @@ import BlogArticleCard from '@/components/blog/BlogArticleCard';
 import { Link } from 'react-router-dom';
 import { getProjects } from '@/api/projects';
 import { getArticles } from '@/api/articles';
+import { useAuth } from '@/hooks/useAuth';
 
 const HomePage = () => {
   const [featured, setFeatured] = useState<Project[]>([]);
@@ -15,6 +16,7 @@ const HomePage = () => {
   const [latestArticles, setLatestArticles] = useState<Article[]>([]);
   const [isArticlesLoading, setIsArticlesLoading] = useState<boolean>(true);
   const [articlesError, setArticlesError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -22,7 +24,7 @@ const HomePage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const normalized: Project[] = await getProjects({ signal: ac.signal });
+        const normalized: Project[] = await getProjects({ signal: ac.signal, token: token ?? undefined });
         const byDateDesc = (a: Project, b: Project) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const featuredOnly = normalized.filter((p) => p.isFeatured);
@@ -41,7 +43,7 @@ const HomePage = () => {
     }
     fetchFeatured();
     return () => ac.abort();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -49,7 +51,7 @@ const HomePage = () => {
       try {
         setIsArticlesLoading(true);
         setArticlesError(null);
-        const normalized: Article[] = await getArticles({ signal: ac.signal });
+        const normalized: Article[] = await getArticles({ signal: ac.signal, token: token ?? undefined });
         const byDateDesc = (a: Article, b: Article) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const top = normalized.sort(byDateDesc).slice(0, 3);
@@ -65,7 +67,7 @@ const HomePage = () => {
     }
     fetchArticles();
     return () => ac.abort();
-  }, []);
+  }, [token]);
 
   return (
     <>
@@ -83,14 +85,14 @@ const HomePage = () => {
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading
             ? Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
-                />
-              ))
+              <div
+                key={i}
+                className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
+              />
+            ))
             : featured.map((p, i) => (
-                <ProjectCard key={p.id} project={p} animationDelay={i * 0.08} />
-              ))}
+              <ProjectCard key={p.id} project={p} animationDelay={i * 0.08} />
+            ))}
         </div>
         {!isLoading && featured.length === 0 && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
@@ -110,18 +112,18 @@ const HomePage = () => {
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {isArticlesLoading
             ? Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
-                />
-              ))
+              <div
+                key={i}
+                className="rounded-3xl h-60 animate-pulse bg-white/20 dark:bg-gray-800/30 border border-white/20 dark:border-white/10"
+              />
+            ))
             : latestArticles.map((a, i) => (
-                <BlogArticleCard
-                  key={a.id}
-                  article={a}
-                  animationDelay={i * 0.08}
-                />
-              ))}
+              <BlogArticleCard
+                key={a.id}
+                article={a}
+                animationDelay={i * 0.08}
+              />
+            ))}
         </div>
         {!isArticlesLoading && latestArticles.length === 0 && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
