@@ -13,7 +13,11 @@ PASSWORD = os.getenv("API_PASSWORD", "secret")
 ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "https://mathislambert.fr")
 NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
 
-
+ENV = os.getenv("ENV", "development")
+if ENV == "production" and (not PASSWORD or PASSWORD == "secret"):
+    raise RuntimeError("API_PASSWORD must be set to a strong value in production.")
+ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "https://mathislambert.fr")
+NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
 class TokenRequest(BaseModel):
     username: str
     nonce: str
