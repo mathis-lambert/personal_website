@@ -46,7 +46,7 @@ router.include_router(
 
 
 # Health check
-@router.get("/health", tags=["Health"], dependencies=[Depends(verify_token)])
+@router.get("/health", tags=["Health"])
 async def health_check():
     """Health check endpoint."""
     return {"status": "ok"}
