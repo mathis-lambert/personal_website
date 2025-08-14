@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log(`[Auth] Setting up auto-refresh every ${refreshMs} ms`);
     const id = setInterval(() => {
       console.log('[Auth] Refreshing token...');
-      fetchToken()
+      fetchToken(true)
         .then((t) =>
           setToken((prev) => {
             if (prev !== t) {

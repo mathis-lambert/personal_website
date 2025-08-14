@@ -82,8 +82,8 @@ function isTokenValid(): boolean {
   return Date.now() + skew < tokenCache.expTs;
 }
 
-export async function fetchToken(): Promise<string> {
-  if (isTokenValid()) return tokenCache!.token;
+export async function fetchToken(force?: boolean): Promise<string> {
+  if (!force && isTokenValid()) return tokenCache!.token;
   if (inFlight) return inFlight;
 
   inFlight = (async () => {
