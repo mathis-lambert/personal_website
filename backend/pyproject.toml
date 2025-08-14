@@ -11,7 +11,8 @@ dependencies = [
     "motor>=3.7.0",
     "pymongo>=4.3.3",
     "uvicorn>=0.34.0",
-    "ml_api_client @ git+https://github.com/mathis-lambert/api_client.git"
+    "ml_api_client @ git+https://github.com/mathis-lambert/api_client.git",
+    "PyJWT>=2.10.1"
 ]
 
 [project.optional-dependencies]
