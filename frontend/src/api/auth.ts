@@ -20,6 +20,10 @@ export async function fetchToken(): Promise<string> {
   const username = import.meta.env.VITE_API_USERNAME;
   const password = import.meta.env.VITE_API_PASSWORD;
 
+  if (!username || !password) {
+    throw new Error('Environment variables VITE_API_USERNAME and VITE_API_PASSWORD must be set');
+  }
+
   const challengeRes = await fetch(`${apiUrl}/api/auth/challenge`);
   if (!challengeRes.ok) {
     throw new Error('Challenge request failed');
