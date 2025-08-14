@@ -10,8 +10,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
 
   const login = async () => {
-    const t = await fetchToken();
-    setToken(t);
+    try {
+      const t = await fetchToken();
+      setToken(t);
+    } catch (err) {
+      console.error('Authentication failed', err);
+      alert("Authentication failed. Please try again later.");
+    }
   };
 
   const logout = () => {
