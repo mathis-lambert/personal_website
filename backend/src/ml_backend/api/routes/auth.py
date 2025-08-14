@@ -48,7 +48,24 @@ async def issue_token(req: TokenRequest, request: Request):
         )
 
     origin = request.headers.get("origin") or request.headers.get("referer")
-    if not origin or not origin.startswith(ALLOWED_ORIGIN):
+    allowed_url = urlparse(ALLOWED_ORIGIN)
+    origin_header = request.headers.get("origin")
+    referer_header = request.headers.get("referer")
+
+    def is_valid_header(header_value):
+        if not header_value:
+            return False
+        try:
+            parsed = urlparse(header_value)
+            # Compare scheme and netloc (host:port)
+            return (
+                parsed.scheme == allowed_url.scheme and
+                parsed.netloc == allowed_url.netloc
+            )
+        except Exception:
+            return False
+
+    if not (is_valid_header(origin_header) or is_valid_header(referer_header)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid origin"
         )
