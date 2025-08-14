@@ -4,6 +4,7 @@ import os
 import time
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
+from urllib.parse import urlparse
 
 from ml_backend.api.security import create_access_token
 
