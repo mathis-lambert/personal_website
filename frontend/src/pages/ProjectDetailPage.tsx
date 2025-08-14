@@ -22,7 +22,14 @@ const ProjectDetailPage: React.FC = () => {
           return;
         }
         const result = await getProjectBySlug(projectId, { signal: ac.signal, token: token ?? undefined });
-        setProject(result);
+        setProject((prevProject) => {
+          const prevId = prevProject?.id;
+          const newId = result?.id;
+          if (prevId !== newId) {
+            return result;
+          }
+          return prevProject;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch project detail:', e);

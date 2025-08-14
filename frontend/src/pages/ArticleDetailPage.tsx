@@ -21,7 +21,14 @@ const ArticleDetailPage: React.FC = () => {
           return;
         }
         const result = await getArticleBySlug(articleId, { signal: ac.signal, token: token ?? undefined });
-        setArticle(result);
+        setArticle((prevArticle) => {
+          const prevId = prevArticle?.id;
+          const newId = result?.id;
+          if (prevId !== newId) {
+            return result;
+          }
+          return prevArticle;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch article detail:', e);

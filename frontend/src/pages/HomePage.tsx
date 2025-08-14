@@ -31,7 +31,14 @@ const HomePage = () => {
         const top = (featuredOnly.length ? featuredOnly : normalized)
           .sort(byDateDesc)
           .slice(0, 3);
-        setFeatured(top);
+        setFeatured((prevProjects) => {
+          const prevIds = prevProjects.map((p) => p.id);
+          const newIds = top.map((p) => p.id);
+          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
+            return top;
+          }
+          return prevProjects;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch featured projects:', e);
@@ -55,7 +62,14 @@ const HomePage = () => {
         const byDateDesc = (a: Article, b: Article) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const top = normalized.sort(byDateDesc).slice(0, 3);
-        setLatestArticles(top);
+        setLatestArticles((prevArticles) => {
+          const prevIds = prevArticles.map((a) => a.id);
+          const newIds = top.map((a) => a.id);
+          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
+            return top;
+          }
+          return prevArticles;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch latest articles:', e);

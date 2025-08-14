@@ -44,7 +44,14 @@ const BlogArticlesList: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const data = await getArticles({ signal: ac.signal, token: token ?? undefined });
-        setArticles(data);
+        setArticles((prevArticles) => {
+          const prevIds = prevArticles.map((a) => a.id);
+          const newIds = data.map((a) => a.id);
+          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
+            return data;
+          }
+          return prevArticles;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch articles:', e);

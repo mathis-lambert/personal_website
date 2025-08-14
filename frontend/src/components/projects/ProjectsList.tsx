@@ -48,7 +48,14 @@ const ProjectsList: React.FC = () => {
         setIsLoading(true);
         setError(null);
         const normalized = await getProjects({ signal: ac.signal, token: token ?? undefined });
-        setProjects(normalized.length ? normalized : []);
+        setProjects((prevProjects) => {
+          const prevIds = prevProjects.map((p) => p.id);
+          const newIds = normalized.map((p) => p.id);
+          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
+            return normalized;
+          }
+          return prevProjects;
+        });
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch projects:', e);
