@@ -14,6 +14,12 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </ChatProvider>
       </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider storageKey="vite-ui-theme">
+        <ChatProvider>
+          <App />
+        </ChatProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </StrictMode>,
 );
