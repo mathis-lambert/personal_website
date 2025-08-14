@@ -34,7 +34,43 @@ export async function fetchToken(): Promise<string> {
   });
 
   if (!tokenRes.ok) {
-    throw new Error('Token request failed');
+  let challengeRes;
+  try {
+    challengeRes = await fetch(`${apiUrl}/api/auth/challenge`);
+  } catch (err) {
+    throw new Error(`Network error during challenge request: ${(err as Error).message}`);
+  }
+  if (!challengeRes.ok) {
+    if (challengeRes.status === 401 || challengeRes.status === 403) {
+      throw new Error('Authentication failed during challenge request');
+    } else if (challengeRes.status >= 500) {
+      throw new Error(`Server error (${challengeRes.status}) during challenge request`);
+    } else {
+      throw new Error(`Challenge request failed with status ${challengeRes.status}: ${challengeRes.statusText}`);
+    }
+  }
+  const { nonce } = await challengeRes.json();
+  const signature = await sign(username, password, nonce);
+
+  let tokenRes;
+  try {
+    tokenRes = await fetch(`${apiUrl}/api/auth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, nonce, signature }),
+    });
+  } catch (err) {
+    throw new Error(`Network error during token request: ${(err as Error).message}`);
+  }
+
+  if (!tokenRes.ok) {
+    if (tokenRes.status === 401 || tokenRes.status === 403) {
+      throw new Error('Authentication failed during token request');
+    } else if (tokenRes.status >= 500) {
+      throw new Error(`Server error (${tokenRes.status}) during token request`);
+    } else {
+      throw new Error(`Token request failed with status ${tokenRes.status}: ${tokenRes.statusText}`);
+    }
   }
 
   const data = await tokenRes.json();
