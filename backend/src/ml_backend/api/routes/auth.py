@@ -11,10 +11,8 @@ from ml_backend.api.security import create_access_token
 USERNAME = os.getenv("API_USERNAME", "admin")
 PASSWORD = os.getenv("API_PASSWORD", "secret")
 
-
-ENV = os.getenv("ENV", "development")
-if ENV == "production" and (not PASSWORD or PASSWORD == "secret"):
-    raise RuntimeError("API_PASSWORD must be set to a strong value in production.")
+if not PASSWORD or PASSWORD == "secret":
+    raise RuntimeError("API_PASSWORD must be set to a strong value.")
 
 ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "https://mathislambert.fr")
 NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
