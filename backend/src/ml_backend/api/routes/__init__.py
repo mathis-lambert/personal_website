@@ -3,6 +3,7 @@ from .experiences import router as experiences_router
 from .studies import router as studies_router
 from .projects import router as projects_router
 from .articles import router as articles_router
+from .auth import router as auth_router
 
 __all__ = [
     "chat_router",
@@ -10,4 +11,5 @@ __all__ = [
     "studies_router",
     "projects_router",
     "articles_router",
+    "auth_router",
 ]

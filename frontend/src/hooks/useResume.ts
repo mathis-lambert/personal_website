@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { initialResumeData } from '../data';
 import { callPersonalApi } from '@/api/personalApi.ts';
+import useAuth from '@/hooks/useAuth';
 import type { IsLoadingState, ResumeData } from '../types';
 
 type AiInteractionType = 'summary' | 'experience' | 'coverLetter' | 'funFact';
@@ -16,6 +17,7 @@ export const useResume = () => {
   });
   const [jobDescription, setJobDescription] = useState<string>('');
   const [aiResponse, setAiResponse] = useState<string>('');
+  const { token } = useAuth();
 
   const handleAiInteraction = useCallback(
     async (type: AiInteractionType) => {
@@ -26,10 +28,13 @@ export const useResume = () => {
         switch (type) {
           case 'summary': {
             prompt = `Rewrite this summary in a more professional tone, keeping it professional and under 50 words: "${resumeData.summary}"`;
-            const newSummary = await callPersonalApi({
-              input: prompt,
-              history: [],
-            });
+            const newSummary = await callPersonalApi(
+              {
+                input: prompt,
+                history: [],
+              },
+              { token },
+            );
 
             console.log('New summary:', newSummary);
             if (!newSummary || !newSummary.result) {
@@ -51,16 +56,17 @@ export const useResume = () => {
               )
               .join('\n');
             prompt = `Summarize the following career experience into a powerful, 2-sentence paragraph for a resume: \n${expText}`;
-            const expSummary = await callPersonalApi({
-              input: prompt,
-              history: [],
-            });
+            const expSummary = await callPersonalApi(
+              {
+                input: prompt,
+                history: [],
+              },
+              { token },
+            );
 
             console.log('Experience summary:', expSummary);
             if (!expSummary || !expSummary.result) {
-              setAiResponse(
-                'Failed to summarize experience. Please try again.',
-              );
+              setAiResponse('Failed to summarize experience. Please try again.');
               return;
             }
             setAiResponse(expSummary.result);
@@ -74,7 +80,7 @@ export const useResume = () => {
         setIsLoading((prev) => ({ ...prev, [type]: false }));
       }
     },
-    [resumeData],
+    [resumeData, token],
   );
 
   return {

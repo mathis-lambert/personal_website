@@ -1,4 +1,6 @@
-export type FetchWithTimeoutInit = RequestInit & { timeoutMs?: number };
+import { getAuthHeaders } from './auth';
+
+export type FetchWithTimeoutInit = RequestInit & { timeoutMs?: number; authToken?: string };
 
 export async function fetchWithTimeout(
   input: RequestInfo | URL,
@@ -23,15 +25,14 @@ export async function fetchWithTimeout(
   }, timeoutMs);
 
   try {
-    const {
-      timeoutMs: _ignoredTimeout,
-      signal: _ignoredSignal,
-      ...rest
-    } = init ?? {};
+    const { timeoutMs: _ignoredTimeout, signal: _ignoredSignal, headers, authToken, ...rest } =
+      init ?? {};
     void _ignoredTimeout;
     void _ignoredSignal;
+    const mergedHeaders: HeadersInit = { ...(headers || {}), ...getAuthHeaders(authToken) };
     return await fetch(input, {
       ...(rest as RequestInit),
+      headers: mergedHeaders,
       signal: controller.signal,
     });
   } finally {
