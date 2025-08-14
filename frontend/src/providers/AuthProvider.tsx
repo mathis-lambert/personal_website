@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { AuthContext } from '@/hooks/useAuth';
 import { fetchToken } from '@/api/auth';
 
@@ -15,7 +16,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(t);
     } catch (err) {
       console.error('Authentication failed', err);
-      alert("Authentication failed. Please try again later.");
+      toast.error('Authentication failed. Please try again later.');
     }
   };
 

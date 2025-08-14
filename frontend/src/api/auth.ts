@@ -33,47 +33,47 @@ export async function fetchToken(): Promise<string> {
     body: JSON.stringify({ username, nonce, signature }),
   });
 
-  if (!tokenRes.ok) {
-  let challengeRes;
-  try {
-    challengeRes = await fetch(`${apiUrl}/api/auth/challenge`);
-  } catch (err) {
-    throw new Error(`Network error during challenge request: ${(err as Error).message}`);
-  }
-  if (!challengeRes.ok) {
-    if (challengeRes.status === 401 || challengeRes.status === 403) {
-      throw new Error('Authentication failed during challenge request');
-    } else if (challengeRes.status >= 500) {
-      throw new Error(`Server error (${challengeRes.status}) during challenge request`);
-    } else {
-      throw new Error(`Challenge request failed with status ${challengeRes.status}: ${challengeRes.statusText}`);
-    }
-  }
-  const { nonce } = await challengeRes.json();
-  const signature = await sign(username, password, nonce);
-
-  let tokenRes;
-  try {
-    tokenRes = await fetch(`${apiUrl}/api/auth/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, nonce, signature }),
-    });
-  } catch (err) {
-    throw new Error(`Network error during token request: ${(err as Error).message}`);
+  // If the first request succeeds, we return the token immediately
+  if (tokenRes.ok) {
+    const data = await tokenRes.json();
+    return data.access_token as string;
   }
 
-    if (tokenRes.status === 401 || tokenRes.status === 403) {
-      throw new Error('Authentication failed during token request');
-    } else if (tokenRes.status >= 500) {
-      throw new Error(`Server error (${tokenRes.status}) during token request`);
-    } else {
-      throw new Error(`Token request failed with status ${tokenRes.status}: ${tokenRes.statusText}`);
-    }
+  // Immediate error handling
+  if (tokenRes.status === 401 || tokenRes.status === 403) {
+    throw new Error('Authentication failed during token request');
+  }
+  if (tokenRes.status >= 500) {
+    throw new Error(`Server error (${tokenRes.status}) during token request`);
   }
 
-  const data = await tokenRes.json();
-  return data.access_token as string;
+  // Last chance to get the token: if the first request fails, we try again with a new nonce
+  const retryChallengeRes = await fetch(`${apiUrl}/api/auth/challenge`);
+  if (!retryChallengeRes.ok) {
+    throw new Error(`Challenge retry failed with status ${retryChallengeRes.status}: ${retryChallengeRes.statusText}`);
+  }
+  const { nonce: retryNonce } = await retryChallengeRes.json();
+  const retrySignature = await sign(username, password, retryNonce);
+
+  const retryTokenRes = await fetch(`${apiUrl}/api/auth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, nonce: retryNonce, signature: retrySignature }),
+  });
+
+  if (retryTokenRes.ok) {
+    const data = await retryTokenRes.json();
+    return data.access_token as string;
+  }
+
+  if (retryTokenRes.status === 401 || retryTokenRes.status === 403) {
+    throw new Error('Authentication failed during token retry');
+  }
+  if (retryTokenRes.status >= 500) {
+    throw new Error(`Server error (${retryTokenRes.status}) during token retry`);
+  }
+
+  throw new Error(`Token retry failed with status ${retryTokenRes.status}: ${retryTokenRes.statusText}`);
 }
 
 export function getAuthHeaders(token?: string): HeadersInit {

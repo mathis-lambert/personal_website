@@ -5,6 +5,7 @@ import App from './App.tsx';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
 import { ChatProvider } from '@/providers/ChatProvider.tsx';
 import { AuthProvider } from '@/providers/AuthProvider.tsx';
+import { Toaster } from "@/components/ui/sonner"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -12,13 +13,9 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <ChatProvider>
           <App />
+          <Toaster />
         </ChatProvider>
       </AuthProvider>
-    <AuthProvider>
-      <ThemeProvider storageKey="vite-ui-theme">
-        <ChatProvider>
-          <App />
-        </ChatProvider>
-      </ThemeProvider>
+    </ThemeProvider>
   </StrictMode>,
 );
