@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async () => {
     try {
       const t = await fetchToken();
+      console.log('[Auth] Initial token fetched', t);
       setToken(t);
     } catch (err) {
       console.error('Authentication failed', err);
@@ -38,10 +39,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Auto-refresh the token before it expires
   useEffect(() => {
     const refreshMs = Math.max(TOKEN_EXPIRATION_SEC - 5, 1) * 1000; // refresh 5 s before the expiration
+    console.log(`[Auth] Setting up auto-refresh every ${refreshMs} ms`);
     const id = setInterval(() => {
+      console.log('[Auth] Refreshing token...');
       fetchToken()
-        .then((t) => setToken((prev) => (prev !== t ? t : prev)))
-        .catch((err) => console.error('Token refresh failed', err));
+        .then((t) =>
+          setToken((prev) => {
+            if (prev !== t) {
+              console.log('[Auth] Token updated');
+              return t;
+            }
+            console.log('[Auth] Token unchanged');
+            return prev;
+          }),
+        )
+        .catch((err) => console.error('[Auth] Token refresh failed', err));
     }, refreshMs);
     return () => clearInterval(id);
   }, []);
