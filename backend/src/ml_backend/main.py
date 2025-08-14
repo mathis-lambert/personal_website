@@ -45,19 +45,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configuration des origines autorisées
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://mathislambert.fr")
+origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(',')]
+
 # Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "mathislambert.fr",
-        "localhost",
-        "localhost:8080",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "https://chat.mathislambert.fr",
-        "chat.mathislambert.fr",
-        "https://api.mathislambert.fr",
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

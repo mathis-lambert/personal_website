@@ -14,8 +14,12 @@ PASSWORD = os.getenv("API_PASSWORD", "secret")
 if not PASSWORD or PASSWORD == "secret":
     raise RuntimeError("API_PASSWORD must be set to a strong value.")
 
-ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "https://mathislambert.fr")
+ALLOWED_ORIGINS_STR = os.getenv("ALLOWED_ORIGINS", "https://mathislambert.fr,http://localhost:5173")
+ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(',')]
+
+
 NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
+
 
 class TokenRequest(BaseModel):
     username: str
@@ -51,24 +55,22 @@ async def issue_token(req: TokenRequest, request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Expired nonce"
         )
 
-    allowed_url = urlparse(ALLOWED_ORIGIN)
     origin_header = request.headers.get("origin")
     referer_header = request.headers.get("referer")
 
-    def is_valid_header(header_value):
+    def get_origin(header_value):
         if not header_value:
-            return False
+            return None
         try:
+            # Return scheme://netloc
             parsed = urlparse(header_value)
-            # Compare scheme and netloc (host:port)
-            return (
-                parsed.scheme == allowed_url.scheme and
-                parsed.netloc == allowed_url.netloc
-            )
+            return f"{parsed.scheme}://{parsed.netloc}"
         except Exception:
-            return False
+            return None
 
-    if not (is_valid_header(origin_header) or is_valid_header(referer_header)):
+    request_origin = get_origin(origin_header) or get_origin(referer_header)
+
+    if not request_origin or request_origin not in ALLOWED_ORIGINS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid origin"
         )
