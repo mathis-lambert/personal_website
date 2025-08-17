@@ -46,18 +46,31 @@ async def chat_completions(
 `retrieved_documents`: {top_k if top_k else "No docs found."}
 """
 
+        messages = [
+            {
+                "role": "system",
+                "content": rag_prompt,
+            },
+        ]
+        
+        for message in body.history:
+            messages.append({
+                "role": message["role"],
+                "content": message["content"],
+            })
+            
+        messages.append({
+            "role": "user",
+            "content": user_input,
+        })
+
         return StreamingResponse(
             api_client.chat.stream_sse(
                 ChatCompletionsRequest(
-                    input=user_input,
-                    prompt=rag_prompt,
-                    history=body.history,
-                    temperature=0.3,
-                    max_tokens=1024,
-                    top_p=0.9,
+                    messages=messages,
                     stream=True,
-                    # model="mistral/mistral-small-latest",
                     model="openai/gpt-5-nano",
+                    reasoning_effort="low",
                 )
             ),
             media_type="text/event-stream",
