@@ -4,7 +4,7 @@ import aiohttp
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from ml_api_client import APIClient
-from ml_api_client.models import ChatCompletionsRequest, RagRetrieveRequest
+from ml_api_client.models import ChatCompletionsRequest, VectorStoreSearchRequest
 from pydantic import BaseModel
 
 from ml_backend.api.services import get_api_client
@@ -26,11 +26,11 @@ async def chat_completions(
     try:
         # Vérifiez si le modèle est spécifié, sinon utilisez le modèle par défaut
 
-        top_k = await api_client.rag.retrieve(
+        top_k = await api_client.vector_stores.search_vector_store(
             "mathis_bio",
-            RagRetrieveRequest(
+            VectorStoreSearchRequest(
                 query=body.input,
-                model="mistral-embed",
+                model="mistral/mistral-embed",
                 limit=5,
             ),
         )
@@ -56,7 +56,7 @@ async def chat_completions(
                     max_tokens=1024,
                     top_p=0.9,
                     stream=True,
-                    model="mistral-small-latest",
+                    model="mistral/mistral-small-latest",
                 )
             ),
             media_type="text/event-stream",
