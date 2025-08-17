@@ -62,23 +62,77 @@ export interface Message {
   content: string;
 }
 
-export interface ChatCompletionsChunk {
-  chunk: string;
-  finish_reason: string | null;
-  job_id: string;
+// (Ancien format supprimé)
+
+// --- OpenAI-like SSE chunk format support ---
+
+export type FinishReason =
+  | 'stop'
+  | 'length'
+  | 'content_filter'
+  | 'tool_calls'
+  | string;
+
+export interface OpenAIChoiceDelta {
+  index: number;
+  delta: {
+    role: 'system' | 'user' | 'assistant' | null;
+    content: string | null;
+    reasoning_content?: string | null;
+  };
+  logprobs: unknown | null;
+  finish_reason: FinishReason | null;
 }
 
-export interface ChatCompletionsResult {
-  result: string;
-  finish_reason: string;
-  job_id: string;
+export interface OpenAIChatCompletionChunk {
+  id: string;
+  object: 'chat.completion.chunk';
+  created: number;
+  model: string;
+  choices: OpenAIChoiceDelta[];
+  system_fingerprint?: string | null;
+}
+
+export interface OpenAIChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+export interface OpenAIChoiceCompletion {
+  index: number;
+  message: OpenAIChatMessage;
+  finish_reason: FinishReason;
+  logprobs?: unknown | null;
+}
+
+export interface OpenAIChatCompletion {
+  id: string;
+  object: 'chat.completion';
+  created: number;
+  model: string;
+  choices: OpenAIChoiceCompletion[];
+  system_fingerprint?: string | null;
+}
+
+// --- Types d'API internes (format simplifié mais aligné OpenAI) ---
+
+export interface ApiStreamChunk {
+  content: string; // delta.content
+  finish_reason: FinishReason | null;
+  id: string; // completion id
+}
+
+export interface ApiCompletionResult {
+  result: string; // contenu agrégé
+  finish_reason: FinishReason; // raison de fin de l'API
+  id: string; // completion id
 }
 
 // --- State and Action Types for Reducer ---
 
 export interface ChatState {
   result: string;
-  finishReason: string | null;
+  finishReason: FinishReason | null;
   jobId: string | null;
   isLoading: boolean;
   error: Error | null;
@@ -86,9 +140,9 @@ export interface ChatState {
 
 export type ChatAction =
   | { type: 'FETCH_START' }
-  | { type: 'STREAM_CHUNK'; payload: ChatCompletionsChunk }
-  | { type: 'STREAM_DONE'; payload: ChatCompletionsResult }
-  | { type: 'FETCH_SUCCESS'; payload: ChatCompletionsResult }
+  | { type: 'STREAM_CHUNK'; payload: ApiStreamChunk }
+  | { type: 'STREAM_DONE'; payload: ApiCompletionResult }
+  | { type: 'FETCH_SUCCESS'; payload: ApiCompletionResult }
   | { type: 'FETCH_ERROR'; payload: Error }
   | { type: 'RESET' };
 

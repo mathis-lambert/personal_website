@@ -1,7 +1,9 @@
 import type {
-  ChatCompletionsChunk,
+  ApiCompletionResult,
+  ApiStreamChunk,
   ChatCompletionsRequest,
-  ChatCompletionsResult,
+  OpenAIChatCompletion,
+  FinishReason,
 } from '@/types.ts';
 import { getAuthHeaders } from './auth';
 
@@ -13,12 +15,12 @@ export interface ApiCallbacks {
    * Called for each data chunk received from the stream.
    * @param chunk The parsed data chunk.
    */
-  onChunk: (chunk: ChatCompletionsChunk) => void;
+  onChunk: (chunk: ApiStreamChunk) => void;
   /**
    * Called when the stream is fully complete.
    * @param result The final, complete result object.
    */
-  onDone?: (result: ChatCompletionsResult) => void;
+  onDone?: (result: ApiCompletionResult) => void;
   /**
    * Called if an error occurs during the fetch or streaming.
    * @param error The error object.
@@ -45,7 +47,7 @@ export async function callPersonalApi(
     signal?: AbortSignal;
     callbacks?: ApiCallbacks;
   },
-): Promise<ChatCompletionsResult | void> {
+): Promise<ApiCompletionResult | void> {
   const apiUrl = import.meta.env.VITE_API_URL;
   const { token, signal, callbacks } = options || {};
   const isStreaming = !!callbacks?.onChunk;
@@ -96,10 +98,10 @@ export async function callPersonalApi(
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
-      // Accumulator for non-callback usage (fallback when server sends SSE even if we didn't request it)
+      // Accumulator for both streaming and non-streaming usage
       let aggregatedResult = '';
-      let aggregatedJobId: string | null = null;
-      let aggregatedFinish: string | null = null;
+      let aggregatedId: string | null = null;
+      let aggregatedFinish: FinishReason | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -125,28 +127,117 @@ export async function callPersonalApi(
 
           if (!dataLine) continue;
           const data = dataLine.substring(5).trim();
+          // Handle SSE sentinel if used
+          if (data === '[DONE]') {
+            const donePayload: ApiCompletionResult = {
+              result: aggregatedResult,
+              finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
+              id: aggregatedId ?? '',
+            };
+            if (callbacks?.onDone) {
+              callbacks.onDone(donePayload);
+              return;
+            }
+            return donePayload;
+          }
           try {
-            const parsed = JSON.parse(data);
+            const parsed = JSON.parse(data) as unknown;
+
             const isDoneEvent = !!eventTypeLine?.includes('done');
 
             if (isDoneEvent) {
-              const donePayload = parsed as ChatCompletionsResult;
+              const donePayload: ApiCompletionResult = {
+                result: aggregatedResult,
+                finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
+                id: aggregatedId ?? '',
+              };
               if (callbacks?.onDone) {
                 callbacks.onDone(donePayload);
                 return; // finish streaming mode
               }
-              // Return full result in non-streaming mode
               return donePayload;
             }
 
-            // Regular data chunk
-            const chunkPayload = parsed as ChatCompletionsChunk;
+            // Normalize possible formats into our simple shapes
+            let nextChunk = '';
+            let nextFinish: FinishReason | null = null;
+            let nextId: string | null = null;
+
+            // OpenAI-like chunk: object === 'chat.completion.chunk'
+            if (
+              typeof parsed === 'object' &&
+              parsed !== null &&
+              'object' in (parsed as Record<string, unknown>) &&
+              (parsed as Record<string, unknown>).object ===
+              'chat.completion.chunk'
+            ) {
+              const oai = parsed as {
+                id?: string;
+                choices?: Array<{
+                  delta?: { role?: string | null; content?: string | null };
+                  finish_reason?: string | null;
+                }>;
+              };
+              const choice = oai.choices?.[0];
+              nextChunk = choice?.delta?.content ?? '';
+              nextFinish = choice?.finish_reason ?? null;
+              nextId = oai.id ?? null;
+            } else if (
+              typeof parsed === 'object' &&
+              parsed !== null &&
+              'object' in (parsed as Record<string, unknown>) &&
+              (parsed as Record<string, unknown>).object === 'chat.completion'
+            ) {
+              // Non-streaming OpenAI-like completion
+              const completion = parsed as OpenAIChatCompletion;
+              const message = completion.choices?.[0]?.message?.content ?? '';
+              const reason =
+                (completion.choices?.[0]?.finish_reason ?? 'stop') as FinishReason;
+              const donePayload: ApiCompletionResult = {
+                result: message,
+                finish_reason: reason,
+                id: completion.id,
+              };
+              if (callbacks?.onDone) {
+                callbacks.onDone(donePayload);
+                return;
+              }
+              return donePayload;
+            }
+
+            // Update aggregation
+            if (nextChunk) {
+              aggregatedResult += nextChunk;
+            }
+            if (nextId) {
+              aggregatedId = nextId;
+            }
+            if (nextFinish !== null) {
+              aggregatedFinish = nextFinish;
+            }
+
+            // Emit chunk callback as our simplified shape
             if (callbacks?.onChunk) {
+              const chunkPayload: ApiStreamChunk = {
+                content: nextChunk,
+                finish_reason: nextFinish,
+                id: aggregatedId ?? '',
+              };
               callbacks.onChunk(chunkPayload);
-            } else {
-              aggregatedResult += chunkPayload.chunk ?? '';
-              aggregatedJobId = chunkPayload.job_id ?? aggregatedJobId;
-              aggregatedFinish = chunkPayload.finish_reason ?? aggregatedFinish;
+            }
+
+            // If backend signals finish via finish_reason inside chunk, end stream
+            if (nextFinish !== null) {
+              const donePayload: ApiCompletionResult = {
+                result: aggregatedResult,
+                finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
+                id: aggregatedId ?? '',
+              };
+              if (callbacks?.onDone) {
+                callbacks.onDone(donePayload);
+                return;
+              }
+              return donePayload;
             }
           } catch (e) {
             console.error('Failed to parse SSE chunk data:', data, e);
@@ -159,16 +250,36 @@ export async function callPersonalApi(
       if (!isStreaming && aggregatedResult) {
         return {
           result: aggregatedResult,
-          finish_reason: aggregatedFinish ?? 'stop',
-          job_id: aggregatedJobId ?? '',
-        } as ChatCompletionsResult;
+          finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
+          id: aggregatedId ?? '',
+        } as ApiCompletionResult;
       }
       return; // Streaming finished with callbacks
     }
 
     // --- Non-Streaming Logic ---
-    const result: ChatCompletionsResult = await response.json();
-    return result;
+    const nonStreaming = (await response.json()) as unknown;
+    // Convert OpenAI completion to ApiCompletionResult
+    if (
+      typeof nonStreaming === 'object' &&
+      nonStreaming !== null &&
+      'object' in (nonStreaming as Record<string, unknown>) &&
+      (nonStreaming as Record<string, unknown>).object === 'chat.completion'
+    ) {
+      const completion = nonStreaming as OpenAIChatCompletion;
+      return {
+        id: completion.id,
+        result: completion.choices?.[0]?.message?.content ?? '',
+        finish_reason: (completion.choices?.[0]?.finish_reason ?? 'stop') as FinishReason,
+      };
+    }
+    // Otherwise assume our simplified result (rare)
+    const fallback = nonStreaming as { result?: string; finish_reason?: string; id?: string };
+    return {
+      id: fallback.id ?? '',
+      result: fallback.result ?? '',
+      finish_reason: (fallback.finish_reason ?? 'stop') as FinishReason,
+    };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       console.log('API request was aborted.');

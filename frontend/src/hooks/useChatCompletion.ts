@@ -24,9 +24,9 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case 'STREAM_CHUNK':
       return {
         ...state,
-        // Append chunk to result, update jobId if present
-        result: state.result + action.payload.chunk,
-        jobId: action.payload.job_id ?? state.jobId,
+        // Append delta content to result, update id if present
+        result: state.result + action.payload.content,
+        jobId: action.payload.id ?? state.jobId,
         finishReason: null,
         isLoading: true,
         error: null,
@@ -35,7 +35,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         finishReason: action.payload.finish_reason,
-        jobId: action.payload.job_id ?? state.jobId,
+        jobId: action.payload.id ?? state.jobId,
         isLoading: false,
         error: null,
       };
@@ -44,7 +44,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         result: action.payload.result,
         finishReason: action.payload.finish_reason,
-        jobId: action.payload.job_id,
+        jobId: action.payload.id,
         isLoading: false,
         error: null,
       };
