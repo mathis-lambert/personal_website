@@ -56,7 +56,8 @@ async def chat_completions(
                     max_tokens=1024,
                     top_p=0.9,
                     stream=True,
-                    model="mistral/mistral-small-latest",
+                    # model="mistral/mistral-small-latest",
+                    model="openai/gpt-5-nano",
                 )
             ),
             media_type="text/event-stream",
