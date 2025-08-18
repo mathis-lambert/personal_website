@@ -52,13 +52,14 @@ async def chat_completions(
             },
         ]
 
-        for message in body.history:
-            messages.append(
-                {
-                    "role": message["role"],
-                    "content": message["content"],
-                }
-            )
+        if len(body.history) > 0:
+            for message in body.history[:-1]:
+                messages.append(
+                    {
+                        "role": message["role"],
+                        "content": message["content"],
+                    }
+                )
 
         messages.append(
             {
