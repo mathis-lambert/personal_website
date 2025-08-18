@@ -72,8 +72,7 @@ async def chat_completions(
         return StreamingResponse(
             api_client.chat.stream_sse(
                 messages=messages,
-                model="openai/gpt-5-nano",
-                reasoning_effort="minimal",
+                model="qwen/qwen3-235b-a22b:free",
             ),
             media_type="text/event-stream",
         )
