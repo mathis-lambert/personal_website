@@ -27,10 +27,9 @@ async def chat_completions(
         # Vérifiez si le modèle est spécifié, sinon utilisez le modèle par défaut
 
         top_k = await api_client.vector_stores.search_vector_store(
-            "mathis_bio",
+            "mathis_bio_store",
             VectorStoreSearchRequest(
                 query=body.input,
-                model="mistral/mistral-embed",
                 limit=5,
             ),
         )
@@ -70,7 +69,7 @@ async def chat_completions(
                     messages=messages,
                     stream=True,
                     model="openai/gpt-5-nano",
-                    reasoning_effort="low",
+                    reasoning_effort="minimal",
                 )
             ),
             media_type="text/event-stream",
