@@ -7,6 +7,7 @@ from .routes import (
     articles_router,
     projects_router,
     auth_router,
+    resume_router,
 )
 from .security import verify_token
 
@@ -41,6 +42,12 @@ router.include_router(
     projects_router,
     prefix="/projects",
     tags=["projects"],
+    dependencies=[Depends(verify_token)],
+)
+router.include_router(
+    resume_router,
+    prefix="/resume",
+    tags=["Resume"],
     dependencies=[Depends(verify_token)],
 )
 

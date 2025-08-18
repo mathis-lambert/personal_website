@@ -43,6 +43,7 @@ class MongoDBConnector:
             "studies": "studies.json",
             "projects": "projects.json",
             "articles": "articles.json",
+            "resume": "resume.json",
         }
 
         db = self.get_database()
