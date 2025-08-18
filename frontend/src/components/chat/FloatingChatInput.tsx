@@ -9,6 +9,7 @@ import { ArrowUp, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useChat } from '@/hooks/useChat';
+import { useLocation } from 'react-router-dom';
 
 interface ChatInputProps {
   placeholder?: string;
@@ -20,7 +21,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState<string>('');
   const { sendMessage, isLoading, isChatOpen, closeChat } = useChat();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
+  const location = useLocation();
   const MIN_TEXTAREA_HEIGHT = 40;
   const MAX_TEXTAREA_HEIGHT = 200;
 
@@ -46,7 +47,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     const trimmedMessage = message.trim();
     if (!trimmedMessage) return;
 
-    sendMessage(trimmedMessage);
+    sendMessage(trimmedMessage, location.pathname);
     setMessage('');
 
     const textArea = textAreaRef.current;
@@ -54,7 +55,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
       textArea.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
       textArea.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
     }
-  }, [message, sendMessage, MIN_TEXTAREA_HEIGHT]);
+  }, [message, sendMessage, MIN_TEXTAREA_HEIGHT, location.pathname]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

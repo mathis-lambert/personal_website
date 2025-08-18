@@ -9,7 +9,7 @@ export interface ChatContextType {
   streamingResult: string;
   openChat: () => void;
   closeChat: () => void;
-  sendMessage: (message: string) => void;
+  sendMessage: (message: string, location: string) => void;
 }
 
 export const ChatContext = createContext<ChatContextType | undefined>(

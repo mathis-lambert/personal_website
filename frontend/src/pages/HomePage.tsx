@@ -22,7 +22,6 @@ const HomePage = () => {
     const ac = new AbortController();
     async function fetchFeatured() {
       try {
-        setIsLoading(true);
         setError(null);
         const normalized: Project[] = await getProjects({ signal: ac.signal, token: token ?? undefined });
         const byDateDesc = (a: Project, b: Project) =>
@@ -31,14 +30,9 @@ const HomePage = () => {
         const top = (featuredOnly.length ? featuredOnly : normalized)
           .sort(byDateDesc)
           .slice(0, 3);
-        setFeatured((prevProjects) => {
-          const prevIds = prevProjects.map((p) => p.id);
-          const newIds = top.map((p) => p.id);
-          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
-            return top;
-          }
-          return prevProjects;
-        });
+        if (JSON.stringify(top) !== JSON.stringify(featured)) {
+          setFeatured(top);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch featured projects:', e);
@@ -50,26 +44,20 @@ const HomePage = () => {
     }
     fetchFeatured();
     return () => ac.abort();
-  }, [token]);
+  }, [token, featured]);
 
   useEffect(() => {
     const ac = new AbortController();
     async function fetchArticles() {
       try {
-        setIsArticlesLoading(true);
         setArticlesError(null);
         const normalized: Article[] = await getArticles({ signal: ac.signal, token: token ?? undefined });
         const byDateDesc = (a: Article, b: Article) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const top = normalized.sort(byDateDesc).slice(0, 3);
-        setLatestArticles((prevArticles) => {
-          const prevIds = prevArticles.map((a) => a.id);
-          const newIds = top.map((a) => a.id);
-          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
-            return top;
-          }
-          return prevArticles;
-        });
+        if (JSON.stringify(top) !== JSON.stringify(latestArticles)) {
+          setLatestArticles(top);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch latest articles:', e);
@@ -81,7 +69,7 @@ const HomePage = () => {
     }
     fetchArticles();
     return () => ac.abort();
-  }, [token]);
+  }, [token, latestArticles]);
 
   return (
     <>

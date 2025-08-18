@@ -22,7 +22,7 @@ const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
       className={cn(
         'inline-flex items-center h-9 px-2 rounded-full border transition-colors select-none',
         checked
-          ? 'bg-yellow-200/70 border-yellow-300/70 hover:bg-yellow-200/80 hover:border-yellow-300/80'
+          ? 'bg-yellow-200/30 border-yellow-300/30 hover:bg-yellow-200/50 hover:border-yellow-300/80'
           : 'bg-gray-400/10  border-white/30 dark:border-white/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40',
       )}
     >

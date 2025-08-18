@@ -35,22 +35,12 @@ const GlassCardsList = () => {
           getExperiences({ token: token ?? undefined, signal: ac.signal }),
           getStudies({ token: token ?? undefined, signal: ac.signal }),
         ]);
-        setExperiences((prevExperiences) => {
-          const prevTitles = prevExperiences.map((e) => e.title);
-          const newTitles = experiencesData.map((e) => e.title);
-          if (JSON.stringify(prevTitles) !== JSON.stringify(newTitles)) {
-            return experiencesData;
-          }
-          return prevExperiences;
-        });
-        setStudies((prevStudies) => {
-          const prevTitles = prevStudies.map((s) => s.title);
-          const newTitles = studiesData.map((s) => s.title);
-          if (JSON.stringify(prevTitles) !== JSON.stringify(newTitles)) {
-            return studiesData;
-          }
-          return prevStudies;
-        });
+        if (JSON.stringify(experiencesData) !== JSON.stringify(experiences)) {
+          setExperiences(experiencesData);
+        }
+        if (JSON.stringify(studiesData) !== JSON.stringify(studies)) {
+          setStudies(studiesData);
+        }
       } catch (error: unknown) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) {
           console.error('Failed to fetch timeline data:', error);
@@ -59,7 +49,7 @@ const GlassCardsList = () => {
     };
     fetchData();
     return () => ac.abort();
-  }, [token]);
+  }, [token, experiences, studies]);
 
   const topSkills = [
     'LLMs',

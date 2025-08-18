@@ -16,13 +16,14 @@ const ProjectDetailPage: React.FC = () => {
 
     async function fetchProject() {
       try {
-        setIsLoading(true);
         if (!projectId) {
           setProject(null);
           return;
         }
         const result = await getProjectBySlug(projectId, { signal: ac.signal, token: token ?? undefined });
-        setProject((prev) => (prev?.id !== result?.id ? result : prev));
+        if (JSON.stringify(result) !== JSON.stringify(project)) {
+          setProject(result);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch project detail:', e);
@@ -34,8 +35,7 @@ const ProjectDetailPage: React.FC = () => {
 
     fetchProject();
     return () => ac.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [token, projectId, project]);
 
   return <ProjectView project={project} isLoading={isLoading} />;
 };

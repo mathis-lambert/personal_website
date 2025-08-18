@@ -21,7 +21,9 @@ const ArticleDetailPage: React.FC = () => {
           return;
         }
         const result = await getArticleBySlug(articleId, { signal: ac.signal, token: token ?? undefined });
-        setArticle((prev) => (prev?.id !== result?.id ? result : prev));
+        if (JSON.stringify(result) !== JSON.stringify(article)) {
+          setArticle(result);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch article detail:', e);
@@ -32,8 +34,7 @@ const ArticleDetailPage: React.FC = () => {
     }
     fetchArticle();
     return () => ac.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [articleId]);
+  }, [token, articleId, article]);
 
   return <ArticleView article={article} isLoading={isLoading} />;
 };

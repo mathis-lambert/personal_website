@@ -41,17 +41,11 @@ const BlogArticlesList: React.FC = () => {
     const ac = new AbortController();
     async function fetchArticles() {
       try {
-        setIsLoading(true);
         setError(null);
         const data = await getArticles({ signal: ac.signal, token: token ?? undefined });
-        setArticles((prevArticles) => {
-          const prevIds = prevArticles.map((a) => a.id);
-          const newIds = data.map((a) => a.id);
-          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
-            return data;
-          }
-          return prevArticles;
-        });
+        if (JSON.stringify(data) !== JSON.stringify(articles)) {
+          setArticles(data);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch articles:', e);
@@ -63,7 +57,7 @@ const BlogArticlesList: React.FC = () => {
     }
     fetchArticles();
     return () => ac.abort();
-  }, [token]);
+  }, [token, articles]);
 
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();

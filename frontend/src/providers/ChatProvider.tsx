@@ -62,7 +62,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   }, []);
 
   const sendMessage = useCallback(
-    (message: string) => {
+    (message: string, location: string) => {
       if (!message.trim() || (isLoading && !!currentRequest)) return;
 
       if (!isChatOpen) {
@@ -76,6 +76,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const newRequest: ChatCompletionsRequest = {
         input: message,
         history: updatedHistory,
+        location,
       };
 
       setCurrentRequest(newRequest);

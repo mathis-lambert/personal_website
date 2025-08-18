@@ -30,13 +30,13 @@ const Navbar = () => {
 
   const navLinks = useMemo<NavLink[]>(
     () => [
-      { to: '/', text: 'Home' },
-      { to: 'projects', text: 'Projects' },
-      { to: 'blog', text: 'Blog' },
-      { to: 'resume', text: 'Resume' },
+      { to: '/', text: 'Home', onClick: closeChat },
+      { to: 'projects', text: 'Projects', onClick: closeChat },
+      { to: 'blog', text: 'Blog', onClick: closeChat },
+      { to: 'resume', text: 'Resume', onClick: closeChat },
       { to: '#', text: 'Chat', onClick: handleChatToggle },
     ],
-    [handleChatToggle],
+    [handleChatToggle, closeChat],
   );
 
   const connectLink: NavLink = {
