@@ -45,17 +45,11 @@ const ProjectsList: React.FC = () => {
 
     async function fetchProjects() {
       try {
-        setIsLoading(true);
         setError(null);
         const normalized = await getProjects({ signal: ac.signal, token: token ?? undefined });
-        setProjects((prevProjects) => {
-          const prevIds = prevProjects.map((p) => p.id);
-          const newIds = normalized.map((p) => p.id);
-          if (JSON.stringify(prevIds) !== JSON.stringify(newIds)) {
-            return normalized;
-          }
-          return prevProjects;
-        });
+        if (JSON.stringify(normalized) !== JSON.stringify(projects)) {
+          setProjects(normalized);
+        }
       } catch (e: unknown) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
         console.error('Failed to fetch projects:', e);
@@ -68,7 +62,7 @@ const ProjectsList: React.FC = () => {
 
     fetchProjects();
     return () => ac.abort();
-  }, [token]);
+  }, [token, projects]);
 
   // Calculate all unique technologies from the projects
   const allTechnologies = useMemo(() => {
