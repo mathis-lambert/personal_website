@@ -30,7 +30,8 @@ async def get_all_articles(
     except Exception as e:
         # Gestion générique des autres erreurs
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/{article_slug}")
 async def get_article_by_slug(
     article_slug: str,
@@ -107,9 +108,13 @@ async def get_article_metrics(
 ):
     try:
         if not id and not slug:
-            raise HTTPException(status_code=400, detail="Query param 'id' or 'slug' is required")
+            raise HTTPException(
+                status_code=400, detail="Query param 'id' or 'slug' is required"
+            )
         if id and slug:
-            raise HTTPException(status_code=400, detail="Provide only one of 'id' or 'slug'")
+            raise HTTPException(
+                status_code=400, detail="Provide only one of 'id' or 'slug'"
+            )
 
         db = mongodb.get_database()
         query: Dict[str, Any] = {"id": str(id)} if id else {"slug": slug}

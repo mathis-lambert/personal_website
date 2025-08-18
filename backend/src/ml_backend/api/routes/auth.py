@@ -14,8 +14,10 @@ PASSWORD = os.getenv("API_PASSWORD", "secret")
 if not PASSWORD or PASSWORD == "secret":
     raise RuntimeError("API_PASSWORD must be set to a strong value.")
 
-ALLOWED_ORIGINS_STR = os.getenv("ALLOWED_ORIGINS", "https://mathislambert.fr,http://localhost:5173")
-ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(',')]
+ALLOWED_ORIGINS_STR = os.getenv(
+    "ALLOWED_ORIGINS", "https://mathislambert.fr,http://localhost:5173"
+)
+ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(",")]
 
 
 NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
@@ -86,4 +88,3 @@ async def issue_token(req: TokenRequest, request: Request):
 
     token = create_access_token({"sub": req.username})
     return {"access_token": token, "token_type": "bearer"}
-

@@ -30,7 +30,8 @@ async def get_all_projects(
     except Exception as e:
         # Gestion générique des autres erreurs
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/{project_slug}")
 async def get_project_by_slug(
     project_slug: str,

@@ -47,7 +47,7 @@ app = FastAPI(
 
 # Configuration des origines autorisées
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://mathislambert.fr")
-origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(',')]
+origins = [origin.strip() for origin in ALLOWED_ORIGINS.split(",")]
 
 # Middleware
 app.add_middleware(

@@ -4,7 +4,7 @@ import aiohttp
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from ml_api_client import APIClient
-from ml_api_client.models import ChatCompletionsRequest, VectorStoreSearchRequest
+from ml_api_client.models import TextGenerationRequest, VectorStoreSearchRequest
 from pydantic import BaseModel
 
 from ml_backend.api.services import get_api_client
@@ -51,26 +51,27 @@ async def chat_completions(
                 "content": rag_prompt,
             },
         ]
-        
+
         for message in body.history:
-            messages.append({
-                "role": message["role"],
-                "content": message["content"],
-            })
-            
-        messages.append({
-            "role": "user",
-            "content": user_input,
-        })
+            messages.append(
+                {
+                    "role": message["role"],
+                    "content": message["content"],
+                }
+            )
+
+        messages.append(
+            {
+                "role": "user",
+                "content": user_input,
+            }
+        )
 
         return StreamingResponse(
             api_client.chat.stream_sse(
-                ChatCompletionsRequest(
-                    messages=messages,
-                    stream=True,
-                    model="openai/gpt-5-nano",
-                    reasoning_effort="minimal",
-                )
+                messages=messages,
+                model="openai/gpt-5-nano",
+                reasoning_effort="minimal",
             ),
             media_type="text/event-stream",
         )
