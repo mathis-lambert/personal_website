@@ -29,7 +29,7 @@ async def chat_completions(
             "mathis_bio_store",
             VectorStoreSearchRequest(
                 query=body.input,
-                limit=5,
+                limit=3,
             ),
         )
 
