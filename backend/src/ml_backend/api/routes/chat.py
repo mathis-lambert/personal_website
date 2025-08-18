@@ -16,6 +16,7 @@ router = APIRouter()
 class BackendCompletionsRequest(BaseModel):
     input: str
     history: List[Dict[str, Any]] = []
+    location: str
 
 
 @router.post("/completions")
@@ -24,8 +25,6 @@ async def chat_completions(
     api_client: APIClient = Depends(get_api_client),
 ):
     try:
-        # Vérifiez si le modèle est spécifié, sinon utilisez le modèle par défaut
-
         top_k = await api_client.vector_stores.search_vector_store(
             "mathis_bio_store",
             VectorStoreSearchRequest(
@@ -43,6 +42,8 @@ async def chat_completions(
 `user_question`: {body.input}
 
 `retrieved_documents`: {top_k if top_k else "No docs found."}
+
+`location`: {body.location}
 """
 
         messages = [
