@@ -6,8 +6,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from ml_api_client.modules.tools import ToolParams, ToolProperty
 from ml_backend.api import api_router
 from ml_backend.utils import CustomLogger, ensure_starting
+from ml_backend.api.services.tools import (
+    get_mathis_info,
+    get_mathis_projects,
+    get_mathis_experiences,
+)
+
 
 load_dotenv()
 
@@ -26,7 +33,33 @@ async def lifespan(app: FastAPI):
     if populate_mongo:
         await mongodb.insert_initial_data()
 
+    apiclient.tools.register(
+        "get_mathis_info",
+        get_mathis_info,
+        ToolParams(
+            properties={
+                "query": ToolProperty(
+                    type="string",
+                    description="The query to get information about Mathis",
+                )
+            },
+            required=["query"],
+        ),
+        description="Get information about Mathis",
+    )
+    apiclient.tools.register(
+        "get_mathis_projects",
+        get_mathis_projects,
+        description="Get All projects Mathis has worked on",
+    )
+    apiclient.tools.register(
+        "get_mathis_experiences",
+        get_mathis_experiences,
+        description="Get All experiences Mathis has worked on",
+    )
+
     app.apiclient = apiclient
+
     logger.info("Clients MongoDB and API initialized.")
 
     yield

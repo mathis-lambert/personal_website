@@ -4,7 +4,7 @@ import aiohttp
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from ml_api_client import APIClient
-from ml_api_client.models import TextGenerationRequest, VectorStoreSearchRequest
+from ml_api_client.models import VectorStoreSearchRequest
 from pydantic import BaseModel
 
 from ml_backend.api.services import get_api_client
@@ -24,23 +24,10 @@ async def chat_completions(
     api_client: APIClient = Depends(get_api_client),
 ):
     try:
-        top_k = await api_client.vector_stores.search_vector_store(
-            "mathis_bio_store",
-            VectorStoreSearchRequest(
-                query=body.messages[-1]["content"],
-                limit=3,
-            ),
-        )
-
-        if not top_k:
-            top_k = "No docs found."
-
         rag_prompt = load_prompt_from_file("./src/ml_backend/prompts/rag_main.txt")
 
         user_input = f"""
 `user_question`: {body.messages[-1]["content"]}
-
-`retrieved_documents`: {top_k if top_k else "No docs found."}
 
 `location`: {body.location}
 """
@@ -70,8 +57,7 @@ async def chat_completions(
 
         return StreamingResponse(
             api_client.chat.stream_sse(
-                messages=messages,
-                model="openai/gpt-oss-120b",
+                messages=messages, model="openai/gpt-oss-120b", auto_tool_execution=True
             ),
             media_type="text/event-stream",
         )

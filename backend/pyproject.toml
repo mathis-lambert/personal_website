@@ -11,7 +11,7 @@ dependencies = [
     "motor>=3.7.0",
     "pymongo>=4.3.3",
     "uvicorn>=0.34.0",
-    "ml-api-client>=0.2.1",
+    "ml-api-client>=0.3.1",
     "PyJWT>=2.10.1"
 ]
 
