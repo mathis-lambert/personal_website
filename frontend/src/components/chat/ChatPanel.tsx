@@ -28,7 +28,7 @@ const ChatPanel: React.FC = () => {
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
-          <div className="relative w-full max-w-4xl h-[calc(90vh-2rem)] flex flex-col bg-transparent">
+          <div className="relative w-full max-w-4xl h-full flex flex-col bg-transparent pt-10 pb-5">
             <Conversation />
           </div>
         </motion.div>

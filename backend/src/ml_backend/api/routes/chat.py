@@ -14,8 +14,7 @@ router = APIRouter()
 
 
 class BackendCompletionsRequest(BaseModel):
-    input: str
-    history: List[Dict[str, Any]] = []
+    messages: List[Dict[str, Any]] = []
     location: str
 
 
@@ -28,7 +27,7 @@ async def chat_completions(
         top_k = await api_client.vector_stores.search_vector_store(
             "mathis_bio_store",
             VectorStoreSearchRequest(
-                query=body.input,
+                query=body.messages[-1]["content"],
                 limit=3,
             ),
         )
@@ -39,7 +38,7 @@ async def chat_completions(
         rag_prompt = load_prompt_from_file("./src/ml_backend/prompts/rag_main.txt")
 
         user_input = f"""
-`user_question`: {body.input}
+`user_question`: {body.messages[-1]["content"]}
 
 `retrieved_documents`: {top_k if top_k else "No docs found."}
 
@@ -53,8 +52,8 @@ async def chat_completions(
             },
         ]
 
-        if len(body.history) > 0:
-            for message in body.history[:-1]:
+        if len(body.messages) > 0:
+            for message in body.messages[:-1]:
                 messages.append(
                     {
                         "role": message["role"],

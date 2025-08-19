@@ -43,7 +43,7 @@ const AnimatedOutletComponent = () => {
           variants={pageVariants}
           transition={pageTransition}
         >
-          <div className="mx-auto w-full min-h-screen max-w-5xl pt-22 px-4 lg:px-2">
+          <div className="mx-auto w-full min-h-screen max-w-5xl pt-20 md:pt-24 lg:pt-28 pb-10 px-4 lg:px-2">
             {cloneElement(element, { key: location.pathname })}
           </div>
         </motion.div>

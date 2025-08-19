@@ -82,13 +82,12 @@ const useChatCompletion = (
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
     ? JSON.stringify({
-      input: request.input,
-      history: request.history,
+      messages: request.messages,
     })
     : null;
 
   useEffect(() => {
-    if (!isActive || !request || !request.input.trim() || !apiUrl) {
+    if (!isActive || !request || !request.messages.length || !apiUrl) {
       if (state.isLoading || state.result || state.error) {
         dispatch({ type: 'RESET' });
       }

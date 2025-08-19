@@ -82,7 +82,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   const isSendDisabled = isLoading || message.trim() === '';
 
   return (
-    <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
+    <div className="fixed bottom-2 md:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
       <motion.div
         className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
         initial={{ opacity: 0, x: -50 }}

@@ -21,7 +21,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
   if (isLoading) {
     return (
       <motion.section
-        className="w-full max-w-5xl mx-auto py-10 md:py-12 px-0 sm:px-6 lg:px-8 min-h-[70vh]"
+        className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -94,7 +94,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
 
   if (!project) {
     return (
-      <section className="w-full max-w-5xl mx-auto py-12 md:py-16 px-0 sm:px-6 lg:px-8 min-h-[60vh] flex items-center justify-center">
+      <section className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[60vh] flex items-center justify-center">
         <div className="text-center text-gray-500 dark:text-gray-400">
           <p className="text-2xl mb-3 font-mono">( T _ T )</p>
           <p className="text-xl font-semibold">Project Not Found</p>
@@ -134,7 +134,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
 
   return (
     <motion.section
-      className="w-full max-w-5xl mx-auto py-10 md:py-12 px-0 sm:px-6 lg:px-8 min-h-[70vh]"
+      className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -227,40 +227,40 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
               repoUrl ||
               project.links?.docs ||
               project.links?.video) && (
-              <ProjectSection
-                title="Project Links"
-                contentClassName="flex flex-wrap gap-4"
-              >
-                {liveUrl && (
-                  <ProjectLinkButton
-                    href={liveUrl}
-                    icon={<ExternalLink className="w-4 h-4" />}
-                    label="Live Demo"
-                  />
-                )}
-                {repoUrl && (
-                  <ProjectLinkButton
-                    href={repoUrl}
-                    icon={<BsGithub className="w-4 h-4" />}
-                    label="Source Code"
-                  />
-                )}
-                {project.links?.docs && (
-                  <ProjectLinkButton
-                    href={project.links.docs}
-                    icon={<span className="text-xs">📄</span>}
-                    label="Docs"
-                  />
-                )}
-                {project.links?.video && (
-                  <ProjectLinkButton
-                    href={project.links.video}
-                    icon={<span className="text-xs">🎬</span>}
-                    label="Video"
-                  />
-                )}
-              </ProjectSection>
-            )}
+                <ProjectSection
+                  title="Project Links"
+                  contentClassName="flex flex-wrap gap-4"
+                >
+                  {liveUrl && (
+                    <ProjectLinkButton
+                      href={liveUrl}
+                      icon={<ExternalLink className="w-4 h-4" />}
+                      label="Live Demo"
+                    />
+                  )}
+                  {repoUrl && (
+                    <ProjectLinkButton
+                      href={repoUrl}
+                      icon={<BsGithub className="w-4 h-4" />}
+                      label="Source Code"
+                    />
+                  )}
+                  {project.links?.docs && (
+                    <ProjectLinkButton
+                      href={project.links.docs}
+                      icon={<span className="text-xs">📄</span>}
+                      label="Docs"
+                    />
+                  )}
+                  {project.links?.video && (
+                    <ProjectLinkButton
+                      href={project.links.video}
+                      icon={<span className="text-xs">🎬</span>}
+                      label="Video"
+                    />
+                  )}
+                </ProjectSection>
+              )}
           </div>
         </div>
       </motion.div>

@@ -178,7 +178,7 @@ const ProjectsList: React.FC = () => {
   ]);
 
   return (
-    <section className="w-full max-w-7xl mx-auto py-12 md:py-16 px-0 sm:px-6 lg:px-8 min-h-[60vh]">
+    <section className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[60vh]">
       {/* Filter Controls */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

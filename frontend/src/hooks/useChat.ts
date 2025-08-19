@@ -3,10 +3,12 @@ import type { Message } from '@/types.ts';
 
 export interface ChatContextType {
   isChatOpen: boolean;
-  history: Message[];
+  messages: Message[];
   isLoading: boolean;
   error: Error | null;
   streamingResult: string;
+  streamingReasoning: string;
+  streamingReasoningContent: string;
   openChat: () => void;
   closeChat: () => void;
   sendMessage: (message: string, location: string) => void;

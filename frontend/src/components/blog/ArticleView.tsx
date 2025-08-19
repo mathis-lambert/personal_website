@@ -60,7 +60,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     if (isLoading) {
         return (
             <motion.section
-                className="w-full max-w-5xl mx-auto py-10 md:py-12 px-0 sm:px-6 lg:px-8 min-h-[70vh]"
+                className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -180,7 +180,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
 
     return (
         <motion.section
-            className="w-full max-w-5xl mx-auto py-10 md:py-12 px-0 sm:px-6 lg:px-8 min-h-[70vh]"
+            className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}

@@ -290,7 +290,6 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
     const parent = parentRef.current;
     const canvas = canvasRef.current;
     const blurCanvas = blurCanvasRef.current;
-    let isMounted = true;
 
     if (!parent || !canvas || !blurCanvas) return;
 
@@ -324,13 +323,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
       blurCtx.fillRect(0, 0, newWidth, newHeight);
     };
 
-    const handleResize = () => {
-      if (!isMounted) return;
-      setupCanvas();
-    };
-
     setupCanvas();
-    window.addEventListener('resize', handleResize);
 
     if (animationFrameId.current) {
       cancelAnimationFrame(animationFrameId.current);
@@ -338,8 +331,6 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
     animationFrameId.current = requestAnimationFrame(drawGradient);
 
     return () => {
-      isMounted = false;
-      window.removeEventListener('resize', handleResize);
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }

@@ -53,8 +53,7 @@ export interface SectionProps {
 // --- Interfaces (assuming these are defined elsewhere or keep them here) ---
 
 export interface ChatCompletionsRequest {
-  input: string;
-  history: Message[];
+  messages: Message[];
   location: string;
 }
 

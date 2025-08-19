@@ -8,7 +8,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-  const [history, setHistory] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [currentRequest, setCurrentRequest] =
     useState<ChatCompletionsRequest | null>(null);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
@@ -28,21 +28,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       !responseAddedRef.current &&
       currentRequest
     ) {
-      setHistory((prevHistory) => {
-        const lastMessage = prevHistory[prevHistory.length - 1];
+      setMessages((prevMessages) => {
+        const lastMessage = prevMessages[prevMessages.length - 1];
         if (
           lastMessage?.role === 'assistant' &&
           lastMessage.content === result
         ) {
-          return prevHistory;
+          return prevMessages;
         }
-        const historyWithoutPartial = prevHistory.filter(
+        const messagesWithoutPartial = prevMessages.filter(
           (msg) => !(msg.role === 'assistant' && msg.content === ''),
         );
         return [
-          ...historyWithoutPartial,
-          { 
-            role: 'assistant', 
+          ...messagesWithoutPartial,
+          {
+            role: 'assistant',
             content: result,
             reasoning: reasoning || null,
             reasoning_content: reasoning_content || null,
@@ -75,27 +75,28 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       }
 
       const userMessage: Message = { role: 'user', content: message };
-      const updatedHistory = [...history, userMessage];
-      setHistory(updatedHistory);
-
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
       const newRequest: ChatCompletionsRequest = {
-        input: message,
-        history: updatedHistory,
+        messages: updatedMessages,
         location,
       };
+
 
       setCurrentRequest(newRequest);
       responseAddedRef.current = false;
     },
-    [history, isLoading, currentRequest, isChatOpen],
+    [messages, isLoading, currentRequest, isChatOpen],
   );
 
   const contextValue: ChatContextType = {
     isChatOpen,
-    history,
+    messages,
     isLoading: isLoading && !!currentRequest,
     error,
     streamingResult: isLoading && !!currentRequest && result ? result : '',
+    streamingReasoning: isLoading && !!currentRequest && reasoning ? reasoning : '',
+    streamingReasoningContent: isLoading && !!currentRequest && reasoning_content ? reasoning_content : '',
     openChat,
     closeChat,
     sendMessage,
