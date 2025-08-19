@@ -15,7 +15,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const responseAddedRef = useRef<boolean>(false);
 
-  const { result, isLoading, error, finishReason, jobId } = useChatCompletion(
+  const { result, reasoning, reasoning_content, isLoading, error, finishReason, jobId } = useChatCompletion(
     currentRequest,
     !!currentRequest,
   );
@@ -41,7 +41,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         );
         return [
           ...historyWithoutPartial,
-          { role: 'assistant', content: result },
+          { 
+            role: 'assistant', 
+            content: result,
+            reasoning: reasoning || null,
+            reasoning_content: reasoning_content || null,
+          },
         ];
       });
       setCurrentRequest(null);
@@ -51,7 +56,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     if (isLoading && currentRequest && !responseAddedRef.current) {
       responseAddedRef.current = false;
     }
-  }, [isLoading, result, finishReason, currentRequest, jobId]);
+  }, [isLoading, result, reasoning, reasoning_content, finishReason, currentRequest, jobId]);
 
   const openChat = useCallback(() => {
     setIsChatOpen(true);
