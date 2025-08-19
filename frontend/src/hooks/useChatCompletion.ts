@@ -7,6 +7,8 @@ import useAuth from '@/hooks/useAuth';
 
 const initialState: ChatState = {
   result: '',
+  reasoning: null,
+  reasoning_content: null,
   finishReason: null,
   jobId: null,
   isLoading: false,
@@ -26,6 +28,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         // Append delta content to result, update id if present
         result: state.result + action.payload.content,
+        reasoning: action.payload.reasoning ?? state.reasoning,
+        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
         jobId: action.payload.id ?? state.jobId,
         finishReason: null,
         isLoading: true,
@@ -35,6 +39,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         finishReason: action.payload.finish_reason,
+        reasoning: action.payload.reasoning ?? state.reasoning,
+        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
         jobId: action.payload.id ?? state.jobId,
         isLoading: false,
         error: null,
@@ -43,6 +49,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         result: action.payload.result,
+        reasoning: action.payload.reasoning ?? state.reasoning,
+        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
         finishReason: action.payload.finish_reason,
         jobId: action.payload.id,
         isLoading: false,

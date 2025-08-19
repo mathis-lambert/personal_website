@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import MarkdownView from '@/components/ui/MarkdownView';
+import AssistantMessage from '@/components/chat/AssistantMessage';
+import UserMessage from '@/components/chat/UserMessage';
 import { useChat } from '@/hooks/useChat';
 
 const Conversation: React.FC = () => {
@@ -29,22 +30,24 @@ const Conversation: React.FC = () => {
             key={index}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div
-              className={`px-4 py-2 rounded-lg inline-block max-w-[85%] break-words shadow-sm ${msg.role === 'user'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100/60 text-gray-900 dark:bg-gray-700/60 dark:text-gray-100'
-                }`}
-            >
-              <MarkdownView content={msg.content} />
-            </div>
+            {msg.role === 'user' ? (
+              <UserMessage content={msg.content} />
+            ) : (
+              <AssistantMessage
+                content={msg.content}
+                reasoning={msg.reasoning}
+                reasoning_content={msg.reasoning_content}
+              />
+            )}
           </div>
         ))}
 
-        {isLoading && streamingResult && (
+        {isLoading && (
           <div className="flex justify-start">
-            <div className="px-4 py-2 rounded-lg inline-block max-w-[85%] break-words bg-gray-100/60 text-gray-900 dark:bg-gray-700/60 dark:text-gray-100 shadow-sm">
-              <MarkdownView content={streamingResult} />
-            </div>
+            <AssistantMessage
+              content={streamingResult}
+              isLoading={!streamingResult}
+            />
           </div>
         )}
 
