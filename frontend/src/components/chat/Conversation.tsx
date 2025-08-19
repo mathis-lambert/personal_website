@@ -5,7 +5,7 @@ import UserMessage from '@/components/chat/UserMessage';
 import { useChat } from '@/hooks/useChat';
 
 const Conversation: React.FC = () => {
-  const { history, isLoading, streamingResult, error } = useChat();
+  const { history, isLoading, streamingResult, streamingReasoning, streamingReasoningContent, error } = useChat();
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -46,6 +46,8 @@ const Conversation: React.FC = () => {
           <div className="flex justify-start">
             <AssistantMessage
               content={streamingResult}
+              reasoning={streamingReasoning}
+              reasoning_content={streamingReasoningContent}
               isLoading={!streamingResult}
             />
           </div>

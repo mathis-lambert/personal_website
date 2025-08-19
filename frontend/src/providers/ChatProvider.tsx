@@ -96,6 +96,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     isLoading: isLoading && !!currentRequest,
     error,
     streamingResult: isLoading && !!currentRequest && result ? result : '',
+    streamingReasoning: isLoading && !!currentRequest && reasoning ? reasoning : '',
+    streamingReasoningContent: isLoading && !!currentRequest && reasoning_content ? reasoning_content : '',
     openChat,
     closeChat,
     sendMessage,

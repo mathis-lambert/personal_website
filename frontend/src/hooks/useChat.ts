@@ -7,6 +7,8 @@ export interface ChatContextType {
   isLoading: boolean;
   error: Error | null;
   streamingResult: string;
+  streamingReasoning: string;
+  streamingReasoningContent: string;
   openChat: () => void;
   closeChat: () => void;
   sendMessage: (message: string, location: string) => void;
