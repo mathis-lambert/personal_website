@@ -61,6 +61,8 @@ export interface ChatCompletionsRequest {
 export interface Message {
   role: string;
   content: string;
+  reasoning?: string | null;
+  reasoning_content?: string | null;
 }
 
 // (Ancien format supprimé)
@@ -122,12 +124,16 @@ export interface OpenAIChatCompletion {
 
 export interface ApiStreamChunk {
   content: string; // delta.content
+  reasoning?: string | null; // delta.reasoning
+  reasoning_content?: string | null; // delta.reasoning_content
   finish_reason: FinishReason | null;
   id: string; // completion id
 }
 
 export interface ApiCompletionResult {
   result: string; // contenu agrégé
+  reasoning?: string | null; // contenu de raisonnement agrégé
+  reasoning_content?: string | null; // contenu de raisonnement agrégé (alternative)
   finish_reason: FinishReason; // raison de fin de l'API
   id: string; // completion id
 }
@@ -136,6 +142,8 @@ export interface ApiCompletionResult {
 
 export interface ChatState {
   result: string;
+  reasoning?: string | null;
+  reasoning_content?: string | null;
   finishReason: FinishReason | null;
   jobId: string | null;
   isLoading: boolean;

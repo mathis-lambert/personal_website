@@ -100,6 +100,8 @@ export async function callPersonalApi(
       let buffer = '';
       // Accumulator for both streaming and non-streaming usage
       let aggregatedResult = '';
+      let aggregatedReasoning = '';
+      let aggregatedReasoningContent = '';
       let aggregatedId: string | null = null;
       let aggregatedFinish: FinishReason | null = null;
 
@@ -131,6 +133,8 @@ export async function callPersonalApi(
           if (data === '[DONE]') {
             const donePayload: ApiCompletionResult = {
               result: aggregatedResult,
+              reasoning: aggregatedReasoning || null,
+              reasoning_content: aggregatedReasoningContent || null,
               finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
               id: aggregatedId ?? '',
             };
@@ -148,6 +152,8 @@ export async function callPersonalApi(
             if (isDoneEvent) {
               const donePayload: ApiCompletionResult = {
                 result: aggregatedResult,
+                reasoning: aggregatedReasoning || null,
+                reasoning_content: aggregatedReasoningContent || null,
                 finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
                 id: aggregatedId ?? '',
               };
@@ -160,6 +166,8 @@ export async function callPersonalApi(
 
             // Normalize possible formats into our simple shapes
             let nextChunk = '';
+            let nextReasoning: string | null = null;
+            let nextReasoningContent: string | null = null;
             let nextFinish: FinishReason | null = null;
             let nextId: string | null = null;
 
@@ -174,12 +182,19 @@ export async function callPersonalApi(
               const oai = parsed as {
                 id?: string;
                 choices?: Array<{
-                  delta?: { role?: string | null; content?: string | null };
+                  delta?: { 
+                    role?: string | null; 
+                    content?: string | null;
+                    reasoning?: string | null;
+                    reasoning_content?: string | null;
+                  };
                   finish_reason?: string | null;
                 }>;
               };
               const choice = oai.choices?.[0];
               nextChunk = choice?.delta?.content ?? '';
+              nextReasoning = choice?.delta?.reasoning ?? null;
+              nextReasoningContent = choice?.delta?.reasoning_content ?? null;
               nextFinish = choice?.finish_reason ?? null;
               nextId = oai.id ?? null;
             } else if (
@@ -209,6 +224,12 @@ export async function callPersonalApi(
             if (nextChunk) {
               aggregatedResult += nextChunk;
             }
+            if (nextReasoning) {
+              aggregatedReasoning += nextReasoning;
+            }
+            if (nextReasoningContent) {
+              aggregatedReasoningContent += nextReasoningContent;
+            }
             if (nextId) {
               aggregatedId = nextId;
             }
@@ -220,6 +241,8 @@ export async function callPersonalApi(
             if (callbacks?.onChunk) {
               const chunkPayload: ApiStreamChunk = {
                 content: nextChunk,
+                reasoning: nextReasoning,
+                reasoning_content: nextReasoningContent,
                 finish_reason: nextFinish,
                 id: aggregatedId ?? '',
               };
@@ -230,6 +253,8 @@ export async function callPersonalApi(
             if (nextFinish !== null) {
               const donePayload: ApiCompletionResult = {
                 result: aggregatedResult,
+                reasoning: aggregatedReasoning || null,
+                reasoning_content: aggregatedReasoningContent || null,
                 finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
                 id: aggregatedId ?? '',
               };
@@ -250,6 +275,8 @@ export async function callPersonalApi(
       if (!isStreaming && aggregatedResult) {
         return {
           result: aggregatedResult,
+          reasoning: aggregatedReasoning || null,
+          reasoning_content: aggregatedReasoningContent || null,
           finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
           id: aggregatedId ?? '',
         } as ApiCompletionResult;
