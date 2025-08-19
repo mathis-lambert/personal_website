@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   /** Décodage de la date d'expiration (exp) depuis le JWT */
   const getExp = (tok: string): number | undefined => {
     try {
-      const payload = JSON.parse(atob(tok.split(".")[1]));
+      const payload = JSON.parse(atob(tok.split('.')[1]));
       return typeof payload.exp === 'number' ? payload.exp : undefined;
     } catch {
       return undefined;
@@ -66,7 +66,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const login = async () => {
     refreshToken();

@@ -177,7 +177,7 @@ export async function callPersonalApi(
               parsed !== null &&
               'object' in (parsed as Record<string, unknown>) &&
               (parsed as Record<string, unknown>).object ===
-              'chat.completion.chunk'
+                'chat.completion.chunk'
             ) {
               const oai = parsed as {
                 id?: string;
@@ -206,8 +206,8 @@ export async function callPersonalApi(
               // Non-streaming OpenAI-like completion
               const completion = parsed as OpenAIChatCompletion;
               const message = completion.choices?.[0]?.message?.content ?? '';
-              const reason =
-                (completion.choices?.[0]?.finish_reason ?? 'stop') as FinishReason;
+              const reason = (completion.choices?.[0]?.finish_reason ??
+                'stop') as FinishReason;
               const donePayload: ApiCompletionResult = {
                 result: message,
                 finish_reason: reason,
@@ -297,11 +297,16 @@ export async function callPersonalApi(
       return {
         id: completion.id,
         result: completion.choices?.[0]?.message?.content ?? '',
-        finish_reason: (completion.choices?.[0]?.finish_reason ?? 'stop') as FinishReason,
+        finish_reason: (completion.choices?.[0]?.finish_reason ??
+          'stop') as FinishReason,
       };
     }
     // Otherwise assume our simplified result (rare)
-    const fallback = nonStreaming as { result?: string; finish_reason?: string; id?: string };
+    const fallback = nonStreaming as {
+      result?: string;
+      finish_reason?: string;
+      id?: string;
+    };
     return {
       id: fallback.id ?? '',
       result: fallback.result ?? '',

@@ -46,7 +46,10 @@ const ProjectsList: React.FC = () => {
     async function fetchProjects() {
       try {
         setError(null);
-        const normalized = await getProjects({ signal: ac.signal, token: token ?? undefined });
+        const normalized = await getProjects({
+          signal: ac.signal,
+          token: token ?? undefined,
+        });
         if (JSON.stringify(normalized) !== JSON.stringify(projects)) {
           setProjects(normalized);
         }

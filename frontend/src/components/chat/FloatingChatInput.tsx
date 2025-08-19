@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { ArrowUp, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, LayoutGroup } from 'framer-motion';
 import { useChat } from '@/hooks/useChat';
 import { useLocation } from 'react-router-dom';
 
@@ -25,18 +25,41 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   const MIN_TEXTAREA_HEIGHT = 40;
   const MAX_TEXTAREA_HEIGHT = 200;
 
-  const adjustTextAreaHeight = useCallback(() => {
-    const textArea = textAreaRef.current;
-    if (!textArea) return;
+  const [hiddenByFooter, setHiddenByFooter] = useState(false);
 
-    textArea.style.height = 'auto';
-    const newHeight = Math.max(
-      MIN_TEXTAREA_HEIGHT,
-      Math.min(textArea.scrollHeight, MAX_TEXTAREA_HEIGHT),
+  // Observe footer visibility to hide input near footer
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const footer = document.getElementById('site-footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setHiddenByFooter(entry.isIntersecting),
+      { root: null, threshold: 0.01, rootMargin: '0px 0px 2px 0px' },
     );
-    textArea.style.height = `${newHeight}px`;
-    textArea.style.lineHeight =
-      textArea.value.trim() === '' ? `${MIN_TEXTAREA_HEIGHT}px` : 'normal';
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const adjustTextAreaHeight = useCallback(() => {
+    const ta = textAreaRef.current;
+    if (!ta) return;
+
+    const isEmpty = ta.value.trim() === '';
+
+    if (isEmpty) {
+      // lock to a single-line box so placeholder is vertically centered
+      ta.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
+      ta.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
+      return;
+    }
+
+    // content present: autosize
+    ta.style.lineHeight = 'normal';
+    ta.style.height = 'auto';
+    const newHeight = Math.min(ta.scrollHeight, MAX_TEXTAREA_HEIGHT);
+    ta.style.height = `${Math.max(MIN_TEXTAREA_HEIGHT, newHeight)}px`;
   }, [MIN_TEXTAREA_HEIGHT, MAX_TEXTAREA_HEIGHT]);
 
   useEffect(() => {
@@ -76,81 +99,112 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   const handleCloseChat = () => {
     closeChat();
     setMessage('');
+    requestAnimationFrame(() => {
+      const ta = textAreaRef.current;
+      if (ta) {
+        ta.value = '';
+        ta.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
+        ta.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
+      }
+    });
   };
+
+  // call sizing again whenever the input becomes visible again
+  useEffect(() => {
+    if (!hiddenByFooter) requestAnimationFrame(adjustTextAreaHeight);
+  }, [hiddenByFooter, adjustTextAreaHeight]);
 
   const closeButtonSize = 'w-9 h-9';
   const isSendDisabled = isLoading || message.trim() === '';
 
   return (
-    <div className="fixed bottom-2 md:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex items-end justify-center space-x-2 w-full px-4">
-      <motion.div
-        className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        layout
-      >
-        <form
-          onSubmit={handleSubmit}
-          className="relative flex items-end w-full"
+    <AnimatePresence initial={false}>
+      {!hiddenByFooter && (
+        <motion.div
+          key="floating-chat-input"
+          className="fixed bottom-2 md:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end justify-center w-full px-4"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          layout="position"
         >
-          <textarea
-            name="message"
-            ref={textAreaRef}
-            value={message}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            rows={1}
-            disabled={isLoading}
-            className="w-full pr-12 pl-2 resize-none overflow-y-auto bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-black/40 outline-none scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent scrollbar-thumb-rounded-full scrollbar-track-rounded-full dark:placeholder:text-white/40 dark:scrollbar-thumb-slate-600 dark:scrollbar-track-transparent dark:scrollbar-thumb-rounded-full dark:scrollbar-track-rounded-full disabled:opacity-60"
-            style={{
-              minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
-              maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
-              paddingBlock: message.trim() === '' ? `0` : '0.5rem',
-            }}
-          />
-          <Button
-            type="submit"
-            size="icon"
-            className="absolute bottom-0 right-0 w-10 h-10 bg-sky-500/50 shadow-lg backdrop-blur-lg rounded-full flex items-center justify-center hover:bg-sky-500/60 text-xs disabled:opacity-50 disabled:cursor-not-allowed dark:bg-sky-600/50 dark:hover:bg-sky-600/60 transition-colors duration-200 ease-in-out"
-            disabled={isSendDisabled}
-            aria-label="Ask something"
-          >
-            {isLoading ? (
-              <Loader2 size={16} className="text-white animate-spin" />
-            ) : (
-              <ArrowUp size={16} className="text-white" />
-            )}
-          </Button>
-        </form>
-      </motion.div>
-
-      <AnimatePresence initial={false}>
-        {isChatOpen && (
-          <div className={`${closeButtonSize} flex-shrink-0`}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="relative w-full h-full"
-            >
-              <Button
-                type="button"
-                size="icon"
-                variant="destructive"
-                className={`absolute left-0 bottom-1.5 ${closeButtonSize} bg-red-500/50 hover:bg-red-500/70 dark:bg-red-600/50 dark:hover:bg-red-600/70 text-white rounded-full shadow-lg backdrop-blur-lg flex items-center justify-center transition-colors duration-200 ease-in-out`}
-                onClick={handleCloseChat}
-                aria-label="Close chat"
+          <LayoutGroup>
+            <div className="flex items-end justify-center gap-2 w-full">
+              {/* Input card */}
+              <motion.div
+                className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
-                <X size={18} />
-              </Button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
+                <form
+                  onSubmit={handleSubmit}
+                  className="relative flex items-end w-full"
+                >
+                  <textarea
+                    name="message"
+                    ref={textAreaRef}
+                    value={message}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    rows={1}
+                    disabled={isLoading}
+                    className="w-full pr-12 pl-2 resize-none overflow-y-auto bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-black/40 outline-none scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent scrollbar-thumb-rounded-full dark:placeholder:text-white/40 dark:scrollbar-thumb-slate-600 dark:scrollbar-track-transparent dark:scrollbar-thumb-rounded-full disabled:opacity-60"
+                    style={{
+                      minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
+                      maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
+                      paddingBlock: message.trim() === '' ? `0` : '0.5rem',
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="absolute bottom-0 right-0 w-10 h-10 bg-sky-500/50 shadow-lg backdrop-blur-lg rounded-full flex items-center justify-center hover:bg-sky-500/60 text-xs disabled:opacity-50 disabled:cursor-not-allowed dark:bg-sky-600/50 dark:hover:bg-sky-600/60 transition-colors duration-200 ease-in-out"
+                    disabled={isSendDisabled}
+                    aria-label="Ask something"
+                  >
+                    {isLoading ? (
+                      <Loader2 size={16} className="text-white animate-spin" />
+                    ) : (
+                      <ArrowUp size={16} className="text-white" />
+                    )}
+                  </Button>
+                </form>
+              </motion.div>
+
+              {/* Persistent slot to avoid layout shift */}
+              <div className={`${closeButtonSize} flex-shrink-0 relative`}>
+                <AnimatePresence mode="wait" initial={false}>
+                  {isChatOpen && (
+                    <motion.div
+                      key="close-button"
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.7 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      className="absolute left-0 bottom-1.5 w-full h-full"
+                    >
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className={`w-full h-full bg-red-500/50 hover:bg-red-500/70 dark:bg-red-600/50 dark:hover:bg-red-600/70 text-white rounded-full shadow-lg backdrop-blur-lg flex items-center justify-center transition-colors duration-200 ease-in-out`}
+                        onClick={handleCloseChat}
+                        aria-label="Close chat"
+                      >
+                        <X size={18} />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </LayoutGroup>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

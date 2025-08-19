@@ -29,7 +29,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         // Append delta content to result, update id if present
         result: state.result + action.payload.content,
         reasoning: action.payload.reasoning ?? state.reasoning,
-        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
+        reasoning_content:
+          action.payload.reasoning_content ?? state.reasoning_content,
         jobId: action.payload.id ?? state.jobId,
         finishReason: null,
         isLoading: true,
@@ -40,7 +41,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         finishReason: action.payload.finish_reason,
         reasoning: action.payload.reasoning ?? state.reasoning,
-        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
+        reasoning_content:
+          action.payload.reasoning_content ?? state.reasoning_content,
         jobId: action.payload.id ?? state.jobId,
         isLoading: false,
         error: null,
@@ -50,7 +52,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         result: action.payload.result,
         reasoning: action.payload.reasoning ?? state.reasoning,
-        reasoning_content: action.payload.reasoning_content ?? state.reasoning_content,
+        reasoning_content:
+          action.payload.reasoning_content ?? state.reasoning_content,
         finishReason: action.payload.finish_reason,
         jobId: action.payload.id,
         isLoading: false,
@@ -82,8 +85,8 @@ const useChatCompletion = (
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
     ? JSON.stringify({
-      messages: request.messages,
-    })
+        messages: request.messages,
+      })
     : null;
 
   useEffect(() => {

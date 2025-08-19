@@ -306,7 +306,7 @@ export function ScrollableTimeline<T extends Record<string, unknown>>({
       virtualTopRef: React.MutableRefObject<number>;
       contentHeightRef: React.MutableRefObject<number>;
       scrollTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
-    }
+    },
   ) {
     if (isMobile) return;
     e.preventDefault(); // OK ici car listener non-passif

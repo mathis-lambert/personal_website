@@ -25,17 +25,14 @@ export default function Resume() {
 
   return (
     <div className="text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
-      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
         <ResumeHeader name={resumeData?.name ?? ''} />
 
         <div id="resume-content" ref={resumeRef}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <main className="lg:col-span-2 space-y-6">
               <GlassCard className="p-6" delay={0}>
-                <ResumeSection
-                  icon={Briefcase}
-                  title="About Me"
-                >
+                <ResumeSection icon={Briefcase} title="About Me">
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[15px] sm:text-base">
                     {resumeData?.summary}
                   </p>

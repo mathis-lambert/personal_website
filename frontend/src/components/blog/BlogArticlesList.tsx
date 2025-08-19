@@ -42,7 +42,10 @@ const BlogArticlesList: React.FC = () => {
     async function fetchArticles() {
       try {
         setError(null);
-        const data = await getArticles({ signal: ac.signal, token: token ?? undefined });
+        const data = await getArticles({
+          signal: ac.signal,
+          token: token ?? undefined,
+        });
         if (JSON.stringify(data) !== JSON.stringify(articles)) {
           setArticles(data);
         }

@@ -20,7 +20,10 @@ const ProjectDetailPage: React.FC = () => {
           setProject(null);
           return;
         }
-        const result = await getProjectBySlug(projectId, { signal: ac.signal, token: token ?? undefined });
+        const result = await getProjectBySlug(projectId, {
+          signal: ac.signal,
+          token: token ?? undefined,
+        });
         if (JSON.stringify(result) !== JSON.stringify(project)) {
           setProject(result);
         }

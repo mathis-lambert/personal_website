@@ -11,7 +11,10 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="w-full border-t border-gray-200 dark:border-gray-500 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md shadow-lg rounded-t-2xl relative z-[100]">
+    <footer
+      id="site-footer"
+      className="w-full border-t border-gray-200 dark:border-gray-500 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md shadow-lg rounded-t-2xl relative z-[100]"
+    >
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Haut du footer */}
         <div className="flex flex-col lg:flex-row justify-between items-center">

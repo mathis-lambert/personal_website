@@ -11,7 +11,10 @@ interface ProjectCardProps {
   animationDelay?: number;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, animationDelay = 0.1 }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  project,
+  animationDelay = 0.1,
+}) => {
   const navigate = useNavigate();
   const detailsPath = `/projects/${project.slug || project.id}`;
 
@@ -45,7 +48,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, animationDelay = 0.1
     <motion.div
       className="group w-full h-full"
       initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0, transition: { delay: animationDelay, duration: 0.4, ease: 'easeOut' } }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { delay: animationDelay, duration: 0.4, ease: 'easeOut' },
+      }}
       exit={{ opacity: 0, y: 30 }}
       layout
     >
@@ -87,8 +94,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, animationDelay = 0.1
                 {project.technologies[0]}
               </span>
             )}
-            <span className={cn('absolute bottom-3 left-3 text-[10px] px-2 py-0.5 rounded-full border shadow-sm', statusClass)}>
-              {status === 'in-progress' ? 'In progress' : status === 'archived' ? 'Archived' : 'Completed'}
+            <span
+              className={cn(
+                'absolute bottom-3 left-3 text-[10px] px-2 py-0.5 rounded-full border shadow-sm',
+                statusClass,
+              )}
+            >
+              {status === 'in-progress'
+                ? 'In progress'
+                : status === 'archived'
+                  ? 'Archived'
+                  : 'Completed'}
             </span>
           </div>
 
@@ -97,10 +113,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, animationDelay = 0.1
               {project.title}
             </h3>
             {project.subtitle && (
-              <p className="-mt-1 mb-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{project.subtitle}</p>
+              <p className="-mt-1 mb-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                {project.subtitle}
+              </p>
             )}
 
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow line-clamp-3">{project.description}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow line-clamp-3">
+              {project.description}
+            </p>
 
             {project.technologies && project.technologies.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-1.5">
@@ -116,7 +136,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, animationDelay = 0.1
             )}
 
             <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/20 dark:border-white/15">
-              <span className="text-xs text-gray-500 dark:text-gray-400">{formattedDate}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {formattedDate}
+              </span>
 
               <div className="flex items-center gap-3">
                 {typeof project.metrics?.stars === 'number' && (

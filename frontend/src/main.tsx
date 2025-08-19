@@ -4,7 +4,7 @@ import App from './App.tsx';
 import { ThemeProvider } from '@/components/theme-provider.tsx';
 import { ChatProvider } from '@/providers/ChatProvider.tsx';
 import { AuthProvider } from '@/providers/AuthProvider.tsx';
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from '@/components/ui/sonner';
 
 createRoot(document.getElementById('root')!).render(
   <ThemeProvider storageKey="vite-ui-theme">
@@ -14,5 +14,5 @@ createRoot(document.getElementById('root')!).render(
         <Toaster />
       </ChatProvider>
     </AuthProvider>
-  </ThemeProvider>
+  </ThemeProvider>,
 );

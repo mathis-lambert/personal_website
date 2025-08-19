@@ -21,8 +21,7 @@ const Navbar = () => {
       } else {
         openChat();
       }
-      setIsMenuOpen(false); // Also close the mobile menu
-      // scroll to the top of the page
+      setIsMenuOpen(false);
       window.scrollTo(0, 0);
     },
     [isChatOpen, closeChat, openChat],
@@ -40,7 +39,7 @@ const Navbar = () => {
   );
 
   const connectLink: NavLink = {
-    to: 'contact',
+    to: 'https://www.linkedin.com/in/mathis-lambert/',
     text: "Let's connect",
   };
 
@@ -133,6 +132,8 @@ const Navbar = () => {
               to={connectLink.to}
               onClick={closeMenu}
               className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-blue-500/30 hover:-rotate-3 text-sm lg:text-base flex-shrink-0"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               {connectLink.text}
             </Link>
@@ -189,13 +190,9 @@ const Navbar = () => {
                 <Link
                   to={link.to}
                   onClick={(e) => {
-                    // Simplified logic: call the link's specific onClick if it exists,
-                    // otherwise just close the menu for standard navigation.
-                    if (link.onClick) {
-                      link.onClick(e); // This is handleChatToggle, which now also closes the menu.
-                    } else {
-                      closeMenu();
-                    }
+                    link.onClick?.(e);
+                    closeMenu();
+                    window.scrollTo(0, 0);
                   }}
                   className="block text-center text-3xl font-medium text-gray-800 dark:text-white px-6 py-3 rounded-lg transform transition-all duration-300 ease-out hover:bg-blue-500/10 dark:hover:bg-blue-400/10 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-1 hover:scale-105"
                 >

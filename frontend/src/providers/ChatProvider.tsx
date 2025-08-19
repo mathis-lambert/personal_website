@@ -15,10 +15,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const responseAddedRef = useRef<boolean>(false);
 
-  const { result, reasoning, reasoning_content, isLoading, error, finishReason, jobId } = useChatCompletion(
-    currentRequest,
-    !!currentRequest,
-  );
+  const {
+    result,
+    reasoning,
+    reasoning_content,
+    isLoading,
+    error,
+    finishReason,
+    jobId,
+  } = useChatCompletion(currentRequest, !!currentRequest);
 
   useEffect(() => {
     if (
@@ -56,7 +61,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     if (isLoading && currentRequest && !responseAddedRef.current) {
       responseAddedRef.current = false;
     }
-  }, [isLoading, result, reasoning, reasoning_content, finishReason, currentRequest, jobId]);
+  }, [
+    isLoading,
+    result,
+    reasoning,
+    reasoning_content,
+    finishReason,
+    currentRequest,
+    jobId,
+  ]);
 
   const openChat = useCallback(() => {
     setIsChatOpen(true);
@@ -82,7 +95,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         location,
       };
 
-
       setCurrentRequest(newRequest);
       responseAddedRef.current = false;
     },
@@ -95,8 +107,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     isLoading: isLoading && !!currentRequest,
     error,
     streamingResult: isLoading && !!currentRequest && result ? result : '',
-    streamingReasoning: isLoading && !!currentRequest && reasoning ? reasoning : '',
-    streamingReasoningContent: isLoading && !!currentRequest && reasoning_content ? reasoning_content : '',
+    streamingReasoning:
+      isLoading && !!currentRequest && reasoning ? reasoning : '',
+    streamingReasoningContent:
+      isLoading && !!currentRequest && reasoning_content
+        ? reasoning_content
+        : '',
     openChat,
     closeChat,
     sendMessage,

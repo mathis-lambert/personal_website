@@ -20,7 +20,10 @@ const ArticleDetailPage: React.FC = () => {
           setArticle(null);
           return;
         }
-        const result = await getArticleBySlug(articleId, { signal: ac.signal, token: token ?? undefined });
+        const result = await getArticleBySlug(articleId, {
+          signal: ac.signal,
+          token: token ?? undefined,
+        });
         if (JSON.stringify(result) !== JSON.stringify(article)) {
           setArticle(result);
         }

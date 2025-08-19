@@ -5,7 +5,14 @@ import UserMessage from '@/components/chat/UserMessage';
 import { useChat } from '@/hooks/useChat';
 
 const Conversation: React.FC = () => {
-  const { messages, isLoading, streamingResult, streamingReasoning, streamingReasoningContent, error } = useChat();
+  const {
+    messages,
+    isLoading,
+    streamingResult,
+    streamingReasoning,
+    streamingReasoningContent,
+    error,
+  } = useChat();
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
