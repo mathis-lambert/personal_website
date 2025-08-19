@@ -80,6 +80,7 @@ export interface OpenAIChoiceDelta {
     role: 'system' | 'user' | 'assistant' | null;
     content: string | null;
     reasoning_content?: string | null;
+    reasoning?: string | null;
   };
   logprobs: unknown | null;
   finish_reason: FinishReason | null;
@@ -97,6 +98,8 @@ export interface OpenAIChatCompletionChunk {
 export interface OpenAIChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
+  reasoning?: string | null;
+  reasoning_content?: string | null;
 }
 
 export interface OpenAIChoiceCompletion {
