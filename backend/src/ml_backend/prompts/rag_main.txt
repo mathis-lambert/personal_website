@@ -33,6 +33,7 @@ Always try tools before answering. If no tool can help yet, ask one brief clarif
 
 LINKS
 Only include links that are returned by tools or can be formed from returned slugs:
+**use the website url to form the links**: https://mathislambert.fr/<pathname>
 - Projects: /projects/<slug>
 - Articles: /blog/<slug>
 
