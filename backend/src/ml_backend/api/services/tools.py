@@ -1,37 +1,112 @@
-__all__ = ["get_self_info", "get_self_projects", "get_self_experiences"]
+# tools_self.py
+from __future__ import annotations
+
+__all__ = [
+    "get_self_info",
+    "get_self_projects",
+    "get_self_experiences",
+    "get_self_projects_by_slug",
+]
+
+import os
+from datetime import datetime
+from typing import Any, Dict, List
+
+from bson import ObjectId
+from ml_api_client import APIClient
+from ml_api_client.models import VectorStoreSearchRequest
+from ml_api_client.utils import CustomLogger
+from ml_backend.databases import MongoDBConnector
+
+# --- singletons (créés une fois) ---
+_logger = CustomLogger().get_logger(__name__)
+_api = APIClient(api_key=os.getenv("ML_API_KEY"))
+_mongo = MongoDBConnector(logger=_logger)
+_db = _mongo.get_database()  # Motor DB async
 
 
-async def get_self_info(query: str):
-    import os
-    from ml_api_client import APIClient
-    from ml_api_client.models import VectorStoreSearchRequest
-
-    client = APIClient(api_key=os.getenv("ML_API_KEY"))
-    top_k = await client.vector_stores.search_vector_store(
-        "mathis_bio_store",
-        VectorStoreSearchRequest(
-            query=query,
-            limit=3,
-        ),
-    )
-    return top_k
+# --- utils JSON ---
+def _to_jsonable(x: Any) -> Any:
+    if isinstance(x, ObjectId):
+        return str(x)
+    if isinstance(x, datetime):
+        return x.isoformat()
+    if isinstance(x, dict):
+        return {k: _to_jsonable(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_to_jsonable(v) for v in x]
+    return x
 
 
-def get_self_projects():
-    from ml_api_client.utils import CustomLogger
-    from ml_backend.databases import MongoDBConnector
-
-    logger = CustomLogger().get_logger(__name__)
-    mongo_client = MongoDBConnector(logger=logger)
-    projects = mongo_client.get_database().projects.find()
-    return projects
+def _dump(obj: Any) -> Any:
+    if hasattr(obj, "model_dump"):  # Pydantic v2
+        obj = obj.model_dump()
+    elif hasattr(obj, "dict"):  # Pydantic v1
+        obj = obj.dict()
+    return _to_jsonable(obj)
 
 
-def get_self_experiences():
-    from ml_api_client.utils import CustomLogger
-    from ml_backend.databases import MongoDBConnector
+# --- tools ---
+async def get_self_info(query: str) -> Dict[str, Any]:
+    """Recherche bio courte dans le vector store 'mathis_bio_store'."""
+    try:
+        q = (query or "").strip()
+        if not q:
+            return {"error": "Invalid 'query' argument"}
+        res = await _api.vector_stores.search_vector_store(
+            "mathis_bio_store",
+            VectorStoreSearchRequest(query=q, limit=3),
+        )
+        return _dump(res)
+    except Exception as e:
+        _logger.exception("get_self_info failed")
+        return {"error": f"{type(e).__name__}: {e}"}
 
-    logger = CustomLogger().get_logger(__name__)
-    mongo_client = MongoDBConnector(logger=logger)
-    experiences = mongo_client.get_database().resume.find_one()
-    return experiences
+
+async def get_self_projects() -> List[Dict[str, Any]]:
+    """Liste des projets (projection légère)."""
+    try:
+        cursor = _db["projects"].find(
+            {},
+            {
+                "_id": 0,
+                "title": 1,
+                "slug": 1,
+                "tags": 1,
+                "subtitle": 1,
+                "links": 1,
+                "date": 1,
+            },
+        )
+        docs = await cursor.to_list(length=200)
+        return _to_jsonable(docs)
+    except Exception as e:
+        _logger.exception("get_self_projects failed")
+        return [{"error": f"{type(e).__name__}: {e}"}]
+
+
+async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
+    """Get a project by slug."""
+    try:
+        project = await _db["projects"].find_one({"slug": slug}, {"_id": 0})
+        return _to_jsonable(project)
+    except Exception as e:
+        _logger.exception("get_self_projects_by_slug failed")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+async def get_self_experiences() -> Dict[str, Any]:
+    """
+    Renvoie expériences et études. Tolère l'absence d'une collection.
+    """
+    try:
+        exps = await _db["experiences"].find({}, {"_id": 0}).to_list(length=500)
+    except Exception:
+        exps = []
+
+    try:
+        studies = await _db["studies"].find({}, {"_id": 0}).to_list(length=500)
+    except Exception:
+        studies = []
+
+    return _to_jsonable({"experiences": exps, "studies": studies})
