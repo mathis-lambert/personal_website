@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 from bson import ObjectId
 from ml_api_client import APIClient
 from ml_api_client.models import VectorStoreSearchRequest
-from ml_api_client.utils import CustomLogger
+from ml_backend.utils import CustomLogger
 from ml_backend.databases import MongoDBConnector
 
 # --- singletons (créés une fois) ---
