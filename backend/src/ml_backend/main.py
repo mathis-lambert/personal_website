@@ -10,9 +10,9 @@ from ml_api_client.modules.tools import ToolParams, ToolProperty
 from ml_backend.api import api_router
 from ml_backend.utils import CustomLogger, ensure_starting
 from ml_backend.api.services.tools import (
-    get_mathis_info,
-    get_mathis_projects,
-    get_mathis_experiences,
+    get_self_info,
+    get_self_projects,
+    get_self_experiences,
 )
 
 
@@ -34,27 +34,27 @@ async def lifespan(app: FastAPI):
         await mongodb.insert_initial_data()
 
     apiclient.tools.register(
-        "get_mathis_info",
-        get_mathis_info,
+        "get_self_info",
+        get_self_info,
         ToolParams(
             properties={
                 "query": ToolProperty(
                     type="string",
-                    description="The query to get information about Mathis",
+                    description="The query to get information about Mathis. The query should be a complete sentence which contains what the users need to know.",
                 )
             },
             required=["query"],
         ),
-        description="Get information about Mathis",
+        description="Get information about Mathis. RAG Pipeline to retrieve relevant documents.",
     )
     apiclient.tools.register(
-        "get_mathis_projects",
-        get_mathis_projects,
+        "get_self_projects",
+        get_self_projects,
         description="Get All projects Mathis has worked on",
     )
     apiclient.tools.register(
-        "get_mathis_experiences",
-        get_mathis_experiences,
+        "get_self_experiences",
+        get_self_experiences,
         description="Get All experiences Mathis has worked on",
     )
 

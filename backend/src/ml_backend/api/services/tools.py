@@ -1,7 +1,7 @@
-__all__ = ["get_mathis_info", "get_mathis_projects", "get_mathis_experiences"]
+__all__ = ["get_self_info", "get_self_projects", "get_self_experiences"]
 
 
-async def get_mathis_info(query: str):
+async def get_self_info(query: str):
     import os
     from ml_api_client import APIClient
     from ml_api_client.models import VectorStoreSearchRequest
@@ -17,9 +17,21 @@ async def get_mathis_info(query: str):
     return top_k
 
 
-def get_mathis_projects():
-    return "Mathis has worked on many projects"
+def get_self_projects():
+    from ml_api_client.utils import CustomLogger
+    from ml_backend.databases import MongoDBConnector
+
+    logger = CustomLogger().get_logger(__name__)
+    mongo_client = MongoDBConnector(logger=logger)
+    projects = mongo_client.get_database().projects.find()
+    return projects
 
 
-def get_mathis_experiences():
-    return "Mathis has worked on many projects"
+def get_self_experiences():
+    from ml_api_client.utils import CustomLogger
+    from ml_backend.databases import MongoDBConnector
+
+    logger = CustomLogger().get_logger(__name__)
+    mongo_client = MongoDBConnector(logger=logger)
+    experiences = mongo_client.get_database().resume.find_one()
+    return experiences
