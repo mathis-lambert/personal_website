@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     apiclient.tools.register(
         "get_self_projects",
         get_self_projects,
-        description="Get All projects Mathis has worked on",
+        description="Get All projects Mathis has worked on. You can use the slug to provide a link to the project : '/projects/<slug>'.",
     )
     apiclient.tools.register(
         "get_self_experiences",
@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
             },
             required=["slug"],
         ),
-        description="Get a project by slug. Returns every information about the project.",
+        description="Get a project by slug. Returns every information about the project. You can use the slug to provide a link to the project : '/projects/<slug>'.",
     )
 
     app.apiclient = apiclient
