@@ -114,7 +114,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     if (!hiddenByFooter) requestAnimationFrame(adjustTextAreaHeight);
   }, [hiddenByFooter, adjustTextAreaHeight]);
 
-  const closeButtonSize = 'w-9 h-9';
+  const closeButtonSize = `${isChatOpen ? 'w-9 h-9' : 'w-0 h-0'}`;
   const isSendDisabled = isLoading || message.trim() === '';
 
   return (
@@ -122,7 +122,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
       {!hiddenByFooter && (
         <motion.div
           key="floating-chat-input"
-          className="fixed bottom-2 md:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end justify-center w-full px-4"
+          className="fixed bottom-4 md:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end justify-center w-full px-4"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
@@ -130,7 +130,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
           layout="position"
         >
           <LayoutGroup>
-            <div className="flex items-end justify-center gap-2 w-full">
+            <div className={`flex items-end justify-center px-1 w-full ${isChatOpen ? 'gap-2' : ''}`}>
               {/* Input card */}
               <motion.div
                 className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"

@@ -193,6 +193,7 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
         rehypePlugins={[rehypeKatex]}
         components={markdownComponents}
         children={content}
+        urlTransform={(url, key) => (key === 'src' ? url : url)}
       />
       {/* Afficher le spinner à la fin si loading est vrai */}
       {loading && (
