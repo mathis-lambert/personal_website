@@ -14,6 +14,8 @@ from ml_backend.api.services.tools import (
     get_self_projects,
     get_self_experiences,
     get_self_projects_by_slug,
+    get_self_articles,
+    get_self_articles_by_slug,
 )
 
 
@@ -71,6 +73,25 @@ async def lifespan(app: FastAPI):
             required=["slug"],
         ),
         description="Get a project by slug. Returns every information about the project. You can use the slug to provide a link to the project : '/projects/<slug>'.",
+    )
+    apiclient.tools.register(
+        "get_self_articles",
+        get_self_articles,
+        description="Get All articles Mathis has written. You can use the slug to provide a link to the article : '/blog/<slug>'.",
+    )
+    apiclient.tools.register(
+        "get_self_articles_by_slug",
+        get_self_articles_by_slug,
+        ToolParams(
+            properties={
+                "slug": ToolProperty(
+                    type="string",
+                    description="The slug of the article to get. The slug is the unique identifier of the article.",
+                )
+            },
+            required=["slug"],
+        ),
+        description="Get a article by slug. Returns every information about the article. You can use the slug to provide a link to the article : '/blog/<slug>'.",
     )
 
     app.apiclient = apiclient

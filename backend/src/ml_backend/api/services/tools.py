@@ -102,6 +102,46 @@ async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
         return {"error": f"{type(e).__name__}: {e}"}
 
 
+async def get_self_articles() -> List[Dict[str, Any]]:
+    """Liste des articles (projection légère)."""
+    try:
+        cursor = _db["articles"].find(
+            {},
+            {
+                "_id": 0,
+                "title": 1,
+                "slug": 1,
+                "excerpt": 1,
+                "tags": 1,
+                "links": 1,
+                "date": 1,
+                "author": 1,
+            },
+        )
+        docs = await cursor.to_list(length=200)
+        return _to_jsonable(docs)
+    except Exception as e:
+        _logger.exception("get_self_articles failed")
+        return [{"error": f"{type(e).__name__}: {e}"}]
+
+
+async def get_self_articles_by_slug(slug: str) -> Dict[str, Any]:
+    """Get a article by slug."""
+    try:
+        article = await _db["articles"].find_one({"slug": slug}, {"_id": 0})
+        return {
+            "article_content": _to_jsonable(
+                article
+                if article
+                else "Wrong slug, you might have mistyped it. Please use get_self_articles to get the list of all articles."
+            ),
+            "article_slug": slug,
+        }
+    except Exception as e:
+        _logger.exception("get_self_articles_by_slug failed")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
 async def get_self_experiences() -> Dict[str, Any]:
     """
     Renvoie expériences et études. Tolère l'absence d'une collection.
