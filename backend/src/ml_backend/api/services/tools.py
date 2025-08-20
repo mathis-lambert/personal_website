@@ -89,7 +89,14 @@ async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
     """Get a project by slug."""
     try:
         project = await _db["projects"].find_one({"slug": slug}, {"_id": 0})
-        return _to_jsonable(project)
+        return {
+            "project_content": _to_jsonable(
+                project
+                if project
+                else "Wrong slug, you might have mistyped it. Please use get_self_projects to get the list of all projects."
+            ),
+            "project_slug": slug,
+        }
     except Exception as e:
         _logger.exception("get_self_projects_by_slug failed")
         return {"error": f"{type(e).__name__}: {e}"}
