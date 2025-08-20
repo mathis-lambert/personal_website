@@ -6,6 +6,8 @@ __all__ = [
     "get_self_projects",
     "get_self_experiences",
     "get_self_projects_by_slug",
+    "get_self_articles",
+    "get_self_articles_by_slug",
 ]
 
 import os
@@ -100,8 +102,8 @@ async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
     except Exception as e:
         _logger.exception("get_self_projects_by_slug failed")
         return {"error": f"{type(e).__name__}: {e}"}
-
-
+    
+    
 async def get_self_articles() -> List[Dict[str, Any]]:
     """Liste des articles (projection légère)."""
     try:
