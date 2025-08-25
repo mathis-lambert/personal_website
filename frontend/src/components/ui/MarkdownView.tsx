@@ -1,4 +1,4 @@
-import React, { type JSX, useEffect, useRef, useState } from 'react';
+import React, { type JSX, useState } from 'react';
 import ReactMarkdown, { type ExtraProps, type Options } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
