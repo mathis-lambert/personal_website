@@ -187,7 +187,8 @@ export interface Project {
   slug?: string;
   title: string;
   subtitle?: string;
-  description: string;
+  description?: string;
+  content: string;
   date: string; // canonical date for sorting (usually end date)
   startDate?: string;
   endDate?: string;

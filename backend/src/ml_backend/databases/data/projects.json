@@ -1,47 +1,54 @@
 [
     {
         "id": "proj-1",
-        "slug": "portfolio-website-v3",
-        "title": "Portfolio Website V3",
-        "subtitle": "Site personnel moderne, rapide et animé",
-        "description": "Mon portfolio personnel mettant en avant mes compétences, mes projets et mes services, construit avec Next.js, Tailwind et Framer Motion. Pages statiques, animations fluides, SEO et dark mode.",
-        "date": "2025-03-15",
+        "slug": "personal-website-vite-fastapi",
+        "title": "Mon Site Personnel",
+        "subtitle": "Frontend Vite + React, backend FastAPI, IA et RAG",
+        "description": "Site personnel propulsé par Vite, React et TypeScript, connecté à un backend Python (FastAPI) exposé via api.mathislambert.fr. Le site utilise des modèles d’IA et des bases vectorielles pour la recherche sémantique et des expériences interactives.",
+        "content": "## Aperçu\n\nMon site personnel sert de hub central pour mon profil, mes projets, mes articles et des démos IA. Le frontend est construit avec **Vite + React + TypeScript**. Le backend **FastAPI** (hosté derrière `api.mathislambert.fr`) orchestre l’accès aux **LLMs**, à **Qdrant** (vecteurs) et à **MongoDB** (métadonnées). Les animations sont gérées avec **Framer Motion**.\n\n![Hero du site](/images/projects/personal-website/hero.png)\n\n---\n\n## Architecture\n\n![Architecture logique](/images/projects/personal-website/architecture.png)\n\n- **Client (Vite/React/TS)**: routing, pages, composants UI, animations, appels API.\n- **API (FastAPI)**: endpoints REST pour contenu, recherche sémantique, génération, et outils.\n- **LLMs**: appel via **OpenRouter** vers `gpt-oss-120B` (et modèles compatibles) pour réponse, résumé, reformulation.\n- **Vector store**: **Qdrant** pour embeddings et similarité (RAG).\n- **Base documentaire**: **MongoDB** pour projets, articles, profils et index.\n\n---\n\n## Frontend\n\n- **Vite** pour un build rapide et un HMR efficace.\n- **React + TypeScript** pour la robustesse et l’ergonomie dev.\n- **Framer Motion** pour transitions de pages et micro-interactions.\n- **Architecture UI** orientée composants réutilisables (Cards, Sections, Layouts).\n- **SEO** et métas dynamiques par page.\n\n![Page Projets](/images/projects/personal-website/projects.png)\n\n---\n\n## Backend FastAPI\n\n- Endpoints versionnés `/v1/*` pour contenu, recherche et IA.\n- Orchestrateur d’appels **OpenRouter** avec timeouts et repli.\n- Intégration **Qdrant** pour requêtes sémantiques (kNN, filtres).\n- Persistance **MongoDB** pour documents et journaux d’utilisation.\n- Schémas Pydantic, validation stricte, gestion d’erreurs normalisée.\n\n---\n\n## IA et RAG\n\n- **Embeddings**: génération et mise à jour périodique pour projets et articles.\n- **Recherche sémantique**: requête → embeddings → similarité Qdrant → contexte → LLM.\n- **Génération contrôlée**: prompts concis, citation des sources internes, limites de longueur.\n- **Use cases**: recherche de projets, Q&A sur mon parcours, résumé d’articles, aide à la navigation.\n\n![Chat IA](/images/projects/personal-website/chat.png)\n\n---\n\n## Données et stockage\n\n- **MongoDB**: documents structurés (projets, articles, profils, logs).\n- **Qdrant**: collections par type de contenu, payloads pour métadonnées.\n- **Stratégie d’indexation**: chunking, normalisation, champs clés pour filtres.\n\n---\n\n## Déploiement et exploitation\n\n- Config via variables d’environnement.\n- Logs structurés côté API. Observabilité basique requêtes/réponses.\n- Politique CORS limitée au domaine public.\n\n---\n\n## Sécurité\n\n- Vérification d’entrée (Pydantic), sanitation minimale côté API.\n- Clés d’API chiffrées au repos et non exposées au client.\n- Limitation de longueur de prompts et réponses pour éviter abus.\n\n---\n\n## Roadmap\n\n- Streaming côté client pour réponses LLM en temps réel.\n- Tableau de bord analytics (requêtes, latences, CTR).\n- Moteur de recommandation de contenu basé sur similarité.\n- Export/Import de la base documentaire.\n\n---\n\n## Captures et médias\n\n- `![Section À propos](/images/projects/personal-website/about.png)`\n- `![Liste des articles](/images/projects/personal-website/blog-list.png)`\n- `![Détail d’un article](/images/projects/personal-website/blog-detail.png)`\n- `![Moteur de recherche](/images/projects/personal-website/search.png)`\n",
+        "date": "2025-08-25",
         "technologies": [
-            "Next.js",
+            "Vite",
             "React",
             "TypeScript",
-            "Tailwind CSS",
+            "MongoDB",
+            "Qdrant",
+            "OpenRouter",
+            "gpt-oss-120B",
+            "FastAPI",
+            "Python",
+            "LLMs",
+            "Embeddings",
             "Framer Motion"
         ],
         "categories": [
             "Website",
-            "Frontend"
+            "Fullstack",
+            "AI"
         ],
         "status": "completed",
         "isFeatured": true,
-        "projectUrl": "https: //your-portfolio-url.com",
-        "repoUrl": "https: //github.com/your-username/portfolio-v3",
+        "projectUrl": "[https://mathislambert.fr](https://mathislambert.fr)",
+        "repoUrl": "[https://github.com/mathis-lambert/personal_website](https://github.com/mathis-lambert/personal_website)",
         "links": {
-            "live": "https: //your-portfolio-url.com",
-            "repo": "https: //github.com/your-username/portfolio-v3",
-            "docs": "https: //your-portfolio-url.com/docs"
+            "live": "[https://mathislambert.fr](https://mathislambert.fr)",
+            "repo": "[https://github.com/mathis-lambert/personal_website](https://github.com/mathis-lambert/personal_website)",
+            "docs": "[https://api.mathislambert.fr/docs](https://api.mathislambert.fr/docs)"
         },
         "media": {
-            "thumbnailUrl": "/images/projects/project1.jpg",
-            "imageUrl": "/images/projects/project1.jpg"
+            "thumbnailUrl": "/images/projects/project1.png",
+            "imageUrl": "/images/projects/project1.png"
         },
-        "metrics": {
-            "stars": 128
-        },
+        "metrics": {},
         "highlights": [
-            "Design glassmorphism + gradients",
-            "Animations orchestrées (Framer Motion)",
-            "Accessibilité et SEO soignés"
+            "Stack Vite/React/TS avec animations Framer Motion",
+            "Backend FastAPI relié à OpenRouter et Qdrant",
+            "Recherche sémantique RAG sur projets et articles"
         ],
         "role": "Fullstack",
         "client": "Personnel",
         "teamSize": 1,
-        "color": "#3b82f6"
+        "color": "#0ea5e9"
     },
     {
         "id": "proj-2",

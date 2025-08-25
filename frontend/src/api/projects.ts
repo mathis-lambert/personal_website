@@ -24,7 +24,7 @@ export function normalizeProjectApi(p: ApiProject): Project {
     slug: p.slug,
     title: p.title ?? '',
     subtitle: p.subtitle,
-    description: p.description ?? '',
+    content: p.content ?? '',
     date: p.date ?? new Date().toISOString(),
     startDate: p.startDate,
     endDate: p.endDate,

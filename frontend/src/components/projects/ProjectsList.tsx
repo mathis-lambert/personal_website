@@ -117,7 +117,10 @@ const ProjectsList: React.FC = () => {
         const isInSubtitle = (project.subtitle || '')
           .toLowerCase()
           .includes(lowerCaseQuery);
-        const isInDescription = project.description
+        const isInDescription = (project.description || '')
+          .toLowerCase()
+          .includes(lowerCaseQuery);
+        const isInContent = (project.content || '')
           .toLowerCase()
           .includes(lowerCaseQuery);
         const isInTechnologies = project.technologies.some((tech) =>
@@ -136,6 +139,7 @@ const ProjectsList: React.FC = () => {
           !isInTitle &&
           !isInSubtitle &&
           !isInDescription &&
+          !isInContent &&
           !isInTechnologies &&
           !isInCategories &&
           !isInClient &&
