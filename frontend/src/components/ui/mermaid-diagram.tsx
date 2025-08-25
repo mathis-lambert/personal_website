@@ -30,6 +30,8 @@ export const MermaidDiagram: React.FC<{ source: string }> = ({ source }) => {
             // extraire config simple si présent en tête
             const cfg = parseTopConfig(source);
 
+            console.log("Mermaid Config", cfg)
+
             mermaid.initialize({
                 startOnLoad: false,
                 theme: cfg?.theme as MmdTheme,
