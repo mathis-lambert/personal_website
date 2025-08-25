@@ -194,7 +194,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
           <div className="space-y-6 md:space-y-8">
             <ProjectSection title="Project Overview">
               <article className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none">
-                <MarkdownView content={project.content} />
+                <MarkdownView content={project.content || ''} />
               </article>
             </ProjectSection>
 

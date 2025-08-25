@@ -119,7 +119,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
 
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow line-clamp-3">
-              {project.description}
+              {project.description || project.content?.slice(0, 100)}...
             </p>
 
             {project.technologies && project.technologies.length > 0 && (

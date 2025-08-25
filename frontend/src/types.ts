@@ -188,7 +188,7 @@ export interface Project {
   title: string;
   subtitle?: string;
   description?: string;
-  content: string;
+  content?: string;
   date: string; // canonical date for sorting (usually end date)
   startDate?: string;
   endDate?: string;
@@ -211,7 +211,28 @@ export interface Project {
   teamSize?: number;
   highlights?: string[];
   color?: string; // accent color for card/header theming
+
+  ai_context?: AiContext;
 }
+
+export interface AiContext {
+  llm_purpose: string;
+  routing: {
+    internal_page: string;
+    external_links: string[];
+  };
+  capabilities: string[];
+  key_tech: string[];
+  claims: string[];
+  limitations: string[];
+  faq_snippets: {
+    q: string;
+    a: string;
+  }[];
+  linking_rules: string[];
+  tags: string[];
+}
+
 
 // ---------------- Blog / Articles DTO ----------------
 

@@ -78,6 +78,7 @@ async def get_self_projects() -> List[Dict[str, Any]]:
                 "subtitle": 1,
                 "links": 1,
                 "date": 1,
+                "ai_context": 1,
             },
         )
         docs = await cursor.to_list(length=200)
@@ -90,7 +91,9 @@ async def get_self_projects() -> List[Dict[str, Any]]:
 async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
     """Get a project by slug."""
     try:
-        project = await _db["projects"].find_one({"slug": slug}, {"_id": 0})
+        project = await _db["projects"].find_one(
+            {"slug": slug}, {"_id": 0, "ai_context": 1}
+        )
         return {
             "project_content": _to_jsonable(
                 project
@@ -102,8 +105,8 @@ async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
     except Exception as e:
         _logger.exception("get_self_projects_by_slug failed")
         return {"error": f"{type(e).__name__}: {e}"}
-    
-    
+
+
 async def get_self_articles() -> List[Dict[str, Any]]:
     """Liste des articles (projection légère)."""
     try:
@@ -118,6 +121,7 @@ async def get_self_articles() -> List[Dict[str, Any]]:
                 "links": 1,
                 "date": 1,
                 "author": 1,
+                "ai_context": 1,
             },
         )
         docs = await cursor.to_list(length=200)
@@ -130,7 +134,9 @@ async def get_self_articles() -> List[Dict[str, Any]]:
 async def get_self_articles_by_slug(slug: str) -> Dict[str, Any]:
     """Get a article by slug."""
     try:
-        article = await _db["articles"].find_one({"slug": slug}, {"_id": 0})
+        article = await _db["articles"].find_one(
+            {"slug": slug}, {"_id": 0, "ai_context": 1}
+        )
         return {
             "article_content": _to_jsonable(
                 article
