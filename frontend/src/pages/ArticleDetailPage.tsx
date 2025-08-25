@@ -15,7 +15,6 @@ const ArticleDetailPage: React.FC = () => {
     const ac = new AbortController();
     async function fetchArticle() {
       try {
-        setIsLoading(true);
         if (!articleId) {
           setArticle(null);
           return;
