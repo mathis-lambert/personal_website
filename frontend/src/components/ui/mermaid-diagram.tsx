@@ -1,17 +1,41 @@
 import React, { useEffect, useRef } from 'react';
 
-const parseTopConfig = (src: string) => {
-    // parse très simple de "config:\n  key: value\n  key2: value2\n\n"
-    if (!src.startsWith('config:')) return null;
-    const lines = src.split('\n').slice(1);
+const parseTopConfig = (src: string): Record<string, string> | null => {
+    // match frontmatter at the very top delimited by ---
+    const fmMatch = src.match(/^\s*---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
+    if (!fmMatch) return null;
+
+    const frontmatter = fmMatch[1];
+
+    // find config: block inside the frontmatter
+    const cfgMatch = frontmatter.match(/(^|\r?\n)config:\s*\r?\n([\s\S]*)$/);
+    if (!cfgMatch) return null;
+
+    const cfgBody = cfgMatch[2];
+    const lines = cfgBody.split(/\r?\n/);
     const cfg: Record<string, string> = {};
-    for (const l of lines) {
-        if (l.trim() === '') break;
-        const m = l.match(/^\s*([\w-]+):\s*(.+)\s*$/);
-        if (m) cfg[m[1]] = m[2];
+
+    for (const rawLine of lines) {
+        const line = rawLine.replace(/\t/g, '    ');
+        if (line.trim() === '') break; // stop at first empty line
+
+        // accept "  key: value" or "key: value"
+        const m = line.match(/^\s*([\w-]+):\s*(.+?)\s*$/);
+        if (!m) break;
+
+        const key = m[1];
+        let value = m[2];
+
+        // strip surrounding quotes if present
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+        cfg[key] = value;
     }
-    return cfg;
+
+    return Object.keys(cfg).length ? cfg : null;
 };
+
 
 type MmdTheme = "default" | "base" | "dark" | "forest" | "neutral" | "null" | undefined
 
