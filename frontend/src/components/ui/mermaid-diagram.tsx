@@ -1,45 +1,39 @@
 import React, { useEffect, useRef } from 'react';
 
-const parseTopConfig = (src: string): Record<string, string> | null => {
-    // match frontmatter at the very top delimited by ---
-    const fmMatch = src.match(/^\s*---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/);
-    if (!fmMatch) return null;
+type MmdTheme = 'default' | 'base' | 'dark' | 'forest' | 'neutral' | undefined;
+type Layout = 'dagre' | 'elk' | undefined;
 
-    const frontmatter = fmMatch[1];
+const FRONTMATTER_RE = /^\s*---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/;
 
-    // find config: block inside the frontmatter
-    const cfgMatch = frontmatter.match(/(^|\r?\n)config:\s*\r?\n([\s\S]*)$/);
-    if (!cfgMatch) return null;
+function extractConfigAndBody(src: string): { theme?: MmdTheme; layout?: Layout; body: string } {
+    const m = src.match(FRONTMATTER_RE);
+    if (!m) return { body: src };
 
-    const cfgBody = cfgMatch[2];
-    const lines = cfgBody.split(/\r?\n/);
-    const cfg: Record<string, string> = {};
+    const front = m[1];
+    const body = src.slice(m[0].length).replace(/^\s+/, '');
 
-    for (const rawLine of lines) {
-        const line = rawLine.replace(/\t/g, '    ');
-        if (line.trim() === '') break; // stop at first empty line
+    // chercher bloc "config:" puis lignes indentées "key: value"
+    const cfgStart = front.search(/(^|\r?\n)config:\s*\r?$/m);
+    if (cfgStart === -1) return { body };
 
-        // accept "  key: value" or "key: value"
-        const m = line.match(/^\s*([\w-]+):\s*(.+?)\s*$/);
-        if (!m) break;
+    const after = front.slice(cfgStart).split(/\n/g).slice(1);
 
-        const key = m[1];
-        let value = m[2];
+    let theme: MmdTheme | undefined;
+    let layout: Layout | undefined;
 
-        // strip surrounding quotes if present
-        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-            value = value.slice(1, -1);
-        }
-        cfg[key] = value;
+    for (const raw of after) {
+        const m2 = raw.match(/^\s*([\w-]+):\s*(.+?)\s*$/);
+        if (!m2) continue;
+        const key = m2[1];
+        const val = m2[2].replace(/^["']|["']$/g, '');
+        if (key === 'theme') theme = (val as MmdTheme);
+        if (key === 'layout') layout = (val as Layout);
     }
 
-    return Object.keys(cfg).length ? cfg : null;
-};
+    return { theme, layout, body };
+}
 
-
-type MmdTheme = "default" | "base" | "dark" | "forest" | "neutral" | "null" | undefined
-
-export const MermaidDiagram: React.FC<{ source: string }> = ({ source }) => {
+export const MermaidDiagram: React.FC<{ source: string; className?: string }> = ({ source, className }) => {
     const ref = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -51,36 +45,21 @@ export const MermaidDiagram: React.FC<{ source: string }> = ({ source }) => {
             const mod = await import('mermaid');
             const mermaid = mod.default ?? mod;
 
-            // extraire config simple si présent en tête
-            const cfg = parseTopConfig(source);
+            const { theme, layout, body } = extractConfigAndBody(source);
 
-            console.log("Mermaid Config", cfg)
-
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: cfg?.theme as MmdTheme,
-                layout: cfg?.layout,
-            });
+            mermaid.initialize({ startOnLoad: false, theme: theme, layout: layout });
 
             try {
-                // si tu veux forcer une init inline (utile pour layout/options par-diagramme)
-                const init = cfg
-                    ? `%%{init: ${JSON.stringify({ theme: cfg.theme, layout: cfg.layout })}}%%\n`
-                    : '';
-                const finalSource = init + source.replace(/^config:[\s\S]*?\n\n/, '');
-
-                const result = await mermaid.render(id, finalSource);
-                const svg = typeof result === 'string' ? result : result.svg ?? result;
+                const res = await mermaid.render(id, body);
+                const svg = typeof res === 'string' ? res : (res.svg ?? res);
                 if (mounted && ref.current) ref.current.innerHTML = svg;
-            } catch (err) {
-                if (mounted && ref.current) ref.current.textContent = 'Erreur mermaid: ' + String(err);
+            } catch (e) {
+                if (mounted && ref.current) ref.current.textContent = 'Erreur mermaid: ' + String(e);
             }
         })();
 
-        return () => {
-            mounted = false;
-        };
+        return () => { mounted = false; };
     }, [source]);
 
-    return <div ref={ref} className="my-4 prose-mermaid" aria-hidden />;
+    return <div ref={ref} className={className ?? 'my-4 prose-mermaid'} />;
 };
