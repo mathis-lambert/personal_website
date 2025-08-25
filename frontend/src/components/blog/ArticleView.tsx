@@ -54,7 +54,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
       .then((m) => {
         if (m) setMetrics(m);
       })
-      .catch(() => { });
+      .catch(() => {});
   }, [article, token]);
 
   if (isLoading) {
@@ -146,7 +146,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
           .then((m) => {
             if (m) setMetrics(m);
           })
-          .catch(() => { });
+          .catch(() => {});
         return;
       }
     } catch {
@@ -159,7 +159,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
         .then((m) => {
           if (m) setMetrics(m);
         })
-        .catch(() => { });
+        .catch(() => {});
       setTimeout(() => setCopiedShare(false), 2000);
     } catch {
       // ignore
@@ -238,11 +238,11 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-start sm:justify-end sm:pl-4 sm:border-l sm:border-white/20 dark:sm:border-white/10">
                 {typeof (metrics?.views ?? article.metrics?.views) ===
                   'number' && (
-                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Eye className="w-3.5 h-3.5" />{' '}
-                      {metrics?.views ?? article.metrics?.views}
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <Eye className="w-3.5 h-3.5" />{' '}
+                    {metrics?.views ?? article.metrics?.views}
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <Heart
                     className={cn('w-3.5 h-3.5', isLiked ? 'text-red-500' : '')}
@@ -251,11 +251,11 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 </span>
                 {typeof (metrics?.shares ?? article.metrics?.shares) ===
                   'number' && (
-                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Share2 className="w-3.5 h-3.5" />{' '}
-                      {metrics?.shares ?? article.metrics?.shares}
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <Share2 className="w-3.5 h-3.5" />{' '}
+                    {metrics?.shares ?? article.metrics?.shares}
+                  </span>
+                )}
               </div>
               {article.tags && article.tags.length > 0 && (
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-1">
@@ -286,7 +286,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                     .then((m) => {
                       if (m) setMetrics(m);
                     })
-                    .catch(() => { })
+                    .catch(() => {})
                 }
               >
                 <Heart
@@ -322,7 +322,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                     .then((m) => {
                       if (m) setMetrics(m);
                     })
-                    .catch(() => { })
+                    .catch(() => {})
                 }
               >
                 <Twitter className="w-4 h-4" /> Twitter
@@ -341,7 +341,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 onMouseUp={() =>
                   trackArticleShare(article, {
                     token: token ?? undefined,
-                  }).catch(() => { })
+                  }).catch(() => {})
                 }
               >
                 <Linkedin className="w-4 h-4" /> LinkedIn
@@ -363,7 +363,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                       .then((m) => {
                         if (m) setMetrics(m);
                       })
-                      .catch(() => { });
+                      .catch(() => {});
                     setTimeout(() => setCopiedLink(false), 2000);
                   } catch {
                     // ignore

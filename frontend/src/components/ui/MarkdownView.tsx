@@ -1,4 +1,4 @@
-import React, { type JSX, useState } from 'react';
+import React, { type JSX, useEffect, useRef, useState } from 'react';
 import ReactMarkdown, { type ExtraProps, type Options } from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Check, Clipboard, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils.ts'; // Import Loader2
+import { MermaidDiagram } from './mermaid-diagram';
 
 interface MarkdownViewProps {
   content: string;
@@ -140,6 +141,14 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
         (mdNode?.value?.includes('\n') ?? false);
 
       if (isBlock && match) {
+        if (isBlock && language === 'mermaid') {
+          return (
+            <div className="my-6">
+              <MermaidDiagram source={codeString} />
+            </div>
+          );
+        }
+
         return (
           <div className="code-block relative group my-6 rounded-xl border border-white/10 bg-[#0b1020]/90 text-sm shadow-sm">
             <div className="flex items-center justify-between px-4 py-2 border-b border-white/10">

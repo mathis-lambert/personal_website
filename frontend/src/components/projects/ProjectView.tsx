@@ -228,40 +228,40 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
               repoUrl ||
               project.links?.docs ||
               project.links?.video) && (
-                <ProjectSection
-                  title="Project Links"
-                  contentClassName="flex flex-wrap gap-4"
-                >
-                  {liveUrl && (
-                    <ProjectLinkButton
-                      href={liveUrl}
-                      icon={<ExternalLink className="w-4 h-4" />}
-                      label="Live Demo"
-                    />
-                  )}
-                  {repoUrl && (
-                    <ProjectLinkButton
-                      href={repoUrl}
-                      icon={<BsGithub className="w-4 h-4" />}
-                      label="Source Code"
-                    />
-                  )}
-                  {project.links?.docs && (
-                    <ProjectLinkButton
-                      href={project.links.docs}
-                      icon={<span className="text-xs">📄</span>}
-                      label="Docs"
-                    />
-                  )}
-                  {project.links?.video && (
-                    <ProjectLinkButton
-                      href={project.links.video}
-                      icon={<span className="text-xs">🎬</span>}
-                      label="Video"
-                    />
-                  )}
-                </ProjectSection>
-              )}
+              <ProjectSection
+                title="Project Links"
+                contentClassName="flex flex-wrap gap-4"
+              >
+                {liveUrl && (
+                  <ProjectLinkButton
+                    href={liveUrl}
+                    icon={<ExternalLink className="w-4 h-4" />}
+                    label="Live Demo"
+                  />
+                )}
+                {repoUrl && (
+                  <ProjectLinkButton
+                    href={repoUrl}
+                    icon={<BsGithub className="w-4 h-4" />}
+                    label="Source Code"
+                  />
+                )}
+                {project.links?.docs && (
+                  <ProjectLinkButton
+                    href={project.links.docs}
+                    icon={<span className="text-xs">📄</span>}
+                    label="Docs"
+                  />
+                )}
+                {project.links?.video && (
+                  <ProjectLinkButton
+                    href={project.links.video}
+                    icon={<span className="text-xs">🎬</span>}
+                    label="Video"
+                  />
+                )}
+              </ProjectSection>
+            )}
           </div>
         </div>
       </motion.div>

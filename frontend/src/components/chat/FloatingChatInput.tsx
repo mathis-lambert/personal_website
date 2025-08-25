@@ -130,7 +130,9 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
           layout="position"
         >
           <LayoutGroup>
-            <div className={`flex items-end justify-center px-1 w-full ${isChatOpen ? 'gap-2' : ''}`}>
+            <div
+              className={`flex items-end justify-center px-1 w-full ${isChatOpen ? 'gap-2' : ''}`}
+            >
               {/* Input card */}
               <motion.div
                 className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
