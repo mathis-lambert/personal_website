@@ -35,8 +35,8 @@
             "repo": "https://github.com/mathis-lambert/personal_website"
         },
         "media": {
-            "thumbnailUrl": "/images/projects/project1.png",
-            "imageUrl": "/images/projects/project1.png"
+            "thumbnailUrl": "/images/projects/personal-website/thumb.png",
+            "imageUrl": "/images/projects/personal-website/thumb.png"
         },
         "metrics": {},
         "highlights": [
