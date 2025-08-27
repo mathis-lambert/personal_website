@@ -98,7 +98,7 @@
                 "Java",
                 "C/C++"
             ],
-            "ai/ml": [
+            "ai_ml": [
                 "SotA Transformer Models",
                 "Fine-tuning",
                 "Computer Vision (YOLO, OpenCV)",

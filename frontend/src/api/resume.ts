@@ -5,10 +5,10 @@ export function normalizeResumeApi(p: ResumeData): ResumeData {
   return {
     name: p.name,
     contact: p.contact,
-    summary: p.summary,
     experiences: p.experiences,
     education: p.education,
-    technologies: p.technologies,
+    technical_skills: p.technical_skills,
+    certifications: p.certifications,
     skills: p.skills,
     passions: p.passions,
   };

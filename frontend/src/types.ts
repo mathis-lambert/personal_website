@@ -4,6 +4,7 @@ export interface Contact {
   email: string;
   phone: string;
   linkedin: string;
+  github: string;
   website: string;
 }
 
@@ -12,7 +13,7 @@ export interface Experience {
   company: string;
   period: string;
   location: string;
-  isCurrent?: boolean;
+  current?: boolean;
   highlight?: boolean;
   description: string[];
 }
@@ -20,16 +21,31 @@ export interface Experience {
 export interface Education {
   institution: string;
   degree: string;
+  description?: string;
   period: string;
+}
+
+export interface Certification {
+  provider: string;
+  title: string;
+  issued_date: string | null;
+  status: "issued" | "running" | "expired";
+}
+
+export interface TechnicalSkills {
+  languages: string[];
+  ai_ml: string[];
+  systems_and_infra: string[];
+  web: string[];
 }
 
 export interface ResumeData {
   name: string;
   contact: Contact;
-  summary: string;
   experiences: Experience[];
   education: Education[];
-  technologies: string[];
+  certifications: Certification[];
+  technical_skills: TechnicalSkills;
   skills: string[];
   passions: string[];
 }

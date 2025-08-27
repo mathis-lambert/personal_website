@@ -31,29 +31,13 @@ export default function Resume() {
         <div id="resume-content" ref={resumeRef}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <main className="lg:col-span-2 space-y-6">
-              <GlassCard className="p-6" delay={0}>
-                <ResumeSection icon={Briefcase} title="About Me">
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[15px] sm:text-base">
-                    {resumeData?.summary}
-                  </p>
-                </ResumeSection>
-              </GlassCard>
-
               <GlassCard className="p-6" delay={0.08}>
                 <ResumeSection icon={Cpu} title="Experience">
                   {resumeData?.experiences.map((exp, i) =>
                     exp.highlight ? (
-                      <HighlightCard
-                        key={i}
-                        experience={exp}
-                        delay={0.05 * i}
-                      />
+                      <HighlightCard key={i} experience={exp} delay={0.05 * i} />
                     ) : (
-                      <ExperienceCard
-                        key={i}
-                        experience={exp}
-                        delay={0.05 * i}
-                      />
+                      <ExperienceCard key={i} experience={exp} delay={0.05 * i} />
                     ),
                   )}
                 </ResumeSection>
@@ -95,6 +79,28 @@ export default function Resume() {
                       <FaLinkedin size={14} className="mr-3 shrink-0" />
                       linkedin.com/in/{resumeData?.contact.linkedin}
                     </a>
+                    {resumeData?.contact.github && (
+                      <a
+                        href={`https://github.com/${resumeData.contact.github}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center hover:text-cyan-500 transition-colors"
+                      >
+                        <Code size={14} className="mr-3 shrink-0" />
+                        github.com/{resumeData.contact.github}
+                      </a>
+                    )}
+                    {resumeData?.contact.website && (
+                      <a
+                        href={`https://${resumeData.contact.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center hover:text-cyan-500 transition-colors"
+                      >
+                        <Home size={14} className="mr-3 shrink-0" />
+                        {resumeData.contact.website}
+                      </a>
+                    )}
                   </div>
                 </ResumeSection>
               </GlassCard>
@@ -119,18 +125,58 @@ export default function Resume() {
 
               <TagListSection
                 icon={Code}
-                title="Technologies"
-                items={resumeData?.technologies ?? []}
+                title="Languages"
+                items={resumeData?.technical_skills?.languages ?? []}
                 colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                delay={0.4}
+                delay={0.40}
               />
+              <TagListSection
+                icon={Cpu}
+                title="AI / ML"
+                items={resumeData?.technical_skills?.ai_ml ?? []}
+                colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                delay={0.44}
+              />
+              <TagListSection
+                icon={Code}
+                title="Systems & Infra"
+                items={resumeData?.technical_skills?.systems_and_infra ?? []}
+                colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                delay={0.48}
+              />
+              <TagListSection
+                icon={Code}
+                title="Web"
+                items={resumeData?.technical_skills?.web ?? []}
+                colorClass="bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                delay={0.52}
+              />
+
+              <GlassCard className="p-6" delay={0.56}>
+                <ResumeSection icon={Briefcase} title="Certifications">
+                  {resumeData?.certifications?.map((cert, i) => (
+                    <div key={i} className="mb-3 last:mb-0">
+                      <h3 className="font-semibold text-slate-800 dark:text-slate-100">
+                        {cert.title}
+                      </h3>
+                      <p className="text-cyan-600 dark:text-cyan-400 text-sm">
+                        {cert.provider}
+                      </p>
+                      <p className="text-slate-500 dark:text-slate-400 text-xs">
+                        {cert.status}
+                        {cert.issued_date ? ` • ${cert.issued_date}` : ''}
+                      </p>
+                    </div>
+                  ))}
+                </ResumeSection>
+              </GlassCard>
 
               <TagListSection
                 icon={Sparkles}
                 title="Professional Skills"
                 items={resumeData?.skills ?? []}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
-                delay={0.48}
+                delay={0.60}
               />
             </aside>
           </div>
