@@ -15,6 +15,7 @@ export interface Experience {
   location: string;
   current?: boolean;
   highlight?: boolean;
+  hide?: boolean;
   description: string[];
 }
 
@@ -29,7 +30,7 @@ export interface Certification {
   provider: string;
   title: string;
   issued_date: string | null;
-  status: "issued" | "running" | "expired";
+  status: "issued" | "running" | "stopped" | "starting";
 }
 
 export interface TechnicalSkills {

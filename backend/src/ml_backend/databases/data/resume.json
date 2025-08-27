@@ -40,6 +40,7 @@
                 "company": "LEXTAN",
                 "period": "Jun 2022 - Aug 2022",
                 "location": "Marseille, France",
+                "hide": true,
                 "description": [
                     "Led the complete, from-scratch redesign and development of the corporate website.",
                     "Developed tailored web solutions for major events like Vivatech and JDL Expo 2022."
