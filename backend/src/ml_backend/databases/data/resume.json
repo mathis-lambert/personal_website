@@ -2,35 +2,47 @@
     {
         "name": "Mathis Lambert",
         "contact": {
-            "email": "mathis.lambert27@gmail.com",
+            "email": "mathislambert.dev@gmail.com",
             "phone": "06 51 05 01 67",
             "linkedin": "mathis-lambert",
+            "github": "mathis-lambert",
             "website": "mathislambert.fr"
         },
-        "summary": "I'm passionate about AI, machine learning, and data science, and I enjoy working on practical and innovative solutions within a collaborative environment. With a focus on continuous learning and technical reliability, I aim to grow through meaningful, hands-on projects.",
         "experiences": [
             {
-                "role": "Apprentice R&D Engineer (previously Intern)",
+                "role": "Apprentice R&D Engineer",
                 "company": "Free Pro",
-                "period": "Apr 2023 - Present",
+                "period": "Sept 2024 - present",
                 "location": "Marseille, France",
+                "current": true,
                 "highlight": true,
-                "isCurrent": true,
                 "description": [
-                    "Progressed from an R&D Intern to an Apprentice Engineer on the AI Research team.",
-                    "Gained expertise in transformer models (LLMs, TimeSeries), dataset design, and fine-tuning (SFT, DPO, LORA).",
-                    "Deployed AI workloads on HPC infrastructures (Nvidia H100 clusters) using Docker, Nvidia NGC, and Slurm.",
-                    "Developed OCR systems with DepthAI/Raspberry Pi and object detection models with OpenCV/YOLOv8."
+                    "Design and implement advanced LLM-based workflows for customer-care automation using state-of-the-art models (Qwen, Llama, Gemma, etc.). Build agentic AI pipelines with tool calling, RAG, embeddings, ReAct planning, and safety/guardrail enforcement to ensure factual, policy-compliant outputs.",
+                    "Deploy and optimize large-scale AI models on specialized GPU clusters (NVIDIA H100, L40S) with vLLM and LlamaCPP.",
+                    "Contribute to full-stack software development, from frontends (React/TypeScript) and backends (NestJS, FastAPI) to AI microservices (Websockets, Python SDKs).",
+                    "Manage data infrastructure (Postgres, MongoDB, Qdrant) for knowledge-base orchestration and retrieval.",
+                    "Maintain CI/CD pipelines (GitLab, Docker) and perform Linux sysadmin/network tasks across dev, pre-prod, and prod environments."
                 ]
             },
             {
-                "role": "Junior Web Developer & Webdesigner",
+                "role": "Apprentice R&D Developer",
+                "company": "Free Pro",
+                "period": "Apr 2023 - Aug 2024",
+                "location": "Marseille, France",
+                "description": [
+                    "Gained expertise in transformer models (LLMs, Embeddings), dataset design, and fine-tuning (SFT, DPO, LORA).",
+                    "Deployed AI workloads on HPC infrastructures (Nvidia H100 clusters) using Docker, Nvidia NGC, and Slurm.",
+                    "Developed OCR systems with DepthAI/Raspberry Pi and object detection models with OpenCV/YOLOv8 for Real-Time screen monitoring."
+                ]
+            },
+            {
+                "role": "Web Developer & Webdesigner intern",
                 "company": "LEXTAN",
                 "period": "Jun 2022 - Aug 2022",
-                "location": "Gémenos, France",
+                "location": "Marseille, France",
                 "description": [
                     "Led the complete, from-scratch redesign and development of the corporate website.",
-                    "Developed tailored web solutions for major tech events like Vivatech and JDL Expo 2022."
+                    "Developed tailored web solutions for major events like Vivatech and JDL Expo 2022."
                 ]
             },
             {
@@ -38,7 +50,6 @@
                 "company": "PÉPITE Provence & UN 2030 Goals",
                 "period": "Mar 2018 - Apr 2018",
                 "location": "Chicago, Illinois, USA",
-                "highlight": false,
                 "description": [
                     "Co-developed an intelligent system to combat driver fatigue for long-haul truck drivers.",
                     "Awarded 2nd Place Jury Prize at the Start'up Competition in Chicago.",
@@ -49,32 +60,71 @@
         "education": [
             {
                 "institution": "CPE Lyon",
-                "degree": "Computer Science, Ingénierie informatique",
+                "degree": "Computer Science & AI Engineering",
+                "description": "Software Engineering, Distributed Systems, Machine Learning",
                 "period": "2024 - 2027"
             },
             {
                 "institution": "Université de Toulon",
-                "degree": "Bachelor (BUT) Multimédia et Métiers de l'Internet",
+                "degree": "Bachelor (BUT) Multimedia & Internet Technologies",
+                "description": "Graduated with honors. Specialized in software development and interactive systems.",
                 "period": "2021 - 2024"
             }
         ],
-        "technologies": [
-            "Python",
-            "PyTorch",
-            "LLMs (Mistral, Llama)",
-            "HPC/Slurm",
-            "Docker",
-            "Nvidia NGC",
-            "Node.js",
-            "MongoDB",
-            "React",
-            "JavaScript/TypeScript",
-            "Computer Vision (OpenCV, YOLO)"
+        "certifications": [
+            {
+                "provider": "Columbia University (NYC)",
+                "title": "Learning AI Through Visualization",
+                "issued_date": null,
+                "status": "running"
+            },
+            {
+                "provider": "freeCodeCamp",
+                "title": "JavaScript Algorithms and Data Structures",
+                "issued_date": "Nov 2022",
+                "status": "issued"
+            },
+            {
+                "provider": "freeCodeCamp",
+                "title": "Backend Development and APIs",
+                "issued_date": "Jan 2023",
+                "status": "issued"
+            }
         ],
+        "technical_skills": {
+            "languages": [
+                "Python",
+                "JavaScript/TypeScript",
+                "Java",
+                "C/C++"
+            ],
+            "ai/ml": [
+                "SotA Transformer Models",
+                "Fine-tuning",
+                "Computer Vision (YOLO, OpenCV)",
+                "vLLM, LlamaCPP",
+                "Embeddings",
+                "Vector stores"
+            ],
+            "systems_and_infra": [
+                "Linux",
+                "HPC/Slurm",
+                "Docker",
+                "CUDA environments",
+                "S3 storage"
+            ],
+            "web": [
+                "React",
+                "MongoDB",
+                "REST APIs",
+                "Websockets"
+            ]
+        },
         "skills": [
             "AI & Machine Learning",
-            "Fine-Tuning (LORA, DPO)",
-            "5G SA Infrastructure",
+            "Data Structures & Algorithms",
+            "Distributed Systems",
+            "Complex AI Workflows",
             "Public Speaking",
             "Agile Methodologies",
             "Problem Solving"
