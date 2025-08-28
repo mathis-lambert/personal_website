@@ -3,16 +3,16 @@
     "title": "R&D Engineer Apprentice – AI Research Team",
     "company": "Free Pro",
     "date": "Sept. 2024 - Present",
-    "description": "Working on Transformer models (LLMs, time series): dataset design, fine-tuning (SFT, DPO, LoRA), and evaluation. Deploying AI workloads on HPC infrastructures with Nvidia H100 GPUs, using Docker, Slurm, and Nvidia NGC. Monitoring open-source models (Mistral, LLaMA), exploring enterprise-focused AI Agents, embeddings, Speech2Text, and Doc2Vec."
+    "description": "Design and implement advanced LLM-based workflows for customer-care automation using state-of-the-art models (Qwen, Llama, Gemma, etc.), building agentic AI pipelines with tool calling, RAG, embeddings, ReAct planning, and guardrails to ensure factual, policy-compliant outputs, while deploying and optimizing large-scale AI models on specialized GPU clusters (NVIDIA H100, L40S) with vLLM and LlamaCPP, contributing to full-stack development from React/TypeScript frontends and NestJS/FastAPI backends to AI microservices and Python SDKs, managing data infrastructure with Postgres, MongoDB, and Qdrant for knowledge-base orchestration and retrieval, and maintaining GitLab/Docker CI/CD pipelines along with Linux sysadmin and network tasks across dev, pre-prod, and prod environments."
   },
   {
     "title": "AI R&D Developer – AI Research Team",
     "company": "Free Pro",
     "date": "Sept. 2023 - Sept. 2024",
-    "description": "Active contribution to R&D projects in generative AI and HPC optimization. Experience in Computer Vision (OCR, DepthAI, YOLOv8), telecom (5G SA, GNodeB), and training open-source models on GPU clusters. Proficient in infrastructure workflows and associated tools."
+    "description": "Active contribution to R&D projects in generative AI and HPC LLMs deployment. Experience in Computer Vision (OCR, DepthAI, YOLOv8), telecom (5G SA, GNodeB), and training open-source models on GPU clusters. Proficient in infrastructure workflows and associated tools. Quick Prototyping skills."
   },
   {
-    "title": "Junior R&D Developer",
+    "title": "R&D Developer Intern - AI Research Team",
     "company": "Free Pro",
     "date": "June 2023 - Sept. 2023",
     "description": "Implemented AI prototypes for internal business use cases. Conducted exploratory work in text generation, speech synthesis, and vector representations (embeddings)."

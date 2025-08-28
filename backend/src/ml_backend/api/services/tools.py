@@ -8,6 +8,8 @@ __all__ = [
     "get_self_projects_by_slug",
     "get_self_articles",
     "get_self_articles_by_slug",
+    "get_self_certifications",
+    "get_self_resume",
 ]
 
 import os
@@ -165,3 +167,29 @@ async def get_self_experiences() -> Dict[str, Any]:
         studies = []
 
     return _to_jsonable({"experiences": exps, "studies": studies})
+
+
+async def get_self_certifications() -> List[Dict[str, Any]]:
+    """Liste des certifications (projection légère)."""
+    try:
+        certs = _db["resume"].find_one(
+            {},
+            {
+                "_id": 0,
+                "certifications": 1,
+            },
+        )
+        return _to_jsonable(certs)
+    except Exception as e:
+        _logger.exception("get_self_certifications failed")
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+async def get_self_resume() -> Dict[str, Any]:
+    """Get the resume information."""
+    try:
+        resume = await _db["resume"].find_one({}, {"_id": 0})
+        return _to_jsonable(resume)
+    except Exception as e:
+        _logger.exception("get_self_resume failed")
+        return {"error": f"{type(e).__name__}: {e}"}

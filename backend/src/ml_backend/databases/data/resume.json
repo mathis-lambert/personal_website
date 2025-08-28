@@ -76,19 +76,22 @@
             {
                 "provider": "Columbia University (NYC)",
                 "title": "Learning AI Through Visualization",
+                "description": "This course offers a comprehensive introduction to Artificial Intelligence (AI), Machine Learning (ML), and Deep Learning (DL) with a focus on practical applications, guiding learners through structured modules that cover foundational concepts from datasets to AI model implementation, optimization techniques, linear regression, and deep learning, while emphasizing real-world problem-solving with low-code/no-code hands-on exercises and interactive dashboards to solidify theory and enable AI-driven solution development, tailored for working professionals from entry to mid-career individuals, senior managers, and corporate executives seeking to transition into AI, particularly those aspiring to become \"AI Chefs\" equipped with the knowledge and skills to integrate AI into operations, enhance decision-making, and drive innovation in their organizations.",
                 "issued_date": null,
                 "status": "running"
             },
             {
                 "provider": "freeCodeCamp",
-                "title": "JavaScript Algorithms and Data Structures",
-                "issued_date": "Nov 2022",
+                "title": "Backend Development and APIs",
+                "description": "The Back End Development and APIs Certification covers building server-side applications with Node.js and npm, developing web apps using the Express framework, and implementing microservices with MongoDB and Mongoose, providing practical experience in modular back end architecture and API-driven development.",
+                "issued_date": "Jan 2023",
                 "status": "issued"
             },
             {
                 "provider": "freeCodeCamp",
-                "title": "Backend Development and APIs",
-                "issued_date": "Jan 2023",
+                "title": "JavaScript Algorithms and Data Structures",
+                "description": "The JavaScript Algorithms and Data Structures Certification provides comprehensive training in JavaScript fundamentals—including variables, arrays, objects, loops, functions, and the DOM—while covering Object-Oriented and Functional Programming, algorithmic problem-solving, data persistence with local storage, and API data fetching, equipping learners with the skills to build interactive, dynamic web applications.",
+                "issued_date": "Nov 2022",
                 "status": "issued"
             }
         ],
