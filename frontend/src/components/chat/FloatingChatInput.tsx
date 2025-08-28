@@ -74,12 +74,9 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     setMessage('');
 
     const textArea = textAreaRef.current;
-    console.log('textAreaRef on send:', textArea);
     if (textArea) {
       textArea.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
       textArea.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
-
-      console.log('Focusing text area after send');
       textArea.focus();
       textArea.setSelectionRange(textArea.value.length, textArea.value.length);
     }
