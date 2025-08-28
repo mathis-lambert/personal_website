@@ -172,7 +172,7 @@ async def get_self_experiences() -> Dict[str, Any]:
 async def get_self_certifications() -> List[Dict[str, Any]]:
     """Liste des certifications (projection légère)."""
     try:
-        certs = _db["resume"].find_one(
+        certs = await _db["resume"].find_one(
             {},
             {
                 "_id": 0,
