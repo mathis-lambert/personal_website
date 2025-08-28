@@ -79,6 +79,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     setIsChatOpen(false);
   }, []);
 
+  const toggleChat = useCallback(() => {
+    setIsChatOpen((prev) => !prev);
+  }, []);
+
   const sendMessage = useCallback(
     (message: string, location: string) => {
       if (!message.trim() || (isLoading && !!currentRequest)) return;
@@ -114,6 +118,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         ? reasoning_content
         : '',
     openChat,
+    toggleChat,
     closeChat,
     sendMessage,
   };

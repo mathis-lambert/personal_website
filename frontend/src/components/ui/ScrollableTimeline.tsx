@@ -83,7 +83,7 @@ const defaultClassNames: Required<ClassNames> = {
   scrollHintIcon: 'w-4 h-4',
 };
 
-const DEFAULT_SCROLL_SPEED = 4;
+const DEFAULT_SCROLL_SPEED = 2;
 const DEFAULT_WHEEL_SENSITIVITY = 2;
 const DEFAULT_MOBILE_BREAKPOINT = 768;
 const DEFAULT_ACCENT_COLOR = 'oklch(68.5% 0.169 237.323)';

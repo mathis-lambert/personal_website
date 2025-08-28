@@ -33,12 +33,12 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Bloc Projects */}
-          <div className="mt-8 lg:mt-0">
+          {/* <div className="mt-8 lg:mt-0">
             <Heading4 className="text-lg font-bold text-gray-800 dark:text-gray-200">
               Projects
             </Heading4>
             <ul className="mt-2 text-sm text-gray-600 space-y-1 dark:text-gray-400"></ul>
-          </div>
+          </div> */}
 
           {/* Bloc Contact & Réseaux */}
           <div className="mt-8 lg:mt-0 flex flex-col items-center">

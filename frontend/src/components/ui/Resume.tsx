@@ -34,14 +34,13 @@ export default function Resume() {
             <main className="lg:col-span-2 space-y-6">
               <GlassCard className="p-6" delay={0.08}>
                 <ResumeSection icon={Cpu} title="Experience">
-                  {resumeData?.experiences.map((exp, i) =>
-                    exp.hide ? <></> :
-                      exp.highlight ? (
-                        <HighlightCard key={i} experience={exp} delay={0.05 * i} />
-                      ) : (
-                        <ExperienceCard key={i} experience={exp} delay={0.05 * i} />
-                      ),
-                  )}
+                  {resumeData?.experiences
+                    .filter(exp => !exp.hide)
+                    .map((exp, i) => {
+                      const Component = exp.highlight ? HighlightCard : ExperienceCard;
+                      return <Component key={i} experience={exp} delay={0.05 * i} />;
+                    })}
+
                 </ResumeSection>
               </GlassCard>
 

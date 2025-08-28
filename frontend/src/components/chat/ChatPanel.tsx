@@ -4,7 +4,7 @@ import { useChat } from '@/hooks/useChat';
 import Conversation from '@/components/chat/Conversation';
 
 const ChatPanel: React.FC = () => {
-  const { isChatOpen } = useChat();
+  const { isChatOpen, closeChat, openChat, toggleChat } = useChat();
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
@@ -17,6 +17,54 @@ const ChatPanel: React.FC = () => {
       document.body.style.overflow = originalOverflow;
     };
   }, [isChatOpen]);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeChat();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeChat]);
+
+  // Macros to open/toggle chat (macOS: Cmd+Option+C/X, Windows: Ctrl+Alt+C/X)
+  useEffect(() => {
+    const isTextInput = (el: Element | null) => {
+      if (!el) return false;
+      const he = el as HTMLElement;
+      const tag = he.tagName;
+      return he.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || !!he.closest('[role="textbox"]');
+    };
+
+    const handleHotkeys = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (isTextInput(document.activeElement)) return;
+
+      const key = event.key.toLowerCase();
+      const metaOrCtrl = event.metaKey || event.ctrlKey;
+
+      // Open chat
+      if (metaOrCtrl && event.altKey && key === 'c') {
+        event.preventDefault();
+        openChat();
+        return;
+      }
+
+      // Toggle chat
+      if (metaOrCtrl && event.altKey && key === 'x') {
+        event.preventDefault();
+        toggleChat();
+      }
+    };
+
+    window.addEventListener('keydown', handleHotkeys);
+    return () => window.removeEventListener('keydown', handleHotkeys);
+  }, [openChat, toggleChat]);
+
 
   return (
     <AnimatePresence>

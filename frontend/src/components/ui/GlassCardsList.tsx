@@ -86,7 +86,8 @@ const GlassCardsList = () => {
           data={experiences}
           showGradients={false}
           accentColor={'#FF6F61'}
-          scrollSpeed={3}
+          scrollSpeed={2}
+          wheelSensitivity={1}
         />
       </GlassCardHero>
 
@@ -95,7 +96,8 @@ const GlassCardsList = () => {
           data={studies}
           showGradients={false}
           accentColor={'#4A90E2'}
-          scrollSpeed={3}
+          scrollSpeed={2}
+          wheelSensitivity={1}
         />
       </GlassCardHero>
 

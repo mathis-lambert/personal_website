@@ -10,6 +10,7 @@ export interface ChatContextType {
   streamingReasoning: string;
   streamingReasoningContent: string;
   openChat: () => void;
+  toggleChat: () => void;
   closeChat: () => void;
   sendMessage: (message: string, location: string) => void;
 }

@@ -74,9 +74,14 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     setMessage('');
 
     const textArea = textAreaRef.current;
+    console.log('textAreaRef on send:', textArea);
     if (textArea) {
       textArea.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
       textArea.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
+
+      console.log('Focusing text area after send');
+      textArea.focus();
+      textArea.setSelectionRange(textArea.value.length, textArea.value.length);
     }
   }, [message, sendMessage, MIN_TEXTAREA_HEIGHT, location.pathname]);
 
@@ -113,6 +118,10 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   useEffect(() => {
     if (!hiddenByFooter) requestAnimationFrame(adjustTextAreaHeight);
   }, [hiddenByFooter, adjustTextAreaHeight]);
+
+  useEffect(() => {
+    if (isChatOpen) textAreaRef.current?.focus();
+  }, [isChatOpen]);
 
   const closeButtonSize = `${isChatOpen ? 'w-9 h-9' : 'w-0 h-0'}`;
   const isSendDisabled = isLoading || message.trim() === '';
@@ -152,7 +161,8 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     rows={1}
-                    disabled={isLoading}
+                    readOnly={isLoading}
+                    aria-disabled={isLoading}
                     className="w-full pr-12 pl-2 resize-none overflow-y-auto bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-black/40 outline-none scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent scrollbar-thumb-rounded-full dark:placeholder:text-white/40 dark:scrollbar-thumb-slate-600 dark:scrollbar-track-transparent dark:scrollbar-thumb-rounded-full disabled:opacity-60"
                     style={{
                       minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
@@ -166,6 +176,8 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
                     className="absolute bottom-0 right-0 w-10 h-10 bg-sky-500/50 shadow-lg backdrop-blur-lg rounded-full flex items-center justify-center hover:bg-sky-500/60 text-xs disabled:opacity-50 disabled:cursor-not-allowed dark:bg-sky-600/50 dark:hover:bg-sky-600/60 transition-colors duration-200 ease-in-out"
                     disabled={isSendDisabled}
                     aria-label="Ask something"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.preventDefault()}
                   >
                     {isLoading ? (
                       <Loader2 size={16} className="text-white animate-spin" />
