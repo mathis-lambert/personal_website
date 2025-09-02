@@ -24,14 +24,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     timeZone: 'UTC',
   });
 
-  const liveUrl = project.links?.live || project.projectUrl;
-  const repoUrl = project.links?.repo || project.repoUrl;
+  const liveUrl = project.links?.live;
+  const repoUrl = project.links?.repo;
   const imageSrc =
     project.media?.thumbnailUrl ||
-    project.thumbnailUrl ||
-    project.media?.imageUrl ||
-    project.imageUrl ||
-    '/images/projects/project1.jpg';
+    project.media?.imageUrl;
   const isFeatured = Boolean(project.isFeatured);
   const status = project.status || 'completed';
 

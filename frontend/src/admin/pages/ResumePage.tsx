@@ -191,11 +191,18 @@ const ResumePage: React.FC = () => {
     if (!token) return;
     setSavingExp(true);
     try {
-      const res = await updateItem('resume', 'main', { experiences }, token);
+      // Sanitize descriptions: trim lines and drop empties before saving
+      const sanitized = experiences.map((exp) => ({
+        ...exp,
+        description: (exp.description || [])
+          .map((s) => s.trim())
+          .filter(Boolean),
+      }));
+      const res = await updateItem('resume', 'main', { experiences: sanitized }, token);
       const merged = (res?.item || {}) as ResumeData;
       const next = Array.isArray(merged?.experiences)
         ? (merged.experiences as Experience[])
-        : experiences;
+        : sanitized;
       setData((prev) => (prev ? { ...prev, experiences: next } : prev));
       setExperiences(next);
       toast.success('Experiences saved');
@@ -402,10 +409,7 @@ const ResumePage: React.FC = () => {
                       className="w-full border rounded-md px-3 py-2 min-h-[100px]"
                       value={(exp.description || []).join('\n')}
                       onChange={(e) => {
-                        const lines = e.target.value
-                          .split('\n')
-                          .map((s) => s.trim())
-                          .filter(Boolean);
+                        const lines = e.target.value.split('\n');
                         setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, description: lines } : x)));
                       }} />
                   </div>

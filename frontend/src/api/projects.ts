@@ -33,10 +33,6 @@ export function normalizeProjectApi(p: ApiProject): Project {
     categories: Array.isArray(p.categories) ? p.categories : [],
     status: p.status,
     isFeatured: Boolean(p.isFeatured),
-    imageUrl: p.imageUrl,
-    thumbnailUrl: p.thumbnailUrl,
-    projectUrl: sanitizeUrl(p.projectUrl),
-    repoUrl: sanitizeUrl(p.repoUrl),
     links: {
       live: sanitizeUrl(links.live),
       repo: sanitizeUrl(links.repo),
