@@ -121,8 +121,8 @@ app = FastAPI(
     description="This is the backend webservice for Mathis LAMBERT's personal website.",
     version="0.1.0",
     openapi_url="/api/v1/openapi.json",  # Chemin personnalisé pour le fichier OpenAPI
-    docs_url="/swagger",  # Chemin personnalisé pour la documentation Swagger UI
-    redoc_url="/api-docs",  # Chemin personnalisé pour la documentation ReDoc
+    docs_url="/api/swagger",  # Chemin personnalisé pour la documentation Swagger UI
+    redoc_url="/api/api-docs",  # Chemin personnalisé pour la documentation ReDoc
     lifespan=lifespan,
 )
 
