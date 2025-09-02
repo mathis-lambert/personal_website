@@ -6,6 +6,7 @@ import {
   getCollectionData,
   updateItem,
 } from '@/api/admin';
+import Modal from '@/admin/components/Modal';
 
 type Project = {
   id: string;
@@ -22,14 +23,11 @@ const ProjectsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
-  const [newTitle, setNewTitle] = useState('');
-  const [newDate, setNewDate] = useState('');
-  const [newTechs, setNewTechs] = useState('');
-  const [creating, setCreating] = useState(false);
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editJson, setEditJson] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Project | null>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const sorted = useMemo(
     () =>
@@ -56,59 +54,105 @@ const ProjectsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const onCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  function splitCSV(v: string): string[] {
+    return v
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  const openCreate = () => setCreateOpen(true);
+
+  const onCreate = async (form: HTMLFormElement) => {
     if (!token) return;
-    setCreating(true);
+    const fd = new FormData(form);
+    const body: any = {
+      title: String(fd.get('title') || ''),
+      slug: String(fd.get('slug') || '') || undefined,
+      subtitle: String(fd.get('subtitle') || '') || undefined,
+      description: String(fd.get('description') || '') || undefined,
+      content: String(fd.get('content') || '') || undefined,
+      date: String(fd.get('date') || new Date().toISOString().slice(0, 10)),
+      technologies: splitCSV(String(fd.get('technologies') || '')),
+      categories: splitCSV(String(fd.get('categories') || '')),
+      status: String(fd.get('status') || '') || undefined,
+      isFeatured: fd.get('isFeatured') === 'on',
+      imageUrl: String(fd.get('imageUrl') || '') || undefined,
+      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
+      projectUrl: String(fd.get('projectUrl') || '') || undefined,
+      repoUrl: String(fd.get('repoUrl') || '') || undefined,
+      links: {
+        live: String(fd.get('link_live') || '') || undefined,
+        repo: String(fd.get('link_repo') || '') || undefined,
+        docs: String(fd.get('link_docs') || '') || undefined,
+        video: String(fd.get('link_video') || '') || undefined,
+      },
+      media: {
+        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
+        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
+        videoUrl: String(fd.get('media_videoUrl') || '') || undefined,
+      },
+    };
+    setCreateLoading(true);
     try {
-      const techs = newTechs
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      const body = {
-        title: newTitle,
-        date: newDate || new Date().toISOString().slice(0, 10),
-        technologies: techs,
-      };
       const res = await createItem('projects', body, token);
       setItems((prev) => [...prev, res.item as Project]);
-      setNewTitle('');
-      setNewDate('');
-      setNewTechs('');
+      setCreateOpen(false);
     } catch (e) {
       alert((e as Error)?.message ?? 'Create failed');
     } finally {
-      setCreating(false);
+      setCreateLoading(false);
     }
   };
 
   const startEdit = (p: Project) => {
-    setEditingId(p.id);
-    setEditJson(JSON.stringify(p, null, 2));
+    setEditTarget(p);
+    setEditOpen(true);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditJson('');
-  };
-
-  const saveEdit = async () => {
-    if (!token || !editingId) return;
-    setSaving(true);
+  const saveEdit = async (form: HTMLFormElement) => {
+    if (!token || !editTarget) return;
+    const fd = new FormData(form);
+    const patch: any = {
+      // id not editable here
+      slug: String(fd.get('slug') || '') || undefined,
+      title: String(fd.get('title') || ''),
+      subtitle: String(fd.get('subtitle') || '') || undefined,
+      description: String(fd.get('description') || '') || undefined,
+      content: String(fd.get('content') || '') || undefined,
+      date: String(fd.get('date') || editTarget.date),
+      technologies: splitCSV(String(fd.get('technologies') || '')),
+      categories: splitCSV(String(fd.get('categories') || '')),
+      status: String(fd.get('status') || '') || undefined,
+      isFeatured: fd.get('isFeatured') === 'on',
+      imageUrl: String(fd.get('imageUrl') || '') || undefined,
+      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
+      projectUrl: String(fd.get('projectUrl') || '') || undefined,
+      repoUrl: String(fd.get('repoUrl') || '') || undefined,
+      links: {
+        live: String(fd.get('link_live') || '') || undefined,
+        repo: String(fd.get('link_repo') || '') || undefined,
+        docs: String(fd.get('link_docs') || '') || undefined,
+        video: String(fd.get('link_video') || '') || undefined,
+      },
+      media: {
+        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
+        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
+        videoUrl: String(fd.get('media_videoUrl') || '') || undefined,
+      },
+    };
+    setSaveLoading(true);
     try {
-      const next = JSON.parse(editJson) as Project;
-      const patch: Record<string, unknown> = {};
-      // send whole object for simplicity
-      Object.assign(patch, next);
-      const res = await updateItem('projects', editingId, patch, token);
+      const res = await updateItem('projects', editTarget.id, patch, token);
       setItems((prev) =>
-        prev.map((it) => (it.id === editingId ? (res.item as Project) : it)),
+        prev.map((it) => (it.id === editTarget.id ? (res.item as Project) : it)),
       );
-      cancelEdit();
+      setEditOpen(false);
+      setEditTarget(null);
     } catch (e) {
       alert((e as Error)?.message ?? 'Save failed');
     } finally {
-      setSaving(false);
+      setSaveLoading(false);
     }
   };
 
@@ -129,39 +173,14 @@ const ProjectsPage: React.FC = () => {
         <h1 className="text-2xl font-semibold">Projects</h1>
       </div>
 
-      <form onSubmit={onCreate} className="border rounded-lg p-4 space-y-3 bg-card">
-        <div className="font-medium">Create new project</div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input
-            placeholder="Title"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            className="border rounded-md px-3 py-2 bg-background"
-            required
-          />
-          <input
-            placeholder="Date (YYYY-MM-DD)"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-            className="border rounded-md px-3 py-2 bg-background"
-          />
-          <input
-            placeholder="Technologies (comma separated)"
-            value={newTechs}
-            onChange={(e) => setNewTechs(e.target.value)}
-            className="border rounded-md px-3 py-2 bg-background"
-          />
-        </div>
-        <div>
-          <button
-            type="submit"
-            disabled={creating}
-            className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60"
-          >
-            {creating ? 'Creating…' : 'Create Project'}
-          </button>
-        </div>
-      </form>
+      <div className="flex justify-end">
+        <button
+          className="rounded-md border px-3 py-2 bg-primary text-primary-foreground"
+          onClick={openCreate}
+        >
+          New Project
+        </button>
+      </div>
 
       {loading ? (
         <div>Loading…</div>
@@ -179,60 +198,128 @@ const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  {editingId === p.id ? (
-                    <>
-                      <button
-                        className="border rounded-md px-3 py-1"
-                        onClick={cancelEdit}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="border rounded-md px-3 py-1 bg-primary text-primary-foreground"
-                        onClick={saveEdit}
-                        disabled={saving}
-                      >
-                        {saving ? 'Saving…' : 'Save'}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="border rounded-md px-3 py-1"
-                        onClick={() => startEdit(p)}
-                      >
-                        Edit JSON
-                      </button>
-                      <button
-                        className="border rounded-md px-3 py-1"
-                        onClick={() => onDelete(p.id)}
-                      >
-                        Delete
-                      </button>
-                    </>
-                  )}
+                  <button
+                    className="border rounded-md px-3 py-1"
+                    onClick={() => startEdit(p)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="border rounded-md px-3 py-1"
+                    onClick={() => onDelete(p.id)}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-              {editingId === p.id ? (
-                <textarea
-                  className="mt-3 w-full h-64 border rounded-md p-2 font-mono text-sm bg-background"
-                  value={editJson}
-                  onChange={(e) => setEditJson(e.target.value)}
-                />
-              ) : (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {Array.isArray(p.technologies) && p.technologies.length > 0
-                    ? p.technologies.join(', ')
-                    : '—'}
-                </div>
-              )}
+              <div className="mt-2 text-sm text-muted-foreground">
+                {Array.isArray(p.technologies) && p.technologies.length > 0
+                  ? p.technologies.join(', ')
+                  : '—'}
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Create modal */}
+      <Modal open={createOpen} onOpenChange={setCreateOpen}>
+        <Modal.Content title="Create Project">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void onCreate(e.currentTarget);
+            }}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input name="title" placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
+              <input name="slug" placeholder="Slug (optional)" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="subtitle" placeholder="Subtitle" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="date" placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="technologies" placeholder="Technologies (comma)" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="categories" placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="status" placeholder="Status" className="border rounded-md px-3 py-2 bg-background" />
+              <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" /> Featured</label>
+            </div>
+            <textarea name="description" placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
+            <textarea name="content" placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input name="imageUrl" placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="thumbnailUrl" placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="projectUrl" placeholder="Project URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="repoUrl" placeholder="Repo URL" className="border rounded-md px-3 py-2 bg-background" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input name="link_live" placeholder="Link: Live" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="link_repo" placeholder="Link: Repo" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="link_docs" placeholder="Link: Docs" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="link_video" placeholder="Link: Video" className="border rounded-md px-3 py-2 bg-background" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input name="media_thumbnailUrl" placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="media_imageUrl" placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input name="media_videoUrl" placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button type="button" className="border rounded-md px-3 py-2" onClick={() => setCreateOpen(false)}>Cancel</button>
+              <button type="submit" disabled={createLoading} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{createLoading ? 'Creating…' : 'Create'}</button>
+            </div>
+          </form>
+        </Modal.Content>
+      </Modal>
+
+      {/* Edit modal */}
+      <Modal open={editOpen} onOpenChange={setEditOpen}>
+        <Modal.Content title="Edit Project">
+          {editTarget && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void saveEdit(e.currentTarget);
+              }}
+              className="space-y-4"
+            >
+              <div className="text-xs text-muted-foreground">ID: {editTarget.id}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="title" defaultValue={editTarget.title} placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
+                <input name="slug" defaultValue={editTarget.slug || ''} placeholder="Slug" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="subtitle" defaultValue={(editTarget as any).subtitle || ''} placeholder="Subtitle" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="date" defaultValue={editTarget.date} placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="technologies" defaultValue={Array.isArray(editTarget.technologies) ? editTarget.technologies.join(', ') : ''} placeholder="Technologies (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="categories" defaultValue={Array.isArray((editTarget as any).categories) ? (editTarget as any).categories.join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="status" defaultValue={(editTarget as any).status || ''} placeholder="Status" className="border rounded-md px-3 py-2 bg-background" />
+                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean((editTarget as any).isFeatured)} /> Featured</label>
+              </div>
+              <textarea name="description" defaultValue={(editTarget as any).description || ''} placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
+              <textarea name="content" defaultValue={(editTarget as any).content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="imageUrl" defaultValue={(editTarget as any).imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="thumbnailUrl" defaultValue={(editTarget as any).thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="projectUrl" defaultValue={(editTarget as any).projectUrl || ''} placeholder="Project URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="repoUrl" defaultValue={(editTarget as any).repoUrl || ''} placeholder="Repo URL" className="border rounded-md px-3 py-2 bg-background" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="link_live" defaultValue={((editTarget as any).links?.live) || ''} placeholder="Link: Live" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_repo" defaultValue={((editTarget as any).links?.repo) || ''} placeholder="Link: Repo" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_docs" defaultValue={((editTarget as any).links?.docs) || ''} placeholder="Link: Docs" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_video" defaultValue={((editTarget as any).links?.video) || ''} placeholder="Link: Video" className="border rounded-md px-3 py-2 bg-background" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="media_thumbnailUrl" defaultValue={((editTarget as any).media?.thumbnailUrl) || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_imageUrl" defaultValue={((editTarget as any).media?.imageUrl) || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_videoUrl" defaultValue={((editTarget as any).media?.videoUrl) || ''} placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" className="border rounded-md px-3 py-2" onClick={() => setEditOpen(false)}>Cancel</button>
+                <button type="submit" disabled={saveLoading} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{saveLoading ? 'Saving…' : 'Save'}</button>
+              </div>
+            </form>
+          )}
+        </Modal.Content>
+      </Modal>
     </div>
   );
 };
 
 export default ProjectsPage;
-

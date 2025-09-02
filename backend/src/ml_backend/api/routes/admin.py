@@ -259,10 +259,21 @@ async def update_item(
     data = _load_json(path)
     if not isinstance(data, list):
         raise HTTPException(status_code=400, detail="Collection is not a list")
-    idx = _index_by_id(data)
-    if item_id not in idx:
-        raise HTTPException(status_code=404, detail="Item not found")
-    i = idx[item_id]
+    idx_map = _index_by_id(data)
+    i: Optional[int] = None
+    if item_id in idx_map:
+        i = idx_map[item_id]
+    else:
+        # try index-based addressing: "index-<n>" or just "<n>"
+        try:
+            if item_id.startswith("index-"):
+                i = int(item_id.split("-", 1)[1])
+            else:
+                i = int(item_id)
+        except Exception:
+            i = None
+        if i is None or i < 0 or i >= len(data):
+            raise HTTPException(status_code=404, detail="Item not found")
     current = data[i]
     if not isinstance(current, dict):
         raise HTTPException(status_code=500, detail="Invalid item format")
@@ -285,7 +296,13 @@ async def update_item(
 
     # Mongo update
     db = mongodb.get_database()
-    await db[collection].update_one({"id": item_id}, {"$set": updated})
+    if item_id in idx_map:
+        await db[collection].update_one({"id": item_id}, {"$set": updated})
+    else:
+        # For index-based collections (experiences/studies), resync all
+        await db[collection].delete_many({})
+        if data:
+            await db[collection].insert_many(data)
 
     return {"ok": True, "item": updated}
 
@@ -303,15 +320,29 @@ async def delete_item(
     data = _load_json(path)
     if not isinstance(data, list):
         raise HTTPException(status_code=400, detail="Collection is not a list")
-    idx = _index_by_id(data)
-    if item_id not in idx:
-        raise HTTPException(status_code=404, detail="Item not found")
-    i = idx[item_id]
+    idx_map = _index_by_id(data)
+    i: Optional[int] = None
+    if item_id in idx_map:
+        i = idx_map[item_id]
+    else:
+        try:
+            if item_id.startswith("index-"):
+                i = int(item_id.split("-", 1)[1])
+            else:
+                i = int(item_id)
+        except Exception:
+            i = None
+        if i is None or i < 0 or i >= len(data):
+            raise HTTPException(status_code=404, detail="Item not found")
     removed = data.pop(i)
     _write_json(path, data)
 
     db = mongodb.get_database()
-    await db[collection].delete_one({"id": item_id})
+    if item_id in idx_map:
+        await db[collection].delete_one({"id": item_id})
+    else:
+        await db[collection].delete_many({})
+        if data:
+            await db[collection].insert_many(data)
 
     return {"ok": True, "item": removed}
-
