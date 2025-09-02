@@ -90,7 +90,7 @@
             {
                 "provider": "freeCodeCamp",
                 "title": "JavaScript Algorithms and Data Structures",
-                "description": "The JavaScript Algorithms and Data Structures Certification provides comprehensive training in JavaScript fundamentals—including variables, arrays, objects, loops, functions, and the DOM—while covering Object-Oriented and Functional Programming, algorithmic problem-solving, data persistence with local storage, and API data fetching, equipping learners with the skills to build interactive, dynamic web applications.",
+                "description": "The JavaScript Algorithms and Data Structures Certification provides comprehensive training in JavaScript fundamentals-including variables, arrays, objects, loops, functions, and the DOM-while covering Object-Oriented and Functional Programming, algorithmic problem-solving, data persistence with local storage, and API data fetching, equipping learners with the skills to build interactive, dynamic web applications.",
                 "issued_date": "Nov 2022",
                 "status": "issued"
             }
