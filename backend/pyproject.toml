@@ -2,7 +2,7 @@
 name = "ml_backend"
 version = "0.1.0"
 description = "Backend web service for Mathis LAMBERT's Personal Website"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 authors = [
     { name = "Mathis LAMBERT", email = "mathislambert.dev@gmail.com" }
 ]
@@ -11,7 +11,7 @@ dependencies = [
     "motor>=3.7.0",
     "pymongo>=4.3.3",
     "uvicorn>=0.34.0",
-    "ml-api-client>=0.3.1",
+    "ml-api-client>=0.3.2",
     "PyJWT>=2.10.1",
     "fpdf2>=2.7.9"
 ]
@@ -37,7 +37,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 88
-target-version = ['py313']
+target-version = ['py312']
 include = '\.pyi?$'
 exclude = '''
 /(
