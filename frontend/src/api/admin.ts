@@ -133,16 +133,19 @@ export async function updateItem(
   patch: unknown,
   token: string,
 ): Promise<{ ok: boolean; item: unknown }> {
-  const res = await fetchWithTimeout(
-    `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(patch),
-      timeoutMs: 10000,
-      authToken: token,
-    },
-  );
+  // Special case: resume doesn't need an item id; backend exposes /api/admin/resume
+  const url =
+    collection === 'resume'
+      ? `${API_URL}/api/admin/resume`
+      : `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`;
+
+  const res = await fetchWithTimeout(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+    timeoutMs: 10000,
+    authToken: token,
+  });
   if (!res.ok)
     throw new Error(`Failed to update ${collection}#${id}: ${res.status}`);
   return (await res.json()) as { ok: boolean; item: unknown };

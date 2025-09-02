@@ -1,10 +1,9 @@
 import json
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Body
+from pydantic import BaseModel, Field, ConfigDict
 
 from ml_backend.api.services import get_mongo_client
 from ml_backend.api.security import verify_token
@@ -69,6 +68,9 @@ def _index_by_id(items: List[Dict[str, Any]]) -> Dict[str, int]:
 
 
 class ProjectIn(BaseModel):
+    # Pydantic v2 config: allow unknown fields, keep flexible shape
+    model_config = ConfigDict(extra="allow")
+
     id: Optional[str] = None
     slug: Optional[str] = None
     title: str
@@ -98,6 +100,9 @@ class ProjectIn(BaseModel):
 
 
 class ArticleIn(BaseModel):
+    # Pydantic v2 config: allow unknown fields, keep flexible shape
+    model_config = ConfigDict(extra="allow")
+
     id: Optional[str] = None
     slug: Optional[str] = None
     title: str
@@ -119,6 +124,66 @@ class UpsertResponse(BaseModel):
     ok: bool
     id: Optional[str] = None
     item: Optional[Dict[str, Any]] = None
+
+
+# Helpers
+def _resolve_item_index(data: List[Dict[str, Any]], item_id: str) -> Tuple[int, bool]:
+    """Return (index, by_id) for an item in a list collection.
+
+    - Tries to locate by "id" first (by_id=True).
+    - Falls back to index addressing: "index-<n>" or "<n>" (by_id=False).
+    - Raises HTTPException 404 if not found or invalid index.
+    """
+    idx_map = _index_by_id(data)
+    if item_id in idx_map:
+        return idx_map[item_id], True
+
+    # try index-based addressing: "index-<n>" or just "<n>"
+    try:
+        if item_id.startswith("index-"):
+            i = int(item_id.split("-", 1)[1])
+        else:
+            i = int(item_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    if i < 0 or i >= len(data):
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return i, False
+
+
+async def _mongo_update_list_collection(
+    mongodb: MongoDBConnector,
+    collection: str,
+    data: List[Dict[str, Any]],
+    by_id: bool,
+    item_id: str,
+    updated: Dict[str, Any],
+) -> None:
+    db = mongodb.get_database()
+    if by_id:
+        await db[collection].update_one({"id": item_id}, {"$set": updated})
+    else:
+        await db[collection].delete_many({})
+        if data:
+            await db[collection].insert_many(data)
+
+
+async def _mongo_delete_list_collection(
+    mongodb: MongoDBConnector,
+    collection: str,
+    data: List[Dict[str, Any]],
+    by_id: bool,
+    item_id: str,
+) -> None:
+    db = mongodb.get_database()
+    if by_id:
+        await db[collection].delete_one({"id": item_id})
+    else:
+        await db[collection].delete_many({})
+        if data:
+            await db[collection].insert_many(data)
 
 
 @router.get("/admin/collections")
@@ -194,6 +259,12 @@ def _ensure_unique_id(items: List[Dict[str, Any]], base: str) -> str:
         i += 1
 
 
+SCHEMA_BY_COLLECTION: Dict[str, Type[BaseModel]] = {
+    "projects": ProjectIn,
+    "articles": ArticleIn,
+}
+
+
 @router.post("/admin/{collection}")
 async def create_item(
     collection: Literal["projects", "articles"],
@@ -205,13 +276,11 @@ async def create_item(
     if not isinstance(data, list):
         raise HTTPException(status_code=400, detail="Collection is not a list")
 
-    # Validate and fill defaults
-    if collection == "projects":
-        obj = ProjectIn(**item).model_dump(exclude_none=True)
-        base_id = obj.get("id") or _slugify(obj["title"]) or "project"
-    else:
-        obj = ArticleIn(**item).model_dump(exclude_none=True)
-        base_id = obj.get("id") or _slugify(obj["title"]) or "article"
+    # Validate and fill defaults (Pydantic v2: model_dump)
+    schema = SCHEMA_BY_COLLECTION[collection]
+    obj = schema(**item).model_dump(exclude_none=True)
+    base_fallback = "project" if collection == "projects" else "article"
+    base_id = obj.get("id") or _slugify(obj["title"]) or base_fallback
 
     obj_id = _ensure_unique_id(data, str(base_id))
     obj["id"] = obj_id
@@ -239,57 +308,12 @@ async def update_item(
     patch: Dict[str, Any] = Body(...),
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
-    if collection == "resume":
-        # Resume is stored as either a single object or an array-of-one.
-        # Merge shallowly with the existing object and preserve the file's original shape.
-        path = _file_for(collection)
-        original = _load_json(path)
-        if not isinstance(patch, dict):
-            raise HTTPException(status_code=400, detail="Patch must be an object")
-
-        # Extract current object regardless of storage shape
-        if isinstance(original, list):
-            current_obj = dict(original[0]) if original else {}
-            new_shape = "list"
-        elif isinstance(original, dict):
-            current_obj = dict(original)
-            new_shape = "dict"
-        else:
-            raise HTTPException(status_code=400, detail="Invalid resume JSON format")
-
-        # Apply shallow merge
-        merged = {**current_obj, **patch}
-
-        # Persist, keeping original shape
-        to_write: Any = [merged] if new_shape == "list" else merged
-        _write_json(path, to_write)
-
-        # Mongo: store as a single document (the merged object)
-        db = mongodb.get_database()
-        await db[collection].delete_many({})
-        await db[collection].insert_one(merged)
-        return {"ok": True, "item": merged}
-
     # List collections
     path = _file_for(collection)
     data = _load_json(path)
     if not isinstance(data, list):
         raise HTTPException(status_code=400, detail="Collection is not a list")
-    idx_map = _index_by_id(data)
-    i: Optional[int] = None
-    if item_id in idx_map:
-        i = idx_map[item_id]
-    else:
-        # try index-based addressing: "index-<n>" or just "<n>"
-        try:
-            if item_id.startswith("index-"):
-                i = int(item_id.split("-", 1)[1])
-            else:
-                i = int(item_id)
-        except Exception:
-            i = None
-        if i is None or i < 0 or i >= len(data):
-            raise HTTPException(status_code=404, detail="Item not found")
+    i, by_id = _resolve_item_index(data, item_id)
     current = data[i]
     if not isinstance(current, dict):
         raise HTTPException(status_code=500, detail="Invalid item format")
@@ -311,16 +335,51 @@ async def update_item(
     _write_json(path, data)
 
     # Mongo update
-    db = mongodb.get_database()
-    if item_id in idx_map:
-        await db[collection].update_one({"id": item_id}, {"$set": updated})
-    else:
-        # For index-based collections (experiences/studies), resync all
-        await db[collection].delete_many({})
-        if data:
-            await db[collection].insert_many(data)
+    await _mongo_update_list_collection(
+        mongodb=mongodb,
+        collection=collection,
+        data=data,
+        by_id=by_id,
+        item_id=item_id,
+        updated=updated,
+    )
 
     return {"ok": True, "item": updated}
+
+
+@router.patch("/admin/resume")
+async def update_resume(
+    patch: Dict[str, Any] = Body(...),
+    mongodb: MongoDBConnector = Depends(get_mongo_client),
+):
+    # Dedicated endpoint for updating resume without an item_id
+    path = _file_for("resume")
+    original = _load_json(path)
+    if not isinstance(patch, dict):
+        raise HTTPException(status_code=400, detail="Patch must be an object")
+
+    # Extract current object regardless of storage shape
+    if isinstance(original, list):
+        current_obj = dict(original[0]) if original else {}
+        new_shape = "list"
+    elif isinstance(original, dict):
+        current_obj = dict(original)
+        new_shape = "dict"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid resume JSON format")
+
+    # Apply shallow merge
+    merged = {**current_obj, **patch}
+
+    # Persist, keeping original shape
+    to_write: Any = [merged] if new_shape == "list" else merged
+    _write_json(path, to_write)
+
+    # Mongo: store as a single document (the merged object)
+    db = mongodb.get_database()
+    await db["resume"].delete_many({})
+    await db["resume"].insert_one(merged)
+    return {"ok": True, "item": merged}
 
 
 @router.delete("/admin/{collection}/{item_id}")
@@ -336,29 +395,16 @@ async def delete_item(
     data = _load_json(path)
     if not isinstance(data, list):
         raise HTTPException(status_code=400, detail="Collection is not a list")
-    idx_map = _index_by_id(data)
-    i: Optional[int] = None
-    if item_id in idx_map:
-        i = idx_map[item_id]
-    else:
-        try:
-            if item_id.startswith("index-"):
-                i = int(item_id.split("-", 1)[1])
-            else:
-                i = int(item_id)
-        except Exception:
-            i = None
-        if i is None or i < 0 or i >= len(data):
-            raise HTTPException(status_code=404, detail="Item not found")
+    i, by_id = _resolve_item_index(data, item_id)
     removed = data.pop(i)
     _write_json(path, data)
 
-    db = mongodb.get_database()
-    if item_id in idx_map:
-        await db[collection].delete_one({"id": item_id})
-    else:
-        await db[collection].delete_many({})
-        if data:
-            await db[collection].insert_many(data)
+    await _mongo_delete_list_collection(
+        mongodb=mongodb,
+        collection=collection,
+        data=data,
+        by_id=by_id,
+        item_id=item_id,
+    )
 
     return {"ok": True, "item": removed}
