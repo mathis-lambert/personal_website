@@ -294,36 +294,51 @@ class ResumePDFExporter:
     def _skills_block(self):
         self._h2("Skills")
         t = self.resume.technical_skills
-        # Compact layout: label followed by inline items
+        rows: List[tuple[str, List[str]]] = [
+            ("Languages", t.languages),
+            ("AI/ML", t.ai_ml),
+            ("Systems & Infra", t.systems_and_infra),
+            ("Web", t.web),
+        ]
+        # Compute a fixed label column width for alignment
+        self.pdf.set_font("Helvetica", style="B", size=9)
+        labels_sanitized = [self._sanitize(f"{lbl}: ") for lbl, items in rows if items]
+        label_col_w = 0
+        for txt in labels_sanitized:
+            label_col_w = max(label_col_w, self.pdf.get_string_width(txt))
+        label_col_w += 2  # padding
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        items_w = max(10, epw - label_col_w)
+
         def row(label: str, items: List[str]):
             if not items:
                 return
+            # Label column
+            self.pdf.set_x(self.pdf.l_margin)
             self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(30)
-            # Put label and items on one wrapped line to save space and avoid overflow
             label_text = self._sanitize(f"{label}: ")
-            label_w = self.pdf.get_string_width(label_text) + 1
-            # Label cell (no line break)
-            self.pdf.cell(label_w, 4.8, text=label_text)
-            # Items cell wraps in remaining width
-            content_w = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin) - label_w
+            self.pdf.cell(label_col_w, 4.8, text=label_text)
+            # Items column
             self.pdf.set_font("Helvetica", size=9)
             self.pdf.set_text_color(50)
-            self.pdf.multi_cell(content_w, 4.8, text=self._sanitize(", ".join(items)))
-        row("Languages", t.languages)
-        row("AI/ML", t.ai_ml)
-        row("Systems & Infra", t.systems_and_infra)
-        row("Web", t.web)
+            text = ", ".join(items)
+            self.pdf.set_x(self.pdf.l_margin + label_col_w)
+            self.pdf.multi_cell(items_w, 4.8, text=self._sanitize(text))
+
+        for lbl, it in rows:
+            row(lbl, it)
 
         if self.resume.skills:
+            # Align the generic skills to the same columns
+            self.pdf.set_x(self.pdf.l_margin)
             self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(30)
-            self.pdf.cell(0, 4.8, "Core", ln=1)
+            self.pdf.cell(label_col_w, 4.8, text="Core: ")
             self.pdf.set_font("Helvetica", size=9)
             self.pdf.set_text_color(50)
-            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
-            self.pdf.set_x(self.pdf.l_margin)
-            self.pdf.multi_cell(epw, 4.8, ", ".join(self.resume.skills[:12]))
+            self.pdf.set_x(self.pdf.l_margin + label_col_w)
+            self.pdf.multi_cell(items_w, 4.8, ", ".join(self.resume.skills[:12]))
 
     def _certs_block(self):
         if not self.resume.certifications:
