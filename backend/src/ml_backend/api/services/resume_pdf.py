@@ -125,10 +125,8 @@ class SimplePDF(FPDF):
         pass
 
     def footer(self):
-        self.set_y(-10)
-        self.set_font("Helvetica", size=7)
-        self.set_text_color(140)
-        self.cell(0, 8, f"Page {self.page_no()}/{{nb}}", align="C")
+        # No footer; keep page clean (no page x/y)
+        pass
 
 
 class ResumePDFExporter:
@@ -164,16 +162,7 @@ class ResumePDFExporter:
 
     # --- style helpers ---
     def _h1(self, text: str):
-        # Header band behind the name for a modern hero look
-        x0 = self.pdf.l_margin
-        y0 = self.pdf.get_y() - 2
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
-        self.pdf.set_fill_color(*self.pdf.accent_light)
-        self.pdf.set_draw_color(255)  # no visible border
-        self.pdf.set_line_width(0)
-        self.pdf.rect(x0 - 1, y0, epw + 2, 16, style="F")
-
-        # Name on top of the band
+        # Clean header without background; accent title only
         self.pdf.set_text_color(*self.pdf.accent)
         self.pdf.set_font("Helvetica", style="B", size=20)
         self.pdf.cell(0, 10, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
@@ -364,21 +353,38 @@ class ResumePDFExporter:
             ("Systems & Infra", t.systems_and_infra),
             ("Web", t.web),
         ]
+        # Compute label column width for clean "skill_name: list" layout
+        self.pdf.set_font("Helvetica", style="B", size=9)
+        labels_sanitized = [self._sanitize(f"{lbl}: ") for lbl, items in rows if items]
+        if self.resume.skills:
+            labels_sanitized.append(self._sanitize("Core: "))
+        label_col_w = 0
+        for txt in labels_sanitized:
+            label_col_w = max(label_col_w, self.pdf.get_string_width(txt))
+        label_col_w += 2
 
-        for label, items in rows:
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        items_w = max(10, epw - label_col_w)
+
+        def row(label: str, items: List[str]):
             if not items:
-                continue
+                return
+            self.pdf.set_x(self.pdf.l_margin)
+            # bold label
             self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(30)
-            self._small(f"{label}")
-            # tag line
-            self._tags(items, max_items=10)
+            self.pdf.cell(label_col_w, 4.8, text=self._sanitize(f"{label}: "))
+            # values
+            self.pdf.set_font("Helvetica", size=9)
+            self.pdf.set_text_color(50)
+            self.pdf.set_x(self.pdf.l_margin + label_col_w)
+            self.pdf.multi_cell(items_w, 4.8, text=self._sanitize(", ".join(items)))
+
+        for lbl, it in rows:
+            row(lbl, it)
 
         if self.resume.skills:
-            self.pdf.set_font("Helvetica", style="B", size=9)
-            self.pdf.set_text_color(30)
-            self._small("Core")
-            self._tags(self.resume.skills, max_items=12)
+            row("Core", self.resume.skills[:12])
 
     def _certs_block(self):
         if not self.resume.certifications:
@@ -411,8 +417,12 @@ class ResumePDFExporter:
         if not self.resume.passions:
             return
         self._h2("Interests")
-        # Render passions as tags for a fresher feel
-        self._tags(self.resume.passions, max_items=10)
+        # Simple inline list (no backgrounds)
+        self.pdf.set_font("Helvetica", size=9)
+        self.pdf.set_text_color(50)
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        self.pdf.set_x(self.pdf.l_margin)
+        self.pdf.multi_cell(epw, 4.8, text=self._sanitize(", ".join(self.resume.passions[:10])))
 
     def build_pdf(self) -> bytes:
         # Compose blocks with a 2-column layout if vertical overflow is likely
