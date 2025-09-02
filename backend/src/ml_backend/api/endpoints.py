@@ -9,6 +9,7 @@ from .routes import (
     auth_router,
     resume_router,
 )
+from .routes.admin import router as admin_router
 from .security import verify_token
 
 router = APIRouter()
@@ -50,6 +51,9 @@ router.include_router(
     tags=["Resume"],
     dependencies=[Depends(verify_token)],
 )
+
+# Admin endpoints (file-backed data management)
+router.include_router(admin_router, prefix="", tags=["Admin"], dependencies=[Depends(verify_token)])
 
 
 # Health check

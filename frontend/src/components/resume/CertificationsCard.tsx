@@ -9,7 +9,7 @@ const CERT_STATUS_COLORS: Record<
     { dot: string; ping: string; label: string }
 > = {
     issued: { dot: 'bg-emerald-500', ping: 'bg-emerald-400', label: 'Issued' },
-    running: { dot: 'bg-cyan-500', ping: 'bg-cyan-400', label: 'Running' },
+    in_progress: { dot: 'bg-cyan-500', ping: 'bg-cyan-400', label: 'In Progress' },
     starting: { dot: 'bg-amber-500', ping: 'bg-amber-400', label: 'Starting' },
     stopped: { dot: 'bg-slate-400 dark:bg-slate-500', ping: 'bg-slate-300', label: 'Stopped' },
 };
@@ -20,7 +20,7 @@ export const CertificationsCard: React.FC<CertificationsCardProps> = ({
     <>
 
         {certifications?.map((cert, i) => {
-            const key = cert.status?.toLowerCase?.() ?? 'stopped';
+            const key = cert.status?.toLowerCase().replace(' ', '_') ?? 'stopped';
             const colors = CERT_STATUS_COLORS[key] ?? CERT_STATUS_COLORS.stopped;
 
             return (

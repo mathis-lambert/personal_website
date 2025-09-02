@@ -45,6 +45,26 @@ async function sign(username: string, nonce: string): Promise<string> {
   return toHex(sig);
 }
 
+async function signWithPassword(
+  username: string,
+  nonce: string,
+  password: string,
+): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(`${username}:${nonce}`),
+  );
+  return toHex(sig);
+}
+
 async function fetchJSON<T>(
   input: RequestInfo,
   init?: RequestInit & { timeoutMs?: number },
@@ -80,6 +100,19 @@ async function requestToken(nonce: string): Promise<TokenResponse> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: USERNAME, nonce, signature }),
+  });
+}
+
+async function requestTokenWithCredentials(
+  username: string,
+  password: string,
+  nonce: string,
+): Promise<TokenResponse> {
+  const signature = await signWithPassword(username, nonce, password);
+  return fetchJSON<TokenResponse>(`${API_URL}/api/auth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, nonce, signature }),
   });
 }
 
@@ -138,4 +171,29 @@ export async function authFetch(
   if (!headers.has('Authorization'))
     headers.set('Authorization', `Bearer ${token}`);
   return fetch(input, { ...init, headers });
+}
+
+// --- Admin-specific token exchange (manual credentials) ---
+export async function exchangeHmacToken(
+  username: string,
+  password: string,
+): Promise<string> {
+  // Single exchange without reusing global token cache
+  try {
+    const first = await requestTokenWithCredentials(
+      username,
+      password,
+      await getNonce(),
+    );
+    return first.access_token;
+  } catch (e: unknown) {
+    const msg = String((e as Error)?.message ?? '');
+    if (!/HTTP 4\d{2}/.test(msg)) throw e;
+    const retry = await requestTokenWithCredentials(
+      username,
+      password,
+      await getNonce(),
+    );
+    return retry.access_token;
+  }
 }

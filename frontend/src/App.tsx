@@ -4,6 +4,7 @@ import Layout from './layouts/Layout';
 import Loader from '@/components/ui/Loader.tsx';
 import ProjectDetailPage from '@/pages/ProjectDetailPage.tsx';
 import ArticleDetailPage from '@/pages/ArticleDetailPage.tsx';
+const AdminApp = React.lazy(() => import('@/admin/AdminApp'));
 
 const Home = React.lazy(() => import('@/pages/HomePage.tsx'));
 const Projects = React.lazy(() => import('@/pages/ProjectsPage.tsx'));
@@ -29,6 +30,7 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:articleId" element={<ArticleDetailPage />} />
           </Route>
+          <Route path="/admin/*" element={<AdminApp />} />
           {/* Fallback route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

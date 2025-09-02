@@ -30,7 +30,7 @@ export interface Certification {
   provider: string;
   title: string;
   issued_date: string | null;
-  status: "issued" | "running" | "stopped" | "starting";
+  status: "issued" | "in progress" | "stopped" | "starting";
 }
 
 export interface TechnicalSkills {
