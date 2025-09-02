@@ -110,9 +110,10 @@ def load_resume_from_file(path: Path = DATA_PATH) -> ResumeModel:
 class SimplePDF(FPDF):
     def __init__(self):
         super().__init__(orientation="P", unit="mm", format="A4")
-        self.set_auto_page_break(auto=True, margin=12)
+        # Slightly larger margins to avoid right overflow and improve readability
+        self.set_margins(15, 14, 15)
+        self.set_auto_page_break(auto=True, margin=14)
         self.add_page()
-        self.set_margins(12, 12, 12)
         self.alias_nb_pages()
 
     # Core fonts only (no external files)
@@ -121,7 +122,7 @@ class SimplePDF(FPDF):
 
     def footer(self):
         self.set_y(-10)
-        self.set_font("Helvetica", size=8)
+        self.set_font("Helvetica", size=7)
         self.set_text_color(140)
         self.cell(0, 8, f"Page {self.page_no()}/{{nb}}", align="C")
 
@@ -160,13 +161,14 @@ class ResumePDFExporter:
     # --- style helpers ---
     def _h1(self, text: str):
         self.pdf.set_text_color(0)
-        self.pdf.set_font("Helvetica", style="B", size=20)
+        # Reduce main title size slightly
+        self.pdf.set_font("Helvetica", style="B", size=18)
         self.pdf.cell(0, 10, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     def _h2(self, text: str):
         self.pdf.ln(1)
         self.pdf.set_text_color(30, 30, 30)
-        self.pdf.set_font("Helvetica", style="B", size=12)
+        self.pdf.set_font("Helvetica", style="B", size=11)
         self.pdf.cell(0, 7, text=self._sanitize(text.upper()), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         # subtle divider
         x = self.pdf.l_margin
@@ -178,30 +180,36 @@ class ResumePDFExporter:
 
     def _small(self, text: str, bold: bool = False):
         self.pdf.set_text_color(50, 50, 50)
-        self.pdf.set_font("Helvetica", style="B" if bold else "", size=9)
-        self.pdf.cell(0, 5, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+        self.pdf.set_font("Helvetica", style="B" if bold else "", size=8)
+        # Use multi_cell so long lines never overflow to the right
+        self.pdf.set_x(self.pdf.l_margin)
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        self.pdf.multi_cell(epw, 4.5, text=self._sanitize(text))
 
     def _para(self, text: str, size: int = 10):
         self.pdf.set_text_color(40)
-        self.pdf.set_font("Helvetica", size=size)
-        self.pdf.multi_cell(0, 5, text=self._sanitize(text))
+        # Slightly reduced base paragraph size
+        self.pdf.set_font("Helvetica", size=max(8, size - 1))
+        self.pdf.set_x(self.pdf.l_margin)
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        self.pdf.multi_cell(epw, 4.8, text=self._sanitize(text))
 
     def _bullets(self, items: Iterable[str], max_items: Optional[int] = None):
         cnt = 0
-        # fixed content width for bullet lines to avoid width=0 issues at end-of-line
-        content_width = self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        # Use effective page width for reliability
+        content_width = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
         indent = 4  # mm indent after bullet symbol
         for it in items:
             if max_items is not None and cnt >= max_items:
                 break
-            self.pdf.set_font("Helvetica", size=9)
+            self.pdf.set_font("Helvetica", size=8)
             # Always start bullet line from left margin
             self.pdf.set_x(self.pdf.l_margin)
-            self.pdf.cell(indent, 5, "-")
+            self.pdf.cell(indent, 4.5, "-")
             # Now write the text in a fixed width block
             self.pdf.set_x(self.pdf.l_margin + indent)
             safe_text = self._sanitize(it)
-            self.pdf.multi_cell(content_width - indent, 5, safe_text)
+            self.pdf.multi_cell(content_width - indent, 4.5, safe_text)
             cnt += 1
 
     # --- layout blocks ---
@@ -239,13 +247,16 @@ class ResumePDFExporter:
                 [x for x in [exp.period, exp.location] if x]
             )
             # role @ company
-            self.pdf.set_font("Helvetica", style="B", size=11)
+            self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(20)
-            self.pdf.cell(0, 6, text=self._sanitize(f"{title} - {company}"), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            self.pdf.set_x(self.pdf.l_margin)
+            self.pdf.multi_cell(epw, 5.5, text=self._sanitize(f"{title} - {company}"))
             if meta:
-                self.pdf.set_font("Helvetica", size=9)
+                self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(90)
-                self.pdf.cell(0, 5, text=self._sanitize(meta), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 4.5, text=self._sanitize(meta))
             if exp.description:
                 # For the first highlighted/current exp, allow up to 4 bullets; others 2
                 max_bullets = 4 if (exp.highlight or exp.current) else 2
@@ -263,17 +274,21 @@ class ResumePDFExporter:
             title = edu.degree or ""
             institution = edu.institution
             line = f"{institution} - {title}" if title else institution
-            self.pdf.set_font("Helvetica", style="B", size=10)
+            self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(25)
-            self.pdf.cell(0, 5, text=self._sanitize(line), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            self.pdf.set_x(self.pdf.l_margin)
+            self.pdf.multi_cell(epw, 4.8, text=self._sanitize(line))
             if edu.description:
-                self.pdf.set_font("Helvetica", size=9)
+                self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(80)
-                self.pdf.multi_cell(0, 4.5, text=self._sanitize(edu.description))
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.description))
             if edu.period:
-                self.pdf.set_font("Helvetica", size=9)
+                self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(100)
-                self.pdf.cell(0, 4.5, text=self._sanitize(edu.period), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.period))
             self.pdf.ln(1)
 
     def _skills_block(self):
@@ -283,24 +298,32 @@ class ResumePDFExporter:
         def row(label: str, items: List[str]):
             if not items:
                 return
-            self.pdf.set_font("Helvetica", style="B", size=10)
+            self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(30)
-            self.pdf.cell(0, 5, text=self._sanitize(f"{label}: "), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-            self.pdf.set_font("Helvetica", size=10)
+            # Put label and items on one wrapped line to save space and avoid overflow
+            label_text = self._sanitize(f"{label}: ")
+            label_w = self.pdf.get_string_width(label_text) + 1
+            # Label cell (no line break)
+            self.pdf.cell(label_w, 4.8, text=label_text)
+            # Items cell wraps in remaining width
+            content_w = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin) - label_w
+            self.pdf.set_font("Helvetica", size=9)
             self.pdf.set_text_color(50)
-            self.pdf.multi_cell(0, 5, text=self._sanitize(", ".join(items)))
+            self.pdf.multi_cell(content_w, 4.8, text=self._sanitize(", ".join(items)))
         row("Languages", t.languages)
         row("AI/ML", t.ai_ml)
         row("Systems & Infra", t.systems_and_infra)
         row("Web", t.web)
 
         if self.resume.skills:
-            self.pdf.set_font("Helvetica", style="B", size=10)
+            self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(30)
-            self.pdf.cell(0, 5, "Core", ln=1)
-            self.pdf.set_font("Helvetica", size=10)
+            self.pdf.cell(0, 4.8, "Core", ln=1)
+            self.pdf.set_font("Helvetica", size=9)
             self.pdf.set_text_color(50)
-            self.pdf.multi_cell(0, 5, ", ".join(self.resume.skills[:12]))
+            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            self.pdf.set_x(self.pdf.l_margin)
+            self.pdf.multi_cell(epw, 4.8, ", ".join(self.resume.skills[:12]))
 
     def _certs_block(self):
         if not self.resume.certifications:
@@ -317,22 +340,27 @@ class ResumePDFExporter:
                 ctx.append(cert.status)
             meta = " | ".join(ctx)
 
-            self.pdf.set_font("Helvetica", style="B", size=10)
+            self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(25)
-            self.pdf.cell(0, 5, text=self._sanitize(title), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            self.pdf.set_x(self.pdf.l_margin)
+            self.pdf.multi_cell(epw, 4.8, text=self._sanitize(title))
             if meta:
-                self.pdf.set_font("Helvetica", size=9)
+                self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(90)
-                self.pdf.cell(0, 4.5, text=self._sanitize(meta), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 4.5, text=self._sanitize(meta))
             self.pdf.ln(0.5)
 
     def _passions_block(self):
         if not self.resume.passions:
             return
         self._h2("Interests")
-        self.pdf.set_font("Helvetica", size=10)
+        self.pdf.set_font("Helvetica", size=9)
         self.pdf.set_text_color(50)
-        self.pdf.multi_cell(0, 5, text=self._sanitize(", ".join(self.resume.passions[:10])))
+        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        self.pdf.set_x(self.pdf.l_margin)
+        self.pdf.multi_cell(epw, 4.8, text=self._sanitize(", ".join(self.resume.passions[:10])))
 
     def build_pdf(self) -> bytes:
         # Compose blocks with a 2-column layout if vertical overflow is likely
@@ -345,5 +373,6 @@ class ResumePDFExporter:
         self._certs_block()
         self._passions_block()
 
+        # Return raw bytes directly to avoid any encoding surprises
         out = self.pdf.output()
-        return bytes(out) if isinstance(out, (bytearray, bytes)) else bytes(str(out), "latin1")
+        return bytes(out)
