@@ -213,11 +213,6 @@ export interface Project {
   categories?: string[];
   status?: ProjectStatus;
   isFeatured?: boolean;
-  // Backward-compat flat fields
-  imageUrl?: string;
-  thumbnailUrl?: string;
-  projectUrl?: string;
-  repoUrl?: string;
   // Structured fields
   links?: ProjectLinks;
   media?: ProjectMedia;

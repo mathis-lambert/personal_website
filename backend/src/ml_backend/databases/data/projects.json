@@ -28,8 +28,6 @@
         ],
         "status": "completed",
         "isFeatured": true,
-        "projectUrl": "https://mathislambert.fr",
-        "repoUrl": "https://github.com/mathis-lambert/personal_website",
         "links": {
             "live": "https://mathislambert.fr",
             "repo": "https://github.com/mathis-lambert/personal_website"

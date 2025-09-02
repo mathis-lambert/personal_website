@@ -72,10 +72,6 @@ const ProjectsPage: React.FC = () => {
       categories: splitCSV(String(fd.get('categories') || '')),
       status: String(fd.get('status')) as ProjectStatus || undefined,
       isFeatured: fd.get('isFeatured') === 'on',
-      imageUrl: String(fd.get('imageUrl') || '') || undefined,
-      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
-      projectUrl: String(fd.get('projectUrl') || '') || undefined,
-      repoUrl: String(fd.get('repoUrl') || '') || undefined,
       links: {
         live: String(fd.get('link_live') || '') || undefined,
         repo: String(fd.get('link_repo') || '') || undefined,
@@ -120,10 +116,6 @@ const ProjectsPage: React.FC = () => {
       categories: splitCSV(String(fd.get('categories') || '')),
       status: String(fd.get('status')) as ProjectStatus || undefined,
       isFeatured: fd.get('isFeatured') === 'on',
-      imageUrl: String(fd.get('imageUrl') || '') || undefined,
-      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
-      projectUrl: String(fd.get('projectUrl') || '') || undefined,
-      repoUrl: String(fd.get('repoUrl') || '') || undefined,
       links: {
         live: String(fd.get('link_live') || '') || undefined,
         repo: String(fd.get('link_repo') || '') || undefined,
@@ -288,12 +280,6 @@ const ProjectsPage: React.FC = () => {
               </div>
               <textarea name="description" defaultValue={editTarget.description || ''} placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
               <textarea name="content" defaultValue={editTarget.content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="imageUrl" defaultValue={editTarget.imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="thumbnailUrl" defaultValue={editTarget.thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="projectUrl" defaultValue={editTarget.projectUrl || ''} placeholder="Project URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="repoUrl" defaultValue={editTarget.repoUrl || ''} placeholder="Repo URL" className="border rounded-md px-3 py-2 bg-background" />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input name="link_live" defaultValue={editTarget.links?.live || ''} placeholder="Link: Live" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="link_repo" defaultValue={editTarget.links?.repo || ''} placeholder="Link: Repo" className="border rounded-md px-3 py-2 bg-background" />
