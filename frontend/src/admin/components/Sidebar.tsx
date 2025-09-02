@@ -35,7 +35,7 @@ const Sidebar: React.FC<{
   const { logout } = useAdminAuth();
 
   return (
-    <aside className="w-64 border-r bg-card text-card-foreground flex flex-col">
+    <aside className="w-64 h-full border-r bg-card text-card-foreground flex flex-col overflow-y-auto">
       <div className="px-4 py-4 border-b">
         <div className="text-xl font-semibold">Admin</div>
         <div className="text-sm text-muted-foreground">mathislambert.fr</div>
@@ -76,4 +76,3 @@ const Sidebar: React.FC<{
 };
 
 export default Sidebar;
-

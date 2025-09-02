@@ -9,8 +9,9 @@ import {
 import Modal from '@/admin/components/Modal';
 import type { Project, ProjectStatus } from '@/types';
 import type { AdminCreateProjectInput, AdminUpdateProjectInput } from '@/admin/types';
-
-// Use shared Project type from '@/types'
+import { Plus, Pencil, Trash2, Save } from 'lucide-react';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ProjectsPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -23,6 +24,9 @@ const ProjectsPage: React.FC = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Project | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const sorted = useMemo(
     () =>
@@ -90,7 +94,7 @@ const ProjectsPage: React.FC = () => {
       setItems((prev) => [...prev, res.item as Project]);
       setCreateOpen(false);
     } catch (e) {
-      alert((e as Error)?.message ?? 'Create failed');
+      toast.error((e as Error)?.message ?? 'Create failed');
     } finally {
       setCreateLoading(false);
     }
@@ -137,7 +141,7 @@ const ProjectsPage: React.FC = () => {
       setEditOpen(false);
       setEditTarget(null);
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSaveLoading(false);
     }
@@ -145,27 +149,34 @@ const ProjectsPage: React.FC = () => {
 
   const onDelete = async (id: string) => {
     if (!token) return;
-    if (!confirm('Delete this project?')) return;
+    setDeleteLoading(true);
     try {
       await deleteItem('projects', id, token);
       setItems((prev) => prev.filter((x) => x.id !== id));
+      toast.success('Project deleted');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Delete failed');
+      toast.error((e as Error)?.message ?? 'Delete failed');
+    } finally {
+      setDeleteLoading(false);
+      setConfirmOpen(false);
+      setConfirmId(null);
     }
+  };
+
+  const askDelete = (id: string) => {
+    setConfirmId(id);
+    setConfirmOpen(true);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Projects</h1>
-      </div>
-
-      <div className="flex justify-end">
         <button
-          className="rounded-md border px-3 py-2 bg-primary text-primary-foreground"
+          className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground hover:opacity-90 transition"
           onClick={openCreate}
         >
-          New Project
+          <Plus size={16} /> New Project
         </button>
       </div>
 
@@ -176,7 +187,7 @@ const ProjectsPage: React.FC = () => {
       ) : (
         <div className="space-y-3">
           {sorted.map((p) => (
-            <div key={p.id} className="border rounded-lg p-4 bg-card">
+            <div key={p.id} className="border rounded-lg p-4 bg-card transition hover:shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{p.title}</div>
@@ -186,16 +197,16 @@ const ProjectsPage: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    className="border rounded-md px-3 py-1"
+                    className="inline-flex items-center gap-2 border rounded-md px-3 py-1 hover:bg-accent"
                     onClick={() => startEdit(p)}
                   >
-                    Edit
+                    <Pencil size={16} /> Edit
                   </button>
                   <button
-                    className="border rounded-md px-3 py-1"
-                    onClick={() => onDelete(p.id)}
+                    className="inline-flex items-center gap-2 border rounded-md px-3 py-1 text-red-600 hover:bg-red-500/10"
+                    onClick={() => askDelete(p.id)}
                   >
-                    Delete
+                    <Trash2 size={16} /> Delete
                   </button>
                 </div>
               </div>
@@ -249,12 +260,42 @@ const ProjectsPage: React.FC = () => {
               <input name="media_videoUrl" placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
             </div>
             <div className="flex justify-end gap-2">
-              <button type="button" className="border rounded-md px-3 py-2" onClick={() => setCreateOpen(false)}>Cancel</button>
-              <button type="submit" disabled={createLoading} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{createLoading ? 'Creating…' : 'Create'}</button>
+              <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setCreateOpen(false)}>Cancel</button>
+              <button type="submit" disabled={createLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
+                {createLoading ? 'Creating…' : (<><Save size={16} /> Create</>)}
+              </button>
             </div>
           </form>
         </Modal.Content>
       </Modal>
+
+      {/* Confirm delete */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete project?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The project will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              className="border rounded-md px-3 py-2 hover:bg-accent"
+              onClick={() => setConfirmOpen(false)}
+              disabled={deleteLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className="inline-flex items-center gap-2 border rounded-md px-3 py-2 text-red-600 hover:bg-red-500/10"
+              onClick={() => confirmId && void onDelete(confirmId)}
+              disabled={deleteLoading}
+            >
+              <Trash2 size={16} /> {deleteLoading ? 'Deleting…' : 'Delete'}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit modal */}
       <Modal open={editOpen} onOpenChange={setEditOpen}>
@@ -275,7 +316,12 @@ const ProjectsPage: React.FC = () => {
                 <input name="date" defaultValue={editTarget.date} placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="technologies" defaultValue={Array.isArray(editTarget.technologies) ? editTarget.technologies.join(', ') : ''} placeholder="Technologies (comma)" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="categories" defaultValue={Array.isArray(editTarget.categories || []) ? (editTarget.categories || []).join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="status" defaultValue={editTarget.status || ''} placeholder="Status" className="border rounded-md px-3 py-2 bg-background" />
+                <select name="status" defaultValue={editTarget.status || ''} className="border rounded-md px-3 py-2 bg-background">
+                  <option value="">Select Status</option>
+                  <option value="completed">Completed</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="archived">Archived</option>
+                </select>
                 <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean(editTarget.isFeatured)} /> Featured</label>
               </div>
               <textarea name="description" defaultValue={editTarget.description || ''} placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
@@ -292,8 +338,10 @@ const ProjectsPage: React.FC = () => {
                 <input name="media_videoUrl" defaultValue={editTarget.media?.videoUrl || ''} placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="flex justify-end gap-2">
-                <button type="button" className="border rounded-md px-3 py-2" onClick={() => setEditOpen(false)}>Cancel</button>
-                <button type="submit" disabled={saveLoading} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{saveLoading ? 'Saving…' : 'Save'}</button>
+                <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setEditOpen(false)}>Cancel</button>
+                <button type="submit" disabled={saveLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
+                  {saveLoading ? 'Saving…' : (<><Save size={16} /> Save</>)}
+                </button>
               </div>
             </form>
           )}

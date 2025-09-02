@@ -75,7 +75,7 @@ const Footer: React.FC = () => {
             {new Date().getFullYear()}. All rights reserved.
           </p>
           <div className="mt-4 text-xs text-center text-gray-500">
-            <Link to="/admin" className="bg-blue-100 hover:bg-blue-200 transition duration-200 rounded px-2 py-1">
+            <Link to="/admin" className="bg-blue-100 hover:bg-blue-200 transition duration-200 rounded px-2 py-1 dark:bg-blue-800 dark:hover:bg-blue-700 text-blue-600 dark:text-blue-400">
               Administration
             </Link>
           </div>

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
 import { getCollectionData, updateItem } from '@/api/admin';
 import type { ResumeData, Contact, TechnicalSkills, Experience, Education, Certification } from '@/types';
+import { Plus, Save, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const ResumePage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -99,10 +101,9 @@ const ResumePage: React.FC = () => {
     };
     setSavingProfile(true);
     try {
-      // Use PATCH to preserve unedited fields in resume
       const res = await updateItem('resume', 'main', patch, token);
       const merged = (res?.item || {}) as ResumeData;
-      // Normalize merged payload back to full ResumeData for local state
+
       const next: ResumeData = {
         name: merged?.name ?? (data?.name ?? ''),
         contact: {
@@ -136,9 +137,9 @@ const ResumePage: React.FC = () => {
           : (patch.passions ?? data?.passions ?? []),
       };
       setData(next);
-      alert('Saved');
+      toast.success('Profile saved');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSavingProfile(false);
     }
@@ -178,9 +179,9 @@ const ResumePage: React.FC = () => {
           }
           : null,
       );
-      alert('Technical skills saved');
+      toast.success('Technical skills saved');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSavingTech(false);
     }
@@ -197,9 +198,9 @@ const ResumePage: React.FC = () => {
         : experiences;
       setData((prev) => (prev ? { ...prev, experiences: next } : prev));
       setExperiences(next);
-      alert('Experiences saved');
+      toast.success('Experiences saved');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSavingExp(false);
     }
@@ -216,9 +217,9 @@ const ResumePage: React.FC = () => {
         : education;
       setData((prev) => (prev ? { ...prev, education: next } : prev));
       setEducation(next);
-      alert('Education saved');
+      toast.success('Education saved');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSavingEdu(false);
     }
@@ -240,9 +241,9 @@ const ResumePage: React.FC = () => {
         : payload;
       setData((prev) => (prev ? { ...prev, certifications: next } : prev));
       setCertifications(next);
-      alert('Certifications saved');
+      toast.success('Certifications saved');
     } catch (e) {
-      alert((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? 'Save failed');
     } finally {
       setSavingCerts(false);
     }
@@ -294,7 +295,9 @@ const ResumePage: React.FC = () => {
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" disabled={savingProfile} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{savingProfile ? 'Saving…' : 'Save'}</button>
+              <button type="submit" disabled={savingProfile} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
+                {savingProfile ? 'Saving…' : (<><Save size={16} /> Save</>)}
+              </button>
             </div>
           </form><form
             onSubmit={(e) => {
@@ -313,14 +316,14 @@ const ResumePage: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end">
-              <button type="submit" disabled={savingTech} className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60">{savingTech ? 'Saving…' : 'Save Technical Skills'}</button>
+              <button type="submit" disabled={savingTech} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">{savingTech ? 'Saving…' : (<><Save size={16} /> Save Technical Skills</>)}</button>
             </div>
           </form><div className="border rounded-lg p-4 bg-card space-y-4">
             <div className="flex items-center justify-between">
               <div className="font-medium">Experiences</div>
               <button
                 type="button"
-                className="rounded-md border px-3 py-2"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
                 onClick={() => setExperiences((prev) => [
                   ...prev,
                   {
@@ -335,7 +338,7 @@ const ResumePage: React.FC = () => {
                   },
                 ])}
               >
-                + Add experience
+                <Plus size={16} /> Add experience
               </button>
             </div>
             <div className="space-y-6">
@@ -409,10 +412,10 @@ const ResumePage: React.FC = () => {
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="text-red-600 border rounded-md px-3 py-2"
+                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
                       onClick={() => setExperiences((prev) => prev.filter((_, i) => i !== idx))}
                     >
-                      Remove
+                      <Trash2 size={16} /> Remove
                     </button>
                   </div>
                 </div>
@@ -422,10 +425,10 @@ const ResumePage: React.FC = () => {
               <button
                 type="button"
                 disabled={savingExp}
-                className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveExperiences()}
               >
-                {savingExp ? 'Saving…' : 'Save Experiences'}
+                {savingExp ? 'Saving…' : (<><Save size={16} /> Save Experiences</>)}
               </button>
             </div>
           </div><div className="border rounded-lg p-4 bg-card space-y-4">
@@ -433,13 +436,13 @@ const ResumePage: React.FC = () => {
               <div className="font-medium">Education</div>
               <button
                 type="button"
-                className="rounded-md border px-3 py-2"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
                 onClick={() => setEducation((prev) => [
                   ...prev,
                   { institution: '', degree: '', description: '', period: '' },
                 ])}
               >
-                + Add education
+                <Plus size={16} /> Add education
               </button>
             </div>
             <div className="space-y-6">
@@ -476,10 +479,10 @@ const ResumePage: React.FC = () => {
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="text-red-600 border rounded-md px-3 py-2"
+                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
                       onClick={() => setEducation((prev) => prev.filter((_, i) => i !== idx))}
                     >
-                      Remove
+                      <Trash2 size={16} /> Remove
                     </button>
                   </div>
                 </div>
@@ -489,10 +492,10 @@ const ResumePage: React.FC = () => {
               <button
                 type="button"
                 disabled={savingEdu}
-                className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveEducation()}
               >
-                {savingEdu ? 'Saving…' : 'Save Education'}
+                {savingEdu ? 'Saving…' : (<><Save size={16} /> Save Education</>)}
               </button>
             </div>
           </div><div className="border rounded-lg p-4 bg-card space-y-4">
@@ -500,13 +503,13 @@ const ResumePage: React.FC = () => {
               <div className="font-medium">Certifications</div>
               <button
                 type="button"
-                className="rounded-md border px-3 py-2"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
                 onClick={() => setCertifications((prev) => [
                   ...prev,
                   { provider: '', title: '', issued_date: null, status: 'issued' },
                 ])}
               >
-                + Add certification
+                <Plus size={16} /> Add certification
               </button>
             </div>
             <div className="space-y-6">
@@ -546,10 +549,10 @@ const ResumePage: React.FC = () => {
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="text-red-600 border rounded-md px-3 py-2"
+                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
                       onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))}
                     >
-                      Remove
+                      <Trash2 size={16} /> Remove
                     </button>
                   </div>
                 </div>
@@ -559,10 +562,10 @@ const ResumePage: React.FC = () => {
               <button
                 type="button"
                 disabled={savingCerts}
-                className="rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveCertifications()}
               >
-                {savingCerts ? 'Saving…' : 'Save Certifications'}
+                {savingCerts ? 'Saving…' : (<><Save size={16} /> Save Certifications</>)}
               </button>
             </div>
           </div>
