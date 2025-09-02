@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   Briefcase,
   Code,
@@ -19,15 +19,40 @@ import { HighlightCard } from '@/components/resume/experience/HighlightCard';
 import { ExperienceCard } from '@/components/resume/experience/ExperienceCard';
 import { FaLinkedin } from 'react-icons/fa';
 import { CertificationsCard } from '../resume/CertificationsCard';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import useAuth from '@/hooks/useAuth';
+import { downloadResumePdf } from '@/api/resume';
 
 export default function Resume() {
   const { resumeData } = useResume();
   const resumeRef = useRef<HTMLDivElement>(null);
+  const { token } = useAuth();
+  const [downloading, setDownloading] = useState(false);
+
+  const onExportPdf = async () => {
+    try {
+      setDownloading(true);
+      await downloadResumePdf({ token: token ?? undefined });
+    } catch (e) {
+      console.error('Failed to export resume PDF', e);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
-        <ResumeHeader name={resumeData?.name ?? ''} />
+        <ResumeHeader
+          name={resumeData?.name ?? ''}
+          actions={
+            <Button variant="outline" size="sm" onClick={onExportPdf} disabled={downloading}>
+              <Download className={downloading ? 'animate-pulse' : ''} />
+              {downloading ? 'Exporting…' : 'Export PDF'}
+            </Button>
+          }
+        />
 
         <div id="resume-content" ref={resumeRef}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
