@@ -1,43 +1,37 @@
 # 🚀 personal_website
 
-Welcome to my personal website project! 🎉 Starting in February 2025, this project is packed with exciting features and
-cutting-edge technologies!
+Personal website with a modern React frontend and a FastAPI backend. It serves public content (projects, articles, resume) and includes an AI chat assistant with streaming responses and RAG.
 
 ## 🌟 Features
 
-- **LLM Chat**: Engage in intelligent conversations powered by Large Language Models! 🤖
-- **RAG Knowledge Usage**: Retrieval-Augmented Generation for enhanced information retrieval! 🧠
-- **RESTful API**: Seamless integration with a robust API! 🔗
-- **FastAPI (Python)**: Blazing-fast backend with FastAPI! 🐍
-    - Utilizes `api_client` (APIClient()) to connect to my API hosted
-      on [api.mathislambert.fr](https://api.mathislambert.fr).
-- **ViteJS React**: Lightning-fast frontend with ViteJS and React! ⚛️
-- **Redux**: Efficient state management with Redux! 🔄
-- **Chakra UI**: Beautiful and accessible UI components with Chakra UI! 🎨
-- **MongoDB**: Scalable and flexible data storage with MongoDB! 🗄️
-
-## 📜 License
-
-This project is licensed under the MIT License. Feel free to explore, modify, and share! 📜
+- **Streaming LLM Chat (SSE)**: Chat endpoint streams responses and supports auto tool execution via `ml-api-client`.
+- **RAG Retrieval**: Vector store search (e.g., `mathis_bio_store`) used to ground answers to personal data.
+- **Content API**: Articles, projects, experiences, studies, and resume served from MongoDB.
+- **Article Metrics**: Track views/likes/shares via lightweight endpoints.
+- **Auth**: Short‑lived JWTs (PyJWT) issued via HMAC challenge (`/api/auth/challenge` → `/api/auth/token`).
+- **API Docs**: OpenAPI JSON at `/api/v1/openapi.json`, Swagger UI at `/swagger`, ReDoc at `/api-docs`.
+- **CORS & Maintenance**: Configurable allowed origins and maintenance mode via environment variables.
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React, ViteJS, Redux, Chakra UI
-- **Backend**: FastAPI (Python)
-    - Integrates with `api_client` for API interactions.
-- **Database**: MongoDB
+- **Frontend**: React 19, Vite 7, TypeScript, Tailwind CSS, Radix UI primitives, Framer Motion, React Router, Lucide Icons, React Markdown (+ GFM/Math/KaTeX), Mermaid, Syntax Highlighting, Sonner toasts.
+- **Backend**: FastAPI, Uvicorn, Motor/PyMongo, `ml-api-client`, PyJWT, python-dotenv (dev).
+- **Database**: MongoDB (Motor async driver).
+- **Containers**: Dockerfiles for frontend and backend; `docker-compose.yml` with Traefik labels.
 
-## 🤝 Contributions
+## 🔌 API Overview
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull
-request. Let's build something amazing together! 🤝
+- `GET /api/health`: Health check.
+- `GET /api/auth/challenge` → `POST /api/auth/token`: Obtain JWT for protected routes.
+- `POST /api/chat/completions`: Streaming chat completions (SSE) with optional tool calls.
+- `GET /api/articles/all` · `GET /api/articles/{slug}` · metrics endpoints.
+- `GET /api/projects/all` · `GET /api/projects/{slug}`.
+- `GET /api/experiences/all` · `GET /api/studies/all` · `GET /api/resume`.
+
+## 📜 License
+
+MIT License — see `LICENSE` for details.
 
 ## 📞 Contact
 
-Have questions or want to chat? Feel free to reach out! 📞
-
-- [LinkedIn](https://www.linkedin.com/in/mathis-lambert) 🔗
-
----
-
-Happy coding! 💻✨
+- LinkedIn: https://www.linkedin.com/in/mathis-lambert
