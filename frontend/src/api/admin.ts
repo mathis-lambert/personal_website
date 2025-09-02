@@ -1,4 +1,13 @@
 import { fetchWithTimeout } from '@/api/utils';
+import type { Article, Project } from '@/types';
+import type {
+  AdminCreateArticleInput,
+  AdminCreateProjectInput,
+  AdminExperience,
+  AdminStudy,
+  AdminUpdateArticleInput,
+  AdminUpdateProjectInput,
+} from '@/admin/types';
 
 export type AdminCollectionName =
   | 'projects'
@@ -61,10 +70,20 @@ export async function replaceCollection(
 }
 
 export async function createItem(
-  collection: Extract<AdminCollectionName, 'projects' | 'articles'>,
-  item: unknown,
+  collection: 'projects',
+  item: AdminCreateProjectInput,
   token: string,
-) {
+): Promise<{ ok: boolean; id: string; item: Project }>;
+export async function createItem(
+  collection: 'articles',
+  item: AdminCreateArticleInput,
+  token: string,
+): Promise<{ ok: boolean; id: string; item: Article }>;
+export async function createItem(
+  collection: Extract<AdminCollectionName, 'projects' | 'articles'>,
+  item: AdminCreateProjectInput | AdminCreateArticleInput,
+  token: string,
+): Promise<{ ok: boolean; id: string; item: Project | Article }> {
   const res = await fetchWithTimeout(`${API_URL}/api/admin/${collection}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -74,15 +93,39 @@ export async function createItem(
   });
   if (!res.ok)
     throw new Error(`Failed to create ${collection} item: ${res.status}`);
-  return (await res.json()) as { ok: boolean; id: string; item: unknown };
+  return (await res.json()) as { ok: boolean; id: string; item: Project | Article };
 }
 
+export async function updateItem(
+  collection: 'projects',
+  id: string,
+  patch: AdminUpdateProjectInput,
+  token: string,
+): Promise<{ ok: boolean; item: Project }>;
+export async function updateItem(
+  collection: 'articles',
+  id: string,
+  patch: AdminUpdateArticleInput,
+  token: string,
+): Promise<{ ok: boolean; item: Article }>;
+export async function updateItem(
+  collection: 'experiences',
+  id: string,
+  patch: AdminExperience,
+  token: string,
+): Promise<{ ok: boolean; item: AdminExperience }>;
+export async function updateItem(
+  collection: 'studies',
+  id: string,
+  patch: AdminStudy,
+  token: string,
+): Promise<{ ok: boolean; item: AdminStudy }>;
 export async function updateItem(
   collection: AdminCollectionName,
   id: string,
   patch: unknown,
   token: string,
-) {
+): Promise<{ ok: boolean; item: unknown }> {
   const res = await fetchWithTimeout(
     `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`,
     {
@@ -114,4 +157,3 @@ export async function deleteItem(
   if (!res.ok)
     throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
 }
-

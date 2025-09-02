@@ -7,17 +7,10 @@ import {
   updateItem,
 } from '@/api/admin';
 import Modal from '@/admin/components/Modal';
+import type { Article } from '@/types';
+import type { AdminCreateArticleInput, AdminUpdateArticleInput } from '@/admin/types';
 
-type Article = {
-  id: string;
-  slug?: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  date: string;
-  tags: string[];
-  [k: string]: unknown;
-};
+// Use shared Article type from '@/types'
 
 const ArticlesPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -63,12 +56,10 @@ const ArticlesPage: React.FC = () => {
       .filter(Boolean);
   }
 
-  const openCreate = () => setCreateOpen(true);
-
   const onCreate = async (form: HTMLFormElement) => {
     if (!token) return;
     const fd = new FormData(form);
-    const body: any = {
+    const body: AdminCreateArticleInput = {
       title: String(fd.get('title') || ''),
       slug: String(fd.get('slug') || '') || undefined,
       excerpt: String(fd.get('excerpt') || ''),
@@ -109,7 +100,7 @@ const ArticlesPage: React.FC = () => {
   const saveEdit = async (form: HTMLFormElement) => {
     if (!token || !editTarget) return;
     const fd = new FormData(form);
-    const patch: any = {
+    const patch: AdminUpdateArticleInput = {
       slug: String(fd.get('slug') || '') || undefined,
       title: String(fd.get('title') || ''),
       excerpt: String(fd.get('excerpt') || ''),
@@ -267,25 +258,25 @@ const ArticlesPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input name="title" defaultValue={editTarget.title} placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
                 <input name="slug" defaultValue={editTarget.slug || ''} placeholder="Slug" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="author" defaultValue={(editTarget as any).author || ''} placeholder="Author" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="author" defaultValue={editTarget.author || ''} placeholder="Author" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="date" defaultValue={editTarget.date} placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="tags" defaultValue={Array.isArray(editTarget.tags) ? editTarget.tags.join(', ') : ''} placeholder="Tags (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="categories" defaultValue={Array.isArray((editTarget as any).categories) ? (editTarget as any).categories.join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean((editTarget as any).isFeatured)} /> Featured</label>
+                <input name="categories" defaultValue={Array.isArray(editTarget.categories || []) ? (editTarget.categories || []).join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean(editTarget.isFeatured)} /> Featured</label>
               </div>
               <input name="excerpt" defaultValue={editTarget.excerpt || ''} placeholder="Excerpt" className="w-full border rounded-md px-3 py-2 bg-background" />
               <textarea name="content" defaultValue={editTarget.content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="imageUrl" defaultValue={(editTarget as any).imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="thumbnailUrl" defaultValue={(editTarget as any).thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="imageUrl" defaultValue={editTarget.imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="thumbnailUrl" defaultValue={editTarget.thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="link_canonical" defaultValue={((editTarget as any).links?.canonical) || ''} placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="link_discussion" defaultValue={((editTarget as any).links?.discussion) || ''} placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_canonical" defaultValue={editTarget.links?.canonical || ''} placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_discussion" defaultValue={editTarget.links?.discussion || ''} placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="media_thumbnailUrl" defaultValue={((editTarget as any).media?.thumbnailUrl) || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="media_imageUrl" defaultValue={((editTarget as any).media?.imageUrl) || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_thumbnailUrl" defaultValue={editTarget.media?.thumbnailUrl || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_imageUrl" defaultValue={editTarget.media?.imageUrl || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" className="border rounded-md px-3 py-2" onClick={() => setEditOpen(false)}>Cancel</button>

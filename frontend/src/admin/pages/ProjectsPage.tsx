@@ -7,15 +7,10 @@ import {
   updateItem,
 } from '@/api/admin';
 import Modal from '@/admin/components/Modal';
+import type { Project, ProjectStatus } from '@/types';
+import type { AdminCreateProjectInput, AdminUpdateProjectInput } from '@/admin/types';
 
-type Project = {
-  id: string;
-  slug?: string;
-  title: string;
-  date: string;
-  technologies: string[];
-  [k: string]: unknown;
-};
+// Use shared Project type from '@/types'
 
 const ProjectsPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -66,7 +61,7 @@ const ProjectsPage: React.FC = () => {
   const onCreate = async (form: HTMLFormElement) => {
     if (!token) return;
     const fd = new FormData(form);
-    const body: any = {
+    const body: AdminCreateProjectInput = {
       title: String(fd.get('title') || ''),
       slug: String(fd.get('slug') || '') || undefined,
       subtitle: String(fd.get('subtitle') || '') || undefined,
@@ -75,7 +70,7 @@ const ProjectsPage: React.FC = () => {
       date: String(fd.get('date') || new Date().toISOString().slice(0, 10)),
       technologies: splitCSV(String(fd.get('technologies') || '')),
       categories: splitCSV(String(fd.get('categories') || '')),
-      status: String(fd.get('status') || '') || undefined,
+      status: String(fd.get('status')) as ProjectStatus || undefined,
       isFeatured: fd.get('isFeatured') === 'on',
       imageUrl: String(fd.get('imageUrl') || '') || undefined,
       thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
@@ -113,7 +108,7 @@ const ProjectsPage: React.FC = () => {
   const saveEdit = async (form: HTMLFormElement) => {
     if (!token || !editTarget) return;
     const fd = new FormData(form);
-    const patch: any = {
+    const patch: AdminUpdateProjectInput = {
       // id not editable here
       slug: String(fd.get('slug') || '') || undefined,
       title: String(fd.get('title') || ''),
@@ -123,7 +118,7 @@ const ProjectsPage: React.FC = () => {
       date: String(fd.get('date') || editTarget.date),
       technologies: splitCSV(String(fd.get('technologies') || '')),
       categories: splitCSV(String(fd.get('categories') || '')),
-      status: String(fd.get('status') || '') || undefined,
+      status: String(fd.get('status')) as ProjectStatus || undefined,
       isFeatured: fd.get('isFeatured') === 'on',
       imageUrl: String(fd.get('imageUrl') || '') || undefined,
       thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
@@ -284,31 +279,31 @@ const ProjectsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input name="title" defaultValue={editTarget.title} placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
                 <input name="slug" defaultValue={editTarget.slug || ''} placeholder="Slug" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="subtitle" defaultValue={(editTarget as any).subtitle || ''} placeholder="Subtitle" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="subtitle" defaultValue={editTarget.subtitle || ''} placeholder="Subtitle" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="date" defaultValue={editTarget.date} placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="technologies" defaultValue={Array.isArray(editTarget.technologies) ? editTarget.technologies.join(', ') : ''} placeholder="Technologies (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="categories" defaultValue={Array.isArray((editTarget as any).categories) ? (editTarget as any).categories.join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="status" defaultValue={(editTarget as any).status || ''} placeholder="Status" className="border rounded-md px-3 py-2 bg-background" />
-                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean((editTarget as any).isFeatured)} /> Featured</label>
+                <input name="categories" defaultValue={Array.isArray(editTarget.categories || []) ? (editTarget.categories || []).join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="status" defaultValue={editTarget.status || ''} placeholder="Status" className="border rounded-md px-3 py-2 bg-background" />
+                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean(editTarget.isFeatured)} /> Featured</label>
               </div>
-              <textarea name="description" defaultValue={(editTarget as any).description || ''} placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
-              <textarea name="content" defaultValue={(editTarget as any).content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
+              <textarea name="description" defaultValue={editTarget.description || ''} placeholder="Short description" className="w-full h-24 border rounded-md p-2 bg-background" />
+              <textarea name="content" defaultValue={editTarget.content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="imageUrl" defaultValue={(editTarget as any).imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="thumbnailUrl" defaultValue={(editTarget as any).thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="projectUrl" defaultValue={(editTarget as any).projectUrl || ''} placeholder="Project URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="repoUrl" defaultValue={(editTarget as any).repoUrl || ''} placeholder="Repo URL" className="border rounded-md px-3 py-2 bg-background" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="link_live" defaultValue={((editTarget as any).links?.live) || ''} placeholder="Link: Live" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="link_repo" defaultValue={((editTarget as any).links?.repo) || ''} placeholder="Link: Repo" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="link_docs" defaultValue={((editTarget as any).links?.docs) || ''} placeholder="Link: Docs" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="link_video" defaultValue={((editTarget as any).links?.video) || ''} placeholder="Link: Video" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="imageUrl" defaultValue={editTarget.imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="thumbnailUrl" defaultValue={editTarget.thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="projectUrl" defaultValue={editTarget.projectUrl || ''} placeholder="Project URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="repoUrl" defaultValue={editTarget.repoUrl || ''} placeholder="Repo URL" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="media_thumbnailUrl" defaultValue={((editTarget as any).media?.thumbnailUrl) || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="media_imageUrl" defaultValue={((editTarget as any).media?.imageUrl) || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="media_videoUrl" defaultValue={((editTarget as any).media?.videoUrl) || ''} placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_live" defaultValue={editTarget.links?.live || ''} placeholder="Link: Live" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_repo" defaultValue={editTarget.links?.repo || ''} placeholder="Link: Repo" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_docs" defaultValue={editTarget.links?.docs || ''} placeholder="Link: Docs" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="link_video" defaultValue={editTarget.links?.video || ''} placeholder="Link: Video" className="border rounded-md px-3 py-2 bg-background" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input name="media_thumbnailUrl" defaultValue={editTarget.media?.thumbnailUrl || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_imageUrl" defaultValue={editTarget.media?.imageUrl || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input name="media_videoUrl" defaultValue={editTarget.media?.videoUrl || ''} placeholder="Media: Video URL" className="border rounded-md px-3 py-2 bg-background" />
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" className="border rounded-md px-3 py-2" onClick={() => setEditOpen(false)}>Cancel</button>

@@ -55,7 +55,7 @@ const ResumePage: React.FC = () => {
   const save = async (form: HTMLFormElement) => {
     if (!token) return;
     const fd = new FormData(form);
-    const obj: any = {
+    const obj: { name: string; contact: ResumeContact; skills: string[]; passions: string[] } = {
       name: String(fd.get('name') || ''),
       contact: {
         email: String(fd.get('email') || ''),
