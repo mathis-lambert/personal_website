@@ -127,12 +127,11 @@ class MongoDBConnector:
         return result.inserted_id
 
     async def log_event(
-        self, user_id: str, job_id: str, action: str, request_body: dict
+        self, job_id: str, action: str, request_body: dict
     ):
         collection_name = "events"
         collection = self.get_database()[collection_name]
         event = {
-            "user_id": self.object_id(user_id),
             "job_id": job_id,
             "action": action,
             "request_body": request_body,

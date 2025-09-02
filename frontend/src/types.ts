@@ -276,8 +276,6 @@ export interface Article {
   tags: string[];
   categories?: string[];
   isFeatured?: boolean;
-  imageUrl?: string;
-  thumbnailUrl?: string;
   links?: ArticleLinks;
   media?: ArticleMedia;
   metrics?: ArticleMetrics;

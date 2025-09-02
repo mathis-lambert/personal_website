@@ -3,12 +3,11 @@ import type { Article, Project, ResumeData } from '@/types';
 import type {
   AdminCreateArticleInput,
   AdminCreateProjectInput,
-  AdminExperience,
-  AdminStudy,
   AdminUpdateArticleInput,
   AdminUpdateProjectInput,
   AdminUpdateResumeInput,
 } from '@/admin/types';
+import type { TimelineData } from '@/components/ui/ScrollableTimeline';
 
 export type AdminCollectionName =
   | 'projects'
@@ -118,15 +117,15 @@ export async function updateItem(
 export async function updateItem(
   collection: 'experiences',
   id: string,
-  patch: AdminExperience,
+  patch: TimelineData,
   token: string,
-): Promise<{ ok: boolean; item: AdminExperience }>;
+): Promise<{ ok: boolean; item: TimelineData }>;
 export async function updateItem(
   collection: 'studies',
   id: string,
-  patch: AdminStudy,
+  patch: TimelineData,
   token: string,
-): Promise<{ ok: boolean; item: AdminStudy }>;
+): Promise<{ ok: boolean; item: TimelineData }>;
 export async function updateItem(
   collection: AdminCollectionName,
   id: string,

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
 import { getCollectionData } from '@/api/admin';
+import type { Article, Project } from '@/types';
+import type { TimelineData } from '@/components/ui/ScrollableTimeline';
 
 const DashboardPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -17,10 +19,10 @@ const DashboardPage: React.FC = () => {
       setErr(null);
       try {
         const [projects, articles, experiences, studies] = await Promise.all([
-          getCollectionData<any[]>('projects', token),
-          getCollectionData<any[]>('articles', token),
-          getCollectionData<any[]>('experiences', token),
-          getCollectionData<any[]>('studies', token),
+          getCollectionData<Project[]>('projects', token),
+          getCollectionData<Article[]>('articles', token),
+          getCollectionData<TimelineData[]>('experiences', token),
+          getCollectionData<TimelineData[]>('studies', token),
         ]);
         if (!canceled)
           setCounts({

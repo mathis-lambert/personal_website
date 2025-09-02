@@ -75,8 +75,6 @@ const ArticlesPage: React.FC = () => {
       tags: splitCSV(String(fd.get('tags') || '')),
       categories: splitCSV(String(fd.get('categories') || '')),
       isFeatured: fd.get('isFeatured') === 'on',
-      imageUrl: String(fd.get('imageUrl') || '') || undefined,
-      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
       links: {
         canonical: String(fd.get('link_canonical') || '') || undefined,
         discussion: String(fd.get('link_discussion') || '') || undefined,
@@ -116,8 +114,6 @@ const ArticlesPage: React.FC = () => {
       tags: splitCSV(String(fd.get('tags') || '')),
       categories: splitCSV(String(fd.get('categories') || '')),
       isFeatured: fd.get('isFeatured') === 'on',
-      imageUrl: String(fd.get('imageUrl') || '') || undefined,
-      thumbnailUrl: String(fd.get('thumbnailUrl') || '') || undefined,
       links: {
         canonical: String(fd.get('link_canonical') || '') || undefined,
         discussion: String(fd.get('link_discussion') || '') || undefined,
@@ -238,10 +234,6 @@ const ArticlesPage: React.FC = () => {
             <input name="excerpt" placeholder="Excerpt" className="w-full border rounded-md px-3 py-2 bg-background" />
             <textarea name="content" placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input name="imageUrl" placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="thumbnailUrl" placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input name="link_canonical" placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
               <input name="link_discussion" placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />
             </div>
@@ -316,10 +308,6 @@ const ArticlesPage: React.FC = () => {
               </div>
               <input name="excerpt" defaultValue={editTarget.excerpt || ''} placeholder="Excerpt" className="w-full border rounded-md px-3 py-2 bg-background" />
               <textarea name="content" defaultValue={editTarget.content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="imageUrl" defaultValue={editTarget.imageUrl || ''} placeholder="Image URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="thumbnailUrl" defaultValue={editTarget.thumbnailUrl || ''} placeholder="Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input name="link_canonical" defaultValue={editTarget.links?.canonical || ''} placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
                 <input name="link_discussion" defaultValue={editTarget.links?.discussion || ''} placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />

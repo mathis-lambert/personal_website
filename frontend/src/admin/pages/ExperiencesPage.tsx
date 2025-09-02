@@ -5,17 +5,11 @@ import Modal from '@/admin/components/Modal';
 import { Pencil, Trash2, Save, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
-type Experience = {
-  title: string;
-  company: string;
-  date: string;
-  description: string;
-};
+import type { TimelineData } from '@/components/ui/ScrollableTimeline';
 
 const ExperiencesPage: React.FC = () => {
   const { token } = useAdminAuth();
-  const [items, setItems] = useState<Experience[]>([]);
+  const [items, setItems] = useState<TimelineData[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
@@ -37,7 +31,7 @@ const ExperiencesPage: React.FC = () => {
       setLoading(true);
       setErr(null);
       try {
-        const data = await getCollectionData<Experience[]>('experiences', token);
+        const data = await getCollectionData<TimelineData[]>('experiences', token);
         if (!canceled) setItems(Array.isArray(data) ? data : []);
       } catch (e) {
         if (!canceled) setErr((e as Error)?.message ?? 'Failed to load');
@@ -59,7 +53,7 @@ const ExperiencesPage: React.FC = () => {
   const saveEdit = async (form: HTMLFormElement) => {
     if (!token || editIndex === null) return;
     const fd = new FormData(form);
-    const patch: Experience = {
+    const patch: TimelineData = {
       title: String(fd.get('title') || ''),
       company: String(fd.get('company') || ''),
       date: String(fd.get('date') || ''),
@@ -69,7 +63,7 @@ const ExperiencesPage: React.FC = () => {
     try {
       const id = `index-${editIndex}`;
       const res = await updateItem('experiences', id, patch, token);
-      setItems((prev) => prev.map((it, i) => (i === editIndex ? (res.item as Experience) : it)));
+      setItems((prev) => prev.map((it, i) => (i === editIndex ? (res.item as TimelineData) : it)));
       setEditOpen(false);
       setEditIndex(null);
     } catch (e) {
@@ -103,7 +97,7 @@ const ExperiencesPage: React.FC = () => {
   const onCreate = async (form: HTMLFormElement) => {
     if (!token) return;
     const fd = new FormData(form);
-    const nextItem: Experience = {
+    const nextItem: TimelineData = {
       title: String(fd.get('title') || '').trim(),
       company: String(fd.get('company') || '').trim(),
       date: String(fd.get('date') || '').trim(),

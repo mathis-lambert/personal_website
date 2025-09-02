@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '@/admin/components/Sidebar';
 import { Laptop2 } from 'lucide-react';
 
@@ -36,6 +36,14 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
             </div>
             <h2 className="text-lg font-semibold mb-1">Must be used on laptop</h2>
             <p className="text-sm text-muted-foreground">The admin dashboard is optimized for wider screens. Please use a laptop or a larger display.</p>
+            <div className="mt-4">
+              <Link
+                to="/"
+                className="inline-block text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Go to Homepage
+              </Link>
+            </div>
           </div>
         </div>
       )}
