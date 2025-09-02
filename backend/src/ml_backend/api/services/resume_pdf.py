@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 from fpdf import FPDF
+from fpdf.enums import XPos, YPos
 
 
 DATA_PATH = (
@@ -160,13 +161,13 @@ class ResumePDFExporter:
     def _h1(self, text: str):
         self.pdf.set_text_color(0)
         self.pdf.set_font("Helvetica", style="B", size=20)
-        self.pdf.cell(0, 10, txt=self._sanitize(text), ln=1)
+        self.pdf.cell(0, 10, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     def _h2(self, text: str):
         self.pdf.ln(1)
         self.pdf.set_text_color(30, 30, 30)
         self.pdf.set_font("Helvetica", style="B", size=12)
-        self.pdf.cell(0, 7, txt=self._sanitize(text.upper()), ln=1)
+        self.pdf.cell(0, 7, text=self._sanitize(text.upper()), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
         # subtle divider
         x = self.pdf.l_margin
         y = self.pdf.get_y()
@@ -178,12 +179,12 @@ class ResumePDFExporter:
     def _small(self, text: str, bold: bool = False):
         self.pdf.set_text_color(50, 50, 50)
         self.pdf.set_font("Helvetica", style="B" if bold else "", size=9)
-        self.pdf.cell(0, 5, txt=self._sanitize(text), ln=1)
+        self.pdf.cell(0, 5, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
     def _para(self, text: str, size: int = 10):
         self.pdf.set_text_color(40)
         self.pdf.set_font("Helvetica", size=size)
-        self.pdf.multi_cell(0, 5, txt=self._sanitize(text))
+        self.pdf.multi_cell(0, 5, text=self._sanitize(text))
 
     def _bullets(self, items: Iterable[str], max_items: Optional[int] = None):
         cnt = 0
@@ -240,11 +241,11 @@ class ResumePDFExporter:
             # role @ company
             self.pdf.set_font("Helvetica", style="B", size=11)
             self.pdf.set_text_color(20)
-            self.pdf.cell(0, 6, self._sanitize(f"{title} - {company}"), ln=1)
+            self.pdf.cell(0, 6, text=self._sanitize(f"{title} - {company}"), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             if meta:
                 self.pdf.set_font("Helvetica", size=9)
                 self.pdf.set_text_color(90)
-                self.pdf.cell(0, 5, self._sanitize(meta), ln=1)
+                self.pdf.cell(0, 5, text=self._sanitize(meta), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             if exp.description:
                 # For the first highlighted/current exp, allow up to 4 bullets; others 2
                 max_bullets = 4 if (exp.highlight or exp.current) else 2
@@ -264,15 +265,15 @@ class ResumePDFExporter:
             line = f"{institution} - {title}" if title else institution
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(25)
-            self.pdf.cell(0, 5, self._sanitize(line), ln=1)
+            self.pdf.cell(0, 5, text=self._sanitize(line), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             if edu.description:
                 self.pdf.set_font("Helvetica", size=9)
                 self.pdf.set_text_color(80)
-                self.pdf.multi_cell(0, 4.5, self._sanitize(edu.description))
+                self.pdf.multi_cell(0, 4.5, text=self._sanitize(edu.description))
             if edu.period:
                 self.pdf.set_font("Helvetica", size=9)
                 self.pdf.set_text_color(100)
-                self.pdf.cell(0, 4.5, self._sanitize(edu.period), ln=1)
+                self.pdf.cell(0, 4.5, text=self._sanitize(edu.period), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.pdf.ln(1)
 
     def _skills_block(self):
@@ -284,10 +285,10 @@ class ResumePDFExporter:
                 return
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(30)
-            self.pdf.cell(0, 5, self._sanitize(f"{label}: "), ln=1)
+            self.pdf.cell(0, 5, text=self._sanitize(f"{label}: "), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.pdf.set_font("Helvetica", size=10)
             self.pdf.set_text_color(50)
-            self.pdf.multi_cell(0, 5, self._sanitize(", ".join(items)))
+            self.pdf.multi_cell(0, 5, text=self._sanitize(", ".join(items)))
         row("Languages", t.languages)
         row("AI/ML", t.ai_ml)
         row("Systems & Infra", t.systems_and_infra)
@@ -318,11 +319,11 @@ class ResumePDFExporter:
 
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(25)
-            self.pdf.cell(0, 5, self._sanitize(title), ln=1)
+            self.pdf.cell(0, 5, text=self._sanitize(title), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             if meta:
                 self.pdf.set_font("Helvetica", size=9)
                 self.pdf.set_text_color(90)
-                self.pdf.cell(0, 4.5, self._sanitize(meta), ln=1)
+                self.pdf.cell(0, 4.5, text=self._sanitize(meta), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             self.pdf.ln(0.5)
 
     def _passions_block(self):
@@ -331,7 +332,7 @@ class ResumePDFExporter:
         self._h2("Interests")
         self.pdf.set_font("Helvetica", size=10)
         self.pdf.set_text_color(50)
-        self.pdf.multi_cell(0, 5, self._sanitize(", ".join(self.resume.passions[:10])))
+        self.pdf.multi_cell(0, 5, text=self._sanitize(", ".join(self.resume.passions[:10])))
 
     def build_pdf(self) -> bytes:
         # Compose blocks with a 2-column layout if vertical overflow is likely
@@ -344,4 +345,5 @@ class ResumePDFExporter:
         self._certs_block()
         self._passions_block()
 
-        return bytes(self.pdf.output(dest="S").encode("latin1"))
+        out = self.pdf.output()
+        return bytes(out) if isinstance(out, (bytearray, bytes)) else bytes(str(out), "latin1")
