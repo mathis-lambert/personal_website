@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from pydantic import BaseModel, Field
 
 from ml_backend.api.services import get_mongo_client
@@ -145,7 +145,7 @@ async def read_collection(collection: CollectionName):
 @router.put("/admin/data/{collection}")
 async def replace_collection(
     collection: CollectionName,
-    payload: Any,
+    payload: Any = Body(...),
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     # Write file
@@ -197,7 +197,7 @@ def _ensure_unique_id(items: List[Dict[str, Any]], base: str) -> str:
 @router.post("/admin/{collection}")
 async def create_item(
     collection: Literal["projects", "articles"],
-    item: Dict[str, Any],
+    item: Dict[str, Any] = Body(...),
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     path = _file_for(collection)
@@ -236,7 +236,7 @@ async def create_item(
 async def update_item(
     collection: CollectionName,
     item_id: str,
-    patch: Dict[str, Any],
+    patch: Dict[str, Any] = Body(...),
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     if collection == "resume":
