@@ -1,5 +1,5 @@
 import { fetchWithTimeout } from '@/api/utils';
-import type { Article, Project } from '@/types';
+import type { Article, Project, ResumeData } from '@/types';
 import type {
   AdminCreateArticleInput,
   AdminCreateProjectInput,
@@ -7,6 +7,7 @@ import type {
   AdminStudy,
   AdminUpdateArticleInput,
   AdminUpdateProjectInput,
+  AdminUpdateResumeInput,
 } from '@/admin/types';
 
 export type AdminCollectionName =
@@ -102,6 +103,12 @@ export async function updateItem(
   patch: AdminUpdateProjectInput,
   token: string,
 ): Promise<{ ok: boolean; item: Project }>;
+export async function updateItem(
+  collection: 'resume',
+  id: string,
+  patch: AdminUpdateResumeInput,
+  token: string,
+): Promise<{ ok: boolean; item: ResumeData }>;
 export async function updateItem(
   collection: 'articles',
   id: string,

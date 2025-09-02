@@ -9,7 +9,9 @@ import {
   GraduationCap,
   IdCard,
   LogOut,
+  DoorOpen,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 type NavItem = {
   label: string;
@@ -55,10 +57,16 @@ const Sidebar: React.FC<{
           </button>
         ))}
       </nav>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t flex flex-col justify-between gap-2">
+        <Link
+          className="w-full inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-accent"
+          to="/"
+        >
+          <DoorOpen size={16} /> Back to site
+        </Link>
         <button
           onClick={logout}
-          className="w-full inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-accent"
+          className="w-full inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm bg-red-500/30 hover:bg-red-500"
         >
           <LogOut size={16} /> Logout
         </button>

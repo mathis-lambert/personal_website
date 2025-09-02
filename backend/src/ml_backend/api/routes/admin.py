@@ -240,19 +240,35 @@ async def update_item(
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     if collection == "resume":
-        # Resume is a single object; ignore item_id
+        # Resume is stored as either a single object or an array-of-one.
+        # Merge shallowly with the existing object and preserve the file's original shape.
         path = _file_for(collection)
-        data = _load_json(path)
-        if not isinstance(data, dict):
-            raise HTTPException(status_code=400, detail="Resume JSON must be an object")
+        original = _load_json(path)
         if not isinstance(patch, dict):
             raise HTTPException(status_code=400, detail="Patch must be an object")
-        data.update(patch)
-        _write_json(path, data)
+
+        # Extract current object regardless of storage shape
+        if isinstance(original, list):
+            current_obj = dict(original[0]) if original else {}
+            new_shape = "list"
+        elif isinstance(original, dict):
+            current_obj = dict(original)
+            new_shape = "dict"
+        else:
+            raise HTTPException(status_code=400, detail="Invalid resume JSON format")
+
+        # Apply shallow merge
+        merged = {**current_obj, **patch}
+
+        # Persist, keeping original shape
+        to_write: Any = [merged] if new_shape == "list" else merged
+        _write_json(path, to_write)
+
+        # Mongo: store as a single document (the merged object)
         db = mongodb.get_database()
         await db[collection].delete_many({})
-        await db[collection].insert_one(data)
-        return {"ok": True, "item": data}
+        await db[collection].insert_one(merged)
+        return {"ok": True, "item": merged}
 
     # List collections
     path = _file_for(collection)

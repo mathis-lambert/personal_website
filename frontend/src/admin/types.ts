@@ -1,4 +1,4 @@
-import type { Article, Project } from '@/types';
+import type { Article, Project, ResumeData } from '@/types';
 
 // Simple list entries stored in experiences.json and studies.json
 export interface AdminExperience {
@@ -27,4 +27,4 @@ export type AdminCreateArticleInput = Pick<
 
 export type AdminUpdateProjectInput = Partial<Project>;
 export type AdminUpdateArticleInput = Partial<Article>;
-
+export type AdminUpdateResumeInput = Partial<ResumeData>;
