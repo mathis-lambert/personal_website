@@ -74,6 +74,11 @@ const Footer: React.FC = () => {
             © This site was designed and developed by Mathis Lambert -{' '}
             {new Date().getFullYear()}. All rights reserved.
           </p>
+          <div className="mt-4 text-xs text-center text-gray-500">
+            <Link to="/admin" className="bg-blue-100 hover:bg-blue-200 transition duration-200 rounded px-2 py-1">
+              Administration
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

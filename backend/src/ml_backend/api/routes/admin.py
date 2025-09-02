@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Type
 
 from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, ConfigDict
+from bson import ObjectId
 
 from ml_backend.api.services import get_mongo_client
 from ml_backend.api.security import verify_token
@@ -296,7 +298,8 @@ async def create_item(
 
     # Mongo insert
     db = mongodb.get_database()
-    await db[collection].insert_one(obj)
+    # Insert a copy to avoid PyMongo mutating our in-memory object with _id
+    await db[collection].insert_one(dict(obj))
 
     return UpsertResponse(ok=True, id=obj_id, item=obj)
 
@@ -370,6 +373,10 @@ async def update_resume(
 
     # Apply shallow merge
     merged = {**current_obj, **patch}
+    # Ensure we don't keep any Mongo-specific _id in file/response
+    if isinstance(merged, dict) and "_id" in merged:
+        # Accept either string or ObjectId; drop it to keep file format clean
+        merged.pop("_id", None)
 
     # Persist, keeping original shape
     to_write: Any = [merged] if new_shape == "list" else merged
@@ -378,8 +385,13 @@ async def update_resume(
     # Mongo: store as a single document (the merged object)
     db = mongodb.get_database()
     await db["resume"].delete_many({})
-    await db["resume"].insert_one(merged)
-    return {"ok": True, "item": merged}
+    # Important: PyMongo mutates the passed dict by adding _id (ObjectId) on the passed document.
+    # Insert a shallow copy to avoid mutating the in-memory object used for the response.
+    await db["resume"].insert_one(dict(merged))
+
+    # Encode response safely: convert any ObjectId to string if present in nested structures
+    response_payload = {"ok": True, "item": merged}
+    return jsonable_encoder(response_payload, custom_encoder={ObjectId: str})
 
 
 @router.delete("/admin/{collection}/{item_id}")
