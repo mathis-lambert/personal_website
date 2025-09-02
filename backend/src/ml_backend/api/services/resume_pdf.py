@@ -187,14 +187,20 @@ class ResumePDFExporter:
 
     def _bullets(self, items: Iterable[str], max_items: Optional[int] = None):
         cnt = 0
+        # fixed content width for bullet lines to avoid width=0 issues at end-of-line
+        content_width = self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        indent = 4  # mm indent after bullet symbol
         for it in items:
             if max_items is not None and cnt >= max_items:
                 break
             self.pdf.set_font("Helvetica", size=9)
-            # ASCII-friendly bullet replacement
-            self.pdf.cell(3, 5, "-")
-            # Constrain each bullet to a short paragraph
-            self.pdf.multi_cell(0, 5, self._sanitize(it))
+            # Always start bullet line from left margin
+            self.pdf.set_x(self.pdf.l_margin)
+            self.pdf.cell(indent, 5, "-")
+            # Now write the text in a fixed width block
+            self.pdf.set_x(self.pdf.l_margin + indent)
+            safe_text = self._sanitize(it)
+            self.pdf.multi_cell(content_width - indent, 5, safe_text)
             cnt += 1
 
     # --- layout blocks ---
