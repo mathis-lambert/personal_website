@@ -6,7 +6,7 @@ import time
 from typing import Tuple
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from pydantic import BaseModel
 
 from ml_backend.api.security import create_access_token
@@ -69,15 +69,16 @@ async def login(req: LoginRequest):
 
 
 @router.post("/token")
-async def issue_token(response: Response):
+async def issue_token(response: Response, request: Request):
     token, expires_in = await fetch_api_token()
     session_id, csrf, max_age = create_session(token, expires_in)
+    secure = request.url.scheme == "https"
     response.set_cookie(
         SESSION_COOKIE_NAME,
         session_id,
         max_age=max_age,
         httponly=True,
-        secure=True,
+        secure=secure,
         samesite="lax",
         path="/",
     )
@@ -86,7 +87,7 @@ async def issue_token(response: Response):
         csrf,
         max_age=max_age,
         httponly=False,
-        secure=True,
+        secure=secure,
         samesite="lax",
         path="/",
     )
@@ -94,17 +95,20 @@ async def issue_token(response: Response):
 
 
 @router.post("/refresh")
-async def refresh_token(response: Response, session=Depends(require_session)):
+async def refresh_token(
+    response: Response, request: Request, session=Depends(require_session)
+):
     old_session_id, _ = session
     token, expires_in = await fetch_api_token()
     new_session_id, csrf, max_age = create_session(token, expires_in)
     clear_session(old_session_id)
+    secure = request.url.scheme == "https"
     response.set_cookie(
         SESSION_COOKIE_NAME,
         new_session_id,
         max_age=max_age,
         httponly=True,
-        secure=True,
+        secure=secure,
         samesite="lax",
         path="/",
     )
@@ -113,7 +117,7 @@ async def refresh_token(response: Response, session=Depends(require_session)):
         csrf,
         max_age=max_age,
         httponly=False,
-        secure=True,
+        secure=secure,
         samesite="lax",
         path="/",
     )
