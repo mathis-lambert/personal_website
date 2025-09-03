@@ -10,7 +10,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/hooks/useChat';
 import { MessageCircle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
 import { getExperiences } from '@/api/experiences';
 import { getStudies } from '@/api/studies';
 
@@ -25,15 +24,14 @@ const GlassCardsList = () => {
   const [experiences, setExperiences] = useState<TimelineData[]>([]);
   const [studies, setStudies] = useState<TimelineData[]>([]);
   const { openChat } = useChat();
-  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
     const fetchData = async () => {
       try {
         const [experiencesData, studiesData] = await Promise.all([
-          getExperiences({ token: token ?? undefined, signal: ac.signal }),
-          getStudies({ token: token ?? undefined, signal: ac.signal }),
+          getExperiences({ signal: ac.signal }),
+          getStudies({ signal: ac.signal }),
         ]);
         if (JSON.stringify(experiencesData) !== JSON.stringify(experiences)) {
           setExperiences(experiencesData);
@@ -49,7 +47,7 @@ const GlassCardsList = () => {
     };
     fetchData();
     return () => ac.abort();
-  }, [token, experiences, studies]);
+  }, [experiences, studies]);
 
   const topSkills = [
     'LLMs',

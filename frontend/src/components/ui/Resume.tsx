@@ -21,19 +21,17 @@ import { FaLinkedin } from 'react-icons/fa';
 import { CertificationsCard } from '../resume/CertificationsCard';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import useAuth from '@/hooks/useAuth';
 import { downloadResumePdf } from '@/api/resume';
 
 export default function Resume() {
   const { resumeData } = useResume();
   const resumeRef = useRef<HTMLDivElement>(null);
-  const { token } = useAuth();
   const [downloading, setDownloading] = useState(false);
 
   const onExportPdf = async () => {
     try {
       setDownloading(true);
-      await downloadResumePdf({ token: token ?? undefined });
+      await downloadResumePdf();
     } catch (e) {
       console.error('Failed to export resume PDF', e);
     } finally {

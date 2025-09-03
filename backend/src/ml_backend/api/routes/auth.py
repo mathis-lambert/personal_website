@@ -1,90 +1,129 @@
-import hmac
 import hashlib
+import hmac
 import os
+import secrets
 import time
-from fastapi import APIRouter, HTTPException, Request, status
+from typing import Tuple
+
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
-from urllib.parse import urlparse
 
 from ml_backend.api.security import create_access_token
-
-USERNAME = os.getenv("API_USERNAME", "admin")
-PASSWORD = os.getenv("API_PASSWORD", "secret")
-
-if not PASSWORD or PASSWORD == "secret":
-    raise RuntimeError("API_PASSWORD must be set to a strong value.")
-
-ALLOWED_ORIGINS_STR = os.getenv(
-    "ALLOWED_ORIGINS", "https://mathislambert.fr,http://localhost:5173"
+from ml_backend.api.session import (
+    CSRF_COOKIE_NAME,
+    SESSION_COOKIE_NAME,
+    create_session,
+    require_session,
+    clear_session,
 )
-ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(",")]
 
+API_URL = os.getenv("API_URL")
+API_USERNAME = os.getenv("API_USERNAME")
+API_PASSWORD = os.getenv("API_PASSWORD")
 
-NONCE_TTL_SECONDS = int(os.getenv("NONCE_TTL_SECONDS", "30"))
-
-
-class TokenRequest(BaseModel):
-    username: str
-    nonce: str
-    signature: str
-
+if not API_URL or not API_USERNAME or not API_PASSWORD:
+    raise RuntimeError("API_URL, API_USERNAME and API_PASSWORD must be set")
 
 router = APIRouter()
 
 
-@router.get("/challenge")
-async def get_challenge():
-    """Return a timestamp nonce used for HMAC challenge."""
-    return {"nonce": str(int(time.time()))}
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
-@router.post("/token")
-async def issue_token(req: TokenRequest, request: Request):
-    if req.username != USERNAME:
+async def fetch_api_token() -> Tuple[str, int]:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        nonce_res = await client.get(f"{API_URL}/api/auth/challenge")
+        nonce_res.raise_for_status()
+        nonce = nonce_res.json().get("nonce")
+        if not nonce:
+            raise HTTPException(status_code=500, detail="Invalid nonce")
+        signature = hmac.new(
+            API_PASSWORD.encode(),
+            f"{API_USERNAME}:{nonce}".encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        token_res = await client.post(
+            f"{API_URL}/api/auth/token",
+            json={"username": API_USERNAME, "nonce": nonce, "signature": signature},
+        )
+        token_res.raise_for_status()
+        data = token_res.json()
+        token = data.get("access_token")
+        if not token:
+            raise HTTPException(status_code=500, detail="Token missing")
+        expires_in = int(data.get("expires_in", 60))
+        return token, expires_in
+
+
+@router.post("/login")
+async def login(req: LoginRequest):
+    if req.username != API_USERNAME or req.password != API_PASSWORD:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
-
-    try:
-        nonce_ts = int(req.nonce)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid nonce"
-        ) from exc
-
-    if abs(int(time.time()) - nonce_ts) > NONCE_TTL_SECONDS:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Expired nonce"
-        )
-
-    origin_header = request.headers.get("origin")
-    referer_header = request.headers.get("referer")
-
-    def get_origin(header_value):
-        if not header_value:
-            return None
-        try:
-            # Return scheme://netloc
-            parsed = urlparse(header_value)
-            return f"{parsed.scheme}://{parsed.netloc}"
-        except Exception:
-            return None
-
-    request_origin = get_origin(origin_header) or get_origin(referer_header)
-
-    if not request_origin or request_origin not in ALLOWED_ORIGINS:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid origin"
-        )
-
-    expected = hmac.new(
-        PASSWORD.encode(), f"{req.username}:{req.nonce}".encode(), hashlib.sha256
-    ).hexdigest()
-
-    if not hmac.compare_digest(req.signature, expected):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid signature"
-        )
-
     token = create_access_token({"sub": req.username})
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.post("/token")
+async def issue_token(response: Response):
+    token, expires_in = await fetch_api_token()
+    session_id, csrf, max_age = create_session(token, expires_in)
+    response.set_cookie(
+        SESSION_COOKIE_NAME,
+        session_id,
+        max_age=max_age,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    response.set_cookie(
+        CSRF_COOKIE_NAME,
+        csrf,
+        max_age=max_age,
+        httponly=False,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    return {"ok": True}
+
+
+@router.post("/refresh")
+async def refresh_token(response: Response, session=Depends(require_session)):
+    old_session_id, _ = session
+    token, expires_in = await fetch_api_token()
+    new_session_id, csrf, max_age = create_session(token, expires_in)
+    clear_session(old_session_id)
+    response.set_cookie(
+        SESSION_COOKIE_NAME,
+        new_session_id,
+        max_age=max_age,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    response.set_cookie(
+        CSRF_COOKIE_NAME,
+        csrf,
+        max_age=max_age,
+        httponly=False,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    return {"ok": True}
+
+
+@router.post("/logout")
+async def logout(response: Response, session=Depends(require_session)):
+    session_id, _ = session
+    clear_session(session_id)
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+    response.delete_cookie(CSRF_COOKIE_NAME, path="/")
+    return {"ok": True}

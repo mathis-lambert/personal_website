@@ -3,13 +3,11 @@ import { useParams } from 'react-router-dom';
 import type { Article } from '@/types';
 import { getArticleBySlug } from '@/api/articles';
 import ArticleView from '@/components/blog/ArticleView';
-import { useAuth } from '@/hooks/useAuth';
 
 const ArticleDetailPage: React.FC = () => {
   const { articleId } = useParams<{ articleId: string }>();
   const [article, setArticle] = useState<Article | null | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -21,7 +19,6 @@ const ArticleDetailPage: React.FC = () => {
         }
         const result = await getArticleBySlug(articleId, {
           signal: ac.signal,
-          token: token ?? undefined,
         });
         if (JSON.stringify(result) !== JSON.stringify(article)) {
           setArticle(result);
@@ -36,7 +33,7 @@ const ArticleDetailPage: React.FC = () => {
     }
     fetchArticle();
     return () => ac.abort();
-  }, [token, articleId, article]);
+  }, [articleId, article]);
 
   return <ArticleView article={article} isLoading={isLoading} />;
 };
