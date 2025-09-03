@@ -6,6 +6,9 @@ from pydantic import BaseModel
 
 from ml_backend.api.services import get_mongo_client
 from ml_backend.databases import MongoDBConnector
+from ml_backend.utils import CustomLogger
+
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter()
 
@@ -24,12 +27,11 @@ async def get_all_articles(
         articles = await db["articles"].find({}).to_list(length=None)
         return {"articles": [mongodb.serialize(exp) for exp in articles]}
     except aiohttp.ClientResponseError as e:
-        # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except Exception as e:
-        # Gestion générique des autres erreurs
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/{article_slug}")
@@ -42,13 +44,13 @@ async def get_article_by_slug(
         article = await db["articles"].find_one({"slug": article_slug})
         return {"article": mongodb.serialize(article)}
     except aiohttp.ClientResponseError as e:
-        # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 class ArticleEventPayload(BaseModel):
@@ -97,7 +99,7 @@ async def post_article_event(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/metrics")
@@ -108,13 +110,9 @@ async def get_article_metrics(
 ):
     try:
         if not id and not slug:
-            raise HTTPException(
-                status_code=400, detail="Query param 'id' or 'slug' is required"
-            )
+            raise HTTPException(status_code=400, detail="Query param 'id' or 'slug' is required")
         if id and slug:
-            raise HTTPException(
-                status_code=400, detail="Provide only one of 'id' or 'slug'"
-            )
+            raise HTTPException(status_code=400, detail="Provide only one of 'id' or 'slug'")
 
         db = mongodb.get_database()
         query: Dict[str, Any] = {"id": str(id)} if id else {"slug": slug}
@@ -133,4 +131,5 @@ async def get_article_metrics(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

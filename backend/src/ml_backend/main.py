@@ -5,21 +5,20 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
 from ml_api_client.modules.tools import ToolParams, ToolProperty
+
 from ml_backend.api import api_router
-from ml_backend.utils import CustomLogger, ensure_starting
 from ml_backend.api.services.tools import (
-    get_self_info,
-    get_self_projects,
-    get_self_experiences,
-    get_self_projects_by_slug,
     get_self_articles,
     get_self_articles_by_slug,
     get_self_certifications,
+    get_self_experiences,
+    get_self_info,
+    get_self_projects,
+    get_self_projects_by_slug,
     get_self_resume,
 )
-
+from ml_backend.utils import CustomLogger, ensure_starting
 
 load_dotenv()
 
@@ -146,9 +145,7 @@ MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
 @app.middleware("http")
 async def check_maintenance(request, call_next):
     if MAINTENANCE_MODE:
-        return JSONResponse(
-            status_code=503, content={"detail": "Service en maintenance"}
-        )
+        return JSONResponse(status_code=503, content={"detail": "Service en maintenance"})
     response = await call_next(request)
     return response
 
@@ -159,9 +156,7 @@ app.include_router(api_router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {
-        "message": "Oups, you shouldn't be here. Please go back to https://mathislambert.fr"
-    }
+    return {"message": "Oups, you shouldn't be here. Please go back to https://mathislambert.fr"}
 
 
 # Gestion des erreurs

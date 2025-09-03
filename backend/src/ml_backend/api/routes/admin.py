@@ -2,23 +2,23 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple, Type
 
-from fastapi import APIRouter, Depends, HTTPException, Body
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, ConfigDict
 from bson import ObjectId
+from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, ConfigDict, Field
 
-from ml_backend.api.services import get_mongo_client
 from ml_backend.api.security import verify_token
+from ml_backend.api.services import get_mongo_client
 from ml_backend.databases import MongoDBConnector
+from ml_backend.utils import CustomLogger
 
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter(dependencies=[Depends(verify_token)])
 
 
 # Collections backed by JSON files
-CollectionName = Literal[
-    "projects", "articles", "experiences", "studies", "resume"
-]
+CollectionName = Literal["projects", "articles", "experiences", "studies", "resume"]
 
 
 def _data_dir() -> Path:
@@ -82,21 +82,21 @@ class ProjectIn(BaseModel):
     subtitle: Optional[str] = None
     description: Optional[str] = None
     content: Optional[str] = None
-    startDate: Optional[str] = None
-    endDate: Optional[str] = None
+    startDate: Optional[str] = None  # noqa: N815
+    endDate: Optional[str] = None  # noqa: N815
     categories: Optional[List[str]] = None
     status: Optional[str] = None
-    isFeatured: Optional[bool] = None
-    imageUrl: Optional[str] = None
-    thumbnailUrl: Optional[str] = None
-    projectUrl: Optional[str] = None
-    repoUrl: Optional[str] = None
+    isFeatured: Optional[bool] = None  # noqa: N815
+    imageUrl: Optional[str] = None  # noqa: N815
+    thumbnailUrl: Optional[str] = None  # noqa: N815
+    projectUrl: Optional[str] = None  # noqa: N815
+    repoUrl: Optional[str] = None  # noqa: N815
     links: Optional[Dict[str, Any]] = None
     media: Optional[Dict[str, Any]] = None
     metrics: Optional[Dict[str, Any]] = None
     role: Optional[str] = None
     client: Optional[str] = None
-    teamSize: Optional[int] = None
+    teamSize: Optional[int] = None  # noqa: N815
     highlights: Optional[List[str]] = None
     color: Optional[str] = None
 
@@ -114,9 +114,9 @@ class ArticleIn(BaseModel):
     tags: List[str] = Field(default_factory=list)
     author: Optional[str] = None
     categories: Optional[List[str]] = None
-    isFeatured: Optional[bool] = None
-    imageUrl: Optional[str] = None
-    thumbnailUrl: Optional[str] = None
+    isFeatured: Optional[bool] = None  # noqa: N815
+    imageUrl: Optional[str] = None  # noqa: N815
+    thumbnailUrl: Optional[str] = None  # noqa: N815
     links: Optional[Dict[str, Any]] = None
     media: Optional[Dict[str, Any]] = None
     metrics: Optional[Dict[str, Any]] = None
@@ -146,8 +146,9 @@ def _resolve_item_index(data: List[Dict[str, Any]], item_id: str) -> Tuple[int, 
             i = int(item_id.split("-", 1)[1])
         else:
             i = int(item_id)
-    except Exception:
-        raise HTTPException(status_code=404, detail="Item not found")
+    except Exception as e:
+        logger.error(f"Erreur lors de la recherche de l'élément : {item_id}. Details: {e}")
+        raise HTTPException(status_code=404, detail="Item not found") from e
 
     if i < 0 or i >= len(data):
         raise HTTPException(status_code=404, detail="Item not found")
@@ -231,7 +232,8 @@ async def replace_collection(
             # Store as a single document with a fixed key
             await col.insert_one(payload)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Mongo sync failed: {exc}")
+        logger.error(f"Mongo sync failed: {exc}")
+        raise HTTPException(status_code=500, detail=f"Mongo sync failed: {exc}") from exc
 
     return {"ok": True}
 

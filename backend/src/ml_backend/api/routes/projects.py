@@ -6,6 +6,9 @@ from pydantic import BaseModel
 
 from ml_backend.api.services import get_mongo_client
 from ml_backend.databases import MongoDBConnector
+from ml_backend.utils import CustomLogger
+
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter()
 
@@ -21,19 +24,16 @@ async def get_all_projects(
 ):
     try:
         db = mongodb.get_database()
-        projects = (
-            await db["projects"]
-            .find({}, {"_id": 0, "ai_context": 0})
-            .to_list(length=None)
-        )
+        projects = await db["projects"].find({}, {"_id": 0, "ai_context": 0}).to_list(length=None)
         return {"projects": [mongodb.serialize(exp) for exp in projects]}
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except Exception as e:
         # Gestion générique des autres erreurs
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/{project_slug}")
@@ -43,15 +43,14 @@ async def get_project_by_slug(
 ):
     try:
         db = mongodb.get_database()
-        project = await db["projects"].find_one(
-            {"slug": project_slug}, {"_id": 0, "ai_context": 0}
-        )
+        project = await db["projects"].find_one({"slug": project_slug}, {"_id": 0, "ai_context": 0})
         return {"project": mongodb.serialize(project)}
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

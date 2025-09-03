@@ -70,15 +70,11 @@ class MongoDBConnector:
 
                 if data:
                     await collection.insert_many(data)
-                    self.logger.info(
-                        f"Inserted data into '{collection_name}' collection."
-                    )
+                    self.logger.info(f"Inserted data into '{collection_name}' collection.")
                 else:
                     self.logger.info(f"No data to insert into '{collection_name}'.")
             except Exception as e:
-                self.logger.error(
-                    f"Failed to insert data into '{collection_name}': {e}"
-                )
+                self.logger.error(f"Failed to insert data into '{collection_name}': {e}")
 
         self.logger.info("MongoDB initial data population complete.")
 
@@ -126,9 +122,7 @@ class MongoDBConnector:
         result = await collection.insert_one(document)
         return result.inserted_id
 
-    async def log_event(
-        self, job_id: str, action: str, request_body: dict
-    ):
+    async def log_event(self, job_id: str, action: str, request_body: dict):
         collection_name = "events"
         collection = self.get_database()[collection_name]
         event = {

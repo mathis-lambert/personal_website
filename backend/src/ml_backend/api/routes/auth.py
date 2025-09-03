@@ -1,76 +1,75 @@
 import hashlib
 import hmac
 import os
-import secrets
-import time
 from typing import Tuple
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel
 
 from ml_backend.api.security import create_access_token
 from ml_backend.api.session import (
     CSRF_COOKIE_NAME,
     SESSION_COOKIE_NAME,
+    clear_session,
     create_session,
     require_session,
-    clear_session,
 )
 
-API_URL = os.getenv("API_URL")
+# Credentials for admin dashboard login
 API_USERNAME = os.getenv("API_USERNAME")
 API_PASSWORD = os.getenv("API_PASSWORD")
 
-if not API_URL or not API_USERNAME or not API_PASSWORD:
-    raise RuntimeError("API_URL, API_USERNAME and API_PASSWORD must be set")
+if not API_USERNAME or not API_PASSWORD:
+    raise RuntimeError("API_USERNAME and API_PASSWORD must be set")
 
 router = APIRouter()
 
 
 class LoginRequest(BaseModel):
     username: str
-    password: str
+    password_hash: str
 
 
-async def fetch_api_token() -> Tuple[str, int]:
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        nonce_res = await client.get(f"{API_URL}/api/auth/challenge")
-        nonce_res.raise_for_status()
-        nonce = nonce_res.json().get("nonce")
-        if not nonce:
-            raise HTTPException(status_code=500, detail="Invalid nonce")
-        signature = hmac.new(
-            API_PASSWORD.encode(),
-            f"{API_USERNAME}:{nonce}".encode(),
-            hashlib.sha256,
-        ).hexdigest()
-        token_res = await client.post(
-            f"{API_URL}/api/auth/token",
-            json={"username": API_USERNAME, "nonce": nonce, "signature": signature},
-        )
-        token_res.raise_for_status()
-        data = token_res.json()
-        token = data.get("access_token")
-        if not token:
-            raise HTTPException(status_code=500, detail="Token missing")
-        expires_in = int(data.get("expires_in", 60))
-        return token, expires_in
+def _generate_session_token() -> Tuple[str, int]:
+    """Generate a short-lived token used for front-back communications.
+
+    The cookie/session protection (HTTPOnly + CSRF) is enforced by session.py.
+    Expires are aligned with JWT_EXPIRE_SECONDS and further bounded by SESSION_TTL_SECONDS.
+    """
+    expires_in = int(os.getenv("JWT_EXPIRE_SECONDS", "60"))
+    token = create_access_token({"sub": "session"})
+    return token, expires_in
 
 
 @router.post("/login")
 async def login(req: LoginRequest):
-    if req.username != API_USERNAME or req.password != API_PASSWORD:
+    if req.username != API_USERNAME:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    # Compute expected SHA-256 hash of the configured password
+    expected_hash = hashlib.sha256(API_PASSWORD.encode()).hexdigest()
+
+    # Determine the supplied hash from request
+    supplied_hash: str | None
+    if req.password_hash:
+        supplied_hash = req.password_hash.strip().lower()
+    else:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="password_hash (or password) required",
         )
+
+    # Constant-time comparison to mitigate timing attacks
+    if not hmac.compare_digest(supplied_hash, expected_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
     token = create_access_token({"sub": req.username})
     return {"access_token": token, "token_type": "bearer"}
 
 
 @router.post("/token")
 async def issue_token(response: Response, request: Request):
-    token, expires_in = await fetch_api_token()
+    token, expires_in = _generate_session_token()
     session_id, csrf, max_age = create_session(token, expires_in)
     secure = request.url.scheme == "https"
     response.set_cookie(
@@ -95,11 +94,9 @@ async def issue_token(response: Response, request: Request):
 
 
 @router.post("/refresh")
-async def refresh_token(
-    response: Response, request: Request, session=Depends(require_session)
-):
+async def refresh_token(response: Response, request: Request, session=Depends(require_session)):
     old_session_id, _ = session
-    token, expires_in = await fetch_api_token()
+    token, expires_in = _generate_session_token()
     new_session_id, csrf, max_age = create_session(token, expires_in)
     clear_session(old_session_id)
     secure = request.url.scheme == "https"

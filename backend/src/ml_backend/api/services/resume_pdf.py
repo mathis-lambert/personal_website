@@ -8,14 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
-
-DATA_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "ml_backend"
-    / "databases"
-    / "data"
-    / "resume.json"
-)
+DATA_PATH = Path(__file__).resolve().parents[3] / "ml_backend" / "databases" / "data" / "resume.json"
 
 
 @dataclass
@@ -81,12 +74,17 @@ class ResumeModel:
         experiences = [Experience(**e) for e in d.get("experiences", [])]
         education = [Education(**e) for e in d.get("education", [])]
         certs = [Certification(**c) for c in d.get("certifications", [])]
-        tech = TechnicalSkills(**d.get("technical_skills", {
-            "languages": [],
-            "ai_ml": [],
-            "systems_and_infra": [],
-            "web": [],
-        }))
+        tech = TechnicalSkills(
+            **d.get(
+                "technical_skills",
+                {
+                    "languages": [],
+                    "ai_ml": [],
+                    "systems_and_infra": [],
+                    "web": [],
+                },
+            )
+        )
         return ResumeModel(
             name=d.get("name", ""),
             contact=contact,
@@ -222,7 +220,12 @@ class ResumePDFExporter:
         # Reset default text color
         self.pdf.set_text_color(0)
 
-    def _tags(self, items: Iterable[str], max_items: Optional[int] = None, left_pad: float = 0.0):
+    def _tags(
+        self,
+        items: Iterable[str],
+        max_items: Optional[int] = None,
+        left_pad: float = 0.0,
+    ):
         """Render tag-like pills for a modern skills/interests look."""
         items_iter = list(items)
         if max_items is not None:
@@ -291,9 +294,7 @@ class ResumePDFExporter:
                 continue
             title = exp.role
             company = exp.company
-            meta = " | ".join(
-                [x for x in [exp.period, exp.location] if x]
-            )
+            meta = " | ".join([x for x in [exp.period, exp.location] if x])
             # Role
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(15)

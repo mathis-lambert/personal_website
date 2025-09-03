@@ -11,14 +11,20 @@ export function getCsrfToken(): string | undefined {
 }
 
 export async function login(username: string, password: string): Promise<string> {
+  const enc = new TextEncoder();
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(password));
+  const hashHex = [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  })
-  if (!res.ok) throw new Error(`Login failed: ${res.status}`)
-  const data = await res.json()
-  return data.access_token as string
+    body: JSON.stringify({ username, password_hash: hashHex }),
+  });
+  if (!res.ok) throw new Error(`Login failed: ${res.status}`);
+  const data = await res.json();
+  return data.access_token as string;
 }
 
 export async function fetchToken(): Promise<void> {

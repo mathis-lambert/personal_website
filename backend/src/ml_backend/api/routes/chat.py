@@ -6,9 +6,11 @@ from fastapi.responses import StreamingResponse
 from ml_api_client import APIClient
 from pydantic import BaseModel
 
-from ml_backend.databases import MongoDBConnector as MongoDB
 from ml_backend.api.services import get_api_client, get_mongo_client
-from ml_backend.utils import load_prompt_from_file
+from ml_backend.databases import MongoDBConnector as MongoDB
+from ml_backend.utils import CustomLogger, load_prompt_from_file
+
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter()
 
@@ -22,7 +24,7 @@ class BackendCompletionsRequest(BaseModel):
 async def chat_completions(
     body: BackendCompletionsRequest,
     api_client: APIClient = Depends(get_api_client),
-    mongodb: MongoDB=Depends(get_mongo_client)
+    mongodb: MongoDB = Depends(get_mongo_client),
 ):
     try:
         rag_prompt = load_prompt_from_file("./src/ml_backend/prompts/rag_main.txt")
@@ -55,22 +57,17 @@ async def chat_completions(
                 "content": user_input,
             }
         )
-        
-        await mongodb.log_event(
-            user_id=None
-        )
+
+        await mongodb.log_event(user_id=None)
 
         return StreamingResponse(
-            api_client.chat.stream_sse(
-                messages=messages, model="openai/gpt-oss-120b", auto_tool_execution=True
-            ),
+            api_client.chat.stream_sse(messages=messages, model="openai/gpt-oss-120b", auto_tool_execution=True),
             media_type="text/event-stream",
         )
 
     except aiohttp.ClientResponseError as e:
-        # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except Exception as e:
-        # Gestion générique des autres erreurs
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

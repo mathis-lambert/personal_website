@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from .routes import (
+    articles_router,
+    auth_router,
     chat_router,
     experiences_router,
-    studies_router,
-    articles_router,
     projects_router,
-    auth_router,
     resume_router,
+    studies_router,
 )
 from .routes.admin import router as admin_router
 from .security import verify_token
