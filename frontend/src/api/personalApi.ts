@@ -5,7 +5,7 @@ import type {
   OpenAIChatCompletion,
   FinishReason,
 } from '@/types.ts';
-import { getAuthHeaders } from './auth';
+import { getCsrfToken } from './auth';
 
 /**
  * Optional callbacks for handling streaming responses.
@@ -43,13 +43,12 @@ export interface ApiCallbacks {
 export async function callPersonalApi(
   request: ChatCompletionsRequest,
   options?: {
-    token?: string;
     signal?: AbortSignal;
     callbacks?: ApiCallbacks;
   },
 ): Promise<ApiCompletionResult | void> {
   const apiUrl = import.meta.env.VITE_API_URL;
-  const { token, signal, callbacks } = options || {};
+  const { signal, callbacks } = options || {};
   const isStreaming = !!callbacks?.onChunk;
 
   if (!apiUrl) {
@@ -70,8 +69,9 @@ export async function callPersonalApi(
         'Content-Type': 'application/json',
         // Request a stream only if we have a callback to handle it
         Accept: isStreaming ? 'text/event-stream' : 'application/json',
-        ...getAuthHeaders(token),
+        ...(getCsrfToken() ? { 'X-CSRF-Token': getCsrfToken()! } : {}),
       },
+      credentials: 'include',
       body: JSON.stringify(request),
       signal,
     });

@@ -8,7 +8,7 @@ Personal website with a modern React frontend and a FastAPI backend. It serves p
 - **RAG Retrieval**: Vector store search (e.g., `mathis_bio_store`) used to ground answers to personal data.
 - **Content API**: Articles, projects, experiences, studies, and resume served from MongoDB.
 - **Article Metrics**: Track views/likes/shares via lightweight endpoints.
-- **Auth**: Short‑lived JWTs (PyJWT) issued via HMAC challenge (`/api/auth/challenge` → `/api/auth/token`).
+- **Auth**: Secure, short‑lived cookies managed by the backend (`/api/auth/token` → `/api/auth/refresh`).
 - **API Docs**: OpenAPI JSON at `/api/v1/openapi.json`, Swagger UI at `/swagger`, ReDoc at `/api-docs`.
 - **CORS & Maintenance**: Configurable allowed origins and maintenance mode via environment variables.
 
@@ -22,7 +22,7 @@ Personal website with a modern React frontend and a FastAPI backend. It serves p
 ## 🔌 API Overview
 
 - `GET /api/health`: Health check.
-- `GET /api/auth/challenge` → `POST /api/auth/token`: Obtain JWT for protected routes.
+- `POST /api/auth/token` → `POST /api/auth/refresh`: Issue and refresh short‑lived sessions.
 - `POST /api/chat/completions`: Streaming chat completions (SSE) with optional tool calls.
 - `GET /api/articles/all` · `GET /api/articles/{slug}` · metrics endpoints.
 - `GET /api/projects/all` · `GET /api/projects/{slug}`.

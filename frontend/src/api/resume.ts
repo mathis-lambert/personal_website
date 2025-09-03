@@ -14,16 +14,12 @@ export function normalizeResumeApi(p: ResumeData): ResumeData {
   };
 }
 
-export async function getResume(options?: {
-  token?: string;
-  signal?: AbortSignal;
-}): Promise<ResumeData> {
+export async function getResume(options?: { signal?: AbortSignal }): Promise<ResumeData> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
   const res = await fetchWithTimeout(`${apiUrl}/api/resume`, {
     signal: options?.signal,
     timeoutMs: 10000,
-    authToken: options?.token,
   });
   if (!res.ok) {
     throw new Error(`Resumes request failed: ${res.status}`);
@@ -33,7 +29,6 @@ export async function getResume(options?: {
 }
 
 export async function exportResumePdf(options?: {
-  token?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
 }): Promise<Blob> {
@@ -43,7 +38,6 @@ export async function exportResumePdf(options?: {
     method: 'GET',
     signal: options?.signal,
     timeoutMs: options?.timeoutMs ?? 20000,
-    authToken: options?.token,
     headers: { Accept: 'application/pdf' },
   });
   if (!res.ok) {
@@ -56,11 +50,10 @@ export async function exportResumePdf(options?: {
 }
 
 export async function downloadResumePdf(options?: {
-  token?: string;
   filename?: string;
   signal?: AbortSignal;
 }): Promise<void> {
-  const blob = await exportResumePdf({ token: options?.token, signal: options?.signal });
+  const blob = await exportResumePdf({ signal: options?.signal });
   const url = URL.createObjectURL(blob);
   try {
     const a = document.createElement('a');

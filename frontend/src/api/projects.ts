@@ -54,16 +54,12 @@ export function normalizeProjectApi(p: ApiProject): Project {
   };
 }
 
-export async function getProjects(options?: {
-  token?: string;
-  signal?: AbortSignal;
-}): Promise<Project[]> {
+export async function getProjects(options?: { signal?: AbortSignal }): Promise<Project[]> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
   const res = await fetchWithTimeout(`${apiUrl}/api/projects/all`, {
     signal: options?.signal,
     timeoutMs: 10000,
-    authToken: options?.token,
   });
   if (!res.ok) {
     throw new Error(`Projects request failed: ${res.status}`);
@@ -77,7 +73,7 @@ export async function getProjects(options?: {
 
 export async function getProjectBySlug(
   slug: string,
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ): Promise<Project | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
@@ -86,7 +82,6 @@ export async function getProjectBySlug(
     const res = await fetchWithTimeout(`${apiUrl}/api/projects/${slug}`, {
       signal: options?.signal,
       timeoutMs: 10000,
-      authToken: options?.token,
     });
     if (res.ok) {
       const data = await res.json();

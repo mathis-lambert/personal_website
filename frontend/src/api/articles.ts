@@ -26,8 +26,6 @@ export function normalizeArticleApi(a: ApiArticle): Article {
     tags: Array.isArray(a.tags) ? a.tags : [],
     categories: Array.isArray(a.categories) ? a.categories : [],
     isFeatured: Boolean(a.isFeatured),
-    imageUrl: a.imageUrl,
-    thumbnailUrl: a.thumbnailUrl,
     links: {
       canonical: sanitizeUrl(links.canonical),
       discussion: sanitizeUrl(links.discussion),
@@ -41,16 +39,12 @@ export function normalizeArticleApi(a: ApiArticle): Article {
   };
 }
 
-export async function getArticles(options?: {
-  token?: string;
-  signal?: AbortSignal;
-}): Promise<Article[]> {
+export async function getArticles(options?: { signal?: AbortSignal }): Promise<Article[]> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
   const res = await fetchWithTimeout(`${apiUrl}/api/articles/all`, {
     signal: options?.signal,
     timeoutMs: 10000,
-    authToken: options?.token,
   });
   if (!res.ok) throw new Error(`Articles request failed: ${res.status}`);
   const data = await res.json();
@@ -62,7 +56,7 @@ export async function getArticles(options?: {
 
 export async function getArticleBySlug(
   slug: string,
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ): Promise<Article | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
@@ -71,7 +65,6 @@ export async function getArticleBySlug(
     const res = await fetchWithTimeout(`${apiUrl}/api/articles/${slug}`, {
       signal: options?.signal,
       timeoutMs: 10000,
-      authToken: options?.token,
     });
     if (res.ok) {
       const data = await res.json();
@@ -93,7 +86,7 @@ export type ArticleEventType = 'like' | 'share' | 'read';
 export async function sendArticleEvent(
   type: ArticleEventType,
   payload: { id?: string; slug?: string },
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ): Promise<ArticleMetrics | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) return null;
@@ -104,7 +97,6 @@ export async function sendArticleEvent(
       body: JSON.stringify({ id: payload.id, slug: payload.slug }),
       signal: options?.signal,
       timeoutMs: 8000,
-      authToken: options?.token,
     });
     if (!res.ok) {
       console.warn('Article event failed', type, res.status);
@@ -129,40 +121,28 @@ export async function sendArticleEvent(
 
 export async function trackArticleRead(
   article: Article,
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent(
-    'read',
-    { id: article.id, slug: article.slug },
-    options,
-  );
+  return sendArticleEvent('read', { id: article.id, slug: article.slug }, options);
 }
 
 export async function trackArticleLike(
   article: Article,
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent(
-    'like',
-    { id: article.id, slug: article.slug },
-    options,
-  );
+  return sendArticleEvent('like', { id: article.id, slug: article.slug }, options);
 }
 
 export async function trackArticleShare(
   article: Article,
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent(
-    'share',
-    { id: article.id, slug: article.slug },
-    options,
-  );
+  return sendArticleEvent('share', { id: article.id, slug: article.slug }, options);
 }
 
 export async function getArticleMetrics(
   payload: { id?: string; slug?: string },
-  options?: { token?: string; signal?: AbortSignal },
+  options?: { signal?: AbortSignal },
 ): Promise<ArticleMetrics | null> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
@@ -174,7 +154,6 @@ export async function getArticleMetrics(
     {
       signal: options?.signal,
       timeoutMs: 8000,
-      authToken: options?.token,
     },
   );
   if (!res.ok) return null;

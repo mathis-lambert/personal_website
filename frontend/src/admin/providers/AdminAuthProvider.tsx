@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { exchangeHmacToken } from '@/api/auth';
+import { login as apiLogin } from '@/api/auth';
 
 interface AdminAuthContextType {
   token: string | null;
@@ -24,7 +24,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [token, setToken] = useState<string | null>(null);
 
   const login = async ({ username, password }: { username: string; password: string }) => {
-    const t = await exchangeHmacToken(username, password);
+    const t = await apiLogin(username, password);
     setToken(t);
   };
 
