@@ -19,7 +19,6 @@ import {
   trackArticleShare,
   trackArticleRead,
 } from '@/api/articles';
-import { useAuth } from '@/hooks/useAuth';
 
 interface ArticleViewProps {
   article: Article | null | undefined;
@@ -27,7 +26,6 @@ interface ArticleViewProps {
 }
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
-  const { token } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -50,12 +48,12 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
   // Track read when article becomes available (hook must not be conditional)
   useEffect(() => {
     if (!article) return;
-    trackArticleRead(article, { token: token ?? undefined })
+    trackArticleRead(article)
       .then((m) => {
         if (m) setMetrics(m);
       })
       .catch(() => { });
-  }, [article, token]);
+  }, [article]);
 
   if (isLoading) {
     return (
@@ -140,7 +138,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        trackArticleShare(article, { token: token ?? undefined })
+        trackArticleShare(article)
           .then((m) => {
             if (m) setMetrics(m);
           })
@@ -153,7 +151,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedShare(true);
-      trackArticleShare(article, { token: token ?? undefined })
+      trackArticleShare(article)
         .then((m) => {
           if (m) setMetrics(m);
         })
@@ -280,7 +278,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 onClick={() => setIsLiked((v) => !v)}
                 aria-pressed={isLiked}
                 onMouseUp={() =>
-                  trackArticleLike(article, { token: token ?? undefined })
+                  trackArticleLike(article)
                     .then((m) => {
                       if (m) setMetrics(m);
                     })
@@ -316,7 +314,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 aria-label="Share on Twitter"
                 title="Share on Twitter"
                 onMouseUp={() =>
-                  trackArticleShare(article, { token: token ?? undefined })
+                  trackArticleShare(article)
                     .then((m) => {
                       if (m) setMetrics(m);
                     })
@@ -337,9 +335,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 aria-label="Share on LinkedIn"
                 title="Share on LinkedIn"
                 onMouseUp={() =>
-                  trackArticleShare(article, {
-                    token: token ?? undefined,
-                  }).catch(() => { })
+                  trackArticleShare(article).catch(() => { })
                 }
               >
                 <Linkedin className="w-4 h-4" /> LinkedIn
@@ -357,7 +353,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                       window.location?.href ?? '',
                     );
                     setCopiedLink(true);
-                    trackArticleShare(article, { token: token ?? undefined })
+                    trackArticleShare(article)
                       .then((m) => {
                         if (m) setMetrics(m);
                       })

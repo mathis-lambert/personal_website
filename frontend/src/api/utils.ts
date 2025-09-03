@@ -1,4 +1,4 @@
-import { getAuthHeaders } from './auth';
+import { getAuthHeaders, getCsrfToken } from './auth';
 
 export type FetchWithTimeoutInit = RequestInit & {
   timeoutMs?: number;
@@ -41,10 +41,18 @@ export async function fetchWithTimeout(
       ...(headers || {}),
       ...getAuthHeaders(authToken),
     };
+    const method = (rest.method ?? 'GET').toUpperCase();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+      const csrf = getCsrfToken();
+      if (csrf && !('X-CSRF-Token' in (mergedHeaders as Record<string, string>))) {
+        (mergedHeaders as Record<string, string>)['X-CSRF-Token'] = csrf;
+      }
+    }
     return await fetch(input, {
       ...(rest as RequestInit),
       headers: mergedHeaders,
       signal: controller.signal,
+      credentials: 'include',
     });
   } finally {
     clearTimeout(timeoutId);

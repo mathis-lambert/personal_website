@@ -7,7 +7,6 @@ import BlogArticleCard from '@/components/blog/BlogArticleCard';
 import { Link } from 'react-router-dom';
 import { getProjects } from '@/api/projects';
 import { getArticles } from '@/api/articles';
-import { useAuth } from '@/hooks/useAuth';
 
 const HomePage = () => {
   const [featured, setFeatured] = useState<Project[]>([]);
@@ -16,17 +15,13 @@ const HomePage = () => {
   const [latestArticles, setLatestArticles] = useState<Article[]>([]);
   const [isArticlesLoading, setIsArticlesLoading] = useState<boolean>(true);
   const [articlesError, setArticlesError] = useState<string | null>(null);
-  const { token } = useAuth();
 
   useEffect(() => {
     const ac = new AbortController();
     async function fetchFeatured() {
       try {
         setError(null);
-        const normalized: Project[] = await getProjects({
-          signal: ac.signal,
-          token: token ?? undefined,
-        });
+        const normalized: Project[] = await getProjects({ signal: ac.signal });
         const byDateDesc = (a: Project, b: Project) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const featuredOnly = normalized.filter((p) => p.isFeatured);
@@ -47,17 +42,14 @@ const HomePage = () => {
     }
     fetchFeatured();
     return () => ac.abort();
-  }, [token, featured]);
+  }, [featured]);
 
   useEffect(() => {
     const ac = new AbortController();
     async function fetchArticles() {
       try {
         setArticlesError(null);
-        const normalized: Article[] = await getArticles({
-          signal: ac.signal,
-          token: token ?? undefined,
-        });
+        const normalized: Article[] = await getArticles({ signal: ac.signal });
         const byDateDesc = (a: Article, b: Article) =>
           new Date(b.date).getTime() - new Date(a.date).getTime();
         const top = normalized.sort(byDateDesc).slice(0, 3);
@@ -75,7 +67,7 @@ const HomePage = () => {
     }
     fetchArticles();
     return () => ac.abort();
-  }, [token, latestArticles]);
+  }, [latestArticles]);
 
   return (
     <>

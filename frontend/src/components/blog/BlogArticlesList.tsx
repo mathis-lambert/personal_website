@@ -4,7 +4,6 @@ import BlogArticleCard from './BlogArticleCard';
 import FiltersBar from '@/components/filters/FiltersBar';
 import type { Article } from '@/types';
 import { getArticles } from '@/api/articles';
-import { useAuth } from '@/hooks/useAuth';
 
 // --- Debounce Hook ---
 function useDebounce<T>(value: T, delay: number): T {
@@ -32,7 +31,6 @@ const BlogArticlesList: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
-  const { token } = useAuth();
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -42,10 +40,7 @@ const BlogArticlesList: React.FC = () => {
     async function fetchArticles() {
       try {
         setError(null);
-        const data = await getArticles({
-          signal: ac.signal,
-          token: token ?? undefined,
-        });
+        const data = await getArticles({ signal: ac.signal });
         if (JSON.stringify(data) !== JSON.stringify(articles)) {
           setArticles(data);
         }
@@ -60,7 +55,7 @@ const BlogArticlesList: React.FC = () => {
     }
     fetchArticles();
     return () => ac.abort();
-  }, [token, articles]);
+  }, [articles]);
 
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();

@@ -1,7 +1,6 @@
 import { useEffect, useReducer, useRef } from 'react';
 import type { ChatAction, ChatCompletionsRequest, ChatState } from '@/types.ts';
 import { callPersonalApi } from '@/api/personalApi.ts';
-import useAuth from '@/hooks/useAuth';
 
 // --- Initial State ---
 
@@ -80,7 +79,6 @@ const useChatCompletion = (
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const controllerRef = useRef<AbortController | null>(null);
   const apiUrl = import.meta.env.VITE_API_URL;
-  const { token } = useAuth();
 
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
@@ -110,7 +108,6 @@ const useChatCompletion = (
       controllerRef.current = controller;
 
       await callPersonalApi(request, {
-        token: token ?? undefined,
         signal: controller.signal,
         callbacks: {
           onChunk: (chunk) => {
@@ -135,7 +132,7 @@ const useChatCompletion = (
       controllerRef.current = null; // Clear the ref
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestDependencies, isActive, apiUrl, token]); // Dependencies
+  }, [requestDependencies, isActive, apiUrl]); // Dependencies
 
   return state; // Return the state object { result, finishReason, jobId, isLoading, error }
 };

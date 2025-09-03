@@ -11,6 +11,7 @@ from .routes import (
 )
 from .routes.admin import router as admin_router
 from .security import verify_token
+from .session import require_session
 
 router = APIRouter()
 
@@ -19,37 +20,37 @@ router.include_router(
     chat_router,
     prefix="/chat",
     tags=["Chat inference"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 router.include_router(
     experiences_router,
     prefix="/experiences",
     tags=["Experiences"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 router.include_router(
     studies_router,
     prefix="/studies",
     tags=["Studies"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 router.include_router(
     articles_router,
     prefix="/articles",
     tags=["Articles"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 router.include_router(
     projects_router,
     prefix="/projects",
     tags=["projects"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 router.include_router(
     resume_router,
     prefix="/resume",
     tags=["Resume"],
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(require_session)],
 )
 
 # Admin endpoints (file-backed data management)

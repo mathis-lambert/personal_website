@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '@/hooks/useAuth';
-import { fetchToken } from '@/api/auth';
+import { fetchToken, refreshToken, logout as apiLogout } from '@/api/auth';
 
 // Token expiration time (in seconds)
 const TOKEN_EXPIRATION_SEC = (() => {
@@ -15,70 +15,51 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /** Décodage de la date d'expiration (exp) depuis le JWT */
-  const getExp = (tok: string): number | undefined => {
-    try {
-      const payload = JSON.parse(atob(tok.split('.')[1]));
-      return typeof payload.exp === 'number' ? payload.exp : undefined;
-    } catch {
-      return undefined;
-    }
-  };
-
-  const scheduleRefresh = (tok: string) => {
+  const scheduleRefresh = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    const exp = getExp(tok);
-    const nowSec = Date.now() / 1000;
-    const targetSec = exp ? exp - 5 : TOKEN_EXPIRATION_SEC - 5;
-    const delayMs = Math.max((targetSec - nowSec) * 1000, 1000);
+    const delayMs = Math.max(TOKEN_EXPIRATION_SEC - 5, 1) * 1000;
     console.log(`[Auth] Next refresh in ${delayMs} ms`);
-    timerRef.current = setTimeout(refreshToken, delayMs);
+    timerRef.current = setTimeout(refresh, delayMs);
   };
 
-  const refreshToken = () => {
+  const refresh = () => {
     console.log('[Auth] Refreshing token...');
-    fetchToken(true)
-      .then((t) => {
-        setToken(t);
+    refreshToken()
+      .then(() => {
         console.log('[Auth] Token refreshed');
-        scheduleRefresh(t);
+        scheduleRefresh();
       })
       .catch((err) => console.error('[Auth] Token refresh failed', err));
   };
 
-  // Initial login / setup
   useEffect(() => {
-    const doLogin = async () => {
+    const init = async () => {
       try {
-        const t = await fetchToken();
-        console.log('[Auth] Initial token fetched', t);
-        setToken(t);
-        scheduleRefresh(t);
+        await fetchToken();
+        scheduleRefresh();
       } catch (err) {
         console.error('Authentication failed', err);
         toast.error('Authentication failed. Please try again later.');
       }
     };
-    void doLogin();
+    void init();
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const login = async () => {
-    refreshToken();
+    refresh();
   };
 
   const logout = () => {
-    setToken(null);
+    apiLogout().catch(() => {});
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token: null, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
