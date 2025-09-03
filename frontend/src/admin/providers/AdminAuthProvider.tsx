@@ -36,4 +36,3 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>
   );
 };
-

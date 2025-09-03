@@ -7,7 +7,9 @@ from ml_api_client.models import ChatCompletionsRequest
 from pydantic import BaseModel
 
 from ml_backend.api.services import get_api_client
-from ml_backend.utils import load_prompt_from_file
+from ml_backend.utils import CustomLogger, load_prompt_from_file
+
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter()
 
@@ -54,18 +56,17 @@ async def get_components(
         )
 
         if not response:
-            raise HTTPException(
-                status_code=500, detail="Aucune réponse reçue de l'API."
-            )
+            raise HTTPException(status_code=500, detail="Aucune réponse reçue de l'API.")
 
         # Traitez la réponse ici si nécessaire
-        print(f"Réponse de l'API : {response}")
+        logger.info(f"Réponse de l'API : {response}")
         return response
 
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
+        logger.error(f"Erreur de réponse de l'API : {e}")
         raise HTTPException(status_code=e.status, detail=str(e)) from e
     except Exception as e:
         # Gestion générique des autres erreurs
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
         raise HTTPException(status_code=500, detail=str(e)) from e

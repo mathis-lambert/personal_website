@@ -1,11 +1,11 @@
-from .chat import router as chat_router
-from .experiences import router as experiences_router
-from .studies import router as studies_router
-from .projects import router as projects_router
+from .admin import router as admin_router
 from .articles import router as articles_router
 from .auth import router as auth_router
+from .chat import router as chat_router
+from .experiences import router as experiences_router
+from .projects import router as projects_router
 from .resume import router as resume_router
-from .admin import router as admin_router
+from .studies import router as studies_router
 
 __all__ = [
     "chat_router",

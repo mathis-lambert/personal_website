@@ -19,8 +19,9 @@ from typing import Any, Dict, List
 from bson import ObjectId
 from ml_api_client import APIClient
 from ml_api_client.models import VectorStoreSearchRequest
-from ml_backend.utils import CustomLogger
+
 from ml_backend.databases import MongoDBConnector
+from ml_backend.utils import CustomLogger
 
 # --- singletons (créés une fois) ---
 _logger = CustomLogger().get_logger(__name__)
@@ -93,9 +94,7 @@ async def get_self_projects() -> List[Dict[str, Any]]:
 async def get_self_projects_by_slug(slug: str) -> Dict[str, Any]:
     """Get a project by slug."""
     try:
-        project = await _db["projects"].find_one(
-            {"slug": slug}, {"_id": 0, "ai_context": 1}
-        )
+        project = await _db["projects"].find_one({"slug": slug}, {"_id": 0, "ai_context": 1})
         return {
             "project_content": _to_jsonable(
                 project
@@ -136,9 +135,7 @@ async def get_self_articles() -> List[Dict[str, Any]]:
 async def get_self_articles_by_slug(slug: str) -> Dict[str, Any]:
     """Get a article by slug."""
     try:
-        article = await _db["articles"].find_one(
-            {"slug": slug}, {"_id": 0, "ai_context": 1}
-        )
+        article = await _db["articles"].find_one({"slug": slug}, {"_id": 0, "ai_context": 1})
         return {
             "article_content": _to_jsonable(
                 article

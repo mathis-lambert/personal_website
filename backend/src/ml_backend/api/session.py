@@ -1,8 +1,8 @@
 import os
 import secrets
 import time
-from typing import Any, Dict, Tuple
 from threading import Lock
+from typing import Any, Dict, Tuple
 
 from fastapi import HTTPException, Request, status
 
@@ -11,7 +11,7 @@ CSRF_COOKIE_NAME = "XSRF-TOKEN"
 SESSION_TTL_SECONDS = int(os.getenv("SESSION_TTL_SECONDS", "900"))
 
 _sessions: Dict[str, Dict[str, Any]] = {}
-_lock = Lock()
+_lock = Lock()  # to protect _sessions dict
 
 
 def create_session(token: str, expires_in: int) -> Tuple[str, str, int]:

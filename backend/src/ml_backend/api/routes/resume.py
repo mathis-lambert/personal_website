@@ -3,8 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
 from ml_backend.api.services import get_mongo_client
+from ml_backend.api.services.resume_pdf import ResumePDFExporter, load_resume_from_file
 from ml_backend.databases import MongoDBConnector
-from ml_backend.api.services.resume_pdf import load_resume_from_file, ResumePDFExporter
+from ml_backend.utils import CustomLogger
+
+logger = CustomLogger().get_logger(__name__)
 
 router = APIRouter()
 
@@ -18,12 +21,11 @@ async def get_resume(
         resume = await db["resume"].find_one({})
         return {"resume": mongodb.serialize(resume)}
     except aiohttp.ClientResponseError as e:
-        # Gestion spécifique des erreurs HTTP de l’API
-        print(f"Erreur de réponse de l'API : {e}")
-        raise HTTPException(status_code=e.status, detail=str(e))
+        logger.error(f"Erreur de réponse de l'API : {e}")
+        raise HTTPException(status_code=e.status, detail=str(e)) from e
     except Exception as e:
-        # Gestion générique des autres erreurs
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erreur lors du traitement de la requête : {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/export", response_class=Response)
@@ -32,11 +34,11 @@ async def export_resume_pdf() -> Response:
     try:
         resume = load_resume_from_file()
         pdf_bytes = ResumePDFExporter(resume).build_pdf()
-        headers = {
-            "Content-Disposition": 'attachment; filename="mathis_lambert_resume.pdf"'
-        }
+        headers = {"Content-Disposition": 'attachment; filename="mathis_lambert_resume.pdf"'}
         return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
     except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=f"Resume data not found: {e}")
+        logger.error(f"Resume data not found: {e}")
+        raise HTTPException(status_code=404, detail=f"Resume data not found: {e}") from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error generating PDF: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
