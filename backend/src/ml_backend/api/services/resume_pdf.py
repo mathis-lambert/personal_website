@@ -273,10 +273,10 @@ class ResumePDFExporter:
             line_parts.append(c.email)
         if c.phone:
             line_parts.append(c.phone)
-        if c.linkedin:
-            line_parts.append(f"LinkedIn: {c.linkedin}")
+        if c.linkedin: 
+            line_parts.append(f"LinkedIn: {c.linkedin} (https://linkedin.com/in/{c.linkedin})")
         if c.github:
-            line_parts.append(f"GitHub: {c.github}")
+            line_parts.append(f"GitHub: {c.github} (https://github.com/{c.github})")
         if c.website:
             line_parts.append(c.website)
         # Use a modern middle-dot separator (latin-1 safe)
