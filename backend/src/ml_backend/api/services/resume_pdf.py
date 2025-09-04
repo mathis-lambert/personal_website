@@ -268,20 +268,46 @@ class ResumePDFExporter:
         c = self.resume.contact
         self._h1(name)
 
-        line_parts: List[str] = []
+        # styling same as _small()
+        self.pdf.set_text_color(60, 60, 60)
+        self.pdf.set_font("Helvetica", size=8)
+        self.pdf.set_x(self.pdf.l_margin)
+
+        sep = "  ·  "
+
+        def add_piece(text: str, url: str | None = None):
+            s = self._sanitize(text)
+            # width sized to text so we can chain cells on one line
+            w = self.pdf.get_string_width(s) + 0.8
+            self.pdf.cell(w=w, h=4.8, txt=s, link=url)
+
+        first = True
+
+        def add_sep():
+            nonlocal first
+            if not first:
+                w = self.pdf.get_string_width(sep) + 0.2
+                self.pdf.cell(w=w, h=4.8, txt=sep)
+            first = False
+
         if c.email:
-            line_parts.append(c.email)
+            add_sep()
+            add_piece(c.email)
         if c.phone:
-            line_parts.append(c.phone)
-        if c.linkedin: 
-            line_parts.append(f"LinkedIn: {c.linkedin} (https://linkedin.com/in/{c.linkedin})")
+            add_sep()
+            add_piece(c.phone)
+        if c.linkedin:
+            add_sep()
+            add_piece(f"LinkedIn: {c.linkedin}", f"https://www.linkedin.com/in/{c.linkedin}")
         if c.github:
-            line_parts.append(f"GitHub: {c.github} (https://github.com/{c.github})")
+            add_sep()
+            add_piece(f"GitHub: {c.github}", f"https://github.com/{c.github}")
         if c.website:
-            line_parts.append(c.website)
-        # Use a modern middle-dot separator (latin-1 safe)
-        contact_line = "  ·  ".join(line_parts)
-        self._small(contact_line)
+            label = c.website.replace("https://", "").replace("http://", "").rstrip("/")
+            add_sep()
+            add_piece(label, c.website)
+
+        self.pdf.ln(5)
 
     def _experiences_block(self):
         if not self.resume.experiences:
