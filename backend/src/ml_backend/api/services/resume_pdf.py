@@ -105,6 +105,10 @@ def load_resume_from_file(path: Path = DATA_PATH) -> ResumeModel:
     return ResumeModel.from_dict(obj)
 
 
+def load_resume_from_dict(data: Dict[str, Any]) -> ResumeModel:
+    return ResumeModel.from_dict(data)
+
+
 class SimplePDF(FPDF):
     def __init__(self):
         super().__init__(orientation="P", unit="mm", format="A4")

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 
 from ml_backend.api.services import get_mongo_client
-from ml_backend.api.services.resume_pdf import ResumePDFExporter, load_resume_from_file
+from ml_backend.api.services.resume_pdf import ResumePDFExporter, load_resume_from_dict
 from ml_backend.databases import MongoDBConnector
 from ml_backend.utils import CustomLogger
 
@@ -29,11 +29,12 @@ async def get_resume(
 
 
 @router.get("/export", response_class=Response)
-async def export_resume_pdf() -> Response:
+async def export_resume_pdf(mongodb: MongoDBConnector = Depends(get_mongo_client)) -> Response:
     """Generate a one-page PDF resume from local JSON data."""
     try:
-        resume = load_resume_from_file()
-        pdf_bytes = ResumePDFExporter(resume).build_pdf()
+        db = mongodb.get_database()
+        resume = await db["resume"].find_one({})
+        pdf_bytes = ResumePDFExporter(load_resume_from_dict(resume)).build_pdf()
         headers = {"Content-Disposition": 'attachment; filename="mathis_lambert_resume.pdf"'}
         return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
     except FileNotFoundError as e:
