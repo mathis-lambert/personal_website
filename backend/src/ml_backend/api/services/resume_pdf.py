@@ -279,7 +279,7 @@ class ResumePDFExporter:
             s = self._sanitize(text)
             # width sized to text so we can chain cells on one line
             w = self.pdf.get_string_width(s) + 0.8
-            self.pdf.cell(w=w, h=4.8, txt=s, link=url)
+            self.pdf.cell(w=w, h=4.8, text=s, link=url)
 
         first = True
 
@@ -287,7 +287,7 @@ class ResumePDFExporter:
             nonlocal first
             if not first:
                 w = self.pdf.get_string_width(sep) + 0.2
-                self.pdf.cell(w=w, h=4.8, txt=sep)
+                self.pdf.cell(w=w, h=4.8, text=sep)
             first = False
 
         if c.email:
