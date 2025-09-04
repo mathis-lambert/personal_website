@@ -456,8 +456,8 @@ class ResumePDFExporter:
         # For simplicity and robustness we keep single column, short content per section.
         self._header_block()
         self.pdf.ln(2)
-        self._experiences_block()
         self._education_block()
+        self._experiences_block()
         self._skills_block()
         self._certs_block()
         self._passions_block()

@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
     app.mongodb_client = mongodb
 
     if populate_mongo:
+        logger.info("POPULATE_MONGODB is set to true. Inserting initial data into MongoDB.")
         await mongodb.insert_initial_data()
 
     apiclient.tools.register(
