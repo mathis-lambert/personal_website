@@ -197,6 +197,8 @@ mongodb/
 
 # Local env files
 .env.local
+.env
+frontend/.env
 .env.development.local
 .env.test.local
 .env.production.local

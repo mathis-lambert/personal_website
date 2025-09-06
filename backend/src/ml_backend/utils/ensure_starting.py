@@ -33,19 +33,11 @@ async def ensure_starting() -> Tuple[MongoDBConnector, APIClient]:
 
     logger.debug("MongoDB connection successful.")
 
-    # api_username = os.getenv("ML_API_USERNAME")
-    # api_password = os.getenv("ML_API_PASSWORD")
     api_key = os.getenv("ML_API_KEY")
     if not api_key:
         raise ValueError("ML_API_KEY is not set in the environment variables.")
 
     apiclient = APIClient(api_key=api_key)
-
-    # while not apiclient.auth_token:
-    #     await apiclient.auth.login(username=api_username, password=api_password)
-    #     if not apiclient.auth_token:
-    #         await asyncio.sleep(5)
-    #         logger.error("API connection failed. Retrying in 5 seconds...")
 
     logger.debug("API connection successful.")
 

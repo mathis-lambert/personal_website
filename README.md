@@ -1,4 +1,4 @@
-# 🚀 personal_website
+# 🚀 Personal Website
 
 Personal website with a modern React frontend and a FastAPI backend. It serves public content (projects, articles, resume) and includes an AI chat assistant with streaming responses and RAG.
 

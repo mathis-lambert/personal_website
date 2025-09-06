@@ -1,0 +1,28 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: personal_frontend
+    restart: unless-stopped
+    env_file: ["./frontend/.env"]
+    networks: [proxy, monitor]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: personal_backend
+    restart: unless-stopped
+    env_file: [ "./.env" ]
+    ports:
+      - "8081:8081"
+    networks: [proxy, databases, monitor]
+
+networks:
+  proxy:
+    external: true
+  databases:
+    external: true
+  monitor:
+    external: true

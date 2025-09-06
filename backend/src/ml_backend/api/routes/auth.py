@@ -17,16 +17,16 @@ from ml_backend.api.session import (
 )
 
 # Credentials for admin dashboard login
-API_USERNAME = os.getenv("API_USERNAME")
-API_PASSWORD = os.getenv("API_PASSWORD")
+INTERNAL_API_USERNAME = os.getenv("INTERNAL_API_USERNAME")
+INTERNAL_API_PASSWORD = os.getenv("INTERNAL_API_PASSWORD")
 
 # Admin Token Expiration time (in seconds)
 ADMIN_TOKEN_EXPIRE_SECONDS = int(
     os.getenv("ADMIN_TOKEN_EXPIRE_SECONDS", "1800")
 )  # Default to 30 minutes
 
-if not API_USERNAME or not API_PASSWORD:
-    raise RuntimeError("API_USERNAME and API_PASSWORD must be set")
+if not INTERNAL_API_USERNAME or not INTERNAL_API_PASSWORD:
+    raise RuntimeError("INTERNAL_API_USERNAME and INTERNAL_API_PASSWORD must be set")
 
 router = APIRouter()
 
@@ -49,13 +49,13 @@ def _generate_session_token() -> Tuple[str, int]:
 
 @router.post("/login")
 async def login(req: LoginRequest):
-    if req.username != API_USERNAME:
+    if req.username != INTERNAL_API_USERNAME:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
 
     # Compute expected SHA-256 hash of the configured password
-    expected_hash = hashlib.sha256(API_PASSWORD.encode()).hexdigest()
+    expected_hash = hashlib.sha256(INTERNAL_API_PASSWORD.encode()).hexdigest()
 
     # Determine the supplied hash from request
     supplied_hash: str | None

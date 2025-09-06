@@ -1,11 +1,8 @@
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/${OWNER}/personal-website-frontend:${IMAGE_TAG}
     container_name: personal_frontend
     restart: unless-stopped
-    env_file: [ "./.env" ]
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -17,12 +14,28 @@ services:
     networks: [proxy, monitor]
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/${OWNER}/personal-website-backend:${IMAGE_TAG}
     container_name: personal_backend
     restart: unless-stopped
-    env_file: [ "./.env" ]
+    environment:
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_USERNAME: ${MONGODB_USERNAME}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
+      ML_API_KEY: ${ML_API_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_EXPIRE_SECONDS: ${JWT_EXPIRE_SECONDS}
+      ADMIN_TOKEN_EXPIRE_SECONDS: ${ADMIN_TOKEN_EXPIRE_SECONDS}
+      TOKEN_AUDIENCE: ${TOKEN_AUDIENCE}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME}
+      INTERNAL_API_USERNAME: ${INTERNAL_API_USERNAME}
+      INTERNAL_API_PASSWORD: ${INTERNAL_API_PASSWORD}
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE}
+      POPULATE_MONGODB: ${POPULATE_MONGODB}
+    ports:
+      - "8081:8081"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

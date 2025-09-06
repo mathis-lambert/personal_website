@@ -8,6 +8,13 @@ RUN npm install
 
 # Copier l'ensemble du projet et lancer le build de production
 COPY . .
+# Variables d'environnement de build pour Vite
+ARG VITE_API_URL
+ARG VITE_MAINTENANCE_MODE
+ARG VITE_MAPS_API_KEY
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_MAINTENANCE_MODE=$VITE_MAINTENANCE_MODE \
+    VITE_MAPS_API_KEY=$VITE_MAPS_API_KEY
 RUN npm run build
 
 # Étape 2 : Image de production
