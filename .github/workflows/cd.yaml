@@ -153,8 +153,8 @@ jobs:
 
             cd "$INSTALL_DIR"
             # Pull and start the updated stack using the tag that triggered this workflow
-            OWNER="$OWNER_LC" IMAGE_TAG="$TAG" -E docker compose -f compose.prod.yaml pull
-            OWNER="$OWNER_LC" IMAGE_TAG="$TAG" -E docker compose -f compose.prod.yaml up -d --remove-orphans
+            OWNER="$OWNER_LC" IMAGE_TAG="$TAG" docker compose -f compose.prod.yaml pull
+            OWNER="$OWNER_LC" IMAGE_TAG="$TAG" docker compose -f compose.prod.yaml up -d --remove-orphans
 
             # Optional cleanup
             docker image prune -f || true
