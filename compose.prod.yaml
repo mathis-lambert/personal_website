@@ -34,8 +34,6 @@ services:
       INTERNAL_API_PASSWORD: ${INTERNAL_API_PASSWORD}
       MAINTENANCE_MODE: ${MAINTENANCE_MODE}
       POPULATE_MONGODB: ${POPULATE_MONGODB}
-    ports:
-      - "8081:8081"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
