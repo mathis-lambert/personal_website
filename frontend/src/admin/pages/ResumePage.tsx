@@ -365,6 +365,12 @@ const ResumePage: React.FC = () => {
                       onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, company: e.target.value } : x))
                       )} />
                     <input
+                      placeholder="Logo"
+                      className="border rounded-md px-3 py-2"
+                      value={exp.logo}
+                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, logo: e.target.value } : x))
+                      )} />
+                    <input
                       placeholder="Period"
                       className="border rounded-md px-3 py-2"
                       value={exp.period}

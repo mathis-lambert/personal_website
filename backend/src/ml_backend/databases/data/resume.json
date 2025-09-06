@@ -13,6 +13,7 @@
             "company": "Free Pro",
             "period": "Sept 2024 - present",
             "location": "Marseille, France",
+            "logo": "freepro_logo.png",
             "current": true,
             "highlight": true,
             "description": [
@@ -29,6 +30,7 @@
             "company": "Free Pro",
             "period": "Apr 2023 - Aug 2024",
             "location": "Marseille, France",
+            "logo": "freepro_logo.png",
             "description": [
                 "Gained expertise in transformer models (LLMs, Embeddings), dataset design, and fine-tuning (SFT, DPO, LORA).",
                 "Deployed AI workloads on HPC infrastructures (Nvidia H100 clusters) using Docker, Nvidia NGC, and Slurm.",
@@ -40,6 +42,7 @@
             "company": "LEXTAN",
             "period": "Jun 2022 - Aug 2022",
             "location": "Marseille, France",
+            "logo": "lextan_logo.png",
             "hide": true,
             "description": [
                 "Led the complete, from-scratch redesign and development of the corporate website.",
@@ -51,6 +54,7 @@
             "company": "PÉPITE Provence & UN 2030 Goals",
             "period": "Mar 2018 - Apr 2018",
             "location": "Chicago, Illinois, USA",
+            "logo": "izzystartup_logo.png",
             "description": [
                 "Co-developed an intelligent system to combat driver fatigue for long-haul truck drivers.",
                 "Awarded 2nd Place Jury Prize at the Start'up Competition in Chicago.",

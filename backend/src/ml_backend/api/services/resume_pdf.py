@@ -24,6 +24,7 @@ class Contact:
 class Experience:
     role: str
     company: str
+    logo: Optional[str] = None
     period: Optional[str] = None
     location: Optional[str] = None
     current: Optional[bool] = None

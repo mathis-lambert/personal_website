@@ -19,7 +19,27 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
     className="mb-6 rounded-2xl border border-cyan-500/40 dark:border-cyan-400/30 bg-gradient-to-br from-cyan-500/10 via-cyan-400/5 to-transparent backdrop-blur p-5 shadow-md hover:shadow-lg hover:border-cyan-500/60"
   >
     <div className="flex items-start gap-3">
-      <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-white shadow">
+      {experience.logo ? (
+        <img
+          src={experience.logo}
+          alt={`${experience.company} logo`}
+          loading="lazy"
+          className="mt-0.5 h-10 w-10 md:h-11 md:w-11 shrink-0 rounded-xl object-contain bg-white dark:bg-slate-900 ring-1 ring-cyan-500/40 dark:ring-cyan-400/30 p-1.5"
+          onError={(e) => {
+            // Fallback to star icon if image fails
+            (e.currentTarget as HTMLImageElement).style.display = 'none';
+            const sibling = e.currentTarget.nextElementSibling as HTMLSpanElement | null;
+            if (sibling && sibling.dataset?.fallback === 'star') {
+              sibling.style.display = 'inline-flex';
+            }
+          }}
+        />
+      ) : null}
+      <span
+        data-fallback="star"
+        className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 text-white shadow"
+        style={{ display: experience.logo ? 'none' : 'inline-flex' }}
+      >
         <Star size={16} />
       </span>
       <div className="flex-1">

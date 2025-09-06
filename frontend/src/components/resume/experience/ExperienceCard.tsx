@@ -19,19 +19,33 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
     className="mb-4 last:mb-0 rounded-2xl p-2 transition-colors"
   >
     <div className="flex items-start justify-between gap-3">
-      <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-50 leading-snug">
-        {experience.role}
-      </h3>
+      <div className="flex items-center gap-3 min-w-0">
+        {experience.logo && (
+          <img
+            src={experience.logo}
+            alt={`${experience.company} logo`}
+            loading="lazy"
+            className="h-8 w-8 md:h-9 md:w-9 shrink-0 rounded-md object-contain bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-700 p-1"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        )}
+        <div className="min-w-0">
+          <h3 className="text-base md:text-lg font-semibold text-slate-900 dark:text-slate-50 leading-snug truncate">
+            {experience.role}
+          </h3>
+          <p className="mt-0.5 text-sm md:text-[15px] font-medium text-cyan-700 dark:text-cyan-300 truncate">
+            {experience.company}
+          </p>
+        </div>
+      </div>
       {experience.current && (
         <span className="shrink-0 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[11px] md:text-xs px-2 py-0.5 font-medium">
           Current
         </span>
       )}
     </div>
-
-    <p className="mt-0.5 text-sm md:text-[15px] font-medium text-cyan-700 dark:text-cyan-300">
-      {experience.company}
-    </p>
 
     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-[13px] text-slate-500 dark:text-slate-400">
       <span className="inline-flex items-center gap-1">

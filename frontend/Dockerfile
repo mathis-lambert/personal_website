@@ -1,5 +1,5 @@
 # Étape 1 : Construction de l’application
-FROM node:22.14.0 AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 # Copier les fichiers de configuration et installer les dépendances
@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Étape 2 : Image de production
-FROM node:22.14.0
+FROM node:24-alpine
 WORKDIR /app
 
 # Installer un serveur statique pour servir le build (ici "serve")

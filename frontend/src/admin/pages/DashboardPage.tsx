@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
-import { getCollectionData, getEventsAnalytics, getEventsList, type EventsAnalyticsResponse, type EventsListResponse } from '@/api/admin';
-import type { Article, Project } from '@/types';
+import { getCollectionData, getEventsAnalytics, getEventsList } from '@/api/admin';
+import type { Article, Project, EventsAnalyticsResponse, EventsListResponse } from '@/types';
 import type { TimelineData } from '@/components/ui/ScrollableTimeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -11,6 +11,7 @@ export interface Contact {
 export interface Experience {
   role: string;
   company: string;
+  logo?: string;
   period: string;
   location: string;
   current?: boolean;
@@ -280,3 +281,49 @@ export interface Article {
   media?: ArticleMedia;
   metrics?: ArticleMetrics;
 }
+
+export interface EventLog {
+  job_id?: string;
+  action?: string;
+  created_at?: string; // ISO
+  request_body?: {
+    location?: string;
+    messages?: Array<{ role: string; content: string }>;
+    [k: string]: unknown;
+  } & Record<string, unknown>;
+}
+
+
+export interface EventsListResponse {
+  ok: boolean;
+  total: number;
+  items: EventLog[];
+}
+
+export type EventsAnalyticsSeriesPoint = {
+  bucket: string; // e.g. 2025-01-01 or 2025-01-01T13:00Z
+  total: number;
+  // dynamic keys per action name
+  [action: string]: number | string;
+};
+
+export interface EventsAnalyticsResponse {
+  ok: boolean;
+  range: { start: string; end: string; granularity: 'hour' | 'day' | 'month' };
+  actions: string[];
+  series: EventsAnalyticsSeriesPoint[];
+  totals: { total: number; byAction: Record<string, number> };
+  group_by?: 'action' | 'location';
+}
+
+export type AdminCollectionName =
+  | 'projects'
+  | 'articles'
+  | 'experiences'
+  | 'studies'
+  | 'resume';
+
+export type AdminListCollectionName = Exclude<
+  AdminCollectionName,
+  'resume'
+>;

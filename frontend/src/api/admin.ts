@@ -1,5 +1,5 @@
 import { fetchWithTimeout } from '@/api/utils';
-import type { Article, Project, ResumeData } from '@/types';
+import type { AdminCollectionName, AdminListCollectionName, Article, EventsAnalyticsResponse, EventsListResponse, Project, ResumeData } from '@/types';
 import type {
   AdminCreateArticleInput,
   AdminCreateProjectInput,
@@ -8,18 +8,6 @@ import type {
   AdminUpdateResumeInput,
 } from '@/admin/types';
 import type { TimelineData } from '@/components/ui/ScrollableTimeline';
-
-export type AdminCollectionName =
-  | 'projects'
-  | 'articles'
-  | 'experiences'
-  | 'studies'
-  | 'resume';
-
-export type AdminListCollectionName = Exclude<
-  AdminCollectionName,
-  'resume'
->;
 
 const API_URL = (import.meta.env.VITE_API_URL as string)?.replace(/\/$/, '');
 if (!API_URL) throw new Error('VITE_API_URL is not configured');
@@ -167,23 +155,6 @@ export async function deleteItem(
     throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
 }
 
-// ---- Analytics: events ----
-export type EventsAnalyticsSeriesPoint = {
-  bucket: string; // e.g. 2025-01-01 or 2025-01-01T13:00Z
-  total: number;
-  // dynamic keys per action name
-  [action: string]: number | string;
-};
-
-export interface EventsAnalyticsResponse {
-  ok: boolean;
-  range: { start: string; end: string; granularity: 'hour' | 'day' | 'month' };
-  actions: string[];
-  series: EventsAnalyticsSeriesPoint[];
-  totals: { total: number; byAction: Record<string, number> };
-  group_by?: 'action' | 'location';
-}
-
 export async function getEventsAnalytics(
   params: {
     start?: string; // ISO8601
@@ -204,24 +175,6 @@ export async function getEventsAnalytics(
   const res = await fetchWithTimeout(url, { timeoutMs: 12000, authToken: token });
   if (!res.ok) throw new Error(`Failed to fetch events analytics: ${res.status}`);
   return (await res.json()) as EventsAnalyticsResponse;
-}
-
-// ---- Events list (for Activity table) ----
-export interface EventLog {
-  job_id?: string;
-  action?: string;
-  created_at?: string; // ISO
-  request_body?: {
-    location?: string;
-    messages?: Array<{ role: string; content: string }>;
-    [k: string]: unknown;
-  } & Record<string, unknown>;
-}
-
-export interface EventsListResponse {
-  ok: boolean;
-  total: number;
-  items: EventLog[];
 }
 
 export async function getEventsList(
