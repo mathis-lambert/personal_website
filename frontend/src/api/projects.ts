@@ -54,7 +54,9 @@ export function normalizeProjectApi(p: ApiProject): Project {
   };
 }
 
-export async function getProjects(options?: { signal?: AbortSignal }): Promise<Project[]> {
+export async function getProjects(options?: {
+  signal?: AbortSignal;
+}): Promise<Project[]> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
   const res = await fetchWithTimeout(`${apiUrl}/api/projects/all`, {

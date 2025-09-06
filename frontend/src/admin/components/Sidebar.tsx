@@ -21,10 +21,22 @@ type NavItem = {
 
 const items: NavItem[] = [
   { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={18} /> },
-  { label: 'Projects', path: '/admin/projects', icon: <FolderKanban size={18} /> },
+  {
+    label: 'Projects',
+    path: '/admin/projects',
+    icon: <FolderKanban size={18} />,
+  },
   { label: 'Articles', path: '/admin/articles', icon: <FileText size={18} /> },
-  { label: 'Experiences', path: '/admin/experiences', icon: <BriefcaseBusiness size={18} /> },
-  { label: 'Studies', path: '/admin/studies', icon: <GraduationCap size={18} /> },
+  {
+    label: 'Experiences',
+    path: '/admin/experiences',
+    icon: <BriefcaseBusiness size={18} />,
+  },
+  {
+    label: 'Studies',
+    path: '/admin/studies',
+    icon: <GraduationCap size={18} />,
+  },
   { label: 'Resume', path: '/admin/resume', icon: <IdCard size={18} /> },
 ];
 
@@ -47,7 +59,8 @@ const Sidebar: React.FC<{
             onClick={() => onNavigate(it.path)}
             className={cn(
               'w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-muted transition-colors',
-              currentPath === it.path || (it.path === '/admin' && currentPath === '/admin/')
+              currentPath === it.path ||
+                (it.path === '/admin' && currentPath === '/admin/')
                 ? 'bg-muted font-medium'
                 : 'font-normal',
             )}

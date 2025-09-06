@@ -44,7 +44,10 @@ export async function fetchWithTimeout(
     const method = (rest.method ?? 'GET').toUpperCase();
     if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
       const csrf = getCsrfToken();
-      if (csrf && !('X-CSRF-Token' in (mergedHeaders as Record<string, string>))) {
+      if (
+        csrf &&
+        !('X-CSRF-Token' in (mergedHeaders as Record<string, string>))
+      ) {
         (mergedHeaders as Record<string, string>)['X-CSRF-Token'] = csrf;
       }
     }

@@ -1,6 +1,9 @@
 import React, { Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
-import { AdminAuthProvider, useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+import {
+  AdminAuthProvider,
+  useAdminAuth,
+} from '@/admin/providers/AdminAuthProvider';
 import AdminLayout from '@/admin/AdminLayout';
 import Loader from '@/components/ui/Loader';
 
@@ -8,12 +11,16 @@ const LoginPage = React.lazy(() => import('@/admin/pages/LoginPage'));
 const DashboardPage = React.lazy(() => import('@/admin/pages/DashboardPage'));
 const ProjectsPage = React.lazy(() => import('@/admin/pages/ProjectsPage'));
 const ArticlesPage = React.lazy(() => import('@/admin/pages/ArticlesPage'));
-const ExperiencesPage = React.lazy(() => import('@/admin/pages/ExperiencesPage'));
+const ExperiencesPage = React.lazy(
+  () => import('@/admin/pages/ExperiencesPage'),
+);
 const StudiesPage = React.lazy(() => import('@/admin/pages/StudiesPage'));
 const ResumePage = React.lazy(() => import('@/admin/pages/ResumePage'));
 
 // Middleware to protect admin routes
-const RequireAdminAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const RequireAdminAuth: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { token } = useAdminAuth();
   if (!token) return <Navigate to="/admin/login" replace />;
   return <>{children}</>;
@@ -51,4 +58,3 @@ const AdminRoot: React.FC = () => {
 };
 
 export default AdminRoot;
-

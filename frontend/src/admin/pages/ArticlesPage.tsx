@@ -8,10 +8,20 @@ import {
 } from '@/api/admin';
 import Modal from '@/admin/components/Modal';
 import type { Article } from '@/types';
-import type { AdminCreateArticleInput, AdminUpdateArticleInput } from '@/admin/types';
+import type {
+  AdminCreateArticleInput,
+  AdminUpdateArticleInput,
+} from '@/admin/types';
 import { Plus, Pencil, Trash2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // Use shared Article type from '@/types'
 
@@ -127,7 +137,9 @@ const ArticlesPage: React.FC = () => {
     try {
       const res = await updateItem('articles', editTarget.id, patch, token);
       setItems((prev) =>
-        prev.map((it) => (it.id === editTarget.id ? (res.item as Article) : it)),
+        prev.map((it) =>
+          it.id === editTarget.id ? (res.item as Article) : it,
+        ),
       );
       setEditOpen(false);
       setEditTarget(null);
@@ -179,7 +191,10 @@ const ArticlesPage: React.FC = () => {
       ) : (
         <div className="space-y-3">
           {sorted.map((a) => (
-            <div key={a.id} className="border rounded-lg p-4 bg-card transition hover:shadow-sm">
+            <div
+              key={a.id}
+              className="border rounded-lg p-4 bg-card transition hover:shadow-sm"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{a.title}</div>
@@ -223,27 +238,88 @@ const ArticlesPage: React.FC = () => {
             className="space-y-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input name="title" placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
-              <input name="slug" placeholder="Slug (optional)" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="author" placeholder="Author" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="date" placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="tags" placeholder="Tags (comma)" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="categories" placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
-              <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" /> Featured</label>
+              <input
+                name="title"
+                placeholder="Title"
+                className="border rounded-md px-3 py-2 bg-background"
+                required
+              />
+              <input
+                name="slug"
+                placeholder="Slug (optional)"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="author"
+                placeholder="Author"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="date"
+                placeholder="Date (YYYY-MM-DD)"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="tags"
+                placeholder="Tags (comma)"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="categories"
+                placeholder="Categories (comma)"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" name="isFeatured" /> Featured
+              </label>
             </div>
-            <input name="excerpt" placeholder="Excerpt" className="w-full border rounded-md px-3 py-2 bg-background" />
-            <textarea name="content" placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
+            <input
+              name="excerpt"
+              placeholder="Excerpt"
+              className="w-full border rounded-md px-3 py-2 bg-background"
+            />
+            <textarea
+              name="content"
+              placeholder="Content (Markdown/HTML)"
+              className="w-full h-40 border rounded-md p-2 bg-background"
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input name="link_canonical" placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="link_discussion" placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />
+              <input
+                name="link_canonical"
+                placeholder="Link: Canonical"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="link_discussion"
+                placeholder="Link: Discussion"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input name="media_thumbnailUrl" placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-              <input name="media_imageUrl" placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+              <input
+                name="media_thumbnailUrl"
+                placeholder="Media: Thumbnail URL"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
+              <input
+                name="media_imageUrl"
+                placeholder="Media: Image URL"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setCreateOpen(false)}>Cancel</button>
-              <button type="submit" disabled={createLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
+              <button
+                type="button"
+                className="border rounded-md px-3 py-2 hover:bg-accent"
+                onClick={() => setCreateOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createLoading}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+              >
                 {createLoading ? (
                   'Creating…'
                 ) : (
@@ -263,7 +339,8 @@ const ArticlesPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Delete article?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. The article will be permanently removed.
+              This action cannot be undone. The article will be permanently
+              removed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -296,30 +373,124 @@ const ArticlesPage: React.FC = () => {
               }}
               className="space-y-4"
             >
-              <div className="text-xs text-muted-foreground">ID: {editTarget.id}</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="title" defaultValue={editTarget.title} placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
-                <input name="slug" defaultValue={editTarget.slug || ''} placeholder="Slug" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="author" defaultValue={editTarget.author || ''} placeholder="Author" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="date" defaultValue={editTarget.date} placeholder="Date (YYYY-MM-DD)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="tags" defaultValue={Array.isArray(editTarget.tags) ? editTarget.tags.join(', ') : ''} placeholder="Tags (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="categories" defaultValue={Array.isArray(editTarget.categories || []) ? (editTarget.categories || []).join(', ') : ''} placeholder="Categories (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <label className="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={Boolean(editTarget.isFeatured)} /> Featured</label>
-              </div>
-              <input name="excerpt" defaultValue={editTarget.excerpt || ''} placeholder="Excerpt" className="w-full border rounded-md px-3 py-2 bg-background" />
-              <textarea name="content" defaultValue={editTarget.content || ''} placeholder="Content (Markdown/HTML)" className="w-full h-40 border rounded-md p-2 bg-background" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="link_canonical" defaultValue={editTarget.links?.canonical || ''} placeholder="Link: Canonical" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="link_discussion" defaultValue={editTarget.links?.discussion || ''} placeholder="Link: Discussion" className="border rounded-md px-3 py-2 bg-background" />
+              <div className="text-xs text-muted-foreground">
+                ID: {editTarget.id}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="media_thumbnailUrl" defaultValue={editTarget.media?.thumbnailUrl || ''} placeholder="Media: Thumbnail URL" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="media_imageUrl" defaultValue={editTarget.media?.imageUrl || ''} placeholder="Media: Image URL" className="border rounded-md px-3 py-2 bg-background" />
+                <input
+                  name="title"
+                  defaultValue={editTarget.title}
+                  placeholder="Title"
+                  className="border rounded-md px-3 py-2 bg-background"
+                  required
+                />
+                <input
+                  name="slug"
+                  defaultValue={editTarget.slug || ''}
+                  placeholder="Slug"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="author"
+                  defaultValue={editTarget.author || ''}
+                  placeholder="Author"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="date"
+                  defaultValue={editTarget.date}
+                  placeholder="Date (YYYY-MM-DD)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="tags"
+                  defaultValue={
+                    Array.isArray(editTarget.tags)
+                      ? editTarget.tags.join(', ')
+                      : ''
+                  }
+                  placeholder="Tags (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="categories"
+                  defaultValue={
+                    Array.isArray(editTarget.categories || [])
+                      ? (editTarget.categories || []).join(', ')
+                      : ''
+                  }
+                  placeholder="Categories (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="isFeatured"
+                    defaultChecked={Boolean(editTarget.isFeatured)}
+                  />{' '}
+                  Featured
+                </label>
+              </div>
+              <input
+                name="excerpt"
+                defaultValue={editTarget.excerpt || ''}
+                placeholder="Excerpt"
+                className="w-full border rounded-md px-3 py-2 bg-background"
+              />
+              <textarea
+                name="content"
+                defaultValue={editTarget.content || ''}
+                placeholder="Content (Markdown/HTML)"
+                className="w-full h-40 border rounded-md p-2 bg-background"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  name="link_canonical"
+                  defaultValue={editTarget.links?.canonical || ''}
+                  placeholder="Link: Canonical"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="link_discussion"
+                  defaultValue={editTarget.links?.discussion || ''}
+                  placeholder="Link: Discussion"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  name="media_thumbnailUrl"
+                  defaultValue={editTarget.media?.thumbnailUrl || ''}
+                  placeholder="Media: Thumbnail URL"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="media_imageUrl"
+                  defaultValue={editTarget.media?.imageUrl || ''}
+                  placeholder="Media: Image URL"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
               </div>
               <div className="flex justify-end gap-2">
-                <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setEditOpen(false)}>Cancel</button>
-                <button type="submit" disabled={saveLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
-                  {saveLoading ? 'Saving…' : (<><Save size={16} /> Save</>)}
+                <button
+                  type="button"
+                  className="border rounded-md px-3 py-2 hover:bg-accent"
+                  onClick={() => setEditOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saveLoading}
+                  className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+                >
+                  {saveLoading ? (
+                    'Saving…'
+                  ) : (
+                    <>
+                      <Save size={16} /> Save
+                    </>
+                  )}
                 </button>
               </div>
             </form>

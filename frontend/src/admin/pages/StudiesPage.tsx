@@ -1,10 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
-import { getCollectionData, updateItem, deleteItem, replaceCollection } from '@/api/admin';
+import {
+  getCollectionData,
+  updateItem,
+  deleteItem,
+  replaceCollection,
+} from '@/api/admin';
 import Modal from '@/admin/components/Modal';
 import { Pencil, Trash2, Save, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type Study = {
   title: string;
@@ -69,7 +81,9 @@ const StudiesPage: React.FC = () => {
     try {
       const id = `index-${editIndex}`;
       const res = await updateItem('studies', id, patch, token);
-      setItems((prev) => prev.map((it, i) => (i === editIndex ? (res.item as Study) : it)));
+      setItems((prev) =>
+        prev.map((it, i) => (i === editIndex ? (res.item as Study) : it)),
+      );
       setEditOpen(false);
       setEditIndex(null);
     } catch (e) {
@@ -149,18 +163,28 @@ const StudiesPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{s.title}</div>
-                  <div className="text-xs text-muted-foreground">{s.company} • {s.date}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {s.company} • {s.date}
+                  </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="inline-flex items-center gap-2 border rounded-md px-3 py-1 hover:bg-accent" onClick={() => startEdit(idx)}>
+                  <button
+                    className="inline-flex items-center gap-2 border rounded-md px-3 py-1 hover:bg-accent"
+                    onClick={() => startEdit(idx)}
+                  >
                     <Pencil size={16} /> Edit
                   </button>
-                  <button className="inline-flex items-center gap-2 border rounded-md px-3 py-1 text-red-600 hover:bg-red-500/10" onClick={() => askDelete(idx)}>
+                  <button
+                    className="inline-flex items-center gap-2 border rounded-md px-3 py-1 text-red-600 hover:bg-red-500/10"
+                    onClick={() => askDelete(idx)}
+                  >
                     <Trash2 size={16} /> Delete
                   </button>
                 </div>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{s.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                {s.description}
+              </p>
             </div>
           ))}
         </div>
@@ -177,14 +201,54 @@ const StudiesPage: React.FC = () => {
               className="space-y-4"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="title" defaultValue={items[editIndex]?.title} placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
-                <input name="company" defaultValue={items[editIndex]?.company} placeholder="Company" className="border rounded-md px-3 py-2 bg-background" required />
-                <input name="date" defaultValue={items[editIndex]?.date} placeholder="Date" className="border rounded-md px-3 py-2 bg-background" />
+                <input
+                  name="title"
+                  defaultValue={items[editIndex]?.title}
+                  placeholder="Title"
+                  className="border rounded-md px-3 py-2 bg-background"
+                  required
+                />
+                <input
+                  name="company"
+                  defaultValue={items[editIndex]?.company}
+                  placeholder="Company"
+                  className="border rounded-md px-3 py-2 bg-background"
+                  required
+                />
+                <input
+                  name="date"
+                  defaultValue={items[editIndex]?.date}
+                  placeholder="Date"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
               </div>
-              <textarea name="description" defaultValue={items[editIndex]?.description} placeholder="Description" className="w-full h-40 border rounded-md p-2 bg-background" />
+              <textarea
+                name="description"
+                defaultValue={items[editIndex]?.description}
+                placeholder="Description"
+                className="w-full h-40 border rounded-md p-2 bg-background"
+              />
               <div className="flex justify-end gap-2">
-                <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setEditOpen(false)}>Cancel</button>
-                <button type="submit" disabled={saveLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">{saveLoading ? 'Saving…' : (<><Save size={16} /> Save</>)}</button>
+                <button
+                  type="button"
+                  className="border rounded-md px-3 py-2 hover:bg-accent"
+                  onClick={() => setEditOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saveLoading}
+                  className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+                >
+                  {saveLoading ? (
+                    'Saving…'
+                  ) : (
+                    <>
+                      <Save size={16} /> Save
+                    </>
+                  )}
+                </button>
               </div>
             </form>
           )}
@@ -196,7 +260,9 @@ const StudiesPage: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Study</DialogTitle>
-            <DialogDescription>Fill in the details for the new study.</DialogDescription>
+            <DialogDescription>
+              Fill in the details for the new study.
+            </DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -206,15 +272,49 @@ const StudiesPage: React.FC = () => {
             className="space-y-4"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input name="title" placeholder="Title" className="border rounded-md px-3 py-2 bg-background" required />
-              <input name="company" placeholder="Company" className="border rounded-md px-3 py-2 bg-background" required />
-              <input name="date" placeholder="Date" className="border rounded-md px-3 py-2 bg-background" />
+              <input
+                name="title"
+                placeholder="Title"
+                className="border rounded-md px-3 py-2 bg-background"
+                required
+              />
+              <input
+                name="company"
+                placeholder="Company"
+                className="border rounded-md px-3 py-2 bg-background"
+                required
+              />
+              <input
+                name="date"
+                placeholder="Date"
+                className="border rounded-md px-3 py-2 bg-background"
+              />
             </div>
-            <textarea name="description" placeholder="Description" className="w-full h-40 border rounded-md p-2 bg-background" />
+            <textarea
+              name="description"
+              placeholder="Description"
+              className="w-full h-40 border rounded-md p-2 bg-background"
+            />
             <DialogFooter>
-              <button type="button" className="border rounded-md px-3 py-2 hover:bg-accent" onClick={() => setCreateOpen(false)}>Cancel</button>
-              <button type="submit" disabled={createLoading} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
-                {createLoading ? 'Creating…' : (<><Save size={16} /> Create</>)}
+              <button
+                type="button"
+                className="border rounded-md px-3 py-2 hover:bg-accent"
+                onClick={() => setCreateOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createLoading}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+              >
+                {createLoading ? (
+                  'Creating…'
+                ) : (
+                  <>
+                    <Save size={16} /> Create
+                  </>
+                )}
               </button>
             </DialogFooter>
           </form>
@@ -227,7 +327,8 @@ const StudiesPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Delete study?</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. The study will be permanently removed.
+              This action cannot be undone. The study will be permanently
+              removed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -240,7 +341,9 @@ const StudiesPage: React.FC = () => {
             </button>
             <button
               className="inline-flex items-center gap-2 border rounded-md px-3 py-2 text-red-600 hover:bg-red-500/10"
-              onClick={() => confirmIndex !== null && void onDelete(confirmIndex)}
+              onClick={() =>
+                confirmIndex !== null && void onDelete(confirmIndex)
+              }
               disabled={deleteLoading}
             >
               <Trash2 size={16} /> {deleteLoading ? 'Deleting…' : 'Delete'}

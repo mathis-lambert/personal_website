@@ -31,7 +31,7 @@ export interface Certification {
   provider: string;
   title: string;
   issued_date: string | null;
-  status: "issued" | "in progress" | "stopped" | "starting";
+  status: 'issued' | 'in progress' | 'stopped' | 'starting';
 }
 
 export interface TechnicalSkills {
@@ -293,7 +293,6 @@ export interface EventLog {
   } & Record<string, unknown>;
 }
 
-
 export interface EventsListResponse {
   ok: boolean;
   total: number;
@@ -323,7 +322,4 @@ export type AdminCollectionName =
   | 'studies'
   | 'resume';
 
-export type AdminListCollectionName = Exclude<
-  AdminCollectionName,
-  'resume'
->;
+export type AdminListCollectionName = Exclude<AdminCollectionName, 'resume'>;

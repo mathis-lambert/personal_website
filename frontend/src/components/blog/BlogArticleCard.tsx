@@ -20,9 +20,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
     day: 'numeric',
   });
 
-  const imageSrc =
-    article.media?.thumbnailUrl ||
-    article.media?.imageUrl;
+  const imageSrc = article.media?.thumbnailUrl || article.media?.imageUrl;
   const readTime =
     typeof article.readTimeMin === 'number'
       ? `${article.readTimeMin} min read`

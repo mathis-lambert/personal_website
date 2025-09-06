@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { login as apiLogin } from '@/api/auth';
 
 interface AdminAuthContextType {
@@ -14,7 +20,8 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAdminAuth = (): AdminAuthContextType => {
   const ctx = useContext(AdminAuthContext);
-  if (!ctx) throw new Error('useAdminAuth must be used within AdminAuthProvider');
+  if (!ctx)
+    throw new Error('useAdminAuth must be used within AdminAuthProvider');
   return ctx;
 };
 
@@ -24,7 +31,13 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [token, setToken] = useState<string | null>(null);
   const [expiresIn, setExpiresIn] = useState<number | null>(null);
 
-  const login = async ({ username, password }: { username: string; password: string }) => {
+  const login = async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
     const { access_token, expires_in } = await apiLogin(username, password);
     setToken(access_token);
     setExpiresIn(expires_in);
@@ -48,9 +61,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return undefined;
   }, [expiresIn]);
 
-  const value = useMemo(() => ({ token, expiresIn, login, logout }), [token, expiresIn]);
+  const value = useMemo(
+    () => ({ token, expiresIn, login, logout }),
+    [token, expiresIn],
+  );
 
   return (
-    <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>
+    <AdminAuthContext.Provider value={value}>
+      {children}
+    </AdminAuthContext.Provider>
   );
 };

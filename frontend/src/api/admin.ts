@@ -1,5 +1,13 @@
 import { fetchWithTimeout } from '@/api/utils';
-import type { AdminCollectionName, AdminListCollectionName, Article, EventsAnalyticsResponse, EventsListResponse, Project, ResumeData } from '@/types';
+import type {
+  AdminCollectionName,
+  AdminListCollectionName,
+  Article,
+  EventsAnalyticsResponse,
+  EventsListResponse,
+  Project,
+  ResumeData,
+} from '@/types';
 import type {
   AdminCreateArticleInput,
   AdminCreateProjectInput,
@@ -46,13 +54,16 @@ export async function replaceCollection(
   data: unknown,
   token: string,
 ) {
-  const res = await fetchWithTimeout(`${API_URL}/api/admin/data/${collection}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-    timeoutMs: 12000,
-    authToken: token,
-  });
+  const res = await fetchWithTimeout(
+    `${API_URL}/api/admin/data/${collection}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      timeoutMs: 12000,
+      authToken: token,
+    },
+  );
   if (!res.ok)
     throw new Error(`Failed to replace ${collection}: ${res.status}`);
 }
@@ -81,7 +92,11 @@ export async function createItem(
   });
   if (!res.ok)
     throw new Error(`Failed to create ${collection} item: ${res.status}`);
-  return (await res.json()) as { ok: boolean; id: string; item: Project | Article };
+  return (await res.json()) as {
+    ok: boolean;
+    id: string;
+    item: Project | Article;
+  };
 }
 
 export async function updateItem(
@@ -169,11 +184,16 @@ export async function getEventsAnalytics(
   if (params.start) qs.set('start', params.start);
   if (params.end) qs.set('end', params.end);
   if (params.granularity) qs.set('granularity', params.granularity);
-  if (params.actions && params.actions.length) qs.set('action', params.actions.join(','));
+  if (params.actions && params.actions.length)
+    qs.set('action', params.actions.join(','));
   if (params.groupBy) qs.set('group_by', params.groupBy);
   const url = `${API_URL}/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ''}`;
-  const res = await fetchWithTimeout(url, { timeoutMs: 12000, authToken: token });
-  if (!res.ok) throw new Error(`Failed to fetch events analytics: ${res.status}`);
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(`Failed to fetch events analytics: ${res.status}`);
   return (await res.json()) as EventsAnalyticsResponse;
 }
 
@@ -191,12 +211,19 @@ export async function getEventsList(
   const qs = new URLSearchParams();
   if (params.start) qs.set('start', params.start);
   if (params.end) qs.set('end', params.end);
-  if (params.action) qs.set('action', Array.isArray(params.action) ? params.action.join(',') : params.action);
+  if (params.action)
+    qs.set(
+      'action',
+      Array.isArray(params.action) ? params.action.join(',') : params.action,
+    );
   if (params.limit != null) qs.set('limit', String(params.limit));
   if (params.skip != null) qs.set('skip', String(params.skip));
   if (params.sort) qs.set('sort', params.sort);
   const url = `${API_URL}/api/admin/events${qs.toString() ? `?${qs.toString()}` : ''}`;
-  const res = await fetchWithTimeout(url, { timeoutMs: 12000, authToken: token });
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
   if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`);
   return (await res.json()) as EventsListResponse;
 }

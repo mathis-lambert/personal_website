@@ -37,7 +37,12 @@ const ChatPanel: React.FC = () => {
       if (!el) return false;
       const he = el as HTMLElement;
       const tag = he.tagName;
-      return he.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || !!he.closest('[role="textbox"]');
+      return (
+        he.isContentEditable ||
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        !!he.closest('[role="textbox"]')
+      );
     };
 
     const handleHotkeys = (event: KeyboardEvent) => {
@@ -64,7 +69,6 @@ const ChatPanel: React.FC = () => {
     window.addEventListener('keydown', handleHotkeys);
     return () => window.removeEventListener('keydown', handleHotkeys);
   }, [openChat, toggleChat]);
-
 
   return (
     <AnimatePresence>

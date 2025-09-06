@@ -28,7 +28,8 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
           onError={(e) => {
             // Fallback to star icon if image fails
             (e.currentTarget as HTMLImageElement).style.display = 'none';
-            const sibling = e.currentTarget.nextElementSibling as HTMLSpanElement | null;
+            const sibling = e.currentTarget
+              .nextElementSibling as HTMLSpanElement | null;
             if (sibling && sibling.dataset?.fallback === 'star') {
               sibling.style.display = 'inline-flex';
             }

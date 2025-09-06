@@ -5,7 +5,9 @@ const ModalRoot = DialogPrimitive.Root;
 const ModalTrigger = DialogPrimitive.Trigger;
 const ModalClose = DialogPrimitive.Close;
 
-const ModalContent: React.FC<{ title?: string; children: React.ReactNode } & React.ComponentProps<'div'>> = ({ title, children, className }) => {
+const ModalContent: React.FC<
+  { title?: string; children: React.ReactNode } & React.ComponentProps<'div'>
+> = ({ title, children, className }) => {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 bg-black/50" />
@@ -17,9 +19,13 @@ const ModalContent: React.FC<{ title?: string; children: React.ReactNode } & Rea
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="text-lg font-semibold">{title}</div>
-          <DialogPrimitive.Close className="border rounded-md px-3 py-1">Close</DialogPrimitive.Close>
+          <DialogPrimitive.Close className="border rounded-md px-3 py-1">
+            Close
+          </DialogPrimitive.Close>
         </div>
-        <div className="p-4 overflow-y-auto h-[calc(100%-56px)]">{children}</div>
+        <div className="p-4 overflow-y-auto h-[calc(100%-56px)]">
+          {children}
+        </div>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   );
@@ -32,4 +38,3 @@ export const Modal = Object.assign(ModalRoot, {
 });
 
 export default Modal;
-

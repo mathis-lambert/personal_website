@@ -45,7 +45,12 @@ export default function Resume() {
         <ResumeHeader
           name={resumeData?.name ?? ''}
           actions={
-            <Button variant="outline" size="sm" onClick={onExportPdf} disabled={downloading}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExportPdf}
+              disabled={downloading}
+            >
               <Download className={downloading ? 'animate-pulse' : ''} />
               {downloading ? 'Exporting…' : 'Export PDF'}
             </Button>
@@ -58,12 +63,15 @@ export default function Resume() {
               <GlassCard className="p-6" delay={0.08}>
                 <ResumeSection icon={Cpu} title="Experience">
                   {resumeData?.experiences
-                    .filter(exp => !exp.hide)
+                    .filter((exp) => !exp.hide)
                     .map((exp, i) => {
-                      const Component = exp.highlight ? HighlightCard : ExperienceCard;
-                      return <Component key={i} experience={exp} delay={0.05 * i} />;
+                      const Component = exp.highlight
+                        ? HighlightCard
+                        : ExperienceCard;
+                      return (
+                        <Component key={i} experience={exp} delay={0.05 * i} />
+                      );
                     })}
-
                 </ResumeSection>
               </GlassCard>
 
@@ -76,14 +84,16 @@ export default function Resume() {
                         Languages
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(resumeData?.technical_skills?.languages ?? []).map((it, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                          >
-                            {it}
-                          </span>
-                        ))}
+                        {(resumeData?.technical_skills?.languages ?? []).map(
+                          (it, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                            >
+                              {it}
+                            </span>
+                          ),
+                        )}
                       </div>
                     </div>
 
@@ -92,14 +102,16 @@ export default function Resume() {
                         AI / ML
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(resumeData?.technical_skills?.ai_ml ?? []).map((it, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                          >
-                            {it}
-                          </span>
-                        ))}
+                        {(resumeData?.technical_skills?.ai_ml ?? []).map(
+                          (it, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                            >
+                              {it}
+                            </span>
+                          ),
+                        )}
                       </div>
                     </div>
 
@@ -108,7 +120,9 @@ export default function Resume() {
                         Systems &amp; Infra
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(resumeData?.technical_skills?.systems_and_infra ?? []).map((it, i) => (
+                        {(
+                          resumeData?.technical_skills?.systems_and_infra ?? []
+                        ).map((it, i) => (
                           <span
                             key={i}
                             className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
@@ -124,14 +138,16 @@ export default function Resume() {
                         Web
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(resumeData?.technical_skills?.web ?? []).map((it, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                          >
-                            {it}
-                          </span>
-                        ))}
+                        {(resumeData?.technical_skills?.web ?? []).map(
+                          (it, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                            >
+                              {it}
+                            </span>
+                          ),
+                        )}
                       </div>
                     </div>
                   </div>
@@ -212,7 +228,9 @@ export default function Resume() {
 
               <GlassCard className="p-6" delay={0.56}>
                 <ResumeSection icon={Briefcase} title="Certifications">
-                  <CertificationsCard certifications={resumeData?.certifications} />
+                  <CertificationsCard
+                    certifications={resumeData?.certifications}
+                  />
                 </ResumeSection>
               </GlassCard>
 
@@ -221,7 +239,7 @@ export default function Resume() {
                 title="Core Skills"
                 items={resumeData?.skills ?? []}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
-                delay={0.60}
+                delay={0.6}
               />
 
               <TagListSection

@@ -26,9 +26,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   const liveUrl = project.links?.live;
   const repoUrl = project.links?.repo;
-  const imageSrc =
-    project.media?.thumbnailUrl ||
-    project.media?.imageUrl;
+  const imageSrc = project.media?.thumbnailUrl || project.media?.imageUrl;
   const isFeatured = Boolean(project.isFeatured);
   const status = project.status || 'completed';
 

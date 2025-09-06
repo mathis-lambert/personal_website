@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
 import { getCollectionData, updateItem } from '@/api/admin';
-import type { ResumeData, Contact, TechnicalSkills, Experience, Education, Certification } from '@/types';
+import type {
+  ResumeData,
+  Contact,
+  TechnicalSkills,
+  Experience,
+  Education,
+  Certification,
+} from '@/types';
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,16 +44,32 @@ const ResumePage: React.FC = () => {
           website: obj?.contact?.website ?? '',
         };
         const technical_skills: TechnicalSkills = {
-          languages: Array.isArray(obj?.technical_skills?.languages) ? obj.technical_skills.languages : [],
-          ai_ml: Array.isArray(obj?.technical_skills?.ai_ml) ? obj.technical_skills.ai_ml : [],
-          systems_and_infra: Array.isArray(obj?.technical_skills?.systems_and_infra)
+          languages: Array.isArray(obj?.technical_skills?.languages)
+            ? obj.technical_skills.languages
+            : [],
+          ai_ml: Array.isArray(obj?.technical_skills?.ai_ml)
+            ? obj.technical_skills.ai_ml
+            : [],
+          systems_and_infra: Array.isArray(
+            obj?.technical_skills?.systems_and_infra,
+          )
             ? obj.technical_skills.systems_and_infra
             : [],
-          web: Array.isArray(obj?.technical_skills?.web) ? obj.technical_skills.web : [],
+          web: Array.isArray(obj?.technical_skills?.web)
+            ? obj.technical_skills.web
+            : [],
         };
-        const experiences: Experience[] = Array.isArray(obj?.experiences) ? obj.experiences : [];
-        const education: Education[] = Array.isArray(obj?.education) ? obj.education : [];
-        const certifications: Certification[] = Array.isArray(obj?.certifications) ? obj.certifications : [];
+        const experiences: Experience[] = Array.isArray(obj?.experiences)
+          ? obj.experiences
+          : [];
+        const education: Education[] = Array.isArray(obj?.education)
+          ? obj.education
+          : [];
+        const certifications: Certification[] = Array.isArray(
+          obj?.certifications,
+        )
+          ? obj.certifications
+          : [];
         if (!canceled)
           setData({
             name: obj?.name ?? '',
@@ -105,14 +128,33 @@ const ResumePage: React.FC = () => {
       const merged = (res?.item || {}) as ResumeData;
 
       const next: ResumeData = {
-        name: merged?.name ?? (data?.name ?? ''),
+        name: merged?.name ?? data?.name ?? '',
         contact: {
-          email: merged?.contact?.email ?? (patch.contact as Contact)?.email ?? data?.contact?.email ?? '',
-          phone: merged?.contact?.phone ?? (patch.contact as Contact)?.phone ?? data?.contact?.phone ?? '',
+          email:
+            merged?.contact?.email ??
+            (patch.contact as Contact)?.email ??
+            data?.contact?.email ??
+            '',
+          phone:
+            merged?.contact?.phone ??
+            (patch.contact as Contact)?.phone ??
+            data?.contact?.phone ??
+            '',
           linkedin:
-            merged?.contact?.linkedin ?? (patch.contact as Contact)?.linkedin ?? data?.contact?.linkedin ?? '',
-          github: merged?.contact?.github ?? (patch.contact as Contact)?.github ?? data?.contact?.github ?? '',
-          website: merged?.contact?.website ?? (patch.contact as Contact)?.website ?? data?.contact?.website ?? '',
+            merged?.contact?.linkedin ??
+            (patch.contact as Contact)?.linkedin ??
+            data?.contact?.linkedin ??
+            '',
+          github:
+            merged?.contact?.github ??
+            (patch.contact as Contact)?.github ??
+            data?.contact?.github ??
+            '',
+          website:
+            merged?.contact?.website ??
+            (patch.contact as Contact)?.website ??
+            data?.contact?.website ??
+            '',
         },
         experiences: Array.isArray(merged?.experiences)
           ? (merged.experiences as Experience[])
@@ -123,12 +165,13 @@ const ResumePage: React.FC = () => {
         certifications: Array.isArray(merged?.certifications)
           ? (merged.certifications as Certification[])
           : (data?.certifications ?? []),
-        technical_skills: (merged?.technical_skills as TechnicalSkills) ?? data?.technical_skills ?? {
-          languages: [],
-          ai_ml: [],
-          systems_and_infra: [],
-          web: [],
-        },
+        technical_skills: (merged?.technical_skills as TechnicalSkills) ??
+          data?.technical_skills ?? {
+            languages: [],
+            ai_ml: [],
+            systems_and_infra: [],
+            web: [],
+          },
         skills: Array.isArray(merged?.skills)
           ? (merged.skills as string[])
           : (patch.skills ?? data?.skills ?? []),
@@ -168,15 +211,21 @@ const ResumePage: React.FC = () => {
     };
     setSavingTech(true);
     try {
-      const res = await updateItem('resume', 'main', { technical_skills }, token);
+      const res = await updateItem(
+        'resume',
+        'main',
+        { technical_skills },
+        token,
+      );
       const merged = (res?.item || {}) as ResumeData;
       setData((prev) =>
         prev
           ? {
-            ...prev,
-            technical_skills:
-              (merged?.technical_skills as TechnicalSkills) ?? technical_skills,
-          }
+              ...prev,
+              technical_skills:
+                (merged?.technical_skills as TechnicalSkills) ??
+                technical_skills,
+            }
           : null,
       );
       toast.success('Technical skills saved');
@@ -198,7 +247,12 @@ const ResumePage: React.FC = () => {
           .map((s) => s.trim())
           .filter(Boolean),
       }));
-      const res = await updateItem('resume', 'main', { experiences: sanitized }, token);
+      const res = await updateItem(
+        'resume',
+        'main',
+        { experiences: sanitized },
+        token,
+      );
       const merged = (res?.item || {}) as ResumeData;
       const next = Array.isArray(merged?.experiences)
         ? (merged.experiences as Experience[])
@@ -241,7 +295,12 @@ const ResumePage: React.FC = () => {
         ...c,
         issued_date: (c.issued_date ?? '') === '' ? null : c.issued_date,
       }));
-      const res = await updateItem('resume', 'main', { certifications: payload }, token);
+      const res = await updateItem(
+        'resume',
+        'main',
+        { certifications: payload },
+        token,
+      );
       const merged = (res?.item || {}) as ResumeData;
       const next = Array.isArray(merged?.certifications)
         ? (merged.certifications as Certification[])
@@ -279,34 +338,81 @@ const ResumePage: React.FC = () => {
                 defaultValue={data.name}
                 placeholder="Full name"
                 className="border rounded-md px-3 py-2 bg-background w-full"
-                required />
+                required
+              />
             </div>
 
             <div className="border rounded-lg p-4 bg-card">
               <div className="font-medium mb-3">Contact</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="email" defaultValue={data.contact?.email || ''} placeholder="Email" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="phone" defaultValue={data.contact?.phone || ''} placeholder="Phone" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="linkedin" defaultValue={data.contact?.linkedin || ''} placeholder="LinkedIn" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="github" defaultValue={data.contact?.github || ''} placeholder="GitHub" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="website" defaultValue={data.contact?.website || ''} placeholder="Website" className="border rounded-md px-3 py-2 bg-background" />
+                <input
+                  name="email"
+                  defaultValue={data.contact?.email || ''}
+                  placeholder="Email"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="phone"
+                  defaultValue={data.contact?.phone || ''}
+                  placeholder="Phone"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="linkedin"
+                  defaultValue={data.contact?.linkedin || ''}
+                  placeholder="LinkedIn"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="github"
+                  defaultValue={data.contact?.github || ''}
+                  placeholder="GitHub"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="website"
+                  defaultValue={data.contact?.website || ''}
+                  placeholder="Website"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
               </div>
             </div>
 
             <div className="border rounded-lg p-4 bg-card">
               <div className="font-medium mb-3">Skills & Passions</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="skills" defaultValue={(data.skills || []).join(', ')} placeholder="Skills (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="passions" defaultValue={(data.passions || []).join(', ')} placeholder="Passions (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <input
+                  name="skills"
+                  defaultValue={(data.skills || []).join(', ')}
+                  placeholder="Skills (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="passions"
+                  defaultValue={(data.passions || []).join(', ')}
+                  placeholder="Passions (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
               </div>
             </div>
 
             <div className="flex justify-end">
-              <button type="submit" disabled={savingProfile} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">
-                {savingProfile ? 'Saving…' : (<><Save size={16} /> Save</>)}
+              <button
+                type="submit"
+                disabled={savingProfile}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+              >
+                {savingProfile ? (
+                  'Saving…'
+                ) : (
+                  <>
+                    <Save size={16} /> Save
+                  </>
+                )}
               </button>
             </div>
-          </form><form
+          </form>
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               void saveTechnicalSkills(e.currentTarget);
@@ -316,114 +422,221 @@ const ResumePage: React.FC = () => {
             <div className="border rounded-lg p-4 bg-card">
               <div className="font-medium mb-3">Technical Skills</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input name="languages" defaultValue={(data?.technical_skills?.languages || []).join(', ')} placeholder="Languages (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="ai_ml" defaultValue={(data?.technical_skills?.ai_ml || []).join(', ')} placeholder="AI/ML (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="systems_and_infra" defaultValue={(data?.technical_skills?.systems_and_infra || []).join(', ')} placeholder="Systems & Infra (comma)" className="border rounded-md px-3 py-2 bg-background" />
-                <input name="web" defaultValue={(data?.technical_skills?.web || []).join(', ')} placeholder="Web (comma)" className="border rounded-md px-3 py-2 bg-background" />
+                <input
+                  name="languages"
+                  defaultValue={(data?.technical_skills?.languages || []).join(
+                    ', ',
+                  )}
+                  placeholder="Languages (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="ai_ml"
+                  defaultValue={(data?.technical_skills?.ai_ml || []).join(
+                    ', ',
+                  )}
+                  placeholder="AI/ML (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="systems_and_infra"
+                  defaultValue={(
+                    data?.technical_skills?.systems_and_infra || []
+                  ).join(', ')}
+                  placeholder="Systems & Infra (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="web"
+                  defaultValue={(data?.technical_skills?.web || []).join(', ')}
+                  placeholder="Web (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
               </div>
             </div>
             <div className="flex justify-end">
-              <button type="submit" disabled={savingTech} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90">{savingTech ? 'Saving…' : (<><Save size={16} /> Save Technical Skills</>)}</button>
+              <button
+                type="submit"
+                disabled={savingTech}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+              >
+                {savingTech ? (
+                  'Saving…'
+                ) : (
+                  <>
+                    <Save size={16} /> Save Technical Skills
+                  </>
+                )}
+              </button>
             </div>
-          </form><div className="border rounded-lg p-4 bg-card space-y-4">
+          </form>
+          <div className="border rounded-lg p-4 bg-card space-y-4">
             <div className="flex items-center justify-between">
               <div className="font-medium">Experiences</div>
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() => setExperiences((prev) => [
-                  ...prev,
-                  {
-                    role: '',
-                    company: '',
-                    period: '',
-                    location: '',
-                    current: false,
-                    highlight: false,
-                    hide: false,
-                    description: [],
-                  },
-                ])}
+                onClick={() =>
+                  setExperiences((prev) => [
+                    ...prev,
+                    {
+                      role: '',
+                      company: '',
+                      period: '',
+                      location: '',
+                      current: false,
+                      highlight: false,
+                      hide: false,
+                      description: [],
+                    },
+                  ])
+                }
               >
                 <Plus size={16} /> Add experience
               </button>
             </div>
             <div className="space-y-6">
               {experiences.map((exp, idx) => (
-                <div key={idx} className="border rounded-md p-3 bg-background space-y-3">
+                <div
+                  key={idx}
+                  className="border rounded-md p-3 bg-background space-y-3"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <input
                       placeholder="Role"
                       className="border rounded-md px-3 py-2"
                       value={exp.role}
-                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, role: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, role: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Company"
                       className="border rounded-md px-3 py-2"
                       value={exp.company}
-                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, company: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, company: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Logo"
                       className="border rounded-md px-3 py-2"
                       value={exp.logo}
-                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, logo: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, logo: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Period"
                       className="border rounded-md px-3 py-2"
                       value={exp.period}
-                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, period: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, period: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Location"
                       className="border rounded-md px-3 py-2"
                       value={exp.location}
-                      onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, location: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, location: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                   </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={!!exp.current}
-                        onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, current: e.target.checked } : x))
-                        )} />
+                        onChange={(e) =>
+                          setExperiences((prev) =>
+                            prev.map((x, i) =>
+                              i === idx
+                                ? { ...x, current: e.target.checked }
+                                : x,
+                            ),
+                          )
+                        }
+                      />
                       <span>Current</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={!!exp.highlight}
-                        onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, highlight: e.target.checked } : x))
-                        )} />
+                        onChange={(e) =>
+                          setExperiences((prev) =>
+                            prev.map((x, i) =>
+                              i === idx
+                                ? { ...x, highlight: e.target.checked }
+                                : x,
+                            ),
+                          )
+                        }
+                      />
                       <span>Highlight</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={!!exp.hide}
-                        onChange={(e) => setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, hide: e.target.checked } : x))
-                        )} />
+                        onChange={(e) =>
+                          setExperiences((prev) =>
+                            prev.map((x, i) =>
+                              i === idx ? { ...x, hide: e.target.checked } : x,
+                            ),
+                          )
+                        }
+                      />
                       <span>Hide</span>
                     </label>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Description (one per line)</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      Description (one per line)
+                    </div>
                     <textarea
                       className="w-full border rounded-md px-3 py-2 min-h-[100px]"
                       value={(exp.description || []).join('\n')}
                       onChange={(e) => {
                         const lines = e.target.value.split('\n');
-                        setExperiences((prev) => prev.map((x, i) => (i === idx ? { ...x, description: lines } : x)));
-                      }} />
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, description: lines } : x,
+                          ),
+                        );
+                      }}
+                    />
                   </div>
                   <div className="flex justify-end">
                     <button
                       type="button"
                       className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() => setExperiences((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        setExperiences((prev) =>
+                          prev.filter((_, i) => i !== idx),
+                        )
+                      }
                     >
                       <Trash2 size={16} /> Remove
                     </button>
@@ -438,59 +651,108 @@ const ResumePage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveExperiences()}
               >
-                {savingExp ? 'Saving…' : (<><Save size={16} /> Save Experiences</>)}
+                {savingExp ? (
+                  'Saving…'
+                ) : (
+                  <>
+                    <Save size={16} /> Save Experiences
+                  </>
+                )}
               </button>
             </div>
-          </div><div className="border rounded-lg p-4 bg-card space-y-4">
+          </div>
+          <div className="border rounded-lg p-4 bg-card space-y-4">
             <div className="flex items-center justify-between">
               <div className="font-medium">Education</div>
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() => setEducation((prev) => [
-                  ...prev,
-                  { institution: '', degree: '', description: '', period: '' },
-                ])}
+                onClick={() =>
+                  setEducation((prev) => [
+                    ...prev,
+                    {
+                      institution: '',
+                      degree: '',
+                      description: '',
+                      period: '',
+                    },
+                  ])
+                }
               >
                 <Plus size={16} /> Add education
               </button>
             </div>
             <div className="space-y-6">
               {education.map((edu, idx) => (
-                <div key={idx} className="border rounded-md p-3 bg-background space-y-3">
+                <div
+                  key={idx}
+                  className="border rounded-md p-3 bg-background space-y-3"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <input
                       placeholder="Institution"
                       className="border rounded-md px-3 py-2"
                       value={edu.institution}
-                      onChange={(e) => setEducation((prev) => prev.map((x, i) => (i === idx ? { ...x, institution: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setEducation((prev) =>
+                          prev.map((x, i) =>
+                            i === idx
+                              ? { ...x, institution: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Degree"
                       className="border rounded-md px-3 py-2"
                       value={edu.degree}
-                      onChange={(e) => setEducation((prev) => prev.map((x, i) => (i === idx ? { ...x, degree: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setEducation((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, degree: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Period"
                       className="border rounded-md px-3 py-2"
                       value={edu.period}
-                      onChange={(e) => setEducation((prev) => prev.map((x, i) => (i === idx ? { ...x, period: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setEducation((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, period: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Description (optional)</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      Description (optional)
+                    </div>
                     <textarea
                       className="w-full border rounded-md px-3 py-2 min-h-[80px]"
                       value={edu.description || ''}
-                      onChange={(e) => setEducation((prev) => prev.map((x, i) => (i === idx ? { ...x, description: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setEducation((prev) =>
+                          prev.map((x, i) =>
+                            i === idx
+                              ? { ...x, description: e.target.value }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
                   </div>
                   <div className="flex justify-end">
                     <button
                       type="button"
                       className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() => setEducation((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        setEducation((prev) => prev.filter((_, i) => i !== idx))
+                      }
                     >
                       <Trash2 size={16} /> Remove
                     </button>
@@ -505,50 +767,98 @@ const ResumePage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveEducation()}
               >
-                {savingEdu ? 'Saving…' : (<><Save size={16} /> Save Education</>)}
+                {savingEdu ? (
+                  'Saving…'
+                ) : (
+                  <>
+                    <Save size={16} /> Save Education
+                  </>
+                )}
               </button>
             </div>
-          </div><div className="border rounded-lg p-4 bg-card space-y-4">
+          </div>
+          <div className="border rounded-lg p-4 bg-card space-y-4">
             <div className="flex items-center justify-between">
               <div className="font-medium">Certifications</div>
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() => setCertifications((prev) => [
-                  ...prev,
-                  { provider: '', title: '', issued_date: null, status: 'issued' },
-                ])}
+                onClick={() =>
+                  setCertifications((prev) => [
+                    ...prev,
+                    {
+                      provider: '',
+                      title: '',
+                      issued_date: null,
+                      status: 'issued',
+                    },
+                  ])
+                }
               >
                 <Plus size={16} /> Add certification
               </button>
             </div>
             <div className="space-y-6">
               {certifications.map((cert, idx) => (
-                <div key={idx} className="border rounded-md p-3 bg-background space-y-3">
+                <div
+                  key={idx}
+                  className="border rounded-md p-3 bg-background space-y-3"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <input
                       placeholder="Provider"
                       className="border rounded-md px-3 py-2"
                       value={cert.provider}
-                      onChange={(e) => setCertifications((prev) => prev.map((x, i) => (i === idx ? { ...x, provider: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setCertifications((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, provider: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Title"
                       className="border rounded-md px-3 py-2"
                       value={cert.title}
-                      onChange={(e) => setCertifications((prev) => prev.map((x, i) => (i === idx ? { ...x, title: e.target.value } : x))
-                      )} />
+                      onChange={(e) =>
+                        setCertifications((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, title: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
                     <input
                       placeholder="Issued date (e.g. Jan 2023)"
                       className="border rounded-md px-3 py-2"
                       value={cert.issued_date ?? ''}
-                      onChange={(e) => setCertifications((prev) => prev.map((x, i) => (i === idx ? { ...x, issued_date: e.target.value || null } : x))
-                      )} />
+                      onChange={(e) =>
+                        setCertifications((prev) =>
+                          prev.map((x, i) =>
+                            i === idx
+                              ? { ...x, issued_date: e.target.value || null }
+                              : x,
+                          ),
+                        )
+                      }
+                    />
                     <select
                       className="border rounded-md px-3 py-2 bg-background"
                       value={cert.status}
-                      onChange={(e) => setCertifications((prev) => prev.map((x, i) => (i === idx ? { ...x, status: e.target.value as Certification['status'] } : x))
-                      )}
+                      onChange={(e) =>
+                        setCertifications((prev) =>
+                          prev.map((x, i) =>
+                            i === idx
+                              ? {
+                                  ...x,
+                                  status: e.target
+                                    .value as Certification['status'],
+                                }
+                              : x,
+                          ),
+                        )
+                      }
                     >
                       <option value="issued">issued</option>
                       <option value="in progress">in progress</option>
@@ -560,7 +870,11 @@ const ResumePage: React.FC = () => {
                     <button
                       type="button"
                       className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() => setCertifications((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        setCertifications((prev) =>
+                          prev.filter((_, i) => i !== idx),
+                        )
+                      }
                     >
                       <Trash2 size={16} /> Remove
                     </button>
@@ -575,7 +889,13 @@ const ResumePage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 onClick={() => void saveCertifications()}
               >
-                {savingCerts ? 'Saving…' : (<><Save size={16} /> Save Certifications</>)}
+                {savingCerts ? (
+                  'Saving…'
+                ) : (
+                  <>
+                    <Save size={16} /> Save Certifications
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -39,7 +39,9 @@ export function normalizeArticleApi(a: ApiArticle): Article {
   };
 }
 
-export async function getArticles(options?: { signal?: AbortSignal }): Promise<Article[]> {
+export async function getArticles(options?: {
+  signal?: AbortSignal;
+}): Promise<Article[]> {
   const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) throw new Error('VITE_API_URL is not configured');
   const res = await fetchWithTimeout(`${apiUrl}/api/articles/all`, {
@@ -123,21 +125,33 @@ export async function trackArticleRead(
   article: Article,
   options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent('read', { id: article.id, slug: article.slug }, options);
+  return sendArticleEvent(
+    'read',
+    { id: article.id, slug: article.slug },
+    options,
+  );
 }
 
 export async function trackArticleLike(
   article: Article,
   options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent('like', { id: article.id, slug: article.slug }, options);
+  return sendArticleEvent(
+    'like',
+    { id: article.id, slug: article.slug },
+    options,
+  );
 }
 
 export async function trackArticleShare(
   article: Article,
   options?: { signal?: AbortSignal },
 ) {
-  return sendArticleEvent('share', { id: article.id, slug: article.slug }, options);
+  return sendArticleEvent(
+    'share',
+    { id: article.id, slug: article.slug },
+    options,
+  );
 }
 
 export async function getArticleMetrics(

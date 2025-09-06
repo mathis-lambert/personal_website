@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    apiLogout().catch(() => { });
+    apiLogout().catch(() => {});
   };
 
   return (
