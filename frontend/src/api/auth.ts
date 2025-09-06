@@ -10,7 +10,7 @@ export function getCsrfToken(): string | undefined {
   return getCookie('XSRF-TOKEN')
 }
 
-export async function login(username: string, password: string): Promise<string> {
+export async function login(username: string, password: string): Promise<{ access_token: string; expires_in: number }> {
   const enc = new TextEncoder();
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(password));
   const hashHex = [...new Uint8Array(digest)]
@@ -24,7 +24,7 @@ export async function login(username: string, password: string): Promise<string>
   });
   if (!res.ok) throw new Error(`Login failed: ${res.status}`);
   const data = await res.json();
-  return data.access_token as string;
+  return { access_token: data.access_token as string, expires_in: data.expires_in as number };
 }
 
 export async function fetchToken(): Promise<void> {

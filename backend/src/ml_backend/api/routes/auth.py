@@ -20,6 +20,9 @@ from ml_backend.api.session import (
 API_USERNAME = os.getenv("API_USERNAME")
 API_PASSWORD = os.getenv("API_PASSWORD")
 
+# Admin Token Expiration time (in seconds)
+ADMIN_TOKEN_EXPIRE_SECONDS = int(os.getenv("ADMIN_TOKEN_EXPIRE_SECONDS", "1800"))  # Default to 30 minutes
+
 if not API_USERNAME or not API_PASSWORD:
     raise RuntimeError("API_USERNAME and API_PASSWORD must be set")
 
@@ -64,8 +67,8 @@ async def login(req: LoginRequest):
     if not hmac.compare_digest(supplied_hash, expected_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    token = create_access_token({"sub": req.username}, expires_delta=timedelta(seconds=1800)) # Admin token valid for 30 minutes
-    return {"access_token": token, "token_type": "bearer"}
+    token = create_access_token({"sub": req.username}, expires_delta=timedelta(seconds=ADMIN_TOKEN_EXPIRE_SECONDS))
+    return {"access_token": token, "token_type": "bearer", "expires_in": ADMIN_TOKEN_EXPIRE_SECONDS}
 
 
 @router.post("/token")

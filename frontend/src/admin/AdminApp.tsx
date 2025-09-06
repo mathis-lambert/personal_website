@@ -12,6 +12,7 @@ const ExperiencesPage = React.lazy(() => import('@/admin/pages/ExperiencesPage')
 const StudiesPage = React.lazy(() => import('@/admin/pages/StudiesPage'));
 const ResumePage = React.lazy(() => import('@/admin/pages/ResumePage'));
 
+// Middleware to protect admin routes
 const RequireAdminAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token } = useAdminAuth();
   if (!token) return <Navigate to="/admin/login" replace />;
