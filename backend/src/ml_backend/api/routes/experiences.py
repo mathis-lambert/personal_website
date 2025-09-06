@@ -25,6 +25,9 @@ async def get_all_experiences(
     try:
         db = mongodb.get_database()
         experiences = await db["experiences"].find({}).to_list(length=None)
+
+        await mongodb.log_event("N/A", "get_all_experiences", {})
+
         return {"experiences": [mongodb.serialize(exp) for exp in experiences]}
     except aiohttp.ClientResponseError as e:
         logger.error(f"Erreur de réponse de l'API : {e}")

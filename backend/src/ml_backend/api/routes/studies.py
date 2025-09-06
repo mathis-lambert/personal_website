@@ -25,6 +25,9 @@ async def get_all_studies(
     try:
         db = mongodb.get_database()
         studies = await db["studies"].find({}).to_list(length=None)
+
+        await mongodb.log_event("N/A", "get_all_studies", {})
+
         return {"studies": [mongodb.serialize(exp) for exp in studies]}
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API

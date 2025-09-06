@@ -166,3 +166,84 @@ export async function deleteItem(
   if (!res.ok)
     throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
 }
+
+// ---- Analytics: events ----
+export type EventsAnalyticsSeriesPoint = {
+  bucket: string; // e.g. 2025-01-01 or 2025-01-01T13:00Z
+  total: number;
+  // dynamic keys per action name
+  [action: string]: number | string;
+};
+
+export interface EventsAnalyticsResponse {
+  ok: boolean;
+  range: { start: string; end: string; granularity: 'hour' | 'day' | 'month' };
+  actions: string[];
+  series: EventsAnalyticsSeriesPoint[];
+  totals: { total: number; byAction: Record<string, number> };
+  group_by?: 'action' | 'location';
+}
+
+export async function getEventsAnalytics(
+  params: {
+    start?: string; // ISO8601
+    end?: string; // ISO8601
+    granularity?: 'hour' | 'day' | 'month';
+    actions?: string[]; // optional filter list
+    groupBy?: 'action' | 'location';
+  },
+  token: string,
+): Promise<EventsAnalyticsResponse> {
+  const qs = new URLSearchParams();
+  if (params.start) qs.set('start', params.start);
+  if (params.end) qs.set('end', params.end);
+  if (params.granularity) qs.set('granularity', params.granularity);
+  if (params.actions && params.actions.length) qs.set('action', params.actions.join(','));
+  if (params.groupBy) qs.set('group_by', params.groupBy);
+  const url = `${API_URL}/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const res = await fetchWithTimeout(url, { timeoutMs: 12000, authToken: token });
+  if (!res.ok) throw new Error(`Failed to fetch events analytics: ${res.status}`);
+  return (await res.json()) as EventsAnalyticsResponse;
+}
+
+// ---- Events list (for Activity table) ----
+export interface EventLog {
+  job_id?: string;
+  action?: string;
+  created_at?: string; // ISO
+  request_body?: {
+    location?: string;
+    messages?: Array<{ role: string; content: string }>;
+    [k: string]: unknown;
+  } & Record<string, unknown>;
+}
+
+export interface EventsListResponse {
+  ok: boolean;
+  total: number;
+  items: EventLog[];
+}
+
+export async function getEventsList(
+  params: {
+    start?: string;
+    end?: string;
+    action?: string | string[];
+    limit?: number;
+    skip?: number;
+    sort?: 'asc' | 'desc';
+  },
+  token: string,
+): Promise<EventsListResponse> {
+  const qs = new URLSearchParams();
+  if (params.start) qs.set('start', params.start);
+  if (params.end) qs.set('end', params.end);
+  if (params.action) qs.set('action', Array.isArray(params.action) ? params.action.join(',') : params.action);
+  if (params.limit != null) qs.set('limit', String(params.limit));
+  if (params.skip != null) qs.set('skip', String(params.skip));
+  if (params.sort) qs.set('sort', params.sort);
+  const url = `${API_URL}/api/admin/events${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const res = await fetchWithTimeout(url, { timeoutMs: 12000, authToken: token });
+  if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`);
+  return (await res.json()) as EventsListResponse;
+}

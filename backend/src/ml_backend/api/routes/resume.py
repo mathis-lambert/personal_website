@@ -19,6 +19,9 @@ async def get_resume(
     try:
         db = mongodb.get_database()
         resume = await db["resume"].find_one({})
+
+        await mongodb.log_event("N/A", "get_resume", {})
+
         return {"resume": mongodb.serialize(resume)}
     except aiohttp.ClientResponseError as e:
         logger.error(f"Erreur de réponse de l'API : {e}")
@@ -36,6 +39,9 @@ async def export_resume_pdf(mongodb: MongoDBConnector = Depends(get_mongo_client
         resume = await db["resume"].find_one({})
         pdf_bytes = ResumePDFExporter(load_resume_from_dict(resume)).build_pdf()
         headers = {"Content-Disposition": 'attachment; filename="mathis_lambert_resume.pdf"'}
+
+        await mongodb.log_event("N/A", "resume_export", {})
+
         return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
     except FileNotFoundError as e:
         logger.error(f"Resume data not found: {e}")

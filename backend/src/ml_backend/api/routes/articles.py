@@ -25,6 +25,9 @@ async def get_all_articles(
     try:
         db = mongodb.get_database()
         articles = await db["articles"].find({}).to_list(length=None)
+
+        await mongodb.log_event("N/A", "get_all_articles", {})
+
         return {"articles": [mongodb.serialize(exp) for exp in articles]}
     except aiohttp.ClientResponseError as e:
         logger.error(f"Erreur de réponse de l'API : {e}")
@@ -42,6 +45,9 @@ async def get_article_by_slug(
     try:
         db = mongodb.get_database()
         article = await db["articles"].find_one({"slug": article_slug})
+
+        await mongodb.log_event("N/A", "get_article_by_slug", {"slug": article_slug})
+
         return {"article": mongodb.serialize(article)}
     except aiohttp.ClientResponseError as e:
         logger.error(f"Erreur de réponse de l'API : {e}")

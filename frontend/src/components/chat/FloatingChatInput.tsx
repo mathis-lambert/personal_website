@@ -141,7 +141,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
             >
               {/* Input card */}
               <motion.div
-                className="w-full max-w-lg bg-white/10 border border-white shadow-lg backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
+                className="w-full max-w-lg bg-white/10 border border-white shadow-lg shadow-black/20 backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
