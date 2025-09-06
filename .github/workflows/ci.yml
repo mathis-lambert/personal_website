@@ -30,9 +30,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install deps
         run: npm ci
@@ -61,7 +61,7 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
-          cache-dependency-path: backend/pyproject.toml
+          cache-dependency-path: pyproject.toml
 
       - name: Install deps (with dev extras)
         env:
@@ -127,7 +127,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'release' || startsWith(github.ref, 'refs/tags/') }}
           tags: ${{ steps.meta_frontend.outputs.tags }}
@@ -152,7 +152,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: ./backend/Dockerfile
+          file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'release' || startsWith(github.ref, 'refs/tags/') }}
           tags: ${{ steps.meta_backend.outputs.tags }}
