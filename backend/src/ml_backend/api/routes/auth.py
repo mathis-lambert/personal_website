@@ -1,3 +1,4 @@
+from datetime import timedelta
 import hashlib
 import hmac
 import os
@@ -63,7 +64,7 @@ async def login(req: LoginRequest):
     if not hmac.compare_digest(supplied_hash, expected_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    token = create_access_token({"sub": req.username})
+    token = create_access_token({"sub": req.username}, expires_delta=timedelta(seconds=1800)) # Admin token valid for 30 minutes
     return {"access_token": token, "token_type": "bearer"}
 
 
