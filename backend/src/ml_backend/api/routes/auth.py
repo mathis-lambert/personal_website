@@ -21,7 +21,9 @@ API_USERNAME = os.getenv("API_USERNAME")
 API_PASSWORD = os.getenv("API_PASSWORD")
 
 # Admin Token Expiration time (in seconds)
-ADMIN_TOKEN_EXPIRE_SECONDS = int(os.getenv("ADMIN_TOKEN_EXPIRE_SECONDS", "1800"))  # Default to 30 minutes
+ADMIN_TOKEN_EXPIRE_SECONDS = int(
+    os.getenv("ADMIN_TOKEN_EXPIRE_SECONDS", "1800")
+)  # Default to 30 minutes
 
 if not API_USERNAME or not API_PASSWORD:
     raise RuntimeError("API_USERNAME and API_PASSWORD must be set")
@@ -48,7 +50,9 @@ def _generate_session_token() -> Tuple[str, int]:
 @router.post("/login")
 async def login(req: LoginRequest):
     if req.username != API_USERNAME:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
     # Compute expected SHA-256 hash of the configured password
     expected_hash = hashlib.sha256(API_PASSWORD.encode()).hexdigest()
@@ -65,10 +69,19 @@ async def login(req: LoginRequest):
 
     # Constant-time comparison to mitigate timing attacks
     if not hmac.compare_digest(supplied_hash, expected_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
-    token = create_access_token({"sub": req.username}, expires_delta=timedelta(seconds=ADMIN_TOKEN_EXPIRE_SECONDS))
-    return {"access_token": token, "token_type": "bearer", "expires_in": ADMIN_TOKEN_EXPIRE_SECONDS}
+    token = create_access_token(
+        {"sub": req.username},
+        expires_delta=timedelta(seconds=ADMIN_TOKEN_EXPIRE_SECONDS),
+    )
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": ADMIN_TOKEN_EXPIRE_SECONDS,
+    }
 
 
 @router.post("/token")
@@ -98,7 +111,9 @@ async def issue_token(response: Response, request: Request):
 
 
 @router.post("/refresh")
-async def refresh_token(response: Response, request: Request, session=Depends(require_session)):
+async def refresh_token(
+    response: Response, request: Request, session=Depends(require_session)
+):
     old_session_id, _ = session
     token, expires_in = _generate_session_token()
     new_session_id, csrf, max_age = create_session(token, expires_in)

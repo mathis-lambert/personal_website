@@ -54,7 +54,9 @@ router.include_router(
 )
 
 # Admin endpoints (file-backed data management)
-router.include_router(admin_router, prefix="", tags=["Admin"], dependencies=[Depends(verify_token)])
+router.include_router(
+    admin_router, prefix="", tags=["Admin"], dependencies=[Depends(verify_token)]
+)
 
 
 # Health check

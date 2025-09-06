@@ -35,7 +35,9 @@ async def lifespan(app: FastAPI):
     app.mongodb_client = mongodb
 
     if populate_mongo:
-        logger.info("POPULATE_MONGODB is set to true. Inserting initial data into MongoDB.")
+        logger.info(
+            "POPULATE_MONGODB is set to true. Inserting initial data into MongoDB."
+        )
         await mongodb.insert_initial_data()
 
     apiclient.tools.register(
@@ -146,7 +148,9 @@ MAINTENANCE_MODE = os.getenv("MAINTENANCE_MODE", "false").lower() == "true"
 @app.middleware("http")
 async def check_maintenance(request, call_next):
     if MAINTENANCE_MODE:
-        return JSONResponse(status_code=503, content={"detail": "Service en maintenance"})
+        return JSONResponse(
+            status_code=503, content={"detail": "Service en maintenance"}
+        )
     response = await call_next(request)
     return response
 
@@ -157,7 +161,9 @@ app.include_router(api_router, prefix="/api")
 
 @app.get("/")
 def read_root():
-    return {"message": "Oups, you shouldn't be here. Please go back to https://mathislambert.fr"}
+    return {
+        "message": "Oups, you shouldn't be here. Please go back to https://mathislambert.fr"
+    }
 
 
 # Gestion des erreurs

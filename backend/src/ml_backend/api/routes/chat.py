@@ -64,7 +64,9 @@ async def chat_completions(
         await mongodb.log_event("N/A", "chat_completion", body.model_dump())
 
         return StreamingResponse(
-            api_client.chat.stream_sse(messages=messages, model=LLM_MODEL_NAME, auto_tool_execution=True),
+            api_client.chat.stream_sse(
+                messages=messages, model=LLM_MODEL_NAME, auto_tool_execution=True
+            ),
             media_type="text/event-stream",
         )
 

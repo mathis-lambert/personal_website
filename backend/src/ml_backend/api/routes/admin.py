@@ -46,7 +46,11 @@ def _parse_dt(value: Optional[str], fallback: Optional[datetime] = None) -> date
 
 
 # Fill any missing buckets with zeros for smoother charts
-def _iter_buckets(start_dt: datetime, end_dt: datetime, granularity: Literal["hour", "day", "month"] = "day"):
+def _iter_buckets(
+    start_dt: datetime,
+    end_dt: datetime,
+    granularity: Literal["hour", "day", "month"] = "day",
+):
     cur = start_dt
     step = {
         "hour": timedelta(hours=1),
@@ -248,10 +252,14 @@ async def replace_collection(
         elif isinstance(payload, dict):
             await col.insert_one(payload)
         else:
-            raise HTTPException(status_code=400, detail="Payload must be a list or an object")
+            raise HTTPException(
+                status_code=400, detail="Payload must be a list or an object"
+            )
     except Exception as exc:
         logger.error(f"Mongo replace failed: {exc}")
-        raise HTTPException(status_code=500, detail=f"Mongo replace failed: {exc}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Mongo replace failed: {exc}"
+        ) from exc
 
     return {"ok": True}
 
@@ -296,7 +304,9 @@ async def update_item(
     mongodb: MongoDBConnector = Depends(get_mongo_client),
 ):
     if collection == "resume":
-        raise HTTPException(status_code=400, detail="Use PATCH /admin/resume for resume updates")
+        raise HTTPException(
+            status_code=400, detail="Use PATCH /admin/resume for resume updates"
+        )
 
     # Do not allow changing id to empty
     if "id" in patch and not str(patch["id"]).strip():
@@ -308,7 +318,9 @@ async def update_item(
     idx = _parse_index(item_id)
     if idx is not None:
         # Find nth document (sorted by _id asc for stability)
-        docs = await db[collection].find({}, {}).sort("_id", 1).skip(idx).to_list(length=1)
+        docs = (
+            await db[collection].find({}, {}).sort("_id", 1).skip(idx).to_list(length=1)
+        )
         if not docs:
             raise HTTPException(status_code=404, detail="Item not found")
         current = docs[0]
@@ -372,7 +384,9 @@ async def delete_item(
     db = mongodb.get_database()
     idx = _parse_index(item_id)
     if idx is not None:
-        docs = await db[collection].find({}, {}).sort("_id", 1).skip(idx).to_list(length=1)
+        docs = (
+            await db[collection].find({}, {}).sort("_id", 1).skip(idx).to_list(length=1)
+        )
         if not docs:
             raise HTTPException(status_code=404, detail="Item not found")
         current = docs[0]
@@ -452,7 +466,12 @@ async def analytics_events(
         },
         {
             "$group": {
-                "_id": {"bucket": "$bucket", "group": "$action" if group_by == "action" else "$request_body.location"},
+                "_id": {
+                    "bucket": "$bucket",
+                    "group": "$action"
+                    if group_by == "action"
+                    else "$request_body.location",
+                },
                 "count": {"$sum": 1},
             }
         },

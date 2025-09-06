@@ -27,19 +27,27 @@ def create_session(token: str, expires_in: int) -> Tuple[str, str, int]:
     return session_id, csrf, max_age
 
 
-def get_session(request: Request, require_csrf: bool = True) -> Tuple[str, Dict[str, Any]]:
+def get_session(
+    request: Request, require_csrf: bool = True
+) -> Tuple[str, Dict[str, Any]]:
     session_id = request.cookies.get(SESSION_COOKIE_NAME)
     with _lock:
         sess = _sessions.get(session_id) if session_id else None
         if not sess:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+            )
         if sess["exp"] < time.time():
             del _sessions[session_id]
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired"
+            )
     if require_csrf and request.method not in ("GET", "HEAD", "OPTIONS"):
         csrf_header = request.headers.get("X-CSRF-Token")
         if not csrf_header or csrf_header != sess["csrf"]:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token"
+            )
     return session_id, sess
 
 

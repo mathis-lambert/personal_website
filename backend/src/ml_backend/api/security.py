@@ -8,7 +8,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not SECRET_KEY:
-    raise RuntimeError("JWT_SECRET_KEY environment variable must be set and not use a weak default in production.")
+    raise RuntimeError(
+        "JWT_SECRET_KEY environment variable must be set and not use a weak default in production."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("JWT_EXPIRE_SECONDS", "60"))
 AUDIENCE = os.getenv("TOKEN_AUDIENCE", "https://mathislambert.fr")
@@ -18,14 +20,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS))
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(seconds=ACCESS_TOKEN_EXPIRE_SECONDS)
+    )
     to_encode.update({"exp": expire, "aud": AUDIENCE})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def verify_token(token: str = Depends(oauth2_scheme)) -> Dict:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=AUDIENCE)
+        payload = jwt.decode(
+            token, SECRET_KEY, algorithms=[ALGORITHM], audience=AUDIENCE
+        )
         return payload
     except jwt.ExpiredSignatureError as exc:
         raise HTTPException(

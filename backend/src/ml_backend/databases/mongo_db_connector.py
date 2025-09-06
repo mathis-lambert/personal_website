@@ -70,11 +70,15 @@ class MongoDBConnector:
 
                 if data:
                     await collection.insert_many(data)
-                    self.logger.info(f"Inserted data into '{collection_name}' collection.")
+                    self.logger.info(
+                        f"Inserted data into '{collection_name}' collection."
+                    )
                 else:
                     self.logger.info(f"No data to insert into '{collection_name}'.")
             except Exception as e:
-                self.logger.error(f"Failed to insert data into '{collection_name}': {e}")
+                self.logger.error(
+                    f"Failed to insert data into '{collection_name}': {e}"
+                )
 
         self.logger.info("MongoDB initial data population complete.")
 

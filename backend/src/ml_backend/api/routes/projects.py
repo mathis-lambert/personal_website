@@ -24,7 +24,11 @@ async def get_all_projects(
 ):
     try:
         db = mongodb.get_database()
-        projects = await db["projects"].find({}, {"_id": 0, "ai_context": 0}).to_list(length=None)
+        projects = (
+            await db["projects"]
+            .find({}, {"_id": 0, "ai_context": 0})
+            .to_list(length=None)
+        )
         return {"projects": [mongodb.serialize(exp) for exp in projects]}
     except aiohttp.ClientResponseError as e:
         # Gestion spécifique des erreurs HTTP de l’API
@@ -43,7 +47,9 @@ async def get_project_by_slug(
 ):
     try:
         db = mongodb.get_database()
-        project = await db["projects"].find_one({"slug": project_slug}, {"_id": 0, "ai_context": 0})
+        project = await db["projects"].find_one(
+            {"slug": project_slug}, {"_id": 0, "ai_context": 0}
+        )
 
         await mongodb.log_event("N/A", "get_project_by_slug", {"slug": project_slug})
 

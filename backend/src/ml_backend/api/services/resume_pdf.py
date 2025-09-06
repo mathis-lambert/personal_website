@@ -8,7 +8,13 @@ from typing import Any, Dict, Iterable, List, Optional
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
 
-DATA_PATH = Path(__file__).resolve().parents[3] / "ml_backend" / "databases" / "data" / "resume.json"
+DATA_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "ml_backend"
+    / "databases"
+    / "data"
+    / "resume.json"
+)
 
 
 @dataclass
@@ -168,7 +174,9 @@ class ResumePDFExporter:
         # Clean header without background; accent title only
         self.pdf.set_text_color(*self.pdf.accent)
         self.pdf.set_font("Helvetica", style="B", size=20)
-        self.pdf.cell(0, 10, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+        self.pdf.cell(
+            0, 10, text=self._sanitize(text), new_x=XPos.LMARGIN, new_y=YPos.NEXT
+        )
 
     def _h2(self, text: str):
         self.pdf.ln(1)
@@ -191,7 +199,9 @@ class ResumePDFExporter:
         self.pdf.set_font("Helvetica", style="B" if bold else "", size=8)
         # Use multi_cell so long lines never overflow to the right
         self.pdf.set_x(self.pdf.l_margin)
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        epw = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         self.pdf.multi_cell(epw, 4.5, text=self._sanitize(text))
 
     def _para(self, text: str, size: int = 10):
@@ -199,13 +209,17 @@ class ResumePDFExporter:
         # Slightly reduced base paragraph size for denser layout
         self.pdf.set_font("Helvetica", size=max(8, size - 1))
         self.pdf.set_x(self.pdf.l_margin)
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        epw = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         self.pdf.multi_cell(epw, 4.8, text=self._sanitize(text))
 
     def _bullets(self, items: Iterable[str], max_items: Optional[int] = None):
         cnt = 0
         # Use effective page width for reliability
-        content_width = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        content_width = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         indent = 4  # mm indent after bullet symbol
         for it in items:
             if max_items is not None and cnt >= max_items:
@@ -236,7 +250,9 @@ class ResumePDFExporter:
         if max_items is not None:
             items_iter = items_iter[:max_items]
 
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        epw = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         avail_w = max(10.0, epw - left_pad)
         x0 = self.pdf.l_margin + left_pad
         y0 = self.pdf.get_y()
@@ -303,7 +319,9 @@ class ResumePDFExporter:
             add_piece(c.phone)
         if c.linkedin:
             add_sep()
-            add_piece(f"LinkedIn: {c.linkedin}", f"https://www.linkedin.com/in/{c.linkedin}")
+            add_piece(
+                f"LinkedIn: {c.linkedin}", f"https://www.linkedin.com/in/{c.linkedin}"
+            )
         if c.github:
             add_sep()
             add_piece(f"GitHub: {c.github}", f"https://github.com/{c.github}")
@@ -329,7 +347,9 @@ class ResumePDFExporter:
             # Role
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(15)
-            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            epw = getattr(
+                self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+            )
             self.pdf.set_x(self.pdf.l_margin)
             self.pdf.multi_cell(epw, 5.0, text=self._sanitize(title))
             # Company
@@ -361,7 +381,9 @@ class ResumePDFExporter:
             line = f"{institution} - {title}" if title else institution
             self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(25)
-            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            epw = getattr(
+                self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+            )
             self.pdf.set_x(self.pdf.l_margin)
             self.pdf.multi_cell(epw, 4.8, text=self._sanitize(line))
             if edu.description:
@@ -395,7 +417,9 @@ class ResumePDFExporter:
             label_col_w = max(label_col_w, self.pdf.get_string_width(txt))
         label_col_w += 2
 
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        epw = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         items_w = max(10, epw - label_col_w)
 
         def row(label: str, items: List[str]):
@@ -435,7 +459,9 @@ class ResumePDFExporter:
 
             self.pdf.set_font("Helvetica", style="B", size=9)
             self.pdf.set_text_color(25)
-            epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+            epw = getattr(
+                self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+            )
             self.pdf.set_x(self.pdf.l_margin)
             self.pdf.multi_cell(epw, 4.8, text=self._sanitize(title))
             if meta:
@@ -452,9 +478,13 @@ class ResumePDFExporter:
         # Simple inline list (no backgrounds)
         self.pdf.set_font("Helvetica", size=9)
         self.pdf.set_text_color(50)
-        epw = getattr(self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin)
+        epw = getattr(
+            self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
+        )
         self.pdf.set_x(self.pdf.l_margin)
-        self.pdf.multi_cell(epw, 4.8, text=self._sanitize(", ".join(self.resume.passions[:10])))
+        self.pdf.multi_cell(
+            epw, 4.8, text=self._sanitize(", ".join(self.resume.passions[:10]))
+        )
 
     def build_pdf(self) -> bytes:
         # Compose blocks with a 2-column layout if vertical overflow is likely
