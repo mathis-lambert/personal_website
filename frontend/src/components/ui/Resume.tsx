@@ -179,7 +179,7 @@ export default function Resume() {
                     )}
                     {resumeData?.contact.website && (
                       <a
-                        href={`https://${resumeData.contact.website}`}
+                        href={resumeData.contact.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center hover:text-cyan-500 transition-colors"
