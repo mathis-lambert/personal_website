@@ -73,14 +73,8 @@ jobs:
       - name: Ruff lint
         run: ruff check .
 
-      - name: Black format check
-        run: black --check .
-
-      - name: isort check
-        run: isort --check-only .
-
-      - name: Flake8
-        run: flake8 .
+      - name: Ruff format check
+        run: ruff format --check .
 
       # TODO: write tests
 
