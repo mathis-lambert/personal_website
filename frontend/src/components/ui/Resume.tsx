@@ -218,7 +218,7 @@ export default function Resume() {
 
               <TagListSection
                 icon={Sparkles}
-                title="Professional Skills"
+                title="Core Skills"
                 items={resumeData?.skills ?? []}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
                 delay={0.60}

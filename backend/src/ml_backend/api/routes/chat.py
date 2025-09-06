@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List
 
 import aiohttp
@@ -9,6 +10,8 @@ from pydantic import BaseModel
 from ml_backend.api.services import get_api_client, get_mongo_client
 from ml_backend.databases import MongoDBConnector as MongoDB
 from ml_backend.utils import CustomLogger, load_prompt_from_file
+
+LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "openai/gpt-oss-120b")
 
 logger = CustomLogger().get_logger(__name__)
 
@@ -58,10 +61,10 @@ async def chat_completions(
             }
         )
 
-        await mongodb.log_event(user_id=None)
+        await mongodb.log_event("N/A", "chat_completion", body.model_dump())
 
         return StreamingResponse(
-            api_client.chat.stream_sse(messages=messages, model="openai/gpt-oss-120b", auto_tool_execution=True),
+            api_client.chat.stream_sse(messages=messages, model=LLM_MODEL_NAME, auto_tool_execution=True),
             media_type="text/event-stream",
         )
 
