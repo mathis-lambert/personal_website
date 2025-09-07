@@ -51,6 +51,9 @@ async def get_project_by_slug(
             {"slug": project_slug}, {"_id": 0, "ai_context": 0}
         )
 
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
         await mongodb.log_event("N/A", "get_project_by_slug", {"slug": project_slug})
 
         return {"project": mongodb.serialize(project)}

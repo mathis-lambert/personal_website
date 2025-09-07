@@ -35,7 +35,27 @@ const ArticleDetailPage: React.FC = () => {
     return () => ac.abort();
   }, [articleId, article]);
 
-  return <ArticleView article={article} isLoading={isLoading} />;
+  return (
+    <>
+      <title>{article ? `${article.title} - Article` : 'Article Detail'}</title>
+      <meta
+        name="description"
+        content={article ? article.excerpt : 'Article Detail'}
+      />
+      <link rel="canonical" href={`/blog/${article?.slug}`} />
+      <meta
+        property="og:title"
+        content={article ? `${article.title} - Article` : 'Article Detail'}
+      />
+      <meta
+        property="og:description"
+        content={article ? article.excerpt : 'Article Detail'}
+      />
+      <meta property="og:url" content={`/blog/${article?.slug}`} />
+      <meta property="og:type" content="website" />
+      <ArticleView article={article} isLoading={isLoading} />
+    </>
+  );
 };
 
 export default ArticleDetailPage;

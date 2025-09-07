@@ -7,6 +7,7 @@ from .routes import (
     experiences_router,
     projects_router,
     resume_router,
+    sitemap_router,
     studies_router,
 )
 from .routes.admin import router as admin_router
@@ -51,6 +52,13 @@ router.include_router(
     prefix="/resume",
     tags=["Resume"],
     dependencies=[Depends(require_session)],
+)
+
+# Public: sitemap (no auth/session dependencies)
+router.include_router(
+    sitemap_router,
+    prefix="",
+    tags=["Public"],
 )
 
 # Admin endpoints (file-backed data management)

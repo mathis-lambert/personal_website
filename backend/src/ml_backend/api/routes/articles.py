@@ -48,6 +48,9 @@ async def get_article_by_slug(
 
         await mongodb.log_event("N/A", "get_article_by_slug", {"slug": article_slug})
 
+        if not article:
+            raise HTTPException(status_code=404, detail="Article not found")
+
         return {"article": mongodb.serialize(article)}
     except aiohttp.ClientResponseError as e:
         logger.error(f"Erreur de réponse de l'API : {e}")

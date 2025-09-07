@@ -62,6 +62,12 @@ const LoginPage: React.FC = () => {
           >
             {isLoading ? 'Signing in…' : 'Sign in'}
           </button>
+          <a
+            href="/"
+            className="w-full rounded-md border px-3 py-2 bg-blue-500 text-white text-center block"
+          >
+            Back to Home
+          </a>
         </div>
       </form>
     </div>

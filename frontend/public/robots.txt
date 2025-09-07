@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://mathislambert.fr/sitemap.xml
+
+# Prefer dynamic sitemap served by backend
+Sitemap: https://mathislambert.fr/api/sitemap.xml

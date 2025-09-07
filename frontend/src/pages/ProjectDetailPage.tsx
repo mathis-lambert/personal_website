@@ -37,7 +37,27 @@ const ProjectDetailPage: React.FC = () => {
     return () => ac.abort();
   }, [projectId, project]);
 
-  return <ProjectView project={project} isLoading={isLoading} />;
+  return (
+    <>
+      <title>{project ? `${project.title} - Project` : 'Project Detail'}</title>
+      <meta
+        name="description"
+        content={project ? project.description : 'Project Detail'}
+      />
+      <link rel="canonical" href={`/projects/${project?.slug}`} />
+      <meta
+        property="og:title"
+        content={project ? `${project.title} - Project` : 'Project Detail'}
+      />
+      <meta
+        property="og:description"
+        content={project ? project.description : 'Project Detail'}
+      />
+      <meta property="og:url" content={`/projects/${project?.slug}`} />
+      <meta property="og:type" content="website" />
+      <ProjectView project={project} isLoading={isLoading} />
+    </>
+  );
 };
 
 export default ProjectDetailPage;
