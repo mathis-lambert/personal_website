@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FaLinkedin } from 'react-icons/fa';
 import { Heading4 } from '@/components/ui/Headings.tsx';
 
+const appVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
+
 const Footer: React.FC = () => {
   // Fonction pour copier l'email dans le presse-papiers
   const copyEmail = () => {
@@ -73,6 +75,9 @@ const Footer: React.FC = () => {
           <p className="text-xs text-center text-gray-500">
             © This site was designed and developed by Mathis Lambert -{' '}
             {new Date().getFullYear()}. All rights reserved.
+          </p>
+          <p className="text-xs text-center text-gray-500">
+            Version: {appVersion}
           </p>
           <div className="mt-4 text-xs text-center text-gray-500">
             <Link

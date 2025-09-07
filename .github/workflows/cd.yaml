@@ -57,7 +57,8 @@ jobs:
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
             VITE_MAINTENANCE_MODE=${{ vars.VITE_MAINTENANCE_MODE }}
-            VITE_MAPS_API_KEY=${{ vars.VITE_MAPS_API_KEY }}
+            VITE_MAPS_PUBLIC_KEY=${{ vars.VITE_MAPS_PUBLIC_KEY }}
+            VITE_APP_VERSION= ${{ github.ref_name }}
           tags: ${{ steps.meta_frontend.outputs.tags }}
           labels: ${{ steps.meta_frontend.outputs.labels }}
           cache-from: type=gha,scope=frontend

@@ -3,7 +3,7 @@ import { useTheme } from '@/components/theme-provider.tsx';
 
 export function LocationMap() {
   const position = { lat: 43.2965, lng: 5.3698 };
-  const apiKey = import.meta.env.VITE_Maps_API_KEY;
+  const apiKey = import.meta.env.VITE_MAPS_PUBLIC_KEY;
   const { resolvedTheme } = useTheme();
 
   const lightStyles = [
