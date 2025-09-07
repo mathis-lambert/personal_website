@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '@/hooks/useAuth';
 import { fetchToken, refreshToken, logout as apiLogout } from '@/api/auth';
+import { setUnauthorizedHandler } from '@/api/utils';
 
 // Token expiration time (in seconds)
 const TOKEN_EXPIRATION_SEC = (() => {
@@ -45,15 +46,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
     void init();
+    // Re-establish session on 401s triggered elsewhere, then reschedule refresh
+    setUnauthorizedHandler(async () => {
+      await fetchToken();
+      scheduleRefresh();
+    });
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      setUnauthorizedHandler(null);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const login = async () => {
-    refresh();
+    await fetchToken();
+    scheduleRefresh();
   };
 
   const logout = () => {

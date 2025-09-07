@@ -25,7 +25,7 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
     h1: ({ className, ...props }) => (
       <h1
         className={cn(
-          'text-3xl mt-8 mb-4 leading-tight tracking-tight',
+          'text-3xl mt-8 mb-4 leading-tight tracking-tight font-bold',
           className,
         )}
         {...props}
@@ -34,7 +34,7 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
     h2: ({ className, ...props }) => (
       <h2
         className={cn(
-          'text-2xl mt-8 mb-3 leading-tight tracking-tight',
+          'text-2xl mt-8 mb-3 leading-tight tracking-tight font-semibold',
           className,
         )}
         {...props}
@@ -42,7 +42,10 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
     ),
     h3: ({ className, ...props }) => (
       <h3
-        className={cn('text-xl mt-6 mb-2 leading-snug', className)}
+        className={cn(
+          'text-xl mt-6 mb-2 leading-snug font-semibold',
+          className,
+        )}
         {...props}
       />
     ),

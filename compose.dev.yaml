@@ -3,9 +3,16 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_MAINTENANCE_MODE=${VITE_MAINTENANCE_MODE}
+        - VITE_MAPS_PUBLIC_KEY=${VITE_MAPS_PUBLIC_KEY}
+        - VITE_TOKEN_EXPIRATION_TIME=${VITE_TOKEN_EXPIRATION_TIME}
+        - VITE_APP_VERSION=${VITE_APP_VERSION}
     container_name: personal_frontend
     restart: unless-stopped
-    env_file: ["./frontend/.env"]
+    ports:
+      - "8080:8080"
     networks: [proxy, monitor]
 
   backend:

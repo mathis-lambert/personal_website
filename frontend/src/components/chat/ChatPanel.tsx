@@ -74,7 +74,7 @@ const ChatPanel: React.FC = () => {
     <AnimatePresence>
       {isChatOpen && (
         <motion.div
-          className="fixed inset-0 w-full h-full flex flex-col items-center justify-center z-40 backdrop-blur-md p-4"
+          className="fixed inset-0 w-full h-[100dvh] flex flex-col items-center justify-center z-40 backdrop-blur-md p-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}

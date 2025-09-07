@@ -63,6 +63,6 @@ export async function logout(): Promise<void> {
   if (!res.ok) throw new Error(`Logout failed: ${res.status}`);
 }
 
-export function getAuthHeaders(token?: string): HeadersInit {
+export function getAuthHeaders(token?: string): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }

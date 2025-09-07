@@ -1,5 +1,16 @@
 import { getAuthHeaders, getCsrfToken } from './auth';
 
+export type UnauthorizedHandler = () => Promise<void> | void;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+let unauthorizedInFlight: Promise<void> | null = null;
+let lastUnauthorizedAt = 0;
+const UNAUTHORIZED_THROTTLE_MS = 2000;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  unauthorizedHandler = handler;
+}
+
 export type FetchWithTimeoutInit = RequestInit & {
   timeoutMs?: number;
   authToken?: string;
@@ -27,6 +38,58 @@ export async function fetchWithTimeout(
     }
   }, timeoutMs);
 
+  const normalizeHeaders = (h?: HeadersInit): Record<string, string> => {
+    const out: Record<string, string> = {};
+    if (!h) return out;
+    if (h instanceof Headers) {
+      h.forEach((v, k) => {
+        out[k] = v;
+      });
+      return out;
+    }
+    if (Array.isArray(h)) {
+      for (const [k, v] of h) out[k] = v;
+      return out;
+    }
+    return { ...(h as Record<string, string>) };
+  };
+
+  const buildHeaders = (
+    headers?: HeadersInit,
+    authToken?: string,
+    method?: string,
+  ): HeadersInit => {
+    const base = normalizeHeaders(headers);
+    const merged: Record<string, string> = {
+      ...base,
+      ...getAuthHeaders(authToken),
+    };
+    const m = (method ?? 'GET').toUpperCase();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(m)) {
+      const csrf = getCsrfToken();
+      if (csrf && !('X-CSRF-Token' in merged)) {
+        merged['X-CSRF-Token'] = csrf;
+      }
+    }
+    return merged;
+  };
+
+  const triggerUnauthorized = async (): Promise<void> => {
+    // Coalesce concurrent unauthorized handling and throttle attempts
+    if (unauthorizedInFlight) return unauthorizedInFlight;
+    if (!unauthorizedHandler) return; // Nothing to do
+    const now = Date.now();
+    if (now - lastUnauthorizedAt < UNAUTHORIZED_THROTTLE_MS) return;
+    lastUnauthorizedAt = now;
+    const p = Promise.resolve()
+      .then(() => unauthorizedHandler?.())
+      .then(() => undefined);
+    unauthorizedInFlight = p.finally(() => {
+      unauthorizedInFlight = null;
+    });
+    return unauthorizedInFlight;
+  };
+
   try {
     const {
       timeoutMs: _ignoredTimeout,
@@ -37,26 +100,23 @@ export async function fetchWithTimeout(
     } = init ?? {};
     void _ignoredTimeout;
     void _ignoredSignal;
-    const mergedHeaders: HeadersInit = {
-      ...(headers || {}),
-      ...getAuthHeaders(authToken),
-    };
     const method = (rest.method ?? 'GET').toUpperCase();
-    if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-      const csrf = getCsrfToken();
-      if (
-        csrf &&
-        !('X-CSRF-Token' in (mergedHeaders as Record<string, string>))
-      ) {
-        (mergedHeaders as Record<string, string>)['X-CSRF-Token'] = csrf;
-      }
-    }
-    return await fetch(input, {
-      ...(rest as RequestInit),
-      headers: mergedHeaders,
-      signal: controller.signal,
-      credentials: 'include',
-    });
+
+    const doFetch = async (): Promise<Response> =>
+      await fetch(input, {
+        ...(rest as RequestInit),
+        headers: buildHeaders(headers, authToken, method),
+        signal: controller.signal,
+        credentials: 'include',
+      });
+
+    // First attempt
+    const res = await doFetch();
+    if (res.status !== 401 || authToken) return res;
+
+    // 401 without bearer token: try to re-establish session via handler, then retry once
+    await triggerUnauthorized();
+    return await doFetch();
   } finally {
     clearTimeout(timeoutId);
     if (parentSignal) parentSignal.removeEventListener('abort', onParentAbort);
