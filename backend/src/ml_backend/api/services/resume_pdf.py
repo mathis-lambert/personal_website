@@ -363,8 +363,8 @@ class ResumePDFExporter:
                 self.pdf.set_x(self.pdf.l_margin)
                 self.pdf.multi_cell(epw, 4.5, text=self._sanitize(meta))
             if exp.description:
-                # For the first highlighted/current exp, allow up to 4 bullets; others 2
-                max_bullets = 4 if (exp.highlight or exp.current) else 2
+                # For the first highlighted/current exp, allow up to 6 bullets; others 4
+                max_bullets = 6 if (exp.highlight or exp.current) else 4
                 self._bullets(exp.description, max_items=max_bullets)
             self.pdf.ln(1)
             shown += 1
