@@ -1,10 +1,12 @@
+# syntax=docker/dockerfile:1.7-labs
 # Étape 1 : Construction de l’application
 FROM node:24-alpine AS build
 WORKDIR /app
 
 # Copier les fichiers de configuration et installer les dépendances
 COPY package*.json ./
-RUN npm install
+# Utilise le cache BuildKit pour npm et installe via npm ci (plus rapide et reproductible)
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copier l'ensemble du projet et lancer le build de production
 COPY . .

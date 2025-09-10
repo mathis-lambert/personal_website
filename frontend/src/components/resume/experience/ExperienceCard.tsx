@@ -25,7 +25,7 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
             src={experience.logo}
             alt={`${experience.company} logo`}
             loading="lazy"
-            className="h-8 w-8 md:h-9 md:w-9 shrink-0 rounded-md object-contain bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-700 p-1"
+            className="h-8 w-8 md:h-9 md:w-9 lg:h-10 lg:w-10 shrink-0 rounded-md object-contain ring-1 ring-slate-200 dark:ring-slate-700"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = 'none';
             }}

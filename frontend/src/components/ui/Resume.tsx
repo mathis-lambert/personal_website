@@ -20,8 +20,9 @@ import { ExperienceCard } from '@/components/resume/experience/ExperienceCard';
 import { FaLinkedin } from 'react-icons/fa';
 import { CertificationsCard } from '../resume/CertificationsCard';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { downloadResumePdf } from '@/api/resume';
+import { motion } from 'framer-motion';
 
 export default function Resume() {
   const { resumeData } = useResume();
@@ -44,23 +45,40 @@ export default function Resume() {
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
         <ResumeHeader
           name={resumeData?.name ?? ''}
+          personal_statement={resumeData?.personal_statement ?? ''}
           actions={
             <Button
               variant="outline"
+              className="group bg-white/50 dark:bg-black/50 hover:bg-white/70 dark:hover:bg-black/70 backdrop-blur border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200"
               size="sm"
               onClick={onExportPdf}
+              aria-busy={downloading}
               disabled={downloading}
             >
-              <Download className={downloading ? 'animate-pulse' : ''} />
-              {downloading ? 'Exporting…' : 'Export PDF'}
+              {downloading ? (
+                <Loader2 className="animate-spin text-cyan-600 dark:text-cyan-400" />
+              ) : (
+                <Download className="text-cyan-600 dark:text-cyan-400 transition-transform duration-200 group-hover:rotate-[-12deg]" />
+              )}
+              <span>{downloading ? 'Exporting…' : 'Export PDF'}</span>
             </Button>
           }
         />
 
+        <motion.div
+          className="mb-6 text-slate-600 dark:text-slate-400"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.3, ease: 'easeOut', delay: 0.25 }}
+        >
+          <p>{}</p>
+        </motion.div>
+
         <div id="resume-content" ref={resumeRef}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <main className="lg:col-span-2 space-y-6">
-              <GlassCard className="p-6" delay={0.08}>
+              <GlassCard className="p-4 md:p-6" delay={0.08}>
                 <ResumeSection icon={Cpu} title="Experience">
                   {resumeData?.experiences
                     .filter((exp) => !exp.hide)

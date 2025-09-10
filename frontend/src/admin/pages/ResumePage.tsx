@@ -74,6 +74,7 @@ const ResumePage: React.FC = () => {
           setData({
             name: obj?.name ?? '',
             contact,
+            personal_statement: obj?.personal_statement ?? '',
             experiences,
             education,
             certifications,
@@ -113,6 +114,7 @@ const ResumePage: React.FC = () => {
         github: String(fd.get('github') || ''),
         website: String(fd.get('website') || ''),
       },
+      personal_statement: String(fd.get('personal_statement') || ''),
       skills: String(fd.get('skills') || '')
         .split(',')
         .map((s) => s.trim())
@@ -156,6 +158,11 @@ const ResumePage: React.FC = () => {
             data?.contact?.website ??
             '',
         },
+        personal_statement:
+          merged?.personal_statement ??
+          (patch.personal_statement as string) ??
+          data?.personal_statement ??
+          '',
         experiences: Array.isArray(merged?.experiences)
           ? (merged.experiences as Experience[])
           : (data?.experiences ?? []),
@@ -376,6 +383,16 @@ const ResumePage: React.FC = () => {
                   className="border rounded-md px-3 py-2 bg-background"
                 />
               </div>
+            </div>
+
+            <div className="border rounded-lg p-4 bg-card">
+              <div className="font-medium mb-3">Personal Statement</div>
+              <textarea
+                name="personal_statement"
+                defaultValue={data.personal_statement || ''}
+                placeholder="A brief personal statement or summary"
+                className="border rounded-md px-3 py-2 bg-background w-full h-24"
+              />
             </div>
 
             <div className="border rounded-lg p-4 bg-card">

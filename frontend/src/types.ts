@@ -44,6 +44,7 @@ export interface TechnicalSkills {
 export interface ResumeData {
   name: string;
   contact: Contact;
+  personal_statement: string;
   experiences: Experience[];
   education: Education[];
   certifications: Certification[];

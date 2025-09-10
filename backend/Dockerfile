@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7-labs
 # Utilise une image de base officielle Python
 FROM python:3.13-slim
 
@@ -5,30 +6,25 @@ FROM python:3.13-slim
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Installe Git et nettoie le cache d'apt pour réduire la taille de l'image
-RUN apt-get update && \
-    apt-get install -y git && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Définit les variables d'environnement pour éviter le buffering de Python
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+# Installe les dépendances système nécessaires (curl pour le HEALTHCHECK)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Définit le répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copie le fichier de dépendances dans le conteneur et installe curl pour le HEALTHCHECK
+# Copie le fichier de dépendances
 COPY pyproject.toml ./
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copie le reste de l'application dans le conteneur
 COPY . .
 
-# Installe les dépendances du projet
-RUN pip install --no-cache-dir .
+# Installe les dépendances du projet en profitant du cache BuildKit de pip
+# Le cache monté n'est pas inclus dans l'image finale, mais accélère fortement les builds répétés
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install .
 
 # Déclare une commande HEALTHCHECK intégrée à l'image
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

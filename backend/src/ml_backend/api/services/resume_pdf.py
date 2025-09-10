@@ -1,20 +1,10 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
-
-DATA_PATH = (
-    Path(__file__).resolve().parents[3]
-    / "ml_backend"
-    / "databases"
-    / "data"
-    / "resume.json"
-)
 
 
 @dataclass
@@ -68,6 +58,7 @@ class TechnicalSkills:
 class ResumeModel:
     name: str
     contact: Contact
+    personal_statement: str
     experiences: List[Experience]
     education: List[Education]
     certifications: List[Certification]
@@ -95,6 +86,7 @@ class ResumeModel:
         return ResumeModel(
             name=d.get("name", ""),
             contact=contact,
+            personal_statement=d.get("personal_statement", ""),
             experiences=experiences,
             education=education,
             certifications=certs,
@@ -102,14 +94,6 @@ class ResumeModel:
             skills=d.get("skills", []),
             passions=d.get("passions", []),
         )
-
-
-def load_resume_from_file(path: Path = DATA_PATH) -> ResumeModel:
-    with path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
-    # File format is a list with a single resume entry
-    obj = data[0] if isinstance(data, list) and data else data
-    return ResumeModel.from_dict(obj)
 
 
 def load_resume_from_dict(data: Dict[str, Any]) -> ResumeModel:
@@ -120,8 +104,8 @@ class SimplePDF(FPDF):
     def __init__(self):
         super().__init__(orientation="P", unit="mm", format="A4")
         # Slightly larger margins to avoid right overflow and improve readability
-        self.set_margins(15, 14, 15)
-        self.set_auto_page_break(auto=True, margin=14)
+        self.set_margins(13, 10, 13)
+        self.set_auto_page_break(auto=True, margin=10)
         self.add_page()
         self.alias_nb_pages()
         # Accent palette (soft modern blue)
@@ -300,7 +284,7 @@ class ResumePDFExporter:
             s = self._sanitize(text)
             # width sized to text so we can chain cells on one line
             w = self.pdf.get_string_width(s) + 0.8
-            self.pdf.cell(w=w, h=4.8, text=s, link=url)
+            self.pdf.cell(w=w, h=4.5, text=s, link=url)
 
         first = True
 
@@ -308,15 +292,16 @@ class ResumePDFExporter:
             nonlocal first
             if not first:
                 w = self.pdf.get_string_width(sep) + 0.2
-                self.pdf.cell(w=w, h=4.8, text=sep)
+                self.pdf.cell(w=w, h=4.5, text=sep)
             first = False
 
         if c.email:
             add_sep()
-            add_piece(c.email)
+            add_piece(c.email, f"mailto:{c.email}")
         if c.phone:
             add_sep()
-            add_piece(c.phone)
+            # Basic tel: link (strip spaces for dialers)
+            add_piece(c.phone, f"tel:{c.phone.replace(' ', '')}")
         if c.linkedin:
             add_sep()
             add_piece(
@@ -330,7 +315,16 @@ class ResumePDFExporter:
             add_sep()
             add_piece(label, c.website)
 
-        self.pdf.ln(5)
+        self.pdf.ln(6)
+
+    def _personal_statement_block(self):
+        if (
+            not hasattr(self.resume, "personal_statement")
+            or not self.resume.personal_statement
+        ):
+            return
+        self._para(self.resume.personal_statement, size=9)
+        self.pdf.ln(1)
 
     def _experiences_block(self):
         if not self.resume.experiences:
@@ -386,16 +380,19 @@ class ResumePDFExporter:
             )
             self.pdf.set_x(self.pdf.l_margin)
             self.pdf.multi_cell(epw, 4.8, text=self._sanitize(line))
+
+            if edu.period:
+                self.pdf.set_font("Helvetica", size=7)
+                self.pdf.set_text_color(100)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 3.5, text=self._sanitize(edu.period))
+
             if edu.description:
                 self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(80)
                 self.pdf.set_x(self.pdf.l_margin)
                 self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.description))
-            if edu.period:
-                self.pdf.set_font("Helvetica", size=8)
-                self.pdf.set_text_color(100)
-                self.pdf.set_x(self.pdf.l_margin)
-                self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.period))
+
             self.pdf.ln(1)
 
     def _skills_block(self):
@@ -431,7 +428,7 @@ class ResumePDFExporter:
             self.pdf.set_text_color(30)
             self.pdf.cell(label_col_w, 4.8, text=self._sanitize(f"{label}: "))
             # values
-            self.pdf.set_font("Helvetica", size=9)
+            self.pdf.set_font("Helvetica", size=8)
             self.pdf.set_text_color(50)
             self.pdf.set_x(self.pdf.l_margin + label_col_w)
             self.pdf.multi_cell(items_w, 4.8, text=self._sanitize(", ".join(items)))
@@ -463,9 +460,9 @@ class ResumePDFExporter:
                 self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
             )
             self.pdf.set_x(self.pdf.l_margin)
-            self.pdf.multi_cell(epw, 4.8, text=self._sanitize(title))
+            self.pdf.multi_cell(epw, 4.5, text=self._sanitize(title))
             if meta:
-                self.pdf.set_font("Helvetica", size=8)
+                self.pdf.set_font("Helvetica", size=7)
                 self.pdf.set_text_color(90)
                 self.pdf.set_x(self.pdf.l_margin)
                 self.pdf.multi_cell(epw, 4.5, text=self._sanitize(meta))
@@ -490,13 +487,12 @@ class ResumePDFExporter:
         # Compose blocks with a 2-column layout if vertical overflow is likely
         # For simplicity and robustness we keep single column, short content per section.
         self._header_block()
-        self.pdf.ln(2)
+        self._personal_statement_block()
         self._education_block()
         self._experiences_block()
         self._skills_block()
         self._certs_block()
         self._passions_block()
 
-        # Return raw bytes directly to avoid any encoding surprises
         out = self.pdf.output()
         return bytes(out)
