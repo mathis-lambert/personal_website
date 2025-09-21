@@ -34,6 +34,7 @@ class Experience:
 class Education:
     institution: str
     degree: Optional[str] = None
+    location: Optional[str] = None
     description: Optional[str] = None
     period: Optional[str] = None
 
@@ -374,28 +375,34 @@ class ResumePDFExporter:
             return
         self._h2("Education")
         for edu in self.resume.education[:3]:
-            title = edu.degree or ""
-            institution = edu.institution
-            line = f"{institution} - {title}" if title else institution
-            self.pdf.set_font("Helvetica", style="B", size=10)
-            self.pdf.set_text_color(25)
             epw = getattr(
                 self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
             )
-            self.pdf.set_x(self.pdf.l_margin)
-            self.pdf.multi_cell(epw, 4.8, text=self._sanitize(line))
+
+            degree_line = edu.degree or edu.institution
+            if degree_line:
+                self.pdf.set_font("Helvetica", style="B", size=10)
+                self.pdf.set_text_color(20)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 4.8, text=self._sanitize(degree_line))
+
+            institution = edu.institution or ""
+            location = getattr(edu, "location", None) or ""
+            period = edu.period or ""
+            details_parts = [part for part in [institution, location, period] if part]
+            if details_parts:
+                self.pdf.set_font("Helvetica", size=8.5)
+                self.pdf.set_text_color(70)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(
+                    epw, 4.2, text=self._sanitize(" · ".join(details_parts))
+                )
 
             if edu.description:
                 self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(80)
                 self.pdf.set_x(self.pdf.l_margin)
                 self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.description))
-
-            if edu.period:
-                self.pdf.set_font("Helvetica", size=8)
-                self.pdf.set_text_color(100)
-                self.pdf.set_x(self.pdf.l_margin)
-                self.pdf.multi_cell(epw, 3.5, text=self._sanitize(edu.period))
 
             self.pdf.ln(1)
 

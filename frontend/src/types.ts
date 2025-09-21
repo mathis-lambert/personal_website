@@ -24,6 +24,7 @@ export interface Experience {
 export interface Education {
   institution: string;
   degree: string;
+  location?: string;
   description?: string;
   period: string;
 }

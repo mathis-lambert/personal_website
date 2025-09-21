@@ -54,12 +54,14 @@
         "education": [
             {
                 "institution": "CPE Lyon",
+                "location": "Lyon, France",
                 "degree": "Computer Science & Communication Networks",
                 "description": "Majors : AI/ML, Software Engineering, Big Data, Distributed Systems",
                 "period": "2024 - 2027"
             },
             {
                 "institution": "Université de Toulon",
+                "location": "Toulon, France",
                 "degree": "Bachelor (BUT) Multimedia & Internet Technologies",
                 "description": "Graduated with honors. Specialized in software development and interactive systems.",
                 "period": "2021 - 2024"

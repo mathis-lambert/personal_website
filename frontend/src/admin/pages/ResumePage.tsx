@@ -174,11 +174,11 @@ const ResumePage: React.FC = () => {
           : (data?.certifications ?? []),
         technical_skills: (merged?.technical_skills as TechnicalSkills) ??
           data?.technical_skills ?? {
-            languages: [],
-            ai_ml: [],
-            systems_and_infra: [],
-            web: [],
-          },
+          languages: [],
+          ai_ml: [],
+          systems_and_infra: [],
+          web: [],
+        },
         skills: Array.isArray(merged?.skills)
           ? (merged.skills as string[])
           : (patch.skills ?? data?.skills ?? []),
@@ -228,11 +228,11 @@ const ResumePage: React.FC = () => {
       setData((prev) =>
         prev
           ? {
-              ...prev,
-              technical_skills:
-                (merged?.technical_skills as TechnicalSkills) ??
-                technical_skills,
-            }
+            ...prev,
+            technical_skills:
+              (merged?.technical_skills as TechnicalSkills) ??
+              technical_skills,
+          }
           : null,
       );
       toast.success('Technical skills saved');
@@ -703,6 +703,7 @@ const ResumePage: React.FC = () => {
                     {
                       institution: '',
                       degree: '',
+                      location: '',
                       description: '',
                       period: '',
                     },
@@ -753,6 +754,18 @@ const ResumePage: React.FC = () => {
                         setEducation((prev) =>
                           prev.map((x, i) =>
                             i === idx ? { ...x, period: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                    <input
+                      placeholder="Location (optional)"
+                      className="border rounded-md px-3 py-2"
+                      value={edu.location}
+                      onChange={(e) =>
+                        setEducation((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, location: e.target.value } : x,
                           ),
                         )
                       }
@@ -881,10 +894,10 @@ const ResumePage: React.FC = () => {
                           prev.map((x, i) =>
                             i === idx
                               ? {
-                                  ...x,
-                                  status: e.target
-                                    .value as Certification['status'],
-                                }
+                                ...x,
+                                status: e.target
+                                  .value as Certification['status'],
+                              }
                               : x,
                           ),
                         )
