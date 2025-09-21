@@ -20,7 +20,7 @@ class Contact:
 class Experience:
     role: str
     company: str
-    position: str
+    position: Optional[str] = None
     logo: Optional[str] = None
     period: Optional[str] = None
     location: Optional[str] = None
@@ -138,7 +138,7 @@ class ResumePDFExporter:
         mapping = {
             ord("—"): "-",  # em dash
             ord("–"): "-",  # en dash
-            # ord("•"): "-",  # bullet
+            ord("•"): "-",  # bullet
             ord("’"): "'",  # right single quote
             ord("‘"): "'",  # left single quote
             ord("“"): '"',  # left double quote
