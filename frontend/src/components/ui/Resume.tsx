@@ -8,6 +8,7 @@ import {
   Home,
   Mail,
   Sparkles,
+  Languages,
 } from 'lucide-react';
 import { useResume } from '@/hooks/useResume.ts';
 import { ResumeHeader } from '@/components/layout/ResumeHeader.tsx';
@@ -98,10 +99,10 @@ export default function Resume() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-                        Languages
+                        Programming
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(resumeData?.technical_skills?.languages ?? []).map(
+                        {(resumeData?.technical_skills?.programming ?? []).map(
                           (it, i) => (
                             <span
                               key={i}
@@ -113,7 +114,6 @@ export default function Resume() {
                         )}
                       </div>
                     </div>
-
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
                         AI / ML
@@ -235,6 +235,14 @@ export default function Resume() {
                   ))}
                 </ResumeSection>
               </GlassCard>
+
+              <TagListSection
+                icon={Languages}
+                title="Languages"
+                items={resumeData?.technical_skills?.languages ?? []}
+                colorClass="bg-emerald-400/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+                delay={0.36}
+              />
 
               <GlassCard className="p-6" delay={0.56}>
                 <ResumeSection icon={Briefcase} title="Certifications">

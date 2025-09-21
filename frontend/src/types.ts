@@ -38,6 +38,7 @@ export interface Certification {
 
 export interface TechnicalSkills {
   languages: string[];
+  programming: string[];
   ai_ml: string[];
   systems_and_infra: string[];
   web: string[];

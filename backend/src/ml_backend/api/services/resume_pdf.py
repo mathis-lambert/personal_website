@@ -51,6 +51,7 @@ class Certification:
 @dataclass
 class TechnicalSkills:
     languages: List[str]
+    programming: List[str]
     ai_ml: List[str]
     systems_and_infra: List[str]
     web: List[str]
@@ -79,6 +80,7 @@ class ResumeModel:
                 "technical_skills",
                 {
                     "languages": [],
+                    "programming": [],
                     "ai_ml": [],
                     "systems_and_infra": [],
                     "web": [],
@@ -410,10 +412,11 @@ class ResumePDFExporter:
         self._h2("Skills")
         t = self.resume.technical_skills
         rows: List[tuple[str, List[str]]] = [
-            ("Languages", t.languages),
+            ("Programming", t.programming),
             ("AI/ML", t.ai_ml),
             ("Systems & Infra", t.systems_and_infra),
             ("Web", t.web),
+            ("Languages", t.languages),
         ]
         # Compute label column width for clean "skill_name: list" layout
         self.pdf.set_font("Helvetica", style="B", size=10)
@@ -507,3 +510,18 @@ class ResumePDFExporter:
 
         out = self.pdf.output()
         return bytes(out)
+
+
+if __name__ == "__main__":
+    import json
+
+    # Quick local test
+    with open(
+        "./src/ml_backend/databases/data/resume.json", "r", encoding="utf-8"
+    ) as f:
+        data = json.load(f)
+    resume = load_resume_from_dict(data[0])
+    exporter = ResumePDFExporter(resume)
+    pdf_bytes = exporter.build_pdf()
+    with open("out.pdf", "wb") as f:
+        f.write(pdf_bytes)

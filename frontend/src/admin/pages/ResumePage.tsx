@@ -47,6 +47,9 @@ const ResumePage: React.FC = () => {
           languages: Array.isArray(obj?.technical_skills?.languages)
             ? obj.technical_skills.languages
             : [],
+          programming: Array.isArray(obj?.technical_skills?.programming)
+            ? obj.technical_skills.programming
+            : [],
           ai_ml: Array.isArray(obj?.technical_skills?.ai_ml)
             ? obj.technical_skills.ai_ml
             : [],
@@ -174,11 +177,12 @@ const ResumePage: React.FC = () => {
           : (data?.certifications ?? []),
         technical_skills: (merged?.technical_skills as TechnicalSkills) ??
           data?.technical_skills ?? {
-          languages: [],
-          ai_ml: [],
-          systems_and_infra: [],
-          web: [],
-        },
+            languages: [],
+            programming: [],
+            ai_ml: [],
+            systems_and_infra: [],
+            web: [],
+          },
         skills: Array.isArray(merged?.skills)
           ? (merged.skills as string[])
           : (patch.skills ?? data?.skills ?? []),
@@ -200,6 +204,10 @@ const ResumePage: React.FC = () => {
     const fd = new FormData(form);
     const technical_skills: TechnicalSkills = {
       languages: String(fd.get('languages') || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      programming: String(fd.get('programming') || '')
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
@@ -228,11 +236,11 @@ const ResumePage: React.FC = () => {
       setData((prev) =>
         prev
           ? {
-            ...prev,
-            technical_skills:
-              (merged?.technical_skills as TechnicalSkills) ??
-              technical_skills,
-          }
+              ...prev,
+              technical_skills:
+                (merged?.technical_skills as TechnicalSkills) ??
+                technical_skills,
+            }
           : null,
       );
       toast.success('Technical skills saved');
@@ -445,6 +453,14 @@ const ResumePage: React.FC = () => {
                     ', ',
                   )}
                   placeholder="Languages (comma)"
+                  className="border rounded-md px-3 py-2 bg-background"
+                />
+                <input
+                  name="programming"
+                  defaultValue={(
+                    data?.technical_skills?.programming || []
+                  ).join(', ')}
+                  placeholder="Programming (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
@@ -894,10 +910,10 @@ const ResumePage: React.FC = () => {
                           prev.map((x, i) =>
                             i === idx
                               ? {
-                                ...x,
-                                status: e.target
-                                  .value as Certification['status'],
-                              }
+                                  ...x,
+                                  status: e.target
+                                    .value as Certification['status'],
+                                }
                               : x,
                           ),
                         )
