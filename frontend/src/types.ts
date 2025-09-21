@@ -10,6 +10,7 @@ export interface Contact {
 
 export interface Experience {
   role: string;
+  position?: string;
   company: string;
   logo?: string;
   period: string;

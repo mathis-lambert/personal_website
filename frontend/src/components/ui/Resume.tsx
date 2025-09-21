@@ -7,7 +7,6 @@ import {
   Heart,
   Home,
   Mail,
-  Phone,
   Sparkles,
 } from 'lucide-react';
 import { useResume } from '@/hooks/useResume.ts';
@@ -183,13 +182,6 @@ export default function Resume() {
                     >
                       <Mail size={14} className="mr-3 shrink-0" />
                       {resumeData?.contact.email}
-                    </a>
-                    <a
-                      href={`tel:${resumeData?.contact.phone.replace(/\s/g, '')}`}
-                      className="flex items-center hover:text-cyan-500 transition-colors"
-                    >
-                      <Phone size={14} className="mr-3 shrink-0" />
-                      {resumeData?.contact.phone}
                     </a>
                     <a
                       href={`https://linkedin.com/in/${resumeData?.contact.linkedin}`}

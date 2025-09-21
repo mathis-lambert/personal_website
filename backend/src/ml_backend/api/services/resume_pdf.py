@@ -20,6 +20,7 @@ class Contact:
 class Experience:
     role: str
     company: str
+    position: str
     logo: Optional[str] = None
     period: Optional[str] = None
     location: Optional[str] = None
@@ -104,7 +105,7 @@ class SimplePDF(FPDF):
     def __init__(self):
         super().__init__(orientation="P", unit="mm", format="A4")
         # Slightly larger margins to avoid right overflow and improve readability
-        self.set_margins(13, 10, 13)
+        self.set_margins(10, 10, 10)
         self.set_auto_page_break(auto=True, margin=10)
         self.add_page()
         self.alias_nb_pages()
@@ -137,7 +138,7 @@ class ResumePDFExporter:
         mapping = {
             ord("—"): "-",  # em dash
             ord("–"): "-",  # en dash
-            ord("•"): "-",  # bullet
+            # ord("•"): "-",  # bullet
             ord("’"): "'",  # right single quote
             ord("‘"): "'",  # left single quote
             ord("“"): '"',  # left double quote
@@ -337,7 +338,8 @@ class ResumePDFExporter:
                 continue
             title = exp.role
             company = exp.company
-            meta = " | ".join([x for x in [exp.period, exp.location] if x])
+            position = exp.position
+            meta = " • ".join([x for x in [exp.period, exp.location] if x])
             # Role
             self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(15)
@@ -350,7 +352,9 @@ class ResumePDFExporter:
             self.pdf.set_font("Helvetica", style="I", size=9)
             self.pdf.set_text_color(70)
             self.pdf.set_x(self.pdf.l_margin)
-            self.pdf.multi_cell(epw, 4.5, text=self._sanitize(company))
+            self.pdf.multi_cell(
+                epw, 4.5, text=self._sanitize(f"{company} • {position}")
+            )
             if meta:
                 self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(90)
@@ -373,7 +377,7 @@ class ResumePDFExporter:
             title = edu.degree or ""
             institution = edu.institution
             line = f"{institution} - {title}" if title else institution
-            self.pdf.set_font("Helvetica", style="B", size=9)
+            self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(25)
             epw = getattr(
                 self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
@@ -381,17 +385,17 @@ class ResumePDFExporter:
             self.pdf.set_x(self.pdf.l_margin)
             self.pdf.multi_cell(epw, 4.8, text=self._sanitize(line))
 
-            if edu.period:
-                self.pdf.set_font("Helvetica", size=7)
-                self.pdf.set_text_color(100)
-                self.pdf.set_x(self.pdf.l_margin)
-                self.pdf.multi_cell(epw, 3.5, text=self._sanitize(edu.period))
-
             if edu.description:
                 self.pdf.set_font("Helvetica", size=8)
                 self.pdf.set_text_color(80)
                 self.pdf.set_x(self.pdf.l_margin)
                 self.pdf.multi_cell(epw, 4.5, text=self._sanitize(edu.description))
+
+            if edu.period:
+                self.pdf.set_font("Helvetica", size=8)
+                self.pdf.set_text_color(100)
+                self.pdf.set_x(self.pdf.l_margin)
+                self.pdf.multi_cell(epw, 3.5, text=self._sanitize(edu.period))
 
             self.pdf.ln(1)
 
@@ -405,7 +409,7 @@ class ResumePDFExporter:
             ("Web", t.web),
         ]
         # Compute label column width for clean "skill_name: list" layout
-        self.pdf.set_font("Helvetica", style="B", size=9)
+        self.pdf.set_font("Helvetica", style="B", size=10)
         labels_sanitized = [self._sanitize(f"{lbl}: ") for lbl, items in rows if items]
         if self.resume.skills:
             labels_sanitized.append(self._sanitize("Core: "))
@@ -424,7 +428,7 @@ class ResumePDFExporter:
                 return
             self.pdf.set_x(self.pdf.l_margin)
             # bold label
-            self.pdf.set_font("Helvetica", style="B", size=9)
+            self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(30)
             self.pdf.cell(label_col_w, 4.8, text=self._sanitize(f"{label}: "))
             # values
@@ -454,7 +458,7 @@ class ResumePDFExporter:
                 ctx.append(cert.status)
             meta = " | ".join(ctx)
 
-            self.pdf.set_font("Helvetica", style="B", size=9)
+            self.pdf.set_font("Helvetica", style="B", size=10)
             self.pdf.set_text_color(25)
             epw = getattr(
                 self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin
@@ -473,7 +477,7 @@ class ResumePDFExporter:
             return
         self._h2("Interests")
         # Simple inline list (no backgrounds)
-        self.pdf.set_font("Helvetica", size=9)
+        self.pdf.set_font("Helvetica", size=10)
         self.pdf.set_text_color(50)
         epw = getattr(
             self.pdf, "epw", self.pdf.w - self.pdf.l_margin - self.pdf.r_margin

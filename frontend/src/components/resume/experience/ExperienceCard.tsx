@@ -36,7 +36,8 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
             {experience.role}
           </h3>
           <p className="mt-0.5 text-sm md:text-[15px] font-medium text-cyan-700 dark:text-cyan-300 truncate">
-            {experience.company}
+            {experience.company}{' '}
+            {experience.position ? `• ${experience.position}` : ''}
           </p>
         </div>
       </div>

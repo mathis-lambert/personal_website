@@ -498,6 +498,7 @@ const ResumePage: React.FC = () => {
                     ...prev,
                     {
                       role: '',
+                      position: '',
                       company: '',
                       period: '',
                       location: '',
@@ -527,6 +528,18 @@ const ResumePage: React.FC = () => {
                         setExperiences((prev) =>
                           prev.map((x, i) =>
                             i === idx ? { ...x, role: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                    <input
+                      placeholder="Position"
+                      className="border rounded-md px-3 py-2"
+                      value={exp.position}
+                      onChange={(e) =>
+                        setExperiences((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, position: e.target.value } : x,
                           ),
                         )
                       }

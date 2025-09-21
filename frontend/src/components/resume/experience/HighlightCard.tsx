@@ -48,7 +48,8 @@ export const HighlightCard: React.FC<HighlightCardProps> = ({
           {experience.role}
         </h3>
         <p className="text-sm md:text-[15px] font-medium text-cyan-700 dark:text-cyan-300">
-          {experience.company}
+          {experience.company}{' '}
+          {experience.position ? `• ${experience.position}` : ''}
         </p>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs md:text-[13px] text-slate-600 dark:text-slate-400">
