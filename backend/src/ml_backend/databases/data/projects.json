@@ -1,104 +1,95 @@
 [
-    {
-        "id": "proj-1",
-        "slug": "personal-website",
-        "title": "My Personal Website",
-        "subtitle": "React frontend, FastAPI backend, Agentic AI and RAG",
-        "description": "Personal site built with React + TS with a FastAPI backend. It uses LLMs and a vector store for semantic search and interactive browsing.",
-        "content": "This website is the digital home I built to showcase who I am, what I’ve worked on, and what drives me technically. I wanted it to feel fast, clean, and responsive while also serving as a playground for Gen AI PoCs. \n\n The frontend is crafted with **Vite**, **React**, and **TypeScript**, ensuring a smooth developer experience and fast load times. For motion and visual polish, I used **Framer Motion** to bring life to the interface — from page transitions to subtle micro-interactions. \n\n On the backend, a robust **FastAPI** server handles all the logic: routing content, orchestrating LLM calls, managing semantic search, and serving dynamic data. \n\n ![Site hero](/images/projects/personal-website/hero_section.png) \n --- \n ## Building the Architecture \n At the core of the project is an intelligent pipeline for Agentic AI-enhanced interaction: \n - The **client** manages all UI rendering, routing, and page-level SEO. \n - The **FastAPI** server offers versioned endpoints (`/v1/*`) for content, AI generation, and semantic search. \n - When a query hits the server, it's transformed into embeddings and sent to **Qdrant**, which returns the most semantically relevant context. \n - That context is injected into prompts and forwarded to an LLM (e.g., `gpt-oss-120B`) via **OpenRouter**. \n - The response is then sent back to the user — often with citations, summaries, or project links. \n\n ```mermaid \n ---\nconfig:\n theme: dark\n layout: dagre\n---\nflowchart TB\n subgraph FE[\"Frontend (Vite + React)\"]\n\tRouter[\"UI + Routing\"]\n end\n subgraph BE[\"mathislambert.fr/api\"]\n\tAPI[\"REST API Endpoints POST /chat/completions (SSE)\"]\n\tLifespan[\"Startup (lifespan)\r\nLoad ML_API_KEY, Connect MongoDB, Register Tools\"]\n\tTools[\"Registered Tools (auto-executed)\r\nget_self_info\r\nget_self_projects(+by_slug)\r\nget_self_experiences\r\nget_self_articles(+by_slug)\"]\n\tPrompts[\"Prompt files\r\nrag_main.txt\"]\n\tMongo[(\"MongoDB\")]\n end\n subgraph AI[\"api.mathislambert.fr\"]\n\tMLAPI[\"ML API (via api client)\r\nChat (streaming/non-streaming)\r\nVector Stores\"]\n\tVStore[\"Vector store: mathis_bio_store\"]\n\tLLMs[\"LLMs via OpenRouter (e.g., openai/gpt-oss-120b, etc.)\"]\n end\n\tFE -- HTTPS fetch/SSE (CORS) --> API\n\tAPI --> Prompts\n\tAPI -- \"Streaming chat (chat.stream_sse)\r\nmodel: openai/gpt-oss-120b\r\nauto_tool_execution: on\" --> MLAPI\n\tMLAPI -- Tool calls (function execution) --> Tools\n\tTools -- Query --> Mongo\n\tTools -- Vector search --> VStore\n\tVStore --> MLAPI\n\tMLAPI --> LLMs\n\tLLMs --> MLAPI\n\tMLAPI -- \"RAG-augmented responses\" --> API\n\tAPI -- SSE events / JSON responses --> FE \n``` \n --- \n ## Stack \n - **Frontend**: Vite, React, TypeScript, Framer Motion   \n - **Backend**: FastAPI, Python   \n - **Data**: MongoDB for content, Qdrant for vector similarity   \n - **AI Orchestration**: OpenRouter + LLMs   \n --- \n ## Roadmap \n The site is actively evolving. Next steps include: \n - **Streaming** LLM responses for real-time interaction   \n - **Analytics dashboard** to monitor usage and feedback   \n - **Content recommendation engine** based on similarity embeddings",
-        "date": "2025-08-25",
-        "technologies": [
-            "Vite",
-            "React",
-            "TypeScript",
-            "MongoDB",
-            "Qdrant",
-            "OpenRouter",
-            "gpt-oss-120B",
-            "FastAPI",
-            "Python",
-            "LLMs",
-            "Embeddings",
-            "Framer Motion"
-        ],
-        "categories": [
-            "Website",
-            "Fullstack",
-            "AI"
-        ],
-        "status": "completed",
-        "isFeatured": true,
-        "links": {
-            "live": "https://mathislambert.fr",
-            "repo": "https://github.com/mathis-lambert/personal_website"
+  {
+    "id": "proj-1",
+    "slug": "personal-website",
+    "title": "My Personal Website",
+    "subtitle": "React frontend, FastAPI backend, Agentic AI and RAG",
+    "description": "Personal site built with React + TS with a FastAPI backend. It uses LLMs and a vector store for semantic search and interactive browsing.",
+    "content": "This website is the digital home I built to showcase who I am, what I’ve worked on, and what drives me technically. I wanted it to feel fast, clean, and responsive while also serving as a playground for Gen AI PoCs. \n\n The frontend is crafted with **Vite**, **React**, and **TypeScript**, ensuring a smooth developer experience and fast load times. For motion and visual polish, I used **Framer Motion** to bring life to the interface — from page transitions to subtle micro-interactions. \n\n On the backend, a robust **FastAPI** server handles all the logic: routing content, orchestrating LLM calls, managing semantic search, and serving dynamic data. \n\n ![Site hero](/images/projects/personal-website/hero_section.png) \n --- \n ## Building the Architecture \n At the core of the project is an intelligent pipeline for Agentic AI-enhanced interaction: \n - The **client** manages all UI rendering, routing, and page-level SEO. \n - The **FastAPI** server offers versioned endpoints (`/v1/*`) for content, AI generation, and semantic search. \n - When a query hits the server, it's transformed into embeddings and sent to **Qdrant**, which returns the most semantically relevant context. \n - That context is injected into prompts and forwarded to an LLM (e.g., `gpt-oss-120B`) via **OpenRouter**. \n - The response is then sent back to the user — often with citations, summaries, or project links. \n\n ```mermaid \n ---\nconfig:\n theme: dark\n layout: dagre\n---\nflowchart TB\n subgraph FE[\"Frontend (Vite + React)\"]\n\tRouter[\"UI + Routing\"]\n end\n subgraph BE[\"mathislambert.fr/api\"]\n\tAPI[\"REST API Endpoints POST /chat/completions (SSE)\"]\n\tLifespan[\"Startup (lifespan)\r\nLoad ML_API_KEY, Connect MongoDB, Register Tools\"]\n\tTools[\"Registered Tools (auto-executed)\r\nget_self_info\r\nget_self_projects(+by_slug)\r\nget_self_experiences\r\nget_self_articles(+by_slug)\"]\n\tPrompts[\"Prompt files\r\nrag_main.txt\"]\n\tMongo[(\"MongoDB\")]\n end\n subgraph AI[\"api.mathislambert.fr\"]\n\tMLAPI[\"ML API (via api client)\r\nChat (streaming/non-streaming)\r\nVector Stores\"]\n\tVStore[\"Vector store: mathis_bio_store\"]\n\tLLMs[\"LLMs via OpenRouter (e.g., openai/gpt-oss-120b, etc.)\"]\n end\n\tFE -- HTTPS fetch/SSE (CORS) --> API\n\tAPI --> Prompts\n\tAPI -- \"Streaming chat (chat.stream_sse)\r\nmodel: openai/gpt-oss-120b\r\nauto_tool_execution: on\" --> MLAPI\n\tMLAPI -- Tool calls (function execution) --> Tools\n\tTools -- Query --> Mongo\n\tTools -- Vector search --> VStore\n\tVStore --> MLAPI\n\tMLAPI --> LLMs\n\tLLMs --> MLAPI\n\tMLAPI -- \"RAG-augmented responses\" --> API\n\tAPI -- SSE events / JSON responses --> FE \n``` \n --- \n ## Stack \n - **Frontend**: Vite, React, TypeScript, Framer Motion   \n - **Backend**: FastAPI, Python   \n - **Data**: MongoDB for content, Qdrant for vector similarity   \n - **AI Orchestration**: OpenRouter + LLMs   \n --- \n ## Roadmap \n The site is actively evolving. Next steps include: \n - **Streaming** LLM responses for real-time interaction   \n - **Analytics dashboard** to monitor usage and feedback   \n - **Content recommendation engine** based on similarity embeddings",
+    "date": "2025-08-25",
+    "technologies": [
+      "Vite",
+      "React",
+      "TypeScript",
+      "MongoDB",
+      "Qdrant",
+      "OpenRouter",
+      "gpt-oss-120B",
+      "FastAPI",
+      "Python",
+      "LLMs",
+      "Embeddings",
+      "Framer Motion"
+    ],
+    "categories": ["Website", "Fullstack", "AI"],
+    "status": "completed",
+    "isFeatured": true,
+    "links": {
+      "live": "https://mathislambert.fr",
+      "repo": "https://github.com/mathis-lambert/personal_website"
+    },
+    "media": {
+      "thumbnailUrl": "/images/projects/personal-website/thumb.png",
+      "imageUrl": "/images/projects/personal-website/thumb.png"
+    },
+    "metrics": {},
+    "highlights": [
+      "Vite/React/TS stack with Framer Motion animations",
+      "FastAPI backend wired to OpenRouter and Qdrant",
+      "RAG semantic search across projects and articles"
+    ],
+    "role": "Full-stack",
+    "client": "Personal",
+    "teamSize": 1,
+    "color": "#0ea5e9",
+    "ai_context": {
+      "llm_purpose": "Enable concise Q&A about this project on the portfolio.",
+      "routing": {
+        "internal_page": "/projects/personal-website",
+        "external_links": [
+          "[https://mathislambert.fr](https://mathislambert.fr)",
+          "[https://github.com/mathis-lambert/personal_website](https://github.com/mathis-lambert/personal_website)"
+        ]
+      },
+      "capabilities": [
+        "Semantic search with Qdrant",
+        "LLM generation via OpenRouter",
+        "Versioned REST API (/v1)"
+      ],
+      "key_tech": [
+        "Vite",
+        "React",
+        "TypeScript",
+        "FastAPI",
+        "Python",
+        "MongoDB",
+        "Qdrant",
+        "OpenRouter",
+        "Framer Motion"
+      ],
+      "claims": [
+        "Client-side UI in Vite/React/TS",
+        "FastAPI orchestrates LLMs and vector search",
+        "MongoDB stores content and logs"
+      ],
+      "limitations": [
+        "Content is not fully completed. Project is still in progress."
+      ],
+      "faq_snippets": [
+        {
+          "q": "How does RAG work here?",
+          "a": "Query → embed → Qdrant similarity → build context → call LLM via OpenRouter → return answer with links."
         },
-        "media": {
-            "thumbnailUrl": "/images/projects/personal-website/thumb.png",
-            "imageUrl": "/images/projects/personal-website/thumb.png"
-        },
-        "metrics": {},
-        "highlights": [
-            "Vite/React/TS stack with Framer Motion animations",
-            "FastAPI backend wired to OpenRouter and Qdrant",
-            "RAG semantic search across projects and articles"
-        ],
-        "role": "Full-stack",
-        "client": "Personal",
-        "teamSize": 1,
-        "color": "#0ea5e9",
-        "ai_context": {
-            "llm_purpose": "Enable concise Q&A about this project on the portfolio.",
-            "routing": {
-                "internal_page": "/projects/personal-website",
-                "external_links": [
-                    "[https://mathislambert.fr](https://mathislambert.fr)",
-                    "[https://github.com/mathis-lambert/personal_website](https://github.com/mathis-lambert/personal_website)"
-                ]
-            },
-            "capabilities": [
-                "Semantic search with Qdrant",
-                "LLM generation via OpenRouter",
-                "Versioned REST API (/v1)"
-            ],
-            "key_tech": [
-                "Vite",
-                "React",
-                "TypeScript",
-                "FastAPI",
-                "Python",
-                "MongoDB",
-                "Qdrant",
-                "OpenRouter",
-                "Framer Motion"
-            ],
-            "claims": [
-                "Client-side UI in Vite/React/TS",
-                "FastAPI orchestrates LLMs and vector search",
-                "MongoDB stores content and logs"
-            ],
-            "limitations": [
-                "Content is not fully completed. Project is still in progress."
-            ],
-            "faq_snippets": [
-                {
-                    "q": "How does RAG work here?",
-                    "a": "Query → embed → Qdrant similarity → build context → call LLM via OpenRouter → return answer with links."
-                },
-                {
-                    "q": "What runs the animations?",
-                    "a": "Framer Motion on the React client."
-                }
-            ],
-            "linking_rules": [
-                "Use full https URLs for external links.",
-                "Prefer internal link format: /projects/<slug>."
-            ],
-            "tags": [
-                "website",
-                "fullstack",
-                "ai",
-                "rag"
-            ]
+        {
+          "q": "What runs the animations?",
+          "a": "Framer Motion on the React client."
         }
+      ],
+      "linking_rules": [
+        "Use full https URLs for external links.",
+        "Prefer internal link format: /projects/<slug>."
+      ],
+      "tags": ["website", "fullstack", "ai", "rag"]
     }
+  }
 ]

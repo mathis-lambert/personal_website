@@ -194,7 +194,11 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
     glRef.current = gl;
 
     try {
-      programRef.current = createProgram(gl, vertexShaderSource, fragmentShaderSource);
+      programRef.current = createProgram(
+        gl,
+        vertexShaderSource,
+        fragmentShaderSource,
+      );
     } catch (error) {
       console.error('Failed to build shader program', error);
       return undefined;
@@ -366,9 +370,11 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
       if (uniformLocations.count) gl.uniform1i(uniformLocations.count, count);
       if (uniformLocations.positions)
         gl.uniform2fv(uniformLocations.positions, positions);
-      if (uniformLocations.radius) gl.uniform1fv(uniformLocations.radius, radii);
+      if (uniformLocations.radius)
+        gl.uniform1fv(uniformLocations.radius, radii);
       if (uniformLocations.alpha) gl.uniform1fv(uniformLocations.alpha, alphas);
-      if (uniformLocations.colors) gl.uniform3fv(uniformLocations.colors, colors);
+      if (uniformLocations.colors)
+        gl.uniform3fv(uniformLocations.colors, colors);
       if (uniformLocations.background)
         gl.uniform3fv(uniformLocations.background, backgroundRgbRef.current);
 
@@ -378,7 +384,9 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const updateFromMedia = () => {
-      updateBackground(mediaQuery.matches ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)');
+      updateBackground(
+        mediaQuery.matches ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)',
+      );
     };
     updateFromMedia();
     if (parent.classList.contains('dark')) {
@@ -388,14 +396,22 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
 
     const mutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
           const target = mutation.target as HTMLElement;
           const isDark = target.classList.contains('dark');
-          updateBackground(isDark ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)');
+          updateBackground(
+            isDark ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)',
+          );
         }
       });
     });
-    mutationObserver.observe(parent, { attributes: true, attributeFilter: ['class'] });
+    mutationObserver.observe(parent, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
 
     resize();
     step();

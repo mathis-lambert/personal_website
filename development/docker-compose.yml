@@ -12,7 +12,16 @@ services:
       - mongo
     volumes:
       - .:/app
-    command: [ "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8081", "--reload" ]
+    command:
+      [
+        "uvicorn",
+        "api.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8081",
+        "--reload",
+      ]
     networks:
       - app-network
 
