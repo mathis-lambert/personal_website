@@ -1,10 +1,11 @@
-'use client';
-import Link from 'next/link';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import type { Article } from '@/types';
-import { Star } from 'lucide-react';
+"use client";
+import Link from "next/link";
+import React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import type { Article } from "@/types";
+import { Star } from "lucide-react";
+import Image from "next/image";
 
 interface BlogArticleCardProps {
   article: Article;
@@ -15,15 +16,15 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
   article,
   animationDelay = 0.1,
 }) => {
-  const formattedDate = new Date(article.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const formattedDate = new Date(article.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 
   const imageSrc = article.media?.thumbnailUrl || article.media?.imageUrl;
   const readTime =
-    typeof article.readTimeMin === 'number'
+    typeof article.readTimeMin === "number"
       ? `${article.readTimeMin} min read`
       : undefined;
   const isFeatured = Boolean(article.isFeatured);
@@ -35,7 +36,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
       animate={{
         opacity: 1,
         y: 0,
-        transition: { delay: animationDelay, duration: 0.4, ease: 'easeOut' },
+        transition: { delay: animationDelay, duration: 0.4, ease: "easeOut" },
       }}
       exit={{ opacity: 0, y: 30 }}
     >
@@ -53,11 +54,13 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
         >
           {/* Cover image */}
           <div className="relative w-full h-44 sm:h-56 overflow-hidden">
-            <img
-              src={imageSrc}
+            <Image
+              src={imageSrc || "undefined"}
               alt={article.title}
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+              width={224}
+              height={224}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
             {isFeatured && (
@@ -133,7 +136,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
                   />
                 </svg>
               </span>
-              {typeof article.metrics?.views === 'number' && (
+              {typeof article.metrics?.views === "number" && (
                 <span className="text-[11px] text-gray-500 dark:text-gray-400">
                   {article.metrics.views} views
                 </span>

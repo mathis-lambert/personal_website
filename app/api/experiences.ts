@@ -1,22 +1,21 @@
-import type { TimelineData } from '@/components/ui/ScrollableTimeline';
-import { fetchWithTimeout } from './utils';
+import type { TimelineData } from "@/components/ui/ScrollableTimeline";
+import { fetchWithTimeout } from "./utils";
 
 export type ApiExperience = Partial<TimelineData>;
 
 export function normalizeExperienceApi(e: ApiExperience): TimelineData {
   return {
-    title: e.title ?? '',
-    company: e.company ?? '',
-    date: e.date ?? '',
-    description: e.description ?? '',
+    title: e.title ?? "",
+    company: e.company ?? "",
+    date: e.date ?? "",
+    description: e.description ?? "",
   };
 }
 
 export async function getExperiences(options?: {
   signal?: AbortSignal;
 }): Promise<TimelineData[]> {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
 
   const res = await fetchWithTimeout(`${apiUrl}/api/experiences/all`, {
     signal: options?.signal,

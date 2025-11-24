@@ -1,20 +1,20 @@
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import {
   createItem,
   deleteItem,
   getCollectionData,
   updateItem,
-} from '@/api/admin';
-import Modal from '@/admin/components/Modal';
-import type { Project, ProjectStatus } from '@/types';
+} from "@/api/admin";
+import Modal from "@/admin/components/Modal";
+import type { Project, ProjectStatus } from "@/types";
 import type {
   AdminCreateProjectInput,
   AdminUpdateProjectInput,
-} from '@/admin/types';
-import { Plus, Pencil, Trash2, Save } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/admin/types";
+import { Plus, Pencil, Trash2, Save } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 const ProjectsPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -50,10 +50,10 @@ const ProjectsPage: React.FC = () => {
     setLoading(true);
     setErr(null);
     try {
-      const data = await getCollectionData<Project[]>('projects', token);
+      const data = await getCollectionData<Project[]>("projects", token);
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
-      setErr((e as Error)?.message ?? 'Failed to load');
+      setErr((e as Error)?.message ?? "Failed to load");
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ const ProjectsPage: React.FC = () => {
 
   function splitCSV(v: string): string[] {
     return v
-      .split(',')
+      .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
   }
@@ -77,35 +77,35 @@ const ProjectsPage: React.FC = () => {
     if (!token) return;
     const fd = new FormData(form);
     const body: AdminCreateProjectInput = {
-      title: String(fd.get('title') || ''),
-      slug: String(fd.get('slug') || '') || undefined,
-      subtitle: String(fd.get('subtitle') || '') || undefined,
-      description: String(fd.get('description') || '') || undefined,
-      content: String(fd.get('content') || '') || undefined,
-      date: String(fd.get('date') || new Date().toISOString().slice(0, 10)),
-      technologies: splitCSV(String(fd.get('technologies') || '')),
-      categories: splitCSV(String(fd.get('categories') || '')),
-      status: (String(fd.get('status')) as ProjectStatus) || undefined,
-      isFeatured: fd.get('isFeatured') === 'on',
+      title: String(fd.get("title") || ""),
+      slug: String(fd.get("slug") || "") || undefined,
+      subtitle: String(fd.get("subtitle") || "") || undefined,
+      description: String(fd.get("description") || "") || undefined,
+      content: String(fd.get("content") || "") || undefined,
+      date: String(fd.get("date") || new Date().toISOString().slice(0, 10)),
+      technologies: splitCSV(String(fd.get("technologies") || "")),
+      categories: splitCSV(String(fd.get("categories") || "")),
+      status: (String(fd.get("status")) as ProjectStatus) || undefined,
+      isFeatured: fd.get("isFeatured") === "on",
       links: {
-        live: String(fd.get('link_live') || '') || undefined,
-        repo: String(fd.get('link_repo') || '') || undefined,
-        docs: String(fd.get('link_docs') || '') || undefined,
-        video: String(fd.get('link_video') || '') || undefined,
+        live: String(fd.get("link_live") || "") || undefined,
+        repo: String(fd.get("link_repo") || "") || undefined,
+        docs: String(fd.get("link_docs") || "") || undefined,
+        video: String(fd.get("link_video") || "") || undefined,
       },
       media: {
-        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
-        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
-        videoUrl: String(fd.get('media_videoUrl') || '') || undefined,
+        thumbnailUrl: String(fd.get("media_thumbnailUrl") || "") || undefined,
+        imageUrl: String(fd.get("media_imageUrl") || "") || undefined,
+        videoUrl: String(fd.get("media_videoUrl") || "") || undefined,
       },
     };
     setCreateLoading(true);
     try {
-      const res = await createItem('projects', body, token);
+      const res = await createItem("projects", body, token);
       setItems((prev) => [...prev, res.item as Project]);
       setCreateOpen(false);
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Create failed');
+      toast.error((e as Error)?.message ?? "Create failed");
     } finally {
       setCreateLoading(false);
     }
@@ -121,31 +121,31 @@ const ProjectsPage: React.FC = () => {
     const fd = new FormData(form);
     const patch: AdminUpdateProjectInput = {
       // id not editable here
-      slug: String(fd.get('slug') || '') || undefined,
-      title: String(fd.get('title') || ''),
-      subtitle: String(fd.get('subtitle') || '') || undefined,
-      description: String(fd.get('description') || '') || undefined,
-      content: String(fd.get('content') || '') || undefined,
-      date: String(fd.get('date') || editTarget.date),
-      technologies: splitCSV(String(fd.get('technologies') || '')),
-      categories: splitCSV(String(fd.get('categories') || '')),
-      status: (String(fd.get('status')) as ProjectStatus) || undefined,
-      isFeatured: fd.get('isFeatured') === 'on',
+      slug: String(fd.get("slug") || "") || undefined,
+      title: String(fd.get("title") || ""),
+      subtitle: String(fd.get("subtitle") || "") || undefined,
+      description: String(fd.get("description") || "") || undefined,
+      content: String(fd.get("content") || "") || undefined,
+      date: String(fd.get("date") || editTarget.date),
+      technologies: splitCSV(String(fd.get("technologies") || "")),
+      categories: splitCSV(String(fd.get("categories") || "")),
+      status: (String(fd.get("status")) as ProjectStatus) || undefined,
+      isFeatured: fd.get("isFeatured") === "on",
       links: {
-        live: String(fd.get('link_live') || '') || undefined,
-        repo: String(fd.get('link_repo') || '') || undefined,
-        docs: String(fd.get('link_docs') || '') || undefined,
-        video: String(fd.get('link_video') || '') || undefined,
+        live: String(fd.get("link_live") || "") || undefined,
+        repo: String(fd.get("link_repo") || "") || undefined,
+        docs: String(fd.get("link_docs") || "") || undefined,
+        video: String(fd.get("link_video") || "") || undefined,
       },
       media: {
-        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
-        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
-        videoUrl: String(fd.get('media_videoUrl') || '') || undefined,
+        thumbnailUrl: String(fd.get("media_thumbnailUrl") || "") || undefined,
+        imageUrl: String(fd.get("media_imageUrl") || "") || undefined,
+        videoUrl: String(fd.get("media_videoUrl") || "") || undefined,
       },
     };
     setSaveLoading(true);
     try {
-      const res = await updateItem('projects', editTarget.id, patch, token);
+      const res = await updateItem("projects", editTarget.id, patch, token);
       setItems((prev) =>
         prev.map((it) =>
           it.id === editTarget.id ? (res.item as Project) : it,
@@ -154,7 +154,7 @@ const ProjectsPage: React.FC = () => {
       setEditOpen(false);
       setEditTarget(null);
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSaveLoading(false);
     }
@@ -164,11 +164,11 @@ const ProjectsPage: React.FC = () => {
     if (!token) return;
     setDeleteLoading(true);
     try {
-      await deleteItem('projects', id, token);
+      await deleteItem("projects", id, token);
       setItems((prev) => prev.filter((x) => x.id !== id));
-      toast.success('Project deleted');
+      toast.success("Project deleted");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Delete failed');
+      toast.error((e as Error)?.message ?? "Delete failed");
     } finally {
       setDeleteLoading(false);
       setConfirmOpen(false);
@@ -228,8 +228,8 @@ const ProjectsPage: React.FC = () => {
               </div>
               <div className="mt-2 text-sm text-muted-foreground">
                 {Array.isArray(p.technologies) && p.technologies.length > 0
-                  ? p.technologies.join(', ')
-                  : '—'}
+                  ? p.technologies.join(", ")
+                  : "—"}
               </div>
             </div>
           ))}
@@ -350,7 +350,7 @@ const ProjectsPage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
               >
                 {createLoading ? (
-                  'Creating…'
+                  "Creating…"
                 ) : (
                   <>
                     <Save size={16} /> Create
@@ -385,7 +385,7 @@ const ProjectsPage: React.FC = () => {
               onClick={() => confirmId && void onDelete(confirmId)}
               disabled={deleteLoading}
             >
-              <Trash2 size={16} /> {deleteLoading ? 'Deleting…' : 'Delete'}
+              <Trash2 size={16} /> {deleteLoading ? "Deleting…" : "Delete"}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -415,13 +415,13 @@ const ProjectsPage: React.FC = () => {
                 />
                 <input
                   name="slug"
-                  defaultValue={editTarget.slug || ''}
+                  defaultValue={editTarget.slug || ""}
                   placeholder="Slug"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="subtitle"
-                  defaultValue={editTarget.subtitle || ''}
+                  defaultValue={editTarget.subtitle || ""}
                   placeholder="Subtitle"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -435,8 +435,8 @@ const ProjectsPage: React.FC = () => {
                   name="technologies"
                   defaultValue={
                     Array.isArray(editTarget.technologies)
-                      ? editTarget.technologies.join(', ')
-                      : ''
+                      ? editTarget.technologies.join(", ")
+                      : ""
                   }
                   placeholder="Technologies (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
@@ -445,15 +445,15 @@ const ProjectsPage: React.FC = () => {
                   name="categories"
                   defaultValue={
                     Array.isArray(editTarget.categories || [])
-                      ? (editTarget.categories || []).join(', ')
-                      : ''
+                      ? (editTarget.categories || []).join(", ")
+                      : ""
                   }
                   placeholder="Categories (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <select
                   name="status"
-                  defaultValue={editTarget.status || ''}
+                  defaultValue={editTarget.status || ""}
                   className="border rounded-md px-3 py-2 bg-background"
                 >
                   <option value="">Select Status</option>
@@ -466,44 +466,44 @@ const ProjectsPage: React.FC = () => {
                     type="checkbox"
                     name="isFeatured"
                     defaultChecked={Boolean(editTarget.isFeatured)}
-                  />{' '}
+                  />{" "}
                   Featured
                 </label>
               </div>
               <textarea
                 name="description"
-                defaultValue={editTarget.description || ''}
+                defaultValue={editTarget.description || ""}
                 placeholder="Short description"
                 className="w-full h-24 border rounded-md p-2 bg-background"
               />
               <textarea
                 name="content"
-                defaultValue={editTarget.content || ''}
+                defaultValue={editTarget.content || ""}
                 placeholder="Content (Markdown/HTML)"
                 className="w-full h-40 border rounded-md p-2 bg-background"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="link_live"
-                  defaultValue={editTarget.links?.live || ''}
+                  defaultValue={editTarget.links?.live || ""}
                   placeholder="Link: Live"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="link_repo"
-                  defaultValue={editTarget.links?.repo || ''}
+                  defaultValue={editTarget.links?.repo || ""}
                   placeholder="Link: Repo"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="link_docs"
-                  defaultValue={editTarget.links?.docs || ''}
+                  defaultValue={editTarget.links?.docs || ""}
                   placeholder="Link: Docs"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="link_video"
-                  defaultValue={editTarget.links?.video || ''}
+                  defaultValue={editTarget.links?.video || ""}
                   placeholder="Link: Video"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -511,19 +511,19 @@ const ProjectsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="media_thumbnailUrl"
-                  defaultValue={editTarget.media?.thumbnailUrl || ''}
+                  defaultValue={editTarget.media?.thumbnailUrl || ""}
                   placeholder="Media: Thumbnail URL"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="media_imageUrl"
-                  defaultValue={editTarget.media?.imageUrl || ''}
+                  defaultValue={editTarget.media?.imageUrl || ""}
                   placeholder="Media: Image URL"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="media_videoUrl"
-                  defaultValue={editTarget.media?.videoUrl || ''}
+                  defaultValue={editTarget.media?.videoUrl || ""}
                   placeholder="Media: Video URL"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -542,7 +542,7 @@ const ProjectsPage: React.FC = () => {
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 >
                   {saveLoading ? (
-                    'Saving…'
+                    "Saving…"
                   ) : (
                     <>
                       <Save size={16} /> Save

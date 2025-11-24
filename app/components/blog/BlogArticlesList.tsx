@@ -1,9 +1,9 @@
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import BlogArticleCard from './BlogArticleCard';
-import FiltersBar from '@/components/filters/FiltersBar';
-import type { Article } from '@/types';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import BlogArticleCard from "./BlogArticleCard";
+import FiltersBar from "@/components/filters/FiltersBar";
+import type { Article } from "@/types";
 
 // --- Debounce Hook ---
 function useDebounce<T>(value: T, delay: number): T {
@@ -20,14 +20,14 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 // --- Type for Sort Order ---
-type SortOrder = 'newest' | 'oldest' | 'a-z' | 'z-a' | 'featured';
+type SortOrder = "newest" | "oldest" | "a-z" | "z-a" | "featured";
 
 // --- Main Component ---
 const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [featuredOnly, setFeaturedOnly] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -65,19 +65,19 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
 
     // Sort the filtered articles
     const sortedArticles = [...tempArticles];
-    if (sortOrder === 'newest') {
+    if (sortOrder === "newest") {
       sortedArticles.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
-    } else if (sortOrder === 'oldest') {
+    } else if (sortOrder === "oldest") {
       sortedArticles.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
-    } else if (sortOrder === 'a-z') {
+    } else if (sortOrder === "a-z") {
       sortedArticles.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortOrder === 'z-a') {
+    } else if (sortOrder === "z-a") {
       sortedArticles.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortOrder === 'featured') {
+    } else if (sortOrder === "featured") {
       sortedArticles.sort(
         (a, b) =>
           Number(b.isFeatured) - Number(a.isFeatured) ||
@@ -93,7 +93,7 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <FiltersBar
           searchQuery={searchQuery}
@@ -102,15 +102,15 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
           onSortChange={(v) => setSortOrder(v as SortOrder)}
           filteredCount={filteredAndSortedArticles.length}
           onReset={() => {
-            setSearchQuery('');
+            setSearchQuery("");
             setSelectedTags([]);
             setFeaturedOnly(false);
-            setSortOrder('newest');
+            setSortOrder("newest");
           }}
           sections={[
             {
-              type: 'multiselect',
-              label: 'Tags',
+              type: "multiselect",
+              label: "Tags",
               items: allTags.map((t) => ({ value: t, label: t })),
               selected: selectedTags,
               onChange: setSelectedTags,
@@ -122,11 +122,11 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
           searchPlaceholder="Search articles..."
           searchAriaLabel="Search articles"
           sortOptions={[
-            { value: 'newest', label: 'Newest first' },
-            { value: 'oldest', label: 'Oldest first' },
-            { value: 'a-z', label: 'A → Z' },
-            { value: 'z-a', label: 'Z → A' },
-            { value: 'featured', label: 'Featured first' },
+            { value: "newest", label: "Newest first" },
+            { value: "oldest", label: "Oldest first" },
+            { value: "a-z", label: "A → Z" },
+            { value: "z-a", label: "Z → A" },
+            { value: "featured", label: "Featured first" },
           ]}
         />
       </motion.div>
@@ -134,13 +134,13 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
       <AnimatePresence mode="wait">
         {filteredAndSortedArticles.length > 0 ? (
           <motion.div
-            key={[selectedTags.join(','), debouncedSearchQuery, sortOrder].join(
-              '|',
+            key={[selectedTags.join(","), debouncedSearchQuery, sortOrder].join(
+              "|",
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3"
           >
             {filteredAndSortedArticles.map((article, index) => (

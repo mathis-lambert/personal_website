@@ -1,7 +1,8 @@
-'use client';
-import { Calendar, MapPin } from 'lucide-react';
-import type { Experience } from '@/types.ts';
-import { motion } from 'framer-motion';
+"use client";
+import { Calendar, MapPin } from "lucide-react";
+import type { Experience } from "@/types.ts";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -16,19 +17,21 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
     initial={{ opacity: 0, y: 12 }}
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, amount: 0.1 }}
-    transition={{ duration: 0.45, ease: 'easeOut', delay }}
+    transition={{ duration: 0.45, ease: "easeOut", delay }}
     className="mb-4 last:mb-0 rounded-2xl p-2 transition-colors"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
         {experience.logo && (
-          <img
+          <Image
             src={experience.logo}
             alt={`${experience.company} logo`}
+            width={40}
+            height={40}
             loading="lazy"
             className="h-8 w-8 md:h-9 md:w-9 lg:h-10 lg:w-10 shrink-0 rounded-md object-contain ring-1 ring-slate-200 dark:ring-slate-700"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
+              (e.currentTarget as HTMLImageElement).style.display = "none";
             }}
           />
         )}
@@ -37,8 +40,8 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
             {experience.role}
           </h3>
           <p className="mt-0.5 text-sm md:text-[15px] font-medium text-cyan-700 dark:text-cyan-300 truncate">
-            {experience.company}{' '}
-            {experience.position ? `• ${experience.position}` : ''}
+            {experience.company}{" "}
+            {experience.position ? `• ${experience.position}` : ""}
           </p>
         </div>
       </div>

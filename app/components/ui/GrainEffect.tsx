@@ -1,7 +1,7 @@
-'use client';
+"use client";
 // src/components/GrainEffect.tsx
-import React, { useMemo, useId } from 'react';
-import { useTheme } from '@/components/theme-provider';
+import React, { useMemo, useId, useEffect, useState } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 interface GrainEffectProps {
   size?: number;
@@ -16,11 +16,18 @@ const GrainEffect: React.FC<GrainEffectProps> = ({
   speed = 3,
   resolution = 50,
   darkOpacityMultiplier = 0.5, // Valeur par défaut pour le multiplicateur d'opacité
-  className = '',
+  className = "",
 }) => {
   const filterId = useId();
   const uniqueFilterId = `grain-filter-${filterId}`;
   const { resolvedTheme } = useTheme(); // Récupère le thème résolu (light/dark)
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const effectiveTheme = mounted && resolvedTheme ? resolvedTheme : "light";
 
   const grainOpacity = useMemo(() => {
     const clampedSize = Math.max(1, Math.min(100, size));
@@ -29,13 +36,13 @@ const GrainEffect: React.FC<GrainEffectProps> = ({
 
     // Appliquer le multiplicateur si le thème est sombre
     const finalOpacity =
-      resolvedTheme === 'dark'
+      effectiveTheme === "dark"
         ? baseOpacity * darkOpacityMultiplier
         : baseOpacity;
 
     // S'assurer que l'opacité reste dans l'intervalle [0, 1]
     return Math.max(0, Math.min(1, finalOpacity));
-  }, [size, resolvedTheme, darkOpacityMultiplier]); // Ajout des dépendances
+  }, [size, effectiveTheme, darkOpacityMultiplier]); // Ajout des dépendances
 
   const baseFrequency = useMemo(() => {
     const clampedResolution = Math.max(1, Math.min(100, resolution));

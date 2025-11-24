@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 
 export interface Contact {
   email: string;
@@ -34,7 +34,7 @@ export interface Certification {
   provider: string;
   title: string;
   issued_date: string | null;
-  status: 'issued' | 'in progress' | 'stopped' | 'starting';
+  status: "issued" | "in progress" | "stopped" | "starting";
   description?: string;
 }
 
@@ -100,16 +100,16 @@ export interface Message {
 // --- OpenAI-like SSE chunk format support ---
 
 export type FinishReason =
-  | 'stop'
-  | 'length'
-  | 'content_filter'
-  | 'tool_calls'
+  | "stop"
+  | "length"
+  | "content_filter"
+  | "tool_calls"
   | string;
 
 export interface OpenAIChoiceDelta {
   index: number;
   delta: {
-    role: 'system' | 'user' | 'assistant' | null;
+    role: "system" | "user" | "assistant" | null;
     content: string | null;
     reasoning_content?: string | null;
     reasoning?: string | null;
@@ -120,7 +120,7 @@ export interface OpenAIChoiceDelta {
 
 export interface OpenAIChatCompletionChunk {
   id: string;
-  object: 'chat.completion.chunk';
+  object: "chat.completion.chunk";
   created: number;
   model: string;
   choices: OpenAIChoiceDelta[];
@@ -128,7 +128,7 @@ export interface OpenAIChatCompletionChunk {
 }
 
 export interface OpenAIChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
   reasoning?: string | null;
   reasoning_content?: string | null;
@@ -143,7 +143,7 @@ export interface OpenAIChoiceCompletion {
 
 export interface OpenAIChatCompletion {
   id: string;
-  object: 'chat.completion';
+  object: "chat.completion";
   created: number;
   model: string;
   choices: OpenAIChoiceCompletion[];
@@ -181,16 +181,16 @@ export interface ChatState {
 }
 
 export type ChatAction =
-  | { type: 'FETCH_START' }
-  | { type: 'STREAM_CHUNK'; payload: ApiStreamChunk }
-  | { type: 'STREAM_DONE'; payload: ApiCompletionResult }
-  | { type: 'FETCH_SUCCESS'; payload: ApiCompletionResult }
-  | { type: 'FETCH_ERROR'; payload: Error }
-  | { type: 'RESET' };
+  | { type: "FETCH_START" }
+  | { type: "STREAM_CHUNK"; payload: ApiStreamChunk }
+  | { type: "STREAM_DONE"; payload: ApiCompletionResult }
+  | { type: "FETCH_SUCCESS"; payload: ApiCompletionResult }
+  | { type: "FETCH_ERROR"; payload: Error }
+  | { type: "RESET" };
 
 // ---------------- Projects / Works DTO ----------------
 
-export type ProjectStatus = 'completed' | 'in-progress' | 'archived';
+export type ProjectStatus = "completed" | "in-progress" | "archived";
 
 export interface ProjectLinks {
   live?: string; // Live demo or website
@@ -321,18 +321,18 @@ export type EventsAnalyticsSeriesPoint = {
 
 export interface EventsAnalyticsResponse {
   ok: boolean;
-  range: { start: string; end: string; granularity: 'hour' | 'day' | 'month' };
+  range: { start: string; end: string; granularity: "hour" | "day" | "month" };
   actions: string[];
   series: EventsAnalyticsSeriesPoint[];
   totals: { total: number; byAction: Record<string, number> };
-  group_by?: 'action' | 'location';
+  group_by?: "action" | "location";
 }
 
 export type AdminCollectionName =
-  | 'projects'
-  | 'articles'
-  | 'experiences'
-  | 'studies'
-  | 'resume';
+  | "projects"
+  | "articles"
+  | "experiences"
+  | "studies"
+  | "resume";
 
-export type AdminListCollectionName = Exclude<AdminCollectionName, 'resume'>;
+export type AdminListCollectionName = Exclude<AdminCollectionName, "resume">;

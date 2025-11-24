@@ -15,8 +15,7 @@ export async function GET(req: NextRequest) {
     undefined;
   const action = searchParams.get("action") ?? undefined;
   const groupBy =
-    (searchParams.get("group_by") as "action" | "location" | null) ||
-    undefined;
+    (searchParams.get("group_by") as "action" | "location" | null) || undefined;
 
   const data = await analyticsEvents({
     start,

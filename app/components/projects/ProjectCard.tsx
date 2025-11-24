@@ -1,11 +1,13 @@
-'use client';
-import Link from 'next/link';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { ExternalLink, Star } from 'lucide-react';
-import { BsGithub } from 'react-icons/bs';
-import type { Project } from '@/types';
+"use client";
+import Link from "next/link";
+import React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { ExternalLink, Star } from "lucide-react";
+import { BsGithub } from "react-icons/bs";
+import type { Project } from "@/types";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ProjectCardProps {
   project: Project;
@@ -16,26 +18,27 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   animationDelay = 0.1,
 }) => {
+  const router = useRouter();
   const detailsPath = `/projects/${project.slug || project.id}`;
 
-  const formattedDate = new Date(project.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
+  const formattedDate = new Date(project.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    timeZone: "UTC",
   });
 
   const liveUrl = project.links?.live;
   const repoUrl = project.links?.repo;
   const imageSrc = project.media?.thumbnailUrl || project.media?.imageUrl;
   const isFeatured = Boolean(project.isFeatured);
-  const status = project.status || 'completed';
+  const status = project.status || "completed";
 
   const statusClass =
-    status === 'completed'
-      ? 'bg-emerald-500/80 text-white border-white/10'
-      : status === 'in-progress'
-        ? 'bg-amber-500/80 text-white border-white/10'
-        : 'bg-gray-500/70 text-white border-white/10';
+    status === "completed"
+      ? "bg-emerald-500/80 text-white border-white/10"
+      : status === "in-progress"
+        ? "bg-amber-500/80 text-white border-white/10"
+        : "bg-gray-500/70 text-white border-white/10";
 
   return (
     <motion.div
@@ -44,29 +47,39 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       animate={{
         opacity: 1,
         y: 0,
-        transition: { delay: animationDelay, duration: 0.4, ease: 'easeOut' },
+        transition: { delay: animationDelay, duration: 0.4, ease: "easeOut" },
       }}
       exit={{ opacity: 0, y: 30 }}
       layout
     >
-      <Link
-        href={detailsPath}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => router.push(detailsPath)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            router.push(detailsPath);
+          }
+        }}
         aria-label={`View details for ${project.title}`}
         className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/10 dark:focus-visible:ring-offset-black/30 rounded-3xl cursor-pointer"
       >
         <div
           className={cn(
-            'flex flex-col h-full rounded-3xl backdrop-blur-xl border border-white/40 relative shadow-md overflow-hidden',
-            'transition-all duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl',
-            'bg-white/30 dark:bg-gray-800/30 dark:text-gray-100 dark:border-white/10 dark:shadow-lg',
+            "flex flex-col h-full rounded-3xl backdrop-blur-xl border border-white/40 relative shadow-md overflow-hidden",
+            "transition-all duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl",
+            "bg-white/30 dark:bg-gray-800/30 dark:text-gray-100 dark:border-white/10 dark:shadow-lg",
           )}
         >
           <div className="relative w-full h-40 sm:h-48 overflow-hidden">
-            <img
-              src={imageSrc}
+            <Image
+              src={imageSrc || "undefined"}
               alt={`Screenshot of ${project.title}`}
               loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+              width={384}
+              height={192}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-50 group-hover:opacity-80 transition-opacity duration-300" />
             {isFeatured && (
@@ -81,15 +94,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
             <span
               className={cn(
-                'absolute bottom-3 left-3 text-[10px] px-2 py-0.5 rounded-full border shadow-sm',
+                "absolute bottom-3 left-3 text-[10px] px-2 py-0.5 rounded-full border shadow-sm",
                 statusClass,
               )}
             >
-              {status === 'in-progress'
-                ? 'In progress'
-                : status === 'archived'
-                  ? 'Archived'
-                  : 'Completed'}
+              {status === "in-progress"
+                ? "In progress"
+                : status === "archived"
+                  ? "Archived"
+                  : "Completed"}
             </span>
           </div>
 
@@ -126,14 +139,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               </span>
 
               <div className="flex items-center gap-3">
-                {typeof project.metrics?.stars === 'number' && (
+                {typeof project.metrics?.stars === "number" && (
                   <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-300">
                     <Star className="w-4 h-4 text-yellow-400" />
                     {project.metrics.stars}
                   </span>
                 )}
                 {liveUrl && (
-                  <a
+                  <Link
                     href={liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -143,10 +156,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     title="View Live Demo"
                   >
                     <ExternalLink className="w-4 h-4" />
-                  </a>
+                  </Link>
                 )}
                 {repoUrl && (
-                  <a
+                  <Link
                     href={repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -156,13 +169,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     title="View Source Code"
                   >
                     <BsGithub className="w-4 h-4" />
-                  </a>
+                  </Link>
                 )}
               </div>
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 };

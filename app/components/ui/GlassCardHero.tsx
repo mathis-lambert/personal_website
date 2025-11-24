@@ -1,11 +1,11 @@
-'use client';
-import { motion } from 'framer-motion';
-import React from 'react';
-import { cn } from '@/lib/utils';
+"use client";
+import { motion } from "framer-motion";
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface GlassCardProps {
   title?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   children: React.ReactNode;
   px?: number;
   pt?: number;
@@ -15,12 +15,12 @@ interface GlassCardProps {
 
 const GlassCardHero: React.FC<GlassCardProps> = ({
   title,
-  size = 'small',
+  size = "small",
   children,
   px = 1,
   pt = 3.5,
   animationDelay = 0.5,
-  className = '',
+  className = "",
 }) => {
   // Styles dynamiques
   const dynamicStyles = {
@@ -32,7 +32,7 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
   return (
     <motion.div
       className={
-        `${size === 'small' ? 'col-span-1 xs:row-span-1' : size === 'medium' ? 'col-span-1 xs:col-span-2 row-span-1' : size === 'large' ? 'col-span-1 xs:col-span-3 row-span-1' : ''}` +
+        `${size === "small" ? "col-span-1 xs:row-span-1" : size === "medium" ? "col-span-1 xs:col-span-2 row-span-1" : size === "large" ? "col-span-1 xs:col-span-3 row-span-1" : ""}` +
         ` ${className}`
       }
       initial={{ opacity: 0, scale: 0.8 }}

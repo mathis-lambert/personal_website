@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { motion, type Variants } from 'framer-motion';
+import { motion, type Variants } from "framer-motion";
 
-import BlogArticleCard from '@/components/blog/BlogArticleCard';
-import ProjectCard from '@/components/projects/ProjectCard';
-import GlassCardsList from '@/components/ui/GlassCardsList';
-import { HeroSection } from '@/components/ui/HeroSection';
-import type { Article, Project, TimelineEntry } from '@/types';
+import BlogArticleCard from "@/components/blog/BlogArticleCard";
+import ProjectCard from "@/components/projects/ProjectCard";
+import GlassCardsList from "@/components/ui/GlassCardsList";
+import { HeroSection } from "@/components/ui/HeroSection";
+import type { Article, Project, TimelineEntry } from "@/types";
 
 type HomePageContentProps = {
   featuredProjects: Project[];
@@ -90,11 +90,7 @@ export function HomePageContent({
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {latestArticles.map((a, i) => (
-            <BlogArticleCard
-              key={a.id}
-              article={a}
-              animationDelay={i * 0.08}
-            />
+            <BlogArticleCard key={a.id} article={a} animationDelay={i * 0.08} />
           ))}
         </div>
         {latestArticles.length === 0 && (

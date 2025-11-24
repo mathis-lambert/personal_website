@@ -1,7 +1,7 @@
-import DashboardPage from '@/admin/pages/DashboardPage';
+import DashboardPage from "@/admin/pages/DashboardPage";
 
 export const metadata = {
-  title: 'Admin Dashboard',
+  title: "Admin Dashboard",
 };
 
 export default function AdminDashboard() {

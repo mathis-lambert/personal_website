@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'; // Importe une icône de spinner
+import { Loader2 } from "lucide-react"; // Importe une icône de spinner
 
 interface LoaderProps {
   message?: string; // Message optionnel
@@ -7,9 +7,9 @@ interface LoaderProps {
 }
 
 function Loader({
-  message = 'Chargement...', // Message par défaut
+  message = "Chargement...", // Message par défaut
   spinnerSize = 8, // Taille par défaut du spinner (h-8 w-8)
-  textSize = 'text-base', // Taille par défaut du texte
+  textSize = "text-base", // Taille par défaut du texte
 }: LoaderProps) {
   const spinnerClasses = `h-${spinnerSize} w-${spinnerSize}`;
 

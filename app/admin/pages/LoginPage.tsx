@@ -1,14 +1,14 @@
-'use client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 
 const LoginPage: React.FC = () => {
   const { login } = useAdminAuth();
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,9 +18,9 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       await login({ username, password });
-      router.replace('/admin');
+      router.replace("/admin");
     } catch (err) {
-      setError((err as Error)?.message ?? 'Login failed');
+      setError((err as Error)?.message ?? "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +62,7 @@ const LoginPage: React.FC = () => {
             disabled={isLoading}
             className="w-full rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60"
           >
-            {isLoading ? 'Signing in…' : 'Sign in'}
+            {isLoading ? "Signing in…" : "Sign in"}
           </button>
           <Link
             href="/"

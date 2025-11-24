@@ -1,7 +1,7 @@
-'use client';
-import React, { useEffect, useRef } from 'react';
-import GrainEffect from '@/components/ui/GrainEffect';
-import * as culori from 'culori';
+"use client";
+import React, { useEffect, useRef } from "react";
+import GrainEffect from "@/components/ui/GrainEffect";
+import * as culori from "culori";
 
 interface TargetArea {
   xMin: number;
@@ -79,13 +79,13 @@ const createShader = (
 ): WebGLShader => {
   const shader = gl.createShader(type);
   if (!shader) {
-    throw new Error('Unable to create shader');
+    throw new Error("Unable to create shader");
   }
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const info = gl.getShaderInfoLog(shader) ?? 'Unknown shader error';
+    const info = gl.getShaderInfoLog(shader) ?? "Unknown shader error";
     gl.deleteShader(shader);
     throw new Error(info);
   }
@@ -103,7 +103,7 @@ const createProgram = (
 
   const program = gl.createProgram();
   if (!program) {
-    throw new Error('Unable to create shader program');
+    throw new Error("Unable to create shader program");
   }
 
   gl.attachShader(program, vertexShader);
@@ -111,7 +111,7 @@ const createProgram = (
   gl.linkProgram(program);
 
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const info = gl.getProgramInfoLog(program) ?? 'Unknown link error';
+    const info = gl.getProgramInfoLog(program) ?? "Unknown link error";
     gl.deleteProgram(program);
     throw new Error(info);
   }
@@ -137,8 +137,8 @@ const colorToVec3 = (value: string, fallback: [number, number, number]) => {
 };
 
 const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
-  className = '',
-  sphereColors = ['#9213C6', '#1B5FD9', '#29E6EA'],
+  className = "",
+  sphereColors = ["#9213C6", "#1B5FD9", "#29E6EA"],
   numSpheres = 6,
   minSphereRadius = 150,
   maxSphereRadiusFactor = 0.33,
@@ -146,7 +146,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
   attractionStrength = 0.000015,
   noiseIntensity = 0.05,
   dampingFactor = 0.99,
-  blurIntensity = 'blur-3xl',
+  blurIntensity = "blur-3xl",
   opacityRange = [0.5, 1.0],
   grainSize = 70,
   grainSpeed = 0.1,
@@ -161,7 +161,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
   const dimensionsRef = useRef({ width: 0, height: 0 });
   const targetAreasRef = useRef<TargetArea[]>([]);
 
-  const backgroundStringRef = useRef('oklch(97.5% 0.01 0)');
+  const backgroundStringRef = useRef("oklch(97.5% 0.01 0)");
   const backgroundRgbRef = useRef<[number, number, number]>([0.97, 0.97, 0.98]);
 
   const sphereStateRef = useRef({
@@ -179,8 +179,8 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
     const canvas = canvasRef.current;
     if (!parent || !canvas) return undefined;
 
-    const gl = canvas.getContext('webgl', {
-      powerPreference: 'high-performance',
+    const gl = canvas.getContext("webgl", {
+      powerPreference: "high-performance",
       antialias: true,
       alpha: true,
       preserveDrawingBuffer: false,
@@ -188,7 +188,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
     });
 
     if (!gl) {
-      console.warn('WebGL not available; gradient disabled.');
+      console.warn("WebGL not available; gradient disabled.");
       return undefined;
     }
 
@@ -201,7 +201,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
         fragmentShaderSource,
       );
     } catch (error) {
-      console.error('Failed to build shader program', error);
+      console.error("Failed to build shader program", error);
       return undefined;
     }
 
@@ -219,18 +219,18 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
       gl.STATIC_DRAW,
     );
 
-    const positionLocation = gl.getAttribLocation(program, 'a_position');
+    const positionLocation = gl.getAttribLocation(program, "a_position");
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     const uniformLocations = {
-      resolution: gl.getUniformLocation(program, 'u_resolution'),
-      count: gl.getUniformLocation(program, 'u_count'),
-      positions: gl.getUniformLocation(program, 'u_positions'),
-      radius: gl.getUniformLocation(program, 'u_radius'),
-      alpha: gl.getUniformLocation(program, 'u_alpha'),
-      colors: gl.getUniformLocation(program, 'u_colors'),
-      background: gl.getUniformLocation(program, 'u_background'),
+      resolution: gl.getUniformLocation(program, "u_resolution"),
+      count: gl.getUniformLocation(program, "u_count"),
+      positions: gl.getUniformLocation(program, "u_positions"),
+      radius: gl.getUniformLocation(program, "u_radius"),
+      alpha: gl.getUniformLocation(program, "u_alpha"),
+      colors: gl.getUniformLocation(program, "u_colors"),
+      background: gl.getUniformLocation(program, "u_background"),
     };
 
     const updateBackground = (color: string) => {
@@ -383,35 +383,35 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
       animationRef.current = requestAnimationFrame(step);
     };
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const updateFromMedia = () => {
       updateBackground(
-        mediaQuery.matches ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)',
+        mediaQuery.matches ? "oklch(20% 0.01 0)" : "oklch(97.5% 0.01 0)",
       );
     };
     updateFromMedia();
-    if (parent.classList.contains('dark')) {
-      updateBackground('oklch(20% 0.01 0)');
+    if (parent.classList.contains("dark")) {
+      updateBackground("oklch(20% 0.01 0)");
     }
-    mediaQuery.addEventListener('change', updateFromMedia);
+    mediaQuery.addEventListener("change", updateFromMedia);
 
     const mutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'class'
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
         ) {
           const target = mutation.target as HTMLElement;
-          const isDark = target.classList.contains('dark');
+          const isDark = target.classList.contains("dark");
           updateBackground(
-            isDark ? 'oklch(20% 0.01 0)' : 'oklch(97.5% 0.01 0)',
+            isDark ? "oklch(20% 0.01 0)" : "oklch(97.5% 0.01 0)",
           );
         }
       });
     });
     mutationObserver.observe(parent, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ["class"],
     });
 
     resize();
@@ -424,7 +424,7 @@ const AbstractGradientBackground: React.FC<AbstractGradientBackgroundProps> = ({
 
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      mediaQuery.removeEventListener('change', updateFromMedia);
+      mediaQuery.removeEventListener("change", updateFromMedia);
       mutationObserver.disconnect();
       resizeObserver.disconnect();
 

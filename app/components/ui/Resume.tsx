@@ -1,5 +1,5 @@
-'use client';
-import { useRef, useState } from 'react';
+"use client";
+import { useRef, useState } from "react";
 import {
   Briefcase,
   Code,
@@ -10,20 +10,81 @@ import {
   Mail,
   Sparkles,
   Languages,
-} from 'lucide-react';
-import type { ResumeData } from '@/types';
-import { ResumeHeader } from '@/components/layout/ResumeHeader';
-import { GlassCard } from '@/components/ui/GlassCard';
-import { ResumeSection } from '@/components/ui/ResumeSection';
-import { TagListSection } from '@/components/ui/TagListSection';
-import { HighlightCard } from '@/components/resume/experience/HighlightCard';
-import { ExperienceCard } from '@/components/resume/experience/ExperienceCard';
-import { FaLinkedin } from 'react-icons/fa';
-import { CertificationsCard } from '../resume/CertificationsCard';
-import { Button } from '@/components/ui/button';
-import { Download, Loader2 } from 'lucide-react';
-import { downloadResumePdf } from '@/api/resume';
-import { motion } from 'framer-motion';
+} from "lucide-react";
+import type { ResumeData } from "@/types";
+import { ResumeHeader } from "@/components/layout/ResumeHeader";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { ResumeSection } from "@/components/ui/ResumeSection";
+import { TagListSection } from "@/components/ui/TagListSection";
+import { HighlightCard } from "@/components/resume/experience/HighlightCard";
+import { ExperienceCard } from "@/components/resume/experience/ExperienceCard";
+import { FaLinkedin } from "react-icons/fa";
+import { CertificationsCard } from "../resume/CertificationsCard";
+import { Button } from "@/components/ui/button";
+import { Download, Loader2 } from "lucide-react";
+import { downloadResumePdf } from "@/api/resume";
+import { motion } from "framer-motion";
+
+const emptyResume: ResumeData = {
+  name: "",
+  contact: {
+    email: "",
+    phone: "",
+    linkedin: "",
+    github: "",
+    website: "",
+  },
+  personal_statement: "",
+  experiences: [],
+  education: [],
+  certifications: [],
+  technical_skills: {
+    languages: [],
+    programming: [],
+    ai_ml: [],
+    systems_and_infra: [],
+    web: [],
+  },
+  skills: [],
+  passions: [],
+};
+
+const normalizeResume = (value: ResumeData | null | undefined): ResumeData => {
+  if (!value) return emptyResume;
+  return {
+    ...emptyResume,
+    ...value,
+    contact: { ...emptyResume.contact, ...(value.contact ?? {}) },
+    experiences: Array.isArray(value.experiences) ? value.experiences : [],
+    education: Array.isArray(value.education) ? value.education : [],
+    certifications: Array.isArray(value.certifications)
+      ? value.certifications
+      : [],
+    technical_skills: {
+      ...emptyResume.technical_skills,
+      ...(value.technical_skills ?? {}),
+      languages: Array.isArray(value.technical_skills?.languages)
+        ? value.technical_skills!.languages
+        : [],
+      programming: Array.isArray(value.technical_skills?.programming)
+        ? value.technical_skills!.programming
+        : [],
+      ai_ml: Array.isArray(value.technical_skills?.ai_ml)
+        ? value.technical_skills!.ai_ml
+        : [],
+      systems_and_infra: Array.isArray(
+        value.technical_skills?.systems_and_infra,
+      )
+        ? value.technical_skills!.systems_and_infra
+        : [],
+      web: Array.isArray(value.technical_skills?.web)
+        ? value.technical_skills!.web
+        : [],
+    },
+    skills: Array.isArray(value.skills) ? value.skills : [],
+    passions: Array.isArray(value.passions) ? value.passions : [],
+  };
+};
 
 export default function Resume({
   resumeData,
@@ -32,37 +93,14 @@ export default function Resume({
 }) {
   const resumeRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-  const data: ResumeData =
-    resumeData ?? {
-      name: '',
-      contact: {
-        email: '',
-        phone: '',
-        linkedin: '',
-        github: '',
-        website: '',
-      },
-      personal_statement: '',
-      experiences: [],
-      education: [],
-      certifications: [],
-      technical_skills: {
-        languages: [],
-        programming: [],
-        ai_ml: [],
-        systems_and_infra: [],
-        web: [],
-      },
-      skills: [],
-      passions: [],
-    };
+  const data = normalizeResume(resumeData);
 
   const onExportPdf = async () => {
     try {
       setDownloading(true);
       await downloadResumePdf();
     } catch (e) {
-      console.error('Failed to export resume PDF', e);
+      console.error("Failed to export resume PDF", e);
     } finally {
       setDownloading(false);
     }
@@ -72,8 +110,8 @@ export default function Resume({
     <div className="text-slate-800 dark:text-slate-200 font-sans transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
         <ResumeHeader
-          name={data.name ?? ''}
-          personal_statement={data.personal_statement ?? ''}
+          name={data.name ?? ""}
+          personal_statement={data.personal_statement ?? ""}
           actions={
             <Button
               variant="outline"
@@ -88,7 +126,7 @@ export default function Resume({
               ) : (
                 <Download className="text-cyan-600 dark:text-cyan-400 transition-transform duration-200 group-hover:rotate-[-12deg]" />
               )}
-              <span>{downloading ? 'Exporting…' : 'Export PDF'}</span>
+              <span>{downloading ? "Exporting…" : "Export PDF"}</span>
             </Button>
           }
         />
@@ -98,9 +136,9 @@ export default function Resume({
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.3, ease: 'easeOut', delay: 0.25 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: 0.25 }}
         >
-          <p>{ }</p>
+          <p>{}</p>
         </motion.div>
 
         <div id="resume-content" ref={resumeRef}>
@@ -147,16 +185,14 @@ export default function Resume({
                         AI / ML
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(data.technical_skills?.ai_ml ?? []).map(
-                          (it, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                            >
-                              {it}
-                            </span>
-                          ),
-                        )}
+                        {(data.technical_skills?.ai_ml ?? []).map((it, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                          >
+                            {it}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
@@ -173,7 +209,8 @@ export default function Resume({
                             >
                               {it}
                             </span>
-                          ))}
+                          ),
+                        )}
                       </div>
                     </div>
 
@@ -182,16 +219,14 @@ export default function Resume({
                         Web
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {(data.technical_skills?.web ?? []).map(
-                          (it, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
-                            >
-                              {it}
-                            </span>
-                          ),
-                        )}
+                        {(data.technical_skills?.web ?? []).map((it, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded-full text-xs bg-cyan-400/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                          >
+                            {it}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -273,9 +308,7 @@ export default function Resume({
 
               <GlassCard className="p-6" delay={0.56}>
                 <ResumeSection icon={Briefcase} title="Certifications">
-                  <CertificationsCard
-                    certifications={data.certifications}
-                  />
+                  <CertificationsCard certifications={data.certifications} />
                 </ResumeSection>
               </GlassCard>
 

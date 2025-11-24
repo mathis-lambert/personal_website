@@ -1,9 +1,9 @@
-'use client';
-import Link from 'next/link';
-import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import type { Article, ArticleMetrics } from '@/types';
-import { cn } from '@/lib/utils';
+"use client";
+import Link from "next/link";
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import type { Article } from "@/types";
+import { cn } from "@/lib/utils";
 import {
   Star,
   Eye,
@@ -12,14 +12,10 @@ import {
   Link as LinkIcon,
   Twitter,
   Linkedin,
-} from 'lucide-react';
-import MarkdownView from '@/components/ui/MarkdownView';
-import Breadcrumb from '@/components/ui/breadcrumb';
-import {
-  trackArticleLike,
-  trackArticleShare,
-  trackArticleRead,
-} from '@/api/articles';
+} from "lucide-react";
+import MarkdownView from "@/components/ui/MarkdownView";
+import Breadcrumb from "@/components/ui/breadcrumb";
+import Image from "next/image";
 
 interface ArticleViewProps {
   article: Article | null | undefined;
@@ -30,39 +26,24 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [metrics, setMetrics] = useState<ArticleMetrics | undefined>(
-    article?.metrics,
-  );
   const breadcrumbItems = useMemo(
     () => [
-      { label: 'Home', href: '/' },
-      { label: 'Blog', href: '/blog' },
-      { label: article?.title || 'Article' },
+      { label: "Home", href: "/" },
+      { label: "Blog", href: "/blog" },
+      { label: article?.title || "Article" },
     ],
     [article?.title],
   );
 
-  useEffect(() => {
-    setMetrics(article?.metrics);
-  }, [article]);
-
-  // Track read when article becomes available (hook must not be conditional)
-  useEffect(() => {
-    if (!article) return;
-    trackArticleRead(article)
-      .then((m) => {
-        if (m) setMetrics(m);
-      })
-      .catch(() => { });
-  }, [article]);
-
+  const metrics = article?.metrics;
+  const sharesCount = metrics?.shares ?? 0;
   if (isLoading) {
     return (
       <motion.section
         className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <div className="animate-pulse">
           <div
@@ -109,26 +90,25 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     );
   }
 
-  const formattedDate = new Date(article.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
+  const formattedDate = new Date(article.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
   });
 
   const imageSrc = article.media?.imageUrl || article.media?.thumbnailUrl;
 
   const readTime =
-    typeof article.readTimeMin === 'number'
+    typeof article.readTimeMin === "number"
       ? `${article.readTimeMin} min read`
       : undefined;
   const isFeatured = Boolean(article.isFeatured);
   const likesCount =
-    (metrics?.likes ?? article.metrics?.likes ?? 0) +
-    (metrics ? 0 : isLiked ? 1 : 0);
+    (metrics?.likes ?? article.metrics?.likes ?? 0) + (isLiked ? 1 : 0);
 
   const handleShare = async () => {
-    const url = window.location?.href ?? '';
+    const url = window.location?.href ?? "";
     const shareData = {
       title: article.title,
       text: article.excerpt || article.title,
@@ -141,7 +121,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
           .then((m) => {
             if (m) setMetrics(m);
           })
-          .catch(() => { });
+          .catch(() => {});
         return;
       }
     } catch {
@@ -154,7 +134,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
         .then((m) => {
           if (m) setMetrics(m);
         })
-        .catch(() => { });
+        .catch(() => {});
       setTimeout(() => setCopiedShare(false), 2000);
     } catch {
       // ignore
@@ -170,7 +150,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     const x = window.top?.outerWidth
       ? Math.max(0, (window.top.outerWidth - w) / 2)
       : 0;
-    window.open(shareUrl, 'share', `width=${w},height=${h},left=${x},top=${y}`);
+    window.open(shareUrl, "share", `width=${w},height=${h},left=${x},top=${y}`);
   };
 
   return (
@@ -178,7 +158,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
       className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <Breadcrumb items={breadcrumbItems} />
       <motion.div
@@ -188,14 +168,16 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
         )}
         initial={{ scale: 0.98, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.5, ease: 'easeOut' }}
+        transition={{ delay: 0.1, duration: 0.5, ease: "easeOut" }}
       >
         {imageSrc && (
           <div className="w-full h-64 md:h-80 relative overflow-hidden border-b border-white/20 dark:border-white/10">
-            <img
+            <Image
               src={imageSrc}
               alt={`Cover image for ${article.title}`}
               className="w-full h-full object-cover"
+              width={1280}
+              height={720}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
             {isFeatured && (
@@ -232,25 +214,23 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-start sm:justify-end sm:pl-4 sm:border-l sm:border-white/20 dark:sm:border-white/10">
                 {typeof (metrics?.views ?? article.metrics?.views) ===
-                  'number' && (
-                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Eye className="w-3.5 h-3.5" />{' '}
-                      {metrics?.views ?? article.metrics?.views}
-                    </span>
-                  )}
+                  "number" && (
+                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <Eye className="w-3.5 h-3.5" />{" "}
+                    {metrics?.views ?? article.metrics?.views}
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <Heart
-                    className={cn('w-3.5 h-3.5', isLiked ? 'text-red-500' : '')}
-                  />{' '}
+                    className={cn("w-3.5 h-3.5", isLiked ? "text-red-500" : "")}
+                  />{" "}
                   {likesCount}
                 </span>
-                {typeof (metrics?.shares ?? article.metrics?.shares) ===
-                  'number' && (
-                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Share2 className="w-3.5 h-3.5" />{' '}
-                      {metrics?.shares ?? article.metrics?.shares}
-                    </span>
-                  )}
+                {typeof sharesCount === "number" && (
+                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <Share2 className="w-3.5 h-3.5" /> {sharesCount}
+                  </span>
+                )}
               </div>
               {article.tags && article.tags.length > 0 && (
                 <div className="sm:col-span-2 flex flex-wrap items-center gap-1">
@@ -269,42 +249,35 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border',
+                  "inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border",
                   isLiked
-                    ? 'bg-red-500/90 text-white border-red-400/80'
-                    : 'bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100',
+                    ? "bg-red-500/90 text-white border-red-400/80"
+                    : "bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100",
                 )}
                 onClick={() => setIsLiked((v) => !v)}
                 aria-pressed={isLiked}
-                onMouseUp={() =>
-                  trackArticleLike(article)
-                    .then((m) => {
-                      if (m) setMetrics(m);
-                    })
-                    .catch(() => { })
-                }
               >
                 <Heart
-                  className={cn('w-4 h-4', isLiked ? 'fill-current' : '')}
+                  className={cn("w-4 h-4", isLiked ? "fill-current" : "")}
                 />
-                {isLiked ? 'Liked' : 'Like'}
+                {isLiked ? "Liked" : "Like"}
               </button>
               <button
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border',
+                  "inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border",
                   copiedShare
-                    ? 'bg-green-500/90 text-white border-green-400/80'
-                    : 'bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100',
+                    ? "bg-green-500/90 text-white border-green-400/80"
+                    : "bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100",
                 )}
                 onClick={handleShare}
               >
                 <Share2 className="w-4 h-4" />
-                {copiedShare ? 'Link copied' : 'Share'}
+                {copiedShare ? "Link copied" : "Share"}
               </button>
               <button
                 className="inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100"
                 onClick={() => {
-                  const url = encodeURIComponent(window.location?.href ?? '');
+                  const url = encodeURIComponent(window.location?.href ?? "");
                   const text = encodeURIComponent(article.title);
                   openShareWindow(
                     `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
@@ -312,20 +285,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 }}
                 aria-label="Share on Twitter"
                 title="Share on Twitter"
-                onMouseUp={() =>
-                  trackArticleShare(article)
-                    .then((m) => {
-                      if (m) setMetrics(m);
-                    })
-                    .catch(() => { })
-                }
               >
                 <Twitter className="w-4 h-4" /> Twitter
               </button>
               <button
                 className="inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100"
                 onClick={() => {
-                  const url = encodeURIComponent(window.location?.href ?? '');
+                  const url = encodeURIComponent(window.location?.href ?? "");
                   const title = encodeURIComponent(article.title);
                   openShareWindow(
                     `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`,
@@ -333,28 +299,22 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 }}
                 aria-label="Share on LinkedIn"
                 title="Share on LinkedIn"
-                onMouseUp={() => trackArticleShare(article).catch(() => { })}
               >
                 <Linkedin className="w-4 h-4" /> LinkedIn
               </button>
               <button
                 className={cn(
-                  'inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border',
+                  "inline-flex items-center gap-1.5 text-xs md:text-sm px-3 py-1.5 rounded-full border",
                   copiedLink
-                    ? 'bg-green-500/90 text-white border-green-400/80'
-                    : 'bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100',
+                    ? "bg-green-500/90 text-white border-green-400/80"
+                    : "bg-white/40 dark:bg-gray-800/40 border-white/20 dark:border-white/10 text-gray-800 dark:text-gray-100",
                 )}
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(
-                      window.location?.href ?? '',
+                      window.location?.href ?? "",
                     );
                     setCopiedLink(true);
-                    trackArticleShare(article)
-                      .then((m) => {
-                        if (m) setMetrics(m);
-                      })
-                      .catch(() => { });
                     setTimeout(() => setCopiedLink(false), 2000);
                   } catch {
                     // ignore
@@ -363,8 +323,8 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                 aria-label="Copy link"
                 title="Copy link"
               >
-                <LinkIcon className="w-4 h-4" />{' '}
-                {copiedLink ? 'Copied' : 'Copy link'}
+                <LinkIcon className="w-4 h-4" />{" "}
+                {copiedLink ? "Copied" : "Copy link"}
               </button>
             </div>
           </header>

@@ -1,6 +1,6 @@
-'use client';
-import React from 'react';
-import { motion } from 'framer-motion';
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
 
 interface StickerConfig {
   id: number;
@@ -36,7 +36,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
             rotate: sticker.rotation,
             transition: {
               delay: sticker.animationDelay,
-              type: 'spring',
+              type: "spring",
               stiffness: 150,
               damping: 15,
             },
@@ -45,7 +45,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
             scale: 1.1,
             transition: {
               delay: 0,
-              type: 'spring',
+              type: "spring",
               stiffness: 200,
               damping: 15,
             },
@@ -57,7 +57,7 @@ export const Patchwork: React.FC<PatchworkProps> = ({ stickers }) => {
             key={sticker.id}
             src={sticker.src}
             alt={sticker.alt}
-            className={`absolute object-contain ${sticker.width} ${sticker.height} ${sticker.top} ${sticker.left ?? ''} ${sticker.right ?? ''}`}
+            className={`absolute object-contain ${sticker.width} ${sticker.height} ${sticker.top} ${sticker.left ?? ""} ${sticker.right ?? ""}`}
             style={{
               zIndex: sticker.zIndex,
             }}

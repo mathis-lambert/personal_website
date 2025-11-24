@@ -1,20 +1,19 @@
-import ProjectView from '@/components/projects/ProjectView';
-import { getAllProjects, getProjectBySlug } from '@/lib/data/content';
-import type { Project } from '@/types';
-import { notFound } from 'next/navigation';
+import ProjectView from "@/components/projects/ProjectView";
+import { getAllProjects, getProjectBySlug } from "@/lib/data/content";
+import type { Project } from "@/types";
+import { notFound } from "next/navigation";
 
 type Params = { slug: string };
 
 export async function generateStaticParams() {
   const projects = await getAllProjects();
-  return projects
-    .filter((p) => p.slug)
-    .map((p) => ({ slug: p.slug! }));
+  return projects.map((p) => ({ slug: p.slug || p.id }));
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
-  const project = await getProjectBySlug(params.slug);
-  if (!project) return { title: 'Project not found' };
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+  if (!project) return { title: "Project not found" };
   return {
     title: `${project.title} – Project`,
     description: project.subtitle || project.description,
@@ -26,7 +25,8 @@ export default async function ProjectDetailPage({
 }: {
   params: Params;
 }) {
-  const project = (await getProjectBySlug(params.slug)) as Project | null;
+  const { slug } = await params;
+  const project = (await getProjectBySlug(slug)) as Project | null;
   if (!project) {
     notFound();
   }

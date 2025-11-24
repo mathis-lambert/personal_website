@@ -1,7 +1,7 @@
-import StudiesPage from '@/admin/pages/StudiesPage';
+import StudiesPage from "@/admin/pages/StudiesPage";
 
 export const metadata = {
-  title: 'Admin · Studies',
+  title: "Admin · Studies",
 };
 
 export default function AdminStudies() {

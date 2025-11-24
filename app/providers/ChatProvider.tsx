@@ -1,8 +1,8 @@
-'use client';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import useChatCompletion from '@/hooks/useChatCompletion';
-import type { ChatCompletionsRequest, Message } from '@/types.ts';
-import { ChatContext, type ChatContextType } from '@/hooks/useChat';
+"use client";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import useChatCompletion from "@/hooks/useChatCompletion";
+import type { ChatCompletionsRequest, Message } from "@/types.ts";
+import { ChatContext, type ChatContextType } from "@/hooks/useChat";
 
 interface ChatProviderProps {
   children: React.ReactNode;
@@ -34,29 +34,31 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       !responseAddedRef.current &&
       currentRequest
     ) {
-      setMessages((prevMessages) => {
-        const lastMessage = prevMessages[prevMessages.length - 1];
-        if (
-          lastMessage?.role === 'assistant' &&
-          lastMessage.content === result
-        ) {
-          return prevMessages;
-        }
-        const messagesWithoutPartial = prevMessages.filter(
-          (msg) => !(msg.role === 'assistant' && msg.content === ''),
-        );
-        return [
-          ...messagesWithoutPartial,
-          {
-            role: 'assistant',
-            content: result,
-            reasoning: reasoning || null,
-            reasoning_content: reasoning_content || null,
-          },
-        ];
-      });
-      setCurrentRequest(null);
       responseAddedRef.current = true;
+      void Promise.resolve().then(() => {
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (
+            lastMessage?.role === "assistant" &&
+            lastMessage.content === result
+          ) {
+            return prevMessages;
+          }
+          const messagesWithoutPartial = prevMessages.filter(
+            (msg) => !(msg.role === "assistant" && msg.content === ""),
+          );
+          return [
+            ...messagesWithoutPartial,
+            {
+              role: "assistant",
+              content: result,
+              reasoning: reasoning || null,
+              reasoning_content: reasoning_content || null,
+            },
+          ];
+        });
+        setCurrentRequest(null);
+      });
     }
 
     if (isLoading && currentRequest && !responseAddedRef.current) {
@@ -92,7 +94,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         setIsChatOpen(true);
       }
 
-      const userMessage: Message = { role: 'user', content: message };
+      const userMessage: Message = { role: "user", content: message };
       const updatedMessages = [...messages, userMessage];
       setMessages(updatedMessages);
       const newRequest: ChatCompletionsRequest = {
@@ -111,13 +113,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     messages,
     isLoading: isLoading && !!currentRequest,
     error,
-    streamingResult: isLoading && !!currentRequest && result ? result : '',
+    streamingResult: isLoading && !!currentRequest && result ? result : "",
     streamingReasoning:
-      isLoading && !!currentRequest && reasoning ? reasoning : '',
+      isLoading && !!currentRequest && reasoning ? reasoning : "",
     streamingReasoningContent:
       isLoading && !!currentRequest && reasoning_content
         ? reasoning_content
-        : '',
+        : "",
     openChat,
     toggleChat,
     closeChat,

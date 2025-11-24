@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 export type ChartConfig = Record<string, { label?: string; color?: string }>;
 
@@ -28,7 +28,7 @@ export function ChartContainer({
 
   return (
     <div
-      className={cn('w-full min-h-[220px] text-sm', className)}
+      className={cn("w-full min-h-[220px] text-sm", className)}
       style={{ ...cssVars, ...style }}
       {...props}
     >
@@ -64,7 +64,7 @@ export function ChartTooltipContent({
             payload?: { fill?: string };
           }[]
         ).map((item) => {
-          const name = (item.name as string) || 'value';
+          const name = (item.name as string) || "value";
           const color =
             item.color ||
             item.stroke ||
@@ -89,7 +89,7 @@ export function ChartTooltipContent({
   );
 }
 
-export function ChartEmptyState({ message = 'No data' }: { message?: string }) {
+export function ChartEmptyState({ message = "No data" }: { message?: string }) {
   return (
     <div className="flex h-[220px] w-full items-center justify-center text-muted-foreground text-sm">
       {message}

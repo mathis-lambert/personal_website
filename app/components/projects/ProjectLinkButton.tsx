@@ -1,7 +1,7 @@
-'use client';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface ProjectLinkButtonProps {
   href: string;

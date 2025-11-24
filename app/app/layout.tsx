@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import { AppProviders } from "@/providers";
 import "./globals.css";
 
-const baseUrl =
-  process.env.PUBLIC_BASE_URL || "https://mathislambert.fr";
+const baseUrl = process.env.PUBLIC_BASE_URL || "https://mathislambert.fr";
 
 const themeInitializer = `
 (() => {
@@ -38,8 +37,7 @@ const themeInitializer = `
 
 export const metadata: Metadata = {
   title: "Mathis Lambert | Software & AI Engineer",
-  description:
-    "Portfolio, projects, resume, and writings by Mathis Lambert.",
+  description: "Portfolio, projects, resume, and writings by Mathis Lambert.",
   metadataBase: new URL(baseUrl),
 };
 
@@ -57,7 +55,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
       </head>
-      <body className="antialiased bg-background text-foreground">
+      <body
+        className="antialiased bg-background text-foreground"
+        suppressHydrationWarning
+      >
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

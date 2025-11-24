@@ -4,7 +4,7 @@ import type {
   ChatCompletionsRequest,
   OpenAIChatCompletion,
   FinishReason,
-} from '@/types.ts';
+} from "@/types.ts";
 
 /**
  * Optional callbacks for handling streaming responses.
@@ -46,25 +46,24 @@ export async function callPersonalApi(
     callbacks?: ApiCallbacks;
   },
 ): Promise<ApiCompletionResult | void> {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
   const { signal, callbacks } = options || {};
   const isStreaming = !!callbacks?.onChunk;
 
   try {
     const response = await fetch(`${apiUrl}/api/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         // Request a stream only if we have a callback to handle it
-        Accept: isStreaming ? 'text/event-stream' : 'application/json',
+        Accept: isStreaming ? "text/event-stream" : "application/json",
       },
       body: JSON.stringify(request),
       signal,
     });
 
     if (!response.ok) {
-      let errorDetails = '';
+      let errorDetails = "";
       try {
         const errorJson = await response.json();
         errorDetails = ` - ${JSON.stringify(errorJson)}`;
@@ -77,18 +76,18 @@ export async function callPersonalApi(
     }
 
     // --- Streaming Logic (also auto-detect SSE in non-streaming mode) ---
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = response.headers.get("content-type") || "";
     if (
-      (isStreaming || contentType.includes('text/event-stream')) &&
+      (isStreaming || contentType.includes("text/event-stream")) &&
       response.body
     ) {
       const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let buffer = '';
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
       // Accumulator for both streaming and non-streaming usage
-      let aggregatedResult = '';
-      let aggregatedReasoning = '';
-      let aggregatedReasoningContent = '';
+      let aggregatedResult = "";
+      let aggregatedReasoning = "";
+      let aggregatedReasoningContent = "";
       let aggregatedId: string | null = null;
       let aggregatedFinish: FinishReason | null = null;
 
@@ -101,29 +100,29 @@ export async function callPersonalApi(
         const text = decoder.decode(value, { stream: true });
         buffer += text;
 
-        const events = buffer.split('\n\n');
-        buffer = events.pop() || '';
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
 
         for (const event of events) {
           if (!event.trim()) continue;
 
           const dataLine = event
-            .split('\n')
-            .find((line) => line.startsWith('data:'));
+            .split("\n")
+            .find((line) => line.startsWith("data:"));
           const eventTypeLine = event
-            .split('\n')
-            .find((line) => line.startsWith('event:'));
+            .split("\n")
+            .find((line) => line.startsWith("event:"));
 
           if (!dataLine) continue;
           const data = dataLine.substring(5).trim();
           // Handle SSE sentinel if used
-          if (data === '[DONE]') {
+          if (data === "[DONE]") {
             const donePayload: ApiCompletionResult = {
               result: aggregatedResult,
               reasoning: aggregatedReasoning || null,
               reasoning_content: aggregatedReasoningContent || null,
-              finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
-              id: aggregatedId ?? '',
+              finish_reason: (aggregatedFinish ?? "stop") as FinishReason,
+              id: aggregatedId ?? "",
             };
             if (callbacks?.onDone) {
               callbacks.onDone(donePayload);
@@ -134,15 +133,15 @@ export async function callPersonalApi(
           try {
             const parsed = JSON.parse(data) as unknown;
 
-            const isDoneEvent = !!eventTypeLine?.includes('done');
+            const isDoneEvent = !!eventTypeLine?.includes("done");
 
             if (isDoneEvent) {
               const donePayload: ApiCompletionResult = {
                 result: aggregatedResult,
                 reasoning: aggregatedReasoning || null,
                 reasoning_content: aggregatedReasoningContent || null,
-                finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
-                id: aggregatedId ?? '',
+                finish_reason: (aggregatedFinish ?? "stop") as FinishReason,
+                id: aggregatedId ?? "",
               };
               if (callbacks?.onDone) {
                 callbacks.onDone(donePayload);
@@ -152,7 +151,7 @@ export async function callPersonalApi(
             }
 
             // Normalize possible formats into our simple shapes
-            let nextChunk = '';
+            let nextChunk = "";
             let nextReasoning: string | null = null;
             let nextReasoningContent: string | null = null;
             let nextFinish: FinishReason | null = null;
@@ -160,11 +159,11 @@ export async function callPersonalApi(
 
             // OpenAI-like chunk: object === 'chat.completion.chunk'
             if (
-              typeof parsed === 'object' &&
+              typeof parsed === "object" &&
               parsed !== null &&
-              'object' in (parsed as Record<string, unknown>) &&
+              "object" in (parsed as Record<string, unknown>) &&
               (parsed as Record<string, unknown>).object ===
-                'chat.completion.chunk'
+                "chat.completion.chunk"
             ) {
               const oai = parsed as {
                 id?: string;
@@ -179,22 +178,22 @@ export async function callPersonalApi(
                 }>;
               };
               const choice = oai.choices?.[0];
-              nextChunk = choice?.delta?.content ?? '';
+              nextChunk = choice?.delta?.content ?? "";
               nextReasoning = choice?.delta?.reasoning ?? null;
               nextReasoningContent = choice?.delta?.reasoning_content ?? null;
               nextFinish = choice?.finish_reason ?? null;
               nextId = oai.id ?? null;
             } else if (
-              typeof parsed === 'object' &&
+              typeof parsed === "object" &&
               parsed !== null &&
-              'object' in (parsed as Record<string, unknown>) &&
-              (parsed as Record<string, unknown>).object === 'chat.completion'
+              "object" in (parsed as Record<string, unknown>) &&
+              (parsed as Record<string, unknown>).object === "chat.completion"
             ) {
               // Non-streaming OpenAI-like completion
               const completion = parsed as OpenAIChatCompletion;
-              const message = completion.choices?.[0]?.message?.content ?? '';
+              const message = completion.choices?.[0]?.message?.content ?? "";
               const reason = (completion.choices?.[0]?.finish_reason ??
-                'stop') as FinishReason;
+                "stop") as FinishReason;
               const donePayload: ApiCompletionResult = {
                 result: message,
                 finish_reason: reason,
@@ -231,7 +230,7 @@ export async function callPersonalApi(
                 reasoning: nextReasoning,
                 reasoning_content: nextReasoningContent,
                 finish_reason: nextFinish,
-                id: aggregatedId ?? '',
+                id: aggregatedId ?? "",
               };
               callbacks.onChunk(chunkPayload);
             }
@@ -242,8 +241,8 @@ export async function callPersonalApi(
                 result: aggregatedResult,
                 reasoning: aggregatedReasoning || null,
                 reasoning_content: aggregatedReasoningContent || null,
-                finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
-                id: aggregatedId ?? '',
+                finish_reason: (aggregatedFinish ?? "stop") as FinishReason,
+                id: aggregatedId ?? "",
               };
               if (callbacks?.onDone) {
                 callbacks.onDone(donePayload);
@@ -252,7 +251,7 @@ export async function callPersonalApi(
               return donePayload;
             }
           } catch (e) {
-            console.error('Failed to parse SSE chunk data:', data, e);
+            console.error("Failed to parse SSE chunk data:", data, e);
             // Continue; optionally callbacks?.onError(e as Error)
           }
         }
@@ -264,8 +263,8 @@ export async function callPersonalApi(
           result: aggregatedResult,
           reasoning: aggregatedReasoning || null,
           reasoning_content: aggregatedReasoningContent || null,
-          finish_reason: (aggregatedFinish ?? 'stop') as FinishReason,
-          id: aggregatedId ?? '',
+          finish_reason: (aggregatedFinish ?? "stop") as FinishReason,
+          id: aggregatedId ?? "",
         } as ApiCompletionResult;
       }
       return; // Streaming finished with callbacks
@@ -275,17 +274,17 @@ export async function callPersonalApi(
     const nonStreaming = (await response.json()) as unknown;
     // Convert OpenAI completion to ApiCompletionResult
     if (
-      typeof nonStreaming === 'object' &&
+      typeof nonStreaming === "object" &&
       nonStreaming !== null &&
-      'object' in (nonStreaming as Record<string, unknown>) &&
-      (nonStreaming as Record<string, unknown>).object === 'chat.completion'
+      "object" in (nonStreaming as Record<string, unknown>) &&
+      (nonStreaming as Record<string, unknown>).object === "chat.completion"
     ) {
       const completion = nonStreaming as OpenAIChatCompletion;
       return {
         id: completion.id,
-        result: completion.choices?.[0]?.message?.content ?? '',
+        result: completion.choices?.[0]?.message?.content ?? "",
         finish_reason: (completion.choices?.[0]?.finish_reason ??
-          'stop') as FinishReason,
+          "stop") as FinishReason,
       };
     }
     // Otherwise assume our simplified result (rare)
@@ -295,18 +294,18 @@ export async function callPersonalApi(
       id?: string;
     };
     return {
-      id: fallback.id ?? '',
-      result: fallback.result ?? '',
-      finish_reason: (fallback.finish_reason ?? 'stop') as FinishReason,
+      id: fallback.id ?? "",
+      result: fallback.result ?? "",
+      finish_reason: (fallback.finish_reason ?? "stop") as FinishReason,
     };
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.log('API request was aborted.');
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("API request was aborted.");
       // Don't throw on abort, just return silently.
       return;
     }
 
-    console.error('Error calling Personal API:', error);
+    console.error("Error calling Personal API:", error);
     if (callbacks?.onError && error instanceof Error) {
       callbacks.onError(error);
     }

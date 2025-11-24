@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { signIn, signOut, useSession } from 'next-auth/react';
-import React, { createContext, useContext, useMemo } from 'react';
+import { signIn, signOut, useSession } from "next-auth/react";
+import React, { createContext, useContext, useMemo } from "react";
 
 interface AdminAuthContextType {
   token: string | null;
@@ -17,7 +17,7 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
 export const useAdminAuth = (): AdminAuthContextType => {
   const ctx = useContext(AdminAuthContext);
   if (!ctx) {
-    throw new Error('useAdminAuth must be used within AdminAuthProvider');
+    throw new Error("useAdminAuth must be used within AdminAuthProvider");
   }
   return ctx;
 };
@@ -27,8 +27,14 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { data: session, status } = useSession();
 
-  const login = async ({ username, password }: { username: string; password: string }) => {
-    const res = await signIn('credentials', {
+  const login = async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
+    const res = await signIn("credentials", {
       redirect: false,
       username,
       password,
@@ -39,15 +45,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
-    await signOut({ callbackUrl: '/admin/login' });
+    await signOut({ callbackUrl: "/admin/login" });
   };
 
   const value = useMemo(
     () => ({
-      token: session ? 'session' : null,
+      token: session ? "session" : null,
       login,
       logout,
-      loading: status === 'loading',
+      loading: status === "loading",
     }),
     [session, status],
   );

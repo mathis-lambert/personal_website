@@ -17,11 +17,17 @@ type DrawCtx = {
 const drawLine = (
   ctx: DrawCtx,
   text: string,
-  opts?: { size?: number; bold?: boolean; color?: { r: number; g: number; b: number } },
+  opts?: {
+    size?: number;
+    bold?: boolean;
+    color?: { r: number; g: number; b: number };
+  },
 ) => {
   const size = opts?.size ?? 11;
   const font = opts?.bold ? ctx.fonts.bold : ctx.fonts.regular;
-  const color = opts?.color ? rgb(opts.color.r, opts.color.g, opts.color.b) : rgb(0, 0, 0);
+  const color = opts?.color
+    ? rgb(opts.color.r, opts.color.g, opts.color.b)
+    : rgb(0, 0, 0);
   ctx.page.drawText(text, {
     x: 50,
     y: ctx.y,
@@ -33,7 +39,11 @@ const drawLine = (
 };
 
 const section = (ctx: DrawCtx, title: string) => {
-  drawLine(ctx, title.toUpperCase(), { bold: true, size: 12, color: { r: 0.1, g: 0.2, b: 0.55 } });
+  drawLine(ctx, title.toUpperCase(), {
+    bold: true,
+    size: 12,
+    color: { r: 0.1, g: 0.2, b: 0.55 },
+  });
   ctx.y -= 4;
 };
 
@@ -101,7 +111,9 @@ export async function buildResumePdf(resume: ResumeData | null) {
           size: 9,
         });
       }
-      exp.description?.slice(0, 3).forEach((line) => drawLine(ctx, `• ${line}`, { size: 9 }));
+      exp.description
+        ?.slice(0, 3)
+        .forEach((line) => drawLine(ctx, `• ${line}`, { size: 9 }));
       ctx.y -= 4;
     });
   }
@@ -130,9 +142,13 @@ export async function buildResumePdf(resume: ResumeData | null) {
     techLines.push(
       ["Programming", tech.programming?.join(", ")].filter(Boolean).join(": "),
     );
-    techLines.push(["AI/ML", tech.ai_ml?.join(", ")].filter(Boolean).join(": "));
     techLines.push(
-      ["Systems & Infra", tech.systems_and_infra?.join(", ")].filter(Boolean).join(": "),
+      ["AI/ML", tech.ai_ml?.join(", ")].filter(Boolean).join(": "),
+    );
+    techLines.push(
+      ["Systems & Infra", tech.systems_and_infra?.join(", ")]
+        .filter(Boolean)
+        .join(": "),
     );
     techLines.push(["Web", tech.web?.join(", ")].filter(Boolean).join(": "));
   }
@@ -140,7 +156,9 @@ export async function buildResumePdf(resume: ResumeData | null) {
   if (skills.length || techLines.some(Boolean)) {
     section(ctx, "Skills");
     if (skills.length) drawLine(ctx, skills.join(", "), { size: 9 });
-    techLines.filter(Boolean).forEach((line) => drawLine(ctx, line, { size: 9 }));
+    techLines
+      .filter(Boolean)
+      .forEach((line) => drawLine(ctx, line, { size: 9 }));
     ctx.y -= 4;
   }
 

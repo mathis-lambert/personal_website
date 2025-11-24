@@ -1,15 +1,15 @@
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import {
   getCollectionData,
   updateItem,
   deleteItem,
   replaceCollection,
-} from '@/api/admin';
-import Modal from '@/admin/components/Modal';
-import { Pencil, Trash2, Save, Plus } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/api/admin";
+import Modal from "@/admin/components/Modal";
+import { Pencil, Trash2, Save, Plus } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 type Study = {
   title: string;
@@ -50,10 +50,10 @@ const StudiesPage: React.FC = () => {
       setLoading(true);
       setErr(null);
       try {
-        const data = await getCollectionData<Study[]>('studies', token);
+        const data = await getCollectionData<Study[]>("studies", token);
         if (!canceled) setItems(Array.isArray(data) ? data : []);
       } catch (e) {
-        if (!canceled) setErr((e as Error)?.message ?? 'Failed to load');
+        if (!canceled) setErr((e as Error)?.message ?? "Failed to load");
       } finally {
         if (!canceled) setLoading(false);
       }
@@ -73,22 +73,22 @@ const StudiesPage: React.FC = () => {
     if (!token || editIndex === null) return;
     const fd = new FormData(form);
     const patch: Study = {
-      title: String(fd.get('title') || ''),
-      company: String(fd.get('company') || ''),
-      date: String(fd.get('date') || ''),
-      description: String(fd.get('description') || ''),
+      title: String(fd.get("title") || ""),
+      company: String(fd.get("company") || ""),
+      date: String(fd.get("date") || ""),
+      description: String(fd.get("description") || ""),
     };
     setSaveLoading(true);
     try {
       const id = `index-${editIndex}`;
-      const res = await updateItem('studies', id, patch, token);
+      const res = await updateItem("studies", id, patch, token);
       setItems((prev) =>
         prev.map((it, i) => (i === editIndex ? (res.item as Study) : it)),
       );
       setEditOpen(false);
       setEditIndex(null);
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSaveLoading(false);
     }
@@ -98,11 +98,11 @@ const StudiesPage: React.FC = () => {
     if (!token) return;
     setDeleteLoading(true);
     try {
-      await deleteItem('studies', `index-${idx}`, token);
+      await deleteItem("studies", `index-${idx}`, token);
       setItems((prev) => prev.filter((_, i) => i !== idx));
-      toast.success('Study deleted');
+      toast.success("Study deleted");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Delete failed');
+      toast.error((e as Error)?.message ?? "Delete failed");
     } finally {
       setDeleteLoading(false);
       setConfirmOpen(false);
@@ -119,24 +119,24 @@ const StudiesPage: React.FC = () => {
     if (!token) return;
     const fd = new FormData(form);
     const nextItem: Study = {
-      title: String(fd.get('title') || '').trim(),
-      company: String(fd.get('company') || '').trim(),
-      date: String(fd.get('date') || '').trim(),
-      description: String(fd.get('description') || '').trim(),
+      title: String(fd.get("title") || "").trim(),
+      company: String(fd.get("company") || "").trim(),
+      date: String(fd.get("date") || "").trim(),
+      description: String(fd.get("description") || "").trim(),
     };
     if (!nextItem.title || !nextItem.company) {
-      toast.error('Title and company are required');
+      toast.error("Title and company are required");
       return;
     }
     setCreateLoading(true);
     try {
       const payload = [...items, nextItem];
-      await replaceCollection('studies', payload, token);
+      await replaceCollection("studies", payload, token);
       setItems(payload);
       setCreateOpen(false);
-      toast.success('Study added');
+      toast.success("Study added");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Create failed');
+      toast.error((e as Error)?.message ?? "Create failed");
     } finally {
       setCreateLoading(false);
     }
@@ -243,7 +243,7 @@ const StudiesPage: React.FC = () => {
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 >
                   {saveLoading ? (
-                    'Saving…'
+                    "Saving…"
                   ) : (
                     <>
                       <Save size={16} /> Save
@@ -310,7 +310,7 @@ const StudiesPage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
               >
                 {createLoading ? (
-                  'Creating…'
+                  "Creating…"
                 ) : (
                   <>
                     <Save size={16} /> Create
@@ -347,7 +347,7 @@ const StudiesPage: React.FC = () => {
               }
               disabled={deleteLoading}
             >
-              <Trash2 size={16} /> {deleteLoading ? 'Deleting…' : 'Delete'}
+              <Trash2 size={16} /> {deleteLoading ? "Deleting…" : "Delete"}
             </button>
           </DialogFooter>
         </DialogContent>

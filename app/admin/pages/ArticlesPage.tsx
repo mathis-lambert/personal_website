@@ -1,20 +1,20 @@
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import {
   createItem,
   deleteItem,
   getCollectionData,
   updateItem,
-} from '@/api/admin';
-import Modal from '@/admin/components/Modal';
-import type { Article } from '@/types';
+} from "@/api/admin";
+import Modal from "@/admin/components/Modal";
+import type { Article } from "@/types";
 import type {
   AdminCreateArticleInput,
   AdminUpdateArticleInput,
-} from '@/admin/types';
-import { Plus, Pencil, Trash2, Save } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/admin/types";
+import { Plus, Pencil, Trash2, Save } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 // Use shared Article type from '@/types'
 
@@ -52,10 +52,10 @@ const ArticlesPage: React.FC = () => {
     setLoading(true);
     setErr(null);
     try {
-      const data = await getCollectionData<Article[]>('articles', token);
+      const data = await getCollectionData<Article[]>("articles", token);
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
-      setErr((e as Error)?.message ?? 'Failed to load');
+      setErr((e as Error)?.message ?? "Failed to load");
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ const ArticlesPage: React.FC = () => {
 
   function splitCSV(v: string): string[] {
     return v
-      .split(',')
+      .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
   }
@@ -77,31 +77,31 @@ const ArticlesPage: React.FC = () => {
     if (!token) return;
     const fd = new FormData(form);
     const body: AdminCreateArticleInput = {
-      title: String(fd.get('title') || ''),
-      slug: String(fd.get('slug') || '') || undefined,
-      excerpt: String(fd.get('excerpt') || ''),
-      content: String(fd.get('content') || ''),
-      author: String(fd.get('author') || '') || undefined,
-      date: String(fd.get('date') || new Date().toISOString().slice(0, 10)),
-      tags: splitCSV(String(fd.get('tags') || '')),
-      categories: splitCSV(String(fd.get('categories') || '')),
-      isFeatured: fd.get('isFeatured') === 'on',
+      title: String(fd.get("title") || ""),
+      slug: String(fd.get("slug") || "") || undefined,
+      excerpt: String(fd.get("excerpt") || ""),
+      content: String(fd.get("content") || ""),
+      author: String(fd.get("author") || "") || undefined,
+      date: String(fd.get("date") || new Date().toISOString().slice(0, 10)),
+      tags: splitCSV(String(fd.get("tags") || "")),
+      categories: splitCSV(String(fd.get("categories") || "")),
+      isFeatured: fd.get("isFeatured") === "on",
       links: {
-        canonical: String(fd.get('link_canonical') || '') || undefined,
-        discussion: String(fd.get('link_discussion') || '') || undefined,
+        canonical: String(fd.get("link_canonical") || "") || undefined,
+        discussion: String(fd.get("link_discussion") || "") || undefined,
       },
       media: {
-        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
-        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
+        thumbnailUrl: String(fd.get("media_thumbnailUrl") || "") || undefined,
+        imageUrl: String(fd.get("media_imageUrl") || "") || undefined,
       },
     };
     setCreateLoading(true);
     try {
-      const res = await createItem('articles', body, token);
+      const res = await createItem("articles", body, token);
       setItems((prev) => [...prev, res.item as Article]);
       setCreateOpen(false);
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Create failed');
+      toast.error((e as Error)?.message ?? "Create failed");
     } finally {
       setCreateLoading(false);
     }
@@ -116,27 +116,27 @@ const ArticlesPage: React.FC = () => {
     if (!token || !editTarget) return;
     const fd = new FormData(form);
     const patch: AdminUpdateArticleInput = {
-      slug: String(fd.get('slug') || '') || undefined,
-      title: String(fd.get('title') || ''),
-      excerpt: String(fd.get('excerpt') || ''),
-      content: String(fd.get('content') || ''),
-      author: String(fd.get('author') || '') || undefined,
-      date: String(fd.get('date') || editTarget.date),
-      tags: splitCSV(String(fd.get('tags') || '')),
-      categories: splitCSV(String(fd.get('categories') || '')),
-      isFeatured: fd.get('isFeatured') === 'on',
+      slug: String(fd.get("slug") || "") || undefined,
+      title: String(fd.get("title") || ""),
+      excerpt: String(fd.get("excerpt") || ""),
+      content: String(fd.get("content") || ""),
+      author: String(fd.get("author") || "") || undefined,
+      date: String(fd.get("date") || editTarget.date),
+      tags: splitCSV(String(fd.get("tags") || "")),
+      categories: splitCSV(String(fd.get("categories") || "")),
+      isFeatured: fd.get("isFeatured") === "on",
       links: {
-        canonical: String(fd.get('link_canonical') || '') || undefined,
-        discussion: String(fd.get('link_discussion') || '') || undefined,
+        canonical: String(fd.get("link_canonical") || "") || undefined,
+        discussion: String(fd.get("link_discussion") || "") || undefined,
       },
       media: {
-        thumbnailUrl: String(fd.get('media_thumbnailUrl') || '') || undefined,
-        imageUrl: String(fd.get('media_imageUrl') || '') || undefined,
+        thumbnailUrl: String(fd.get("media_thumbnailUrl") || "") || undefined,
+        imageUrl: String(fd.get("media_imageUrl") || "") || undefined,
       },
     };
     setSaveLoading(true);
     try {
-      const res = await updateItem('articles', editTarget.id, patch, token);
+      const res = await updateItem("articles", editTarget.id, patch, token);
       setItems((prev) =>
         prev.map((it) =>
           it.id === editTarget.id ? (res.item as Article) : it,
@@ -145,7 +145,7 @@ const ArticlesPage: React.FC = () => {
       setEditOpen(false);
       setEditTarget(null);
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSaveLoading(false);
     }
@@ -155,11 +155,11 @@ const ArticlesPage: React.FC = () => {
     if (!token) return;
     setDeleteLoading(true);
     try {
-      await deleteItem('articles', id, token);
+      await deleteItem("articles", id, token);
       setItems((prev) => prev.filter((x) => x.id !== id));
-      toast.success('Article deleted');
+      toast.success("Article deleted");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Delete failed');
+      toast.error((e as Error)?.message ?? "Delete failed");
     } finally {
       setDeleteLoading(false);
       setConfirmOpen(false);
@@ -220,8 +220,8 @@ const ArticlesPage: React.FC = () => {
               </div>
               <div className="mt-2 text-sm text-muted-foreground">
                 {Array.isArray(a.tags) && a.tags.length > 0
-                  ? a.tags.join(', ')
-                  : '—'}
+                  ? a.tags.join(", ")
+                  : "—"}
               </div>
             </div>
           ))}
@@ -322,7 +322,7 @@ const ArticlesPage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
               >
                 {createLoading ? (
-                  'Creating…'
+                  "Creating…"
                 ) : (
                   <>
                     <Save size={16} /> Create
@@ -357,7 +357,7 @@ const ArticlesPage: React.FC = () => {
               onClick={() => confirmId && void onDelete(confirmId)}
               disabled={deleteLoading}
             >
-              <Trash2 size={16} /> {deleteLoading ? 'Deleting…' : 'Delete'}
+              <Trash2 size={16} /> {deleteLoading ? "Deleting…" : "Delete"}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -387,13 +387,13 @@ const ArticlesPage: React.FC = () => {
                 />
                 <input
                   name="slug"
-                  defaultValue={editTarget.slug || ''}
+                  defaultValue={editTarget.slug || ""}
                   placeholder="Slug"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="author"
-                  defaultValue={editTarget.author || ''}
+                  defaultValue={editTarget.author || ""}
                   placeholder="Author"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -407,8 +407,8 @@ const ArticlesPage: React.FC = () => {
                   name="tags"
                   defaultValue={
                     Array.isArray(editTarget.tags)
-                      ? editTarget.tags.join(', ')
-                      : ''
+                      ? editTarget.tags.join(", ")
+                      : ""
                   }
                   placeholder="Tags (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
@@ -417,8 +417,8 @@ const ArticlesPage: React.FC = () => {
                   name="categories"
                   defaultValue={
                     Array.isArray(editTarget.categories || [])
-                      ? (editTarget.categories || []).join(', ')
-                      : ''
+                      ? (editTarget.categories || []).join(", ")
+                      : ""
                   }
                   placeholder="Categories (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
@@ -428,32 +428,32 @@ const ArticlesPage: React.FC = () => {
                     type="checkbox"
                     name="isFeatured"
                     defaultChecked={Boolean(editTarget.isFeatured)}
-                  />{' '}
+                  />{" "}
                   Featured
                 </label>
               </div>
               <input
                 name="excerpt"
-                defaultValue={editTarget.excerpt || ''}
+                defaultValue={editTarget.excerpt || ""}
                 placeholder="Excerpt"
                 className="w-full border rounded-md px-3 py-2 bg-background"
               />
               <textarea
                 name="content"
-                defaultValue={editTarget.content || ''}
+                defaultValue={editTarget.content || ""}
                 placeholder="Content (Markdown/HTML)"
                 className="w-full h-40 border rounded-md p-2 bg-background"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="link_canonical"
-                  defaultValue={editTarget.links?.canonical || ''}
+                  defaultValue={editTarget.links?.canonical || ""}
                   placeholder="Link: Canonical"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="link_discussion"
-                  defaultValue={editTarget.links?.discussion || ''}
+                  defaultValue={editTarget.links?.discussion || ""}
                   placeholder="Link: Discussion"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -461,13 +461,13 @@ const ArticlesPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="media_thumbnailUrl"
-                  defaultValue={editTarget.media?.thumbnailUrl || ''}
+                  defaultValue={editTarget.media?.thumbnailUrl || ""}
                   placeholder="Media: Thumbnail URL"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="media_imageUrl"
-                  defaultValue={editTarget.media?.imageUrl || ''}
+                  defaultValue={editTarget.media?.imageUrl || ""}
                   placeholder="Media: Image URL"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -486,7 +486,7 @@ const ArticlesPage: React.FC = () => {
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
                 >
                   {saveLoading ? (
-                    'Saving…'
+                    "Saving…"
                   ) : (
                     <>
                       <Save size={16} /> Save

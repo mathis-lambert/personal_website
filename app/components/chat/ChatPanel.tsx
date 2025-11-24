@@ -1,8 +1,8 @@
-'use client';
-import React, { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useChat } from '@/hooks/useChat';
-import Conversation from '@/components/chat/Conversation';
+"use client";
+import React, { useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useChat } from "@/hooks/useChat";
+import Conversation from "@/components/chat/Conversation";
 
 const ChatPanel: React.FC = () => {
   const { isChatOpen, closeChat, openChat, toggleChat } = useChat();
@@ -10,7 +10,7 @@ const ChatPanel: React.FC = () => {
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     if (isChatOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = originalOverflow;
     }
@@ -22,13 +22,13 @@ const ChatPanel: React.FC = () => {
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         closeChat();
       }
     };
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [closeChat]);
 
@@ -40,8 +40,8 @@ const ChatPanel: React.FC = () => {
       const tag = he.tagName;
       return (
         he.isContentEditable ||
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
         !!he.closest('[role="textbox"]')
       );
     };
@@ -54,21 +54,21 @@ const ChatPanel: React.FC = () => {
       const metaOrCtrl = event.metaKey || event.ctrlKey;
 
       // Open chat
-      if (metaOrCtrl && event.altKey && key === 'c') {
+      if (metaOrCtrl && event.altKey && key === "c") {
         event.preventDefault();
         openChat();
         return;
       }
 
       // Toggle chat
-      if (metaOrCtrl && event.altKey && key === 'x') {
+      if (metaOrCtrl && event.altKey && key === "x") {
         event.preventDefault();
         toggleChat();
       }
     };
 
-    window.addEventListener('keydown', handleHotkeys);
-    return () => window.removeEventListener('keydown', handleHotkeys);
+    window.addEventListener("keydown", handleHotkeys);
+    return () => window.removeEventListener("keydown", handleHotkeys);
   }, [openChat, toggleChat]);
 
   return (
@@ -79,7 +79,7 @@ const ChatPanel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <div className="relative w-full max-w-4xl h-full flex flex-col bg-transparent pt-10 pb-5 lg:pt-14 lg:pb-10">
             <Conversation />

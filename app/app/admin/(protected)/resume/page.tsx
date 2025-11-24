@@ -1,7 +1,7 @@
-import ResumePage from '@/admin/pages/ResumePage';
+import ResumePage from "@/admin/pages/ResumePage";
 
 export const metadata = {
-  title: 'Admin · Resume',
+  title: "Admin · Resume",
 };
 
 export default function AdminResume() {

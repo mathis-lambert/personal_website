@@ -37,11 +37,7 @@ export async function PATCH(
   }
   const patch = await req.json();
   try {
-    const item = await updateItem(
-      collection,
-      itemId,
-      patch,
-    );
+    const item = await updateItem(collection, itemId, patch);
     return NextResponse.json({ ok: true, item });
   } catch (err: any) {
     return NextResponse.json(
