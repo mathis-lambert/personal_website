@@ -1,6 +1,19 @@
-import { appendEvent, getEvents } from "./content";
+import { getEventsCollection } from "@/lib/db/collections";
 
 type Granularity = "hour" | "day" | "month";
+
+type EventRecord = {
+  job_id?: string;
+  action?: string;
+  created_at?: Date | string;
+  request_body?: Record<string, unknown>;
+  [k: string]: unknown;
+};
+
+type EventFilter = {
+  created_at?: { $gte?: Date; $lte?: Date };
+  action?: { $in: string[] };
+};
 
 const parseDate = (value?: string, fallback?: Date): Date | null => {
   if (!value) return fallback ?? null;
@@ -33,18 +46,31 @@ const formatBucket = (date: Date, granularity: Granularity): string => {
   return `${iso.slice(0, 13)}:00Z`;
 };
 
+const normalizeEvent = (evt: EventRecord): EventRecord => {
+  const created =
+    evt.created_at instanceof Date
+      ? evt.created_at.toISOString()
+      : typeof evt.created_at === "string"
+        ? evt.created_at
+        : new Date().toISOString();
+  const { _id, ...rest } = evt as { _id?: unknown };
+  void _id;
+  return { ...rest, created_at: created };
+};
+
 export async function logEvent(
   action: string,
-  requestBody: Record<string, any>,
+  requestBody: Record<string, unknown>,
   jobId?: string,
 ) {
+  const collection = await getEventsCollection();
   const event = {
     job_id: jobId ?? undefined,
     action,
     request_body: requestBody,
-    created_at: new Date().toISOString(),
+    created_at: new Date(),
   };
-  await appendEvent(event);
+  await collection.insertOne(event);
 }
 
 export async function listEvents(options: {
@@ -55,40 +81,47 @@ export async function listEvents(options: {
   skip?: number;
   sort?: "asc" | "desc";
 }) {
-  const events = (await getEvents()) ?? [];
+  const collection = await getEventsCollection();
   const start = parseDate(options.start);
   const end = parseDate(options.end);
   const actions = Array.isArray(options.action)
     ? options.action
     : options.action
-      ? options.action.split(",").map((v) => v.trim()).filter(Boolean)
+      ? options.action
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
       : null;
 
-  let filtered = events.filter((evt) => {
-    if (!evt) return false;
-    const created = evt.created_at ? new Date(evt.created_at) : null;
-    if (!created || Number.isNaN(created.getTime())) return false;
-    if (start && created < start) return false;
-    if (end && created > end) return false;
-    if (actions && actions.length) {
-      const act = evt.action ?? "";
-      if (!actions.includes(act)) return false;
-    }
-    return true;
-  });
-
-  const total = filtered.length;
-  const sortDir = options.sort === "asc" ? 1 : -1;
-  filtered = filtered.sort((a, b) => {
-    const da = new Date(a.created_at ?? 0).getTime();
-    const db = new Date(b.created_at ?? 0).getTime();
-    return sortDir * (da - db);
-  });
+  const filter: EventFilter = {};
+  if (start || end) {
+    filter.created_at = {};
+    if (start) filter.created_at.$gte = start;
+    if (end) filter.created_at.$lte = end;
+  }
+  if (actions && actions.length) {
+    filter.action = { $in: actions };
+  }
 
   const skip = Math.max(0, options.skip ?? 0);
   const limit = Math.max(0, Math.min(options.limit ?? 50, 500));
-  const sliced = filtered.slice(skip, limit ? skip + limit : undefined);
-  return { total, items: sliced };
+  const sortDir = options.sort === "asc" ? 1 : -1;
+
+  const cursor = collection
+    .find(filter)
+    .sort({ created_at: sortDir })
+    .skip(skip);
+  if (limit) cursor.limit(limit);
+
+  const [items, total] = await Promise.all([
+    cursor.toArray(),
+    collection.countDocuments(filter),
+  ]);
+
+  return {
+    total,
+    items: items.map((evt) => normalizeEvent(evt as EventRecord)),
+  };
 }
 
 export async function analyticsEvents(options: {
@@ -111,7 +144,17 @@ export async function analyticsEvents(options: {
         .filter(Boolean)
     : null;
 
-  const events = (await getEvents()) ?? [];
+  const collection = await getEventsCollection();
+  const filter: EventFilter = {
+    created_at: { $gte: start, $lte: end },
+  };
+  if (actionsFilter && actionsFilter.length) {
+    filter.action = { $in: actionsFilter };
+  }
+
+  const events = (await collection
+    .find(filter, { projection: { action: 1, request_body: 1, created_at: 1 } })
+    .toArray()) as EventRecord[];
 
   type BucketMap = Record<string, Record<string, number>>;
   const buckets: BucketMap = {};
@@ -121,14 +164,17 @@ export async function analyticsEvents(options: {
 
   for (const evt of events) {
     if (!evt?.created_at) continue;
-    const created = new Date(evt.created_at);
+    const created =
+      evt.created_at instanceof Date
+        ? evt.created_at
+        : new Date(evt.created_at);
     if (Number.isNaN(created.getTime())) continue;
-    if (created < start || created > end) continue;
     const action = (evt.action ?? "unknown") as string;
     if (actionsFilter && !actionsFilter.includes(action)) continue;
+
     const groupValue =
       options.groupBy === "location"
-        ? evt.request_body?.location ?? "unknown"
+        ? ((evt.request_body?.location as string) ?? "unknown")
         : action;
 
     const bucket = startOfBucket(created, granularity);
@@ -141,14 +187,13 @@ export async function analyticsEvents(options: {
     totalCount += 1;
   }
 
-  // generate all buckets between start and end
-  const series: Array<Record<string, any>> = [];
+  const series: Array<Record<string, number | string>> = [];
   const cursor = startOfBucket(start, granularity);
   const endBucket = startOfBucket(end, granularity);
   while (cursor <= endBucket) {
     const label = formatBucket(cursor, granularity);
     const values = buckets[label] ?? {};
-    const entry: Record<string, any> = {
+    const entry: Record<string, number | string> = {
       bucket: label,
       total: Object.values(values).reduce((acc, v) => acc + (v as number), 0),
     };

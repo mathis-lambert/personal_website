@@ -1,16 +1,16 @@
-'use client';
-import { useState } from 'react';
-import AbstractGradientBackground from '@/components/ui/AbstractGradientBackground';
-import Navbar from '@/components/ui/Navbar';
-import ChatPanel from '@/components/chat/ChatPanel';
-import FloatingChatInput from '@/components/chat/FloatingChatInput';
-import Footer from '@/components/ui/Footer';
-import { MaintenanceDialog } from '@/components/ui/MaintenanceDialog';
-import ScrollToTop from '@/components/ui/ScrollToTop';
+"use client";
+import { useState } from "react";
+import AbstractGradientBackground from "@/components/ui/AbstractGradientBackground";
+import Navbar from "@/components/ui/Navbar";
+import ChatPanel from "@/components/chat/ChatPanel";
+import FloatingChatInput from "@/components/chat/FloatingChatInput";
+import Footer from "@/components/ui/Footer";
+import { MaintenanceDialog } from "@/components/ui/MaintenanceDialog";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [maintenanceMode] = useState(
-    process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true',
+    process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true",
   );
 
   return (

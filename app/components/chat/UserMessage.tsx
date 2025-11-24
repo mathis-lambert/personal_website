@@ -1,5 +1,5 @@
-import React from 'react';
-import MarkdownView from '@/components/ui/MarkdownView';
+import React from "react";
+import MarkdownView from "@/components/ui/MarkdownView";
 
 interface UserMessageProps {
   content: string;

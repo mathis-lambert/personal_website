@@ -1,6 +1,6 @@
-import React from 'react';
-import colors from 'tailwindcss/colors';
-import { oklch, converter } from 'culori';
+import React from "react";
+import colors from "tailwindcss/colors";
+import { oklch, converter } from "culori";
 
 // On définit un type pour générer une union de toutes les couleurs disponibles sous la forme "nom-teinte"
 type TailwindColor = {
@@ -15,8 +15,8 @@ interface GlowingTextProps {
 }
 
 const convertToRGBA = (colorStr: string, alpha: number) => {
-  if (colorStr.startsWith('oklch')) {
-    const rgbaColor = converter('rgb')(oklch(colorStr));
+  if (colorStr.startsWith("oklch")) {
+    const rgbaColor = converter("rgb")(oklch(colorStr));
     if (rgbaColor) {
       return `rgba(${Math.round(rgbaColor.r * 255)}, ${Math.round(rgbaColor.g * 255)}, ${Math.round(rgbaColor.b * 255)}, ${alpha})`;
     }
@@ -26,10 +26,10 @@ const convertToRGBA = (colorStr: string, alpha: number) => {
 
 const GlowingText: React.FC<GlowingTextProps> = ({
   children,
-  color = 'blue-500',
+  color = "blue-500",
 }) => {
-  const colorValue = color.split('text-')[1];
-  const [colorName, shade] = colorValue.split('-');
+  const colorValue = color.split("text-")[1];
+  const [colorName, shade] = colorValue.split("-");
 
   if (!(colorName in colors)) {
     console.error(`La couleur ${colorName} n'existe pas dans Tailwind.`);

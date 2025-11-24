@@ -1,18 +1,18 @@
-'use client';
-import { lazy, Suspense } from 'react';
-import GlassCardHero from '@/components/ui/GlassCardHero';
-import ToolCarousel from '@/components/ui/ToolCarousel';
-import { ScrollableTimeline } from '@/components/ui/ScrollableTimeline';
-import WidgetTechnologyChip from '@/components/ui/WidgetTechnologyChip';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { useChat } from '@/hooks/useChat';
-import { MessageCircle } from 'lucide-react';
-import type { TimelineEntry } from '@/types';
+"use client";
+import { lazy, Suspense } from "react";
+import GlassCardHero from "@/components/ui/GlassCardHero";
+import ToolCarousel from "@/components/ui/ToolCarousel";
+import { ScrollableTimeline } from "@/components/ui/ScrollableTimeline";
+import WidgetTechnologyChip from "@/components/ui/WidgetTechnologyChip";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useChat } from "@/hooks/useChat";
+import { MessageCircle } from "lucide-react";
+import type { TimelineEntry } from "@/types";
 
 // lazy load du map
 const LocationMapLazy = lazy(() =>
-  import('@/components/ui/LocationMap').then((m) => ({
+  import("@/components/ui/LocationMap").then((m) => ({
     default: m.LocationMap,
   })),
 );
@@ -27,15 +27,15 @@ const GlassCardsList = ({
   const { openChat } = useChat();
 
   const topSkills = [
-    'LLMs',
-    'Python',
-    'vLLM',
-    'CUDA',
-    'NVIDIA',
-    'Docker',
-    'TypeScript',
-    'MongoDB',
-    'Qdrant',
+    "LLMs",
+    "Python",
+    "vLLM",
+    "CUDA",
+    "NVIDIA",
+    "Docker",
+    "TypeScript",
+    "MongoDB",
+    "Qdrant",
   ];
 
   return (
@@ -60,7 +60,7 @@ const GlassCardsList = ({
         <ScrollableTimeline
           data={experiences}
           showGradients={false}
-          accentColor={'#FF6F61'}
+          accentColor={"#FF6F61"}
           scrollSpeed={2}
           wheelSensitivity={1}
         />
@@ -70,7 +70,7 @@ const GlassCardsList = ({
         <ScrollableTimeline
           data={studies}
           showGradients={false}
-          accentColor={'#4A90E2'}
+          accentColor={"#4A90E2"}
           scrollSpeed={2}
           wheelSensitivity={1}
         />

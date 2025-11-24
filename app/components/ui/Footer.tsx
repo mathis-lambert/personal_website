@@ -1,15 +1,15 @@
-'use client';
-import Link from 'next/link';
-import React from 'react';
-import { FaLinkedin } from 'react-icons/fa';
-import { Heading4 } from '@/components/ui/Headings';
+"use client";
+import Link from "next/link";
+import React from "react";
+import { FaLinkedin } from "react-icons/fa";
+import { Heading4 } from "@/components/ui/Headings";
 
-const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0';
+const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
 
 const Footer: React.FC = () => {
   // Fonction pour copier l'email dans le presse-papiers
   const copyEmail = () => {
-    navigator.clipboard.writeText('mathislambert.dev@gmail.com');
+    navigator.clipboard.writeText("mathislambert.dev@gmail.com");
     // On peut ajouter ici une notification si besoin
   };
 
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         {/* Bas du footer */}
         <div className="mt-6 border-t border-gray-200 pt-6 dark:border-gray-500">
           <p className="text-xs text-center text-gray-500">
-            © This site was designed and developed by Mathis Lambert -{' '}
+            © This site was designed and developed by Mathis Lambert -{" "}
             {new Date().getFullYear()}. All rights reserved.
           </p>
           <p className="text-xs text-center text-gray-500">

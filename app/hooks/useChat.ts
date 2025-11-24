@@ -1,6 +1,6 @@
-'use client';
-import { createContext, useContext } from 'react';
-import type { Message } from '@/types.ts';
+"use client";
+import { createContext, useContext } from "react";
+import type { Message } from "@/types.ts";
 
 export interface ChatContextType {
   isChatOpen: boolean;
@@ -23,7 +23,7 @@ export const ChatContext = createContext<ChatContextType | undefined>(
 export const useChat = (): ChatContextType => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChat must be used within a ChatProvider');
+    throw new Error("useChat must be used within a ChatProvider");
   }
   return context;
 };

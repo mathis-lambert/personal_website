@@ -1,11 +1,11 @@
-'use client';
+"use client";
 import {
   type CSSProperties,
   useCallback,
   useEffect,
   useRef,
   useState,
-} from 'react';
+} from "react";
 
 export type TimelineData = {
   title: string;
@@ -50,44 +50,44 @@ export type ScrollableTimelineProps<T extends TimelineData = TimelineData> = {
 };
 
 const defaultClassNames: Required<ClassNames> = {
-  root: 'relative h-full w-full overflow-hidden group select-none overscroll-none',
+  root: "relative h-full w-full overflow-hidden group select-none overscroll-none",
   gradientTop:
-    'absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none',
+    "absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none",
   gradientBottom:
-    'absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none',
+    "absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/95 dark:from-slate-950/95 to-transparent z-10 pointer-events-none",
   motionDiv:
-    'relative left-0 top-0 h-full w-full overflow-y-auto overscroll-contain will-change-scroll touch-none',
-  itemContainer: 'relative flex flex-col',
-  line: 'absolute left-6 top-0 h-full w-px bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-70',
-  item: 'relative w-full py-4 pl-14 pr-4 group/item',
+    "relative left-0 top-0 h-full w-full overflow-y-auto overscroll-contain will-change-scroll touch-none",
+  itemContainer: "relative flex flex-col",
+  line: "absolute left-6 top-0 h-full w-px bg-gradient-to-b from-slate-200 via-[var(--accent-color)] to-slate-200 dark:from-slate-700 dark:via-[var(--accent-color)] dark:to-slate-700 opacity-70",
+  item: "relative w-full py-4 pl-14 pr-4 group/item",
   dotContainerWrapper:
-    'absolute left-6 top-1/2 -translate-x-1/2 -translate-y-1/2',
-  dotWrapper: 'relative h-3 w-3',
+    "absolute left-6 top-1/2 -translate-x-1/2 -translate-y-1/2",
+  dotWrapper: "relative h-3 w-3",
   dotOuter:
-    'absolute inset-0 rounded-full bg-[var(--accent-color)] opacity-30 blur-[0.5px] group-hover/item:scale-[2.2] transition-transform duration-300',
+    "absolute inset-0 rounded-full bg-[var(--accent-color)] opacity-30 blur-[0.5px] group-hover/item:scale-[2.2] transition-transform duration-300",
   dotInner:
-    'relative h-3 w-3 rounded-full bg-[var(--accent-color)] ring-2 ring-white dark:ring-slate-900 group-hover/item:scale-110 transition-transform duration-300',
+    "relative h-3 w-3 rounded-full bg-[var(--accent-color)] ring-2 ring-white dark:ring-slate-900 group-hover/item:scale-110 transition-transform duration-300",
   dotConnector:
-    'absolute left-8 top-1/2 w-6 h-0.5 bg-gradient-to-r from-[var(--accent-color)] to-transparent opacity-0 group-hover/item:opacity-60 transition-opacity duration-300',
+    "absolute left-8 top-1/2 w-6 h-0.5 bg-gradient-to-r from-[var(--accent-color)] to-transparent opacity-0 group-hover/item:opacity-60 transition-opacity duration-300",
   contentWrapper:
-    'text-left rounded-xl p-4 -ml-3 transition-all duration-300 backdrop-blur-sm bg-white/40 dark:bg-slate-900/20 ring-1 ring-slate-900/5 dark:ring-white/10 group-hover/item:shadow-xl group-hover/item:shadow-[var(--accent-color)]/20 group-hover/item:translate-x-0.5',
+    "text-left rounded-xl p-4 -ml-3 transition-all duration-300 backdrop-blur-sm bg-white/40 dark:bg-slate-900/20 ring-1 ring-slate-900/5 dark:ring-white/10 group-hover/item:shadow-xl group-hover/item:shadow-[var(--accent-color)]/20 group-hover/item:translate-x-0.5",
   title:
-    'text-base font-bold text-slate-800 dark:text-slate-100 group-hover/item:text-[var(--accent-color)] transition-colors duration-300',
-  company: 'text-sm font-semibold text-slate-600 dark:text-slate-400',
-  date: 'mt-1 text-xs text-slate-400 dark:text-slate-500',
+    "text-base font-bold text-slate-800 dark:text-slate-100 group-hover/item:text-[var(--accent-color)] transition-colors duration-300",
+  company: "text-sm font-semibold text-slate-600 dark:text-slate-400",
+  date: "mt-1 text-xs text-slate-400 dark:text-slate-500",
   description:
-    'mt-2 text-xs text-slate-600 dark:text-slate-400 opacity-0 max-h-0 group-hover/item:opacity-100 group-hover/item:max-h-24 transition-all duration-300 overflow-hidden',
+    "mt-2 text-xs text-slate-600 dark:text-slate-400 opacity-0 max-h-0 group-hover/item:opacity-100 group-hover/item:max-h-24 transition-all duration-300 overflow-hidden",
   scrollHintContainer:
-    'absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300',
+    "absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
   scrollHint:
-    'flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500',
-  scrollHintIcon: 'w-4 h-4',
+    "flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500",
+  scrollHintIcon: "w-4 h-4",
 };
 
 const DEFAULT_SCROLL_SPEED = 2;
 const DEFAULT_WHEEL_SENSITIVITY = 2;
 const DEFAULT_MOBILE_BREAKPOINT = 768;
-const DEFAULT_ACCENT_COLOR = 'oklch(68.5% 0.169 237.323)';
+const DEFAULT_ACCENT_COLOR = "oklch(68.5% 0.169 237.323)";
 // Nombre de répétitions du dataset pour créer un ruban continu
 const REPEAT_COUNT = 5;
 const CENTER_INDEX = Math.floor(REPEAT_COUNT / 2);
@@ -95,10 +95,10 @@ const CENTER_INDEX = Math.floor(REPEAT_COUNT / 2);
 export function ScrollableTimeline<T extends TimelineData = TimelineData>({
   data,
   keyMappings = {
-    title: 'title',
-    company: 'company',
-    date: 'date',
-    description: 'description',
+    title: "title",
+    company: "company",
+    date: "date",
+    description: "description",
   },
   mobileBreakpoint = DEFAULT_MOBILE_BREAKPOINT,
   scrollSpeed = DEFAULT_SCROLL_SPEED,
@@ -126,8 +126,8 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
     const checkScreenSize = () =>
       setIsMobile(window.innerWidth < mobileBreakpoint);
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, [mobileBreakpoint]);
 
   const updateContentHeight = useCallback(() => {
@@ -225,8 +225,8 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
       startAnimation();
     };
     handle();
-    window.addEventListener('resize', handle);
-    return () => window.removeEventListener('resize', handle);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
   }, [centerScrollPosition, startAnimation, updateContentHeight]);
 
   // Relance l'animation au chargement initial des données et à chaque changement de données/mappage
@@ -351,8 +351,8 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
         scrollTimeoutRef,
       });
 
-    el.addEventListener('wheel', wheelListener, { passive: false });
-    return () => el.removeEventListener('wheel', wheelListener);
+    el.addEventListener("wheel", wheelListener, { passive: false });
+    return () => el.removeEventListener("wheel", wheelListener);
   }, [
     isMobile,
     wheelSensitivity,
@@ -390,10 +390,10 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
 
   // Map data with provided key mappings
   const mappedData = data.map((item) => ({
-    title: String(item[keyMappings.title ?? 'title'] ?? ''),
-    company: String(item[keyMappings.company ?? 'company'] ?? ''),
-    date: String(item[keyMappings.date ?? 'date'] ?? ''),
-    description: String(item[keyMappings.description ?? 'description'] ?? ''),
+    title: String(item[keyMappings.title ?? "title"] ?? ""),
+    company: String(item[keyMappings.company ?? "company"] ?? ""),
+    date: String(item[keyMappings.date ?? "date"] ?? ""),
+    description: String(item[keyMappings.description ?? "description"] ?? ""),
   }));
 
   // On rend plusieurs copies pour créer un ruban continu sans couture visible
@@ -403,7 +403,7 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
       className={finalClassNames.root}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ '--accent-color': accentColor } as CSSProperties}
+      style={{ "--accent-color": accentColor } as CSSProperties}
     >
       {showGradients && (
         <>
@@ -416,7 +416,7 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
 
       <div
         ref={scrollerRef}
-        className={finalClassNames.motionDiv + ' no-scrollbar'}
+        className={finalClassNames.motionDiv + " no-scrollbar"}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

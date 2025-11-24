@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import React from 'react';
-import { ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import React from "react";
+import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BreadcrumbItem {
   label: string;
@@ -17,7 +17,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cn('mb-6 md:mb-8 text-sm', className)}
+      className={cn("mb-6 md:mb-8 text-sm", className)}
     >
       <ol className="flex items-center space-x-1.5 text-gray-600 dark:text-gray-400">
         {items.map((item, index) => (

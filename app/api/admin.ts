@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from '@/api/utils';
+import { fetchWithTimeout } from "@/api/utils";
 import type {
   AdminCollectionName,
   AdminListCollectionName,
@@ -7,19 +7,19 @@ import type {
   EventsListResponse,
   Project,
   ResumeData,
-} from '@/types';
+} from "@/types";
 import type {
   AdminCreateArticleInput,
   AdminCreateProjectInput,
   AdminUpdateArticleInput,
   AdminUpdateProjectInput,
   AdminUpdateResumeInput,
-} from '@/admin/types';
-import type { TimelineData } from '@/components/ui/ScrollableTimeline';
+} from "@/admin/types";
+import type { TimelineData } from "@/components/ui/ScrollableTimeline";
 
 const API_URL =
-  (process.env.NEXT_PUBLIC_API_URL as string | undefined)?.replace(/\/$/, '') ||
-  '';
+  (process.env.NEXT_PUBLIC_API_URL as string | undefined)?.replace(/\/$/, "") ||
+  "";
 
 export async function getCollections(token?: string): Promise<string[]> {
   const res = await fetchWithTimeout(`${API_URL}/api/admin/collections`, {
@@ -58,8 +58,8 @@ export async function replaceCollection(
   const res = await fetchWithTimeout(
     `${API_URL}/api/admin/data/${collection}`,
     {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       timeoutMs: 12000,
       authToken: token,
@@ -70,23 +70,23 @@ export async function replaceCollection(
 }
 
 export async function createItem(
-  collection: 'projects',
+  collection: "projects",
   item: AdminCreateProjectInput,
   token?: string,
 ): Promise<{ ok: boolean; id: string; item: Project }>;
 export async function createItem(
-  collection: 'articles',
+  collection: "articles",
   item: AdminCreateArticleInput,
   token?: string,
 ): Promise<{ ok: boolean; id: string; item: Article }>;
 export async function createItem(
-  collection: Extract<AdminCollectionName, 'projects' | 'articles'>,
+  collection: Extract<AdminCollectionName, "projects" | "articles">,
   item: AdminCreateProjectInput | AdminCreateArticleInput,
   token?: string,
 ): Promise<{ ok: boolean; id: string; item: Project | Article }> {
   const res = await fetchWithTimeout(`${API_URL}/api/admin/${collection}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item),
     timeoutMs: 10000,
     authToken: token,
@@ -101,31 +101,31 @@ export async function createItem(
 }
 
 export async function updateItem(
-  collection: 'projects',
+  collection: "projects",
   id: string,
   patch: AdminUpdateProjectInput,
   token?: string,
 ): Promise<{ ok: boolean; item: Project }>;
 export async function updateItem(
-  collection: 'resume',
+  collection: "resume",
   id: string,
   patch: AdminUpdateResumeInput,
   token?: string,
 ): Promise<{ ok: boolean; item: ResumeData }>;
 export async function updateItem(
-  collection: 'articles',
+  collection: "articles",
   id: string,
   patch: AdminUpdateArticleInput,
   token?: string,
 ): Promise<{ ok: boolean; item: Article }>;
 export async function updateItem(
-  collection: 'experiences',
+  collection: "experiences",
   id: string,
   patch: TimelineData,
   token?: string,
 ): Promise<{ ok: boolean; item: TimelineData }>;
 export async function updateItem(
-  collection: 'studies',
+  collection: "studies",
   id: string,
   patch: TimelineData,
   token?: string,
@@ -138,13 +138,13 @@ export async function updateItem(
 ): Promise<{ ok: boolean; item: unknown }> {
   // Special case: resume doesn't need an item id; backend exposes /api/admin/resume
   const url =
-    collection === 'resume'
+    collection === "resume"
       ? `${API_URL}/api/admin/resume`
       : `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`;
 
   const res = await fetchWithTimeout(url, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
     timeoutMs: 10000,
     authToken: token,
@@ -162,7 +162,7 @@ export async function deleteItem(
   const res = await fetchWithTimeout(
     `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`,
     {
-      method: 'DELETE',
+      method: "DELETE",
       timeoutMs: 8000,
       authToken: token,
     },
@@ -175,20 +175,20 @@ export async function getEventsAnalytics(
   params: {
     start?: string; // ISO8601
     end?: string; // ISO8601
-    granularity?: 'hour' | 'day' | 'month';
+    granularity?: "hour" | "day" | "month";
     actions?: string[]; // optional filter list
-    groupBy?: 'action' | 'location';
+    groupBy?: "action" | "location";
   },
   token?: string,
 ): Promise<EventsAnalyticsResponse> {
   const qs = new URLSearchParams();
-  if (params.start) qs.set('start', params.start);
-  if (params.end) qs.set('end', params.end);
-  if (params.granularity) qs.set('granularity', params.granularity);
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
+  if (params.granularity) qs.set("granularity", params.granularity);
   if (params.actions && params.actions.length)
-    qs.set('action', params.actions.join(','));
-  if (params.groupBy) qs.set('group_by', params.groupBy);
-  const url = `${API_URL}/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ''}`;
+    qs.set("action", params.actions.join(","));
+  if (params.groupBy) qs.set("group_by", params.groupBy);
+  const url = `${API_URL}/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,
@@ -205,22 +205,22 @@ export async function getEventsList(
     action?: string | string[];
     limit?: number;
     skip?: number;
-    sort?: 'asc' | 'desc';
+    sort?: "asc" | "desc";
   },
   token?: string,
 ): Promise<EventsListResponse> {
   const qs = new URLSearchParams();
-  if (params.start) qs.set('start', params.start);
-  if (params.end) qs.set('end', params.end);
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
   if (params.action)
     qs.set(
-      'action',
-      Array.isArray(params.action) ? params.action.join(',') : params.action,
+      "action",
+      Array.isArray(params.action) ? params.action.join(",") : params.action,
     );
-  if (params.limit != null) qs.set('limit', String(params.limit));
-  if (params.skip != null) qs.set('skip', String(params.skip));
-  if (params.sort) qs.set('sort', params.sort);
-  const url = `${API_URL}/api/admin/events${qs.toString() ? `?${qs.toString()}` : ''}`;
+  if (params.limit != null) qs.set("limit", String(params.limit));
+  if (params.skip != null) qs.set("skip", String(params.skip));
+  if (params.sort) qs.set("sort", params.sort);
+  const url = `${API_URL}/api/admin/events${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,

@@ -1,9 +1,9 @@
-'use client';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import React from 'react';
-import Sidebar from '@/admin/components/Sidebar';
-import { Laptop2 } from 'lucide-react';
+"use client";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React from "react";
+import Sidebar from "@/admin/components/Sidebar";
+import { Laptop2 } from "lucide-react";
 
 const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({
   children,
@@ -15,8 +15,8 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({
   React.useEffect(() => {
     const onResize = () => setIsSmall(window.innerWidth < 768);
     onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   return (
@@ -25,15 +25,13 @@ const AdminLayout: React.FC<{ children?: React.ReactNode }> = ({
         {/* Fixed sidebar */}
         <div className="fixed inset-y-0 left-0 z-40">
           <Sidebar
-            currentPath={pathname || '/admin'}
+            currentPath={pathname || "/admin"}
             onNavigate={(path) => router.push(path)}
           />
         </div>
 
         {/* Scrollable content area */}
-        <main className="ml-64 h-screen overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="ml-64 h-screen overflow-y-auto p-6">{children}</main>
 
         {/* Mobile lockout */}
         {isSmall && (

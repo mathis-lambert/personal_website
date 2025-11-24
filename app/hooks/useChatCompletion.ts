@@ -1,12 +1,12 @@
-'use client';
-import { useEffect, useReducer, useRef } from 'react';
-import type { ChatAction, ChatCompletionsRequest, ChatState } from '@/types.ts';
-import { callPersonalApi } from '@/api/personalApi';
+"use client";
+import { useEffect, useReducer, useRef } from "react";
+import type { ChatAction, ChatCompletionsRequest, ChatState } from "@/types.ts";
+import { callPersonalApi } from "@/api/personalApi";
 
 // --- Initial State ---
 
 const initialState: ChatState = {
-  result: '',
+  result: "",
   reasoning: null,
   reasoning_content: null,
   finishReason: null,
@@ -18,12 +18,12 @@ const initialState: ChatState = {
 // --- Reducer Function ---
 function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
-    case 'FETCH_START':
+    case "FETCH_START":
       return {
         ...initialState,
         isLoading: true,
       };
-    case 'STREAM_CHUNK':
+    case "STREAM_CHUNK":
       return {
         ...state,
         // Append delta content to result, update id if present
@@ -36,7 +36,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isLoading: true,
         error: null,
       };
-    case 'STREAM_DONE':
+    case "STREAM_DONE":
       return {
         ...state,
         finishReason: action.payload.finish_reason,
@@ -47,7 +47,7 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isLoading: false,
         error: null,
       };
-    case 'FETCH_SUCCESS':
+    case "FETCH_SUCCESS":
       return {
         ...state,
         result: action.payload.result,
@@ -59,13 +59,13 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         isLoading: false,
         error: null,
       };
-    case 'FETCH_ERROR':
+    case "FETCH_ERROR":
       return {
         ...state,
         isLoading: false,
         error: action.payload,
       };
-    case 'RESET':
+    case "RESET":
       return initialState;
     default:
       return state;
@@ -79,20 +79,19 @@ const useChatCompletion = (
 ): ChatState => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const controllerRef = useRef<AbortController | null>(null);
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
+  const apiUrl = process.env.NEXT_PUBLIC_ML_BASE_URL?.replace(/\/$/, "") || "";
 
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
     ? JSON.stringify({
-      messages: request.messages,
-    })
+        messages: request.messages,
+      })
     : null;
 
   useEffect(() => {
     if (!isActive || !request || !request.messages.length) {
       if (state.isLoading || state.result || state.error) {
-        dispatch({ type: 'RESET' });
+        dispatch({ type: "RESET" });
       }
       return;
     }
@@ -105,7 +104,7 @@ const useChatCompletion = (
     controllerRef.current = controller;
 
     const fetchData = async () => {
-      dispatch({ type: 'FETCH_START' });
+      dispatch({ type: "FETCH_START" });
       const controller = new AbortController();
       controllerRef.current = controller;
 
@@ -113,13 +112,13 @@ const useChatCompletion = (
         signal: controller.signal,
         callbacks: {
           onChunk: (chunk) => {
-            dispatch({ type: 'STREAM_CHUNK', payload: chunk });
+            dispatch({ type: "STREAM_CHUNK", payload: chunk });
           },
           onDone: (result) => {
-            dispatch({ type: 'FETCH_SUCCESS', payload: result });
+            dispatch({ type: "FETCH_SUCCESS", payload: result });
           },
           onError: (error) => {
-            dispatch({ type: 'FETCH_ERROR', payload: error });
+            dispatch({ type: "FETCH_ERROR", payload: error });
           },
         },
       });
@@ -129,7 +128,7 @@ const useChatCompletion = (
 
     // Cleanup function
     return () => {
-      console.log('Cleaning up effect: Aborting fetch controller.');
+      console.log("Cleaning up effect: Aborting fetch controller.");
       controller.abort();
       controllerRef.current = null; // Clear the ref
     };

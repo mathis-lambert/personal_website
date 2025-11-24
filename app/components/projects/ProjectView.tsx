@@ -1,17 +1,18 @@
-'use client';
-import Link from 'next/link';
-import React from 'react';
-import { motion } from 'framer-motion';
-import type { Project } from '@/types';
-import { cn } from '@/lib/utils';
-import { Calendar, ExternalLink, Star } from 'lucide-react';
-import { BsGithub } from 'react-icons/bs';
+"use client";
+import Link from "next/link";
+import React from "react";
+import { motion } from "framer-motion";
+import type { Project } from "@/types";
+import { cn } from "@/lib/utils";
+import { Calendar, ExternalLink, Star } from "lucide-react";
+import { BsGithub } from "react-icons/bs";
 
-import Breadcrumb from '@/components/ui/breadcrumb';
-import ProjectSection from '@/components/projects/ProjectSection';
-import TechnologyChip from '@/components/ui/TechnologyChip';
-import ProjectLinkButton from '@/components/projects/ProjectLinkButton';
-import MarkdownView from '@/components/ui/MarkdownView';
+import Breadcrumb from "@/components/ui/breadcrumb";
+import ProjectSection from "@/components/projects/ProjectSection";
+import TechnologyChip from "@/components/ui/TechnologyChip";
+import ProjectLinkButton from "@/components/projects/ProjectLinkButton";
+import MarkdownView from "@/components/ui/MarkdownView";
+import Image from "next/image";
 
 interface ProjectViewProps {
   project: Project | null | undefined; // Allow null/undefined if project is loading or not found
@@ -26,7 +27,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
         className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <div className="animate-pulse">
           <div
@@ -113,11 +114,11 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
   }
 
   // Format date nicely
-  const formattedDate = new Date(project.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
+  const formattedDate = new Date(project.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
   });
 
   const liveUrl = project.links?.live;
@@ -125,8 +126,8 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
   const imageSrc = project.media?.imageUrl || project.media?.thumbnailUrl;
 
   const breadcrumbItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Projects', href: '/projects' },
+    { label: "Home", href: "/" },
+    { label: "Projects", href: "/projects" },
     { label: project.title },
   ];
 
@@ -135,7 +136,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
       className="w-full max-w-5xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[70vh]"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <Breadcrumb items={breadcrumbItems} />
 
@@ -146,14 +147,16 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
         )}
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.5, ease: 'easeOut' }}
+        transition={{ delay: 0.1, duration: 0.5, ease: "easeOut" }}
       >
         {imageSrc && (
           <div className="w-full h-64 md:h-80 lg:h-96 relative overflow-hidden border-b border-white/20 dark:border-white/10">
-            <img
+            <Image
               src={imageSrc}
               alt={`Showcase image for ${project.title}`}
               className="w-full h-full object-cover"
+              width={1280}
+              height={720}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
             {project.isFeatured && (
@@ -179,9 +182,9 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
               <span>
-                {project.status === 'in-progress'
-                  ? 'Updated on'
-                  : 'Completed on'}{' '}
+                {project.status === "in-progress"
+                  ? "Updated on"
+                  : "Completed on"}{" "}
                 {formattedDate}
               </span>
             </div>
@@ -191,7 +194,7 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
           <div className="space-y-6 md:space-y-8">
             <ProjectSection title="Project Overview">
               <article className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none">
-                <MarkdownView content={project.content || ''} />
+                <MarkdownView content={project.content || ""} />
               </article>
             </ProjectSection>
 
@@ -225,40 +228,40 @@ const ProjectView: React.FC<ProjectViewProps> = ({ project, isLoading }) => {
               repoUrl ||
               project.links?.docs ||
               project.links?.video) && (
-                <ProjectSection
-                  title="Project Links"
-                  contentClassName="flex flex-wrap gap-4"
-                >
-                  {liveUrl && (
-                    <ProjectLinkButton
-                      href={liveUrl}
-                      icon={<ExternalLink className="w-4 h-4" />}
-                      label="Live Demo"
-                    />
-                  )}
-                  {repoUrl && (
-                    <ProjectLinkButton
-                      href={repoUrl}
-                      icon={<BsGithub className="w-4 h-4" />}
-                      label="Source Code"
-                    />
-                  )}
-                  {project.links?.docs && (
-                    <ProjectLinkButton
-                      href={project.links.docs}
-                      icon={<span className="text-xs">📄</span>}
-                      label="Docs"
-                    />
-                  )}
-                  {project.links?.video && (
-                    <ProjectLinkButton
-                      href={project.links.video}
-                      icon={<span className="text-xs">🎬</span>}
-                      label="Video"
-                    />
-                  )}
-                </ProjectSection>
-              )}
+              <ProjectSection
+                title="Project Links"
+                contentClassName="flex flex-wrap gap-4"
+              >
+                {liveUrl && (
+                  <ProjectLinkButton
+                    href={liveUrl}
+                    icon={<ExternalLink className="w-4 h-4" />}
+                    label="Live Demo"
+                  />
+                )}
+                {repoUrl && (
+                  <ProjectLinkButton
+                    href={repoUrl}
+                    icon={<BsGithub className="w-4 h-4" />}
+                    label="Source Code"
+                  />
+                )}
+                {project.links?.docs && (
+                  <ProjectLinkButton
+                    href={project.links.docs}
+                    icon={<span className="text-xs">📄</span>}
+                    label="Docs"
+                  />
+                )}
+                {project.links?.video && (
+                  <ProjectLinkButton
+                    href={project.links.video}
+                    icon={<span className="text-xs">🎬</span>}
+                    label="Video"
+                  />
+                )}
+              </ProjectSection>
+            )}
           </div>
         </div>
       </motion.div>

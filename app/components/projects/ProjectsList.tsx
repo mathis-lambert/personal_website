@@ -1,11 +1,11 @@
 "use client";
 
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import ProjectCard from '@/components/projects/ProjectCard';
-import type { Project } from '@/types';
-import FiltersBar from '@/components/filters/FiltersBar';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import ProjectCard from "@/components/projects/ProjectCard";
+import type { Project } from "@/types";
+import FiltersBar from "@/components/filters/FiltersBar";
 
 // --- Debounce Hook (same as before) ---
 function useDebounce<T>(value: T, delay: number): T {
@@ -22,7 +22,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 // --- Type for Sort Order (same as before) ---
-type SortOrder = 'newest' | 'oldest' | 'a-z' | 'z-a' | 'featured';
+type SortOrder = "newest" | "oldest" | "a-z" | "z-a" | "featured";
 
 interface ProjectsListProps {
   projects: Project[];
@@ -30,14 +30,14 @@ interface ProjectsListProps {
 
 // --- Main Component ---
 const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>(
     [],
   );
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [featuredOnly, setFeaturedOnly] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Calculate all unique technologies from the projects
@@ -87,13 +87,13 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
       if (debouncedSearchQuery) {
         const lowerCaseQuery = debouncedSearchQuery.toLowerCase();
         const isInTitle = project.title.toLowerCase().includes(lowerCaseQuery);
-        const isInSubtitle = (project.subtitle || '')
+        const isInSubtitle = (project.subtitle || "")
           .toLowerCase()
           .includes(lowerCaseQuery);
-        const isInDescription = (project.description || '')
+        const isInDescription = (project.description || "")
           .toLowerCase()
           .includes(lowerCaseQuery);
-        const isInContent = (project.content || '')
+        const isInContent = (project.content || "")
           .toLowerCase()
           .includes(lowerCaseQuery);
         const isInTechnologies = project.technologies.some((tech) =>
@@ -102,10 +102,10 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
         const isInCategories = (project.categories || []).some((cat) =>
           cat.toLowerCase().includes(lowerCaseQuery),
         );
-        const isInClient = (project.client || '')
+        const isInClient = (project.client || "")
           .toLowerCase()
           .includes(lowerCaseQuery);
-        const isInRole = (project.role || '')
+        const isInRole = (project.role || "")
           .toLowerCase()
           .includes(lowerCaseQuery);
         if (
@@ -126,19 +126,19 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
 
     // Sort the filtered projects
     const sortedProjects = [...tempProjects];
-    if (sortOrder === 'newest') {
+    if (sortOrder === "newest") {
       sortedProjects.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
-    } else if (sortOrder === 'oldest') {
+    } else if (sortOrder === "oldest") {
       sortedProjects.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
-    } else if (sortOrder === 'a-z') {
+    } else if (sortOrder === "a-z") {
       sortedProjects.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortOrder === 'z-a') {
+    } else if (sortOrder === "z-a") {
       sortedProjects.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortOrder === 'featured') {
+    } else if (sortOrder === "featured") {
       sortedProjects.sort(
         (a, b) =>
           Number(b.isFeatured) - Number(a.isFeatured) ||
@@ -163,7 +163,7 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <FiltersBar
           searchQuery={searchQuery}
@@ -172,35 +172,35 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
           onSortChange={(v) => setSortOrder(v as SortOrder)}
           filteredCount={filteredAndSortedProjects.length}
           onReset={() => {
-            setSearchQuery('');
+            setSearchQuery("");
             setSelectedTechnologies([]);
             setSelectedCategories([]);
             setSelectedStatuses([]);
             setFeaturedOnly(false);
-            setSortOrder('newest');
+            setSortOrder("newest");
           }}
           sections={[
             {
-              type: 'multiselect',
-              label: 'Technologies',
+              type: "multiselect",
+              label: "Technologies",
               items: allTechnologies.map((t) => ({ value: t, label: t })),
               selected: selectedTechnologies,
               onChange: setSelectedTechnologies,
             },
             {
-              type: 'multiselect',
-              label: 'Categories',
+              type: "multiselect",
+              label: "Categories",
               items: allCategories.map((c) => ({ value: c, label: c })),
               selected: selectedCategories,
               onChange: setSelectedCategories,
             },
             {
-              type: 'multiselect',
-              label: 'Status',
+              type: "multiselect",
+              label: "Status",
               items: [
-                { value: 'in-progress', label: 'In progress' },
-                { value: 'completed', label: 'Completed' },
-                { value: 'archived', label: 'Archived' },
+                { value: "in-progress", label: "In progress" },
+                { value: "completed", label: "Completed" },
+                { value: "archived", label: "Archived" },
               ],
               selected: selectedStatuses,
               onChange: setSelectedStatuses,
@@ -212,11 +212,11 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
           searchPlaceholder="Search by title, description, technology, client..."
           searchAriaLabel="Search projects"
           sortOptions={[
-            { value: 'newest', label: 'Newest first' },
-            { value: 'oldest', label: 'Oldest first' },
-            { value: 'a-z', label: 'A → Z' },
-            { value: 'z-a', label: 'Z → A' },
-            { value: 'featured', label: 'Featured first' },
+            { value: "newest", label: "Newest first" },
+            { value: "oldest", label: "Oldest first" },
+            { value: "a-z", label: "A → Z" },
+            { value: "z-a", label: "Z → A" },
+            { value: "featured", label: "Featured first" },
           ]}
         />
       </motion.div>
@@ -226,17 +226,17 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
         {filteredAndSortedProjects.length > 0 ? (
           <motion.div
             key={[
-              'tech:' + selectedTechnologies.join(','),
-              'cat:' + selectedCategories.join(','),
-              'status:' + selectedStatuses.join(','),
-              featuredOnly ? 'feat' : 'all',
-              'q:' + debouncedSearchQuery,
-              'sort:' + sortOrder,
-            ].join('|')}
+              "tech:" + selectedTechnologies.join(","),
+              "cat:" + selectedCategories.join(","),
+              "status:" + selectedStatuses.join(","),
+              featuredOnly ? "feat" : "all",
+              "q:" + debouncedSearchQuery,
+              "sort:" + sortOrder,
+            ].join("|")}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3" // Responsive grid
           >
             {filteredAndSortedProjects.map((project, index) => (

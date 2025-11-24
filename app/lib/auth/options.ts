@@ -4,13 +4,9 @@ import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 const ADMIN_USER =
-  process.env.INTERNAL_API_USERNAME ||
-  process.env.ADMIN_USERNAME ||
-  "admin";
+  process.env.INTERNAL_API_USERNAME || process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD =
-  process.env.INTERNAL_API_PASSWORD ||
-  process.env.ADMIN_PASSWORD ||
-  "";
+  process.env.INTERNAL_API_PASSWORD || process.env.ADMIN_PASSWORD || "";
 
 const verifyPassword = (value: string) => {
   if (!ADMIN_PASSWORD) return false;

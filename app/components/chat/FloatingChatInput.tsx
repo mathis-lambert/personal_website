@@ -1,28 +1,28 @@
-'use client';
-import { usePathname } from 'next/navigation';
+"use client";
+import { usePathname } from "next/navigation";
 import React, {
   type FormEvent,
   useCallback,
   useEffect,
   useRef,
   useState,
-} from 'react';
-import { ArrowUp, Loader2, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { AnimatePresence, motion, LayoutGroup } from 'framer-motion';
-import { useChat } from '@/hooks/useChat';
+} from "react";
+import { ArrowUp, Loader2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
+import { useChat } from "@/hooks/useChat";
 
 interface ChatInputProps {
   placeholder?: string;
 }
 
 const FloatingChatInput: React.FC<ChatInputProps> = ({
-  placeholder = 'Ask something',
+  placeholder = "Ask something",
 }) => {
-  const [message, setMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>("");
   const { sendMessage, isLoading, isChatOpen, closeChat } = useChat();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const pathname = usePathname() || '/';
+  const pathname = usePathname() || "/";
   const MIN_TEXTAREA_HEIGHT = 40;
   const MAX_TEXTAREA_HEIGHT = 200;
 
@@ -30,13 +30,13 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
 
   // Observe footer visibility to hide input near footer
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const footer = document.getElementById('site-footer');
+    if (typeof window === "undefined") return;
+    const footer = document.getElementById("site-footer");
     if (!footer) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => setHiddenByFooter(entry.isIntersecting),
-      { root: null, threshold: 0.01, rootMargin: '0px 0px 2px 0px' },
+      { root: null, threshold: 0.01, rootMargin: "0px 0px 2px 0px" },
     );
 
     observer.observe(footer);
@@ -47,7 +47,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     const ta = textAreaRef.current;
     if (!ta) return;
 
-    const isEmpty = ta.value.trim() === '';
+    const isEmpty = ta.value.trim() === "";
 
     if (isEmpty) {
       // lock to a single-line box so placeholder is vertically centered
@@ -57,8 +57,8 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     }
 
     // content present: autosize
-    ta.style.lineHeight = 'normal';
-    ta.style.height = 'auto';
+    ta.style.lineHeight = "normal";
+    ta.style.height = "auto";
     const newHeight = Math.min(ta.scrollHeight, MAX_TEXTAREA_HEIGHT);
     ta.style.height = `${Math.max(MIN_TEXTAREA_HEIGHT, newHeight)}px`;
   }, [MIN_TEXTAREA_HEIGHT, MAX_TEXTAREA_HEIGHT]);
@@ -72,7 +72,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     if (!trimmedMessage) return;
 
     sendMessage(trimmedMessage, pathname);
-    setMessage('');
+    setMessage("");
 
     const textArea = textAreaRef.current;
     if (textArea) {
@@ -89,7 +89,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -101,11 +101,11 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
 
   const handleCloseChat = () => {
     closeChat();
-    setMessage('');
+    setMessage("");
     requestAnimationFrame(() => {
       const ta = textAreaRef.current;
       if (ta) {
-        ta.value = '';
+        ta.value = "";
         ta.style.lineHeight = `${MIN_TEXTAREA_HEIGHT}px`;
         ta.style.height = `${MIN_TEXTAREA_HEIGHT}px`;
       }
@@ -121,8 +121,8 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
     if (isChatOpen) textAreaRef.current?.focus();
   }, [isChatOpen]);
 
-  const closeButtonSize = `${isChatOpen ? 'w-9 h-9' : 'w-0 h-0'}`;
-  const isSendDisabled = isLoading || message.trim() === '';
+  const closeButtonSize = `${isChatOpen ? "w-9 h-9" : "w-0 h-0"}`;
+  const isSendDisabled = isLoading || message.trim() === "";
 
   return (
     <AnimatePresence initial={false}>
@@ -133,19 +133,19 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           layout="position"
         >
           <LayoutGroup>
             <div
-              className={`flex items-end justify-center px-1 w-full ${isChatOpen ? 'gap-2' : ''}`}
+              className={`flex items-end justify-center px-1 w-full ${isChatOpen ? "gap-2" : ""}`}
             >
               {/* Input card */}
               <motion.div
                 className="w-full max-w-lg bg-white/10 border border-white shadow-lg shadow-black/20 backdrop-blur-md rounded-3xl p-1 dark:bg-gray-800/10 dark:border-white/20 flex-shrink"
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 <form
                   onSubmit={handleSubmit}
@@ -165,7 +165,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
                     style={{
                       minHeight: `${MIN_TEXTAREA_HEIGHT}px`,
                       maxHeight: `${MAX_TEXTAREA_HEIGHT}px`,
-                      paddingBlock: message.trim() === '' ? `0` : '0.5rem',
+                      paddingBlock: message.trim() === "" ? `0` : "0.5rem",
                     }}
                   />
                   <Button
@@ -195,7 +195,7 @@ const FloatingChatInput: React.FC<ChatInputProps> = ({
                       initial={{ opacity: 0, scale: 0.7 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.7 }}
-                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
                       className="absolute left-0 bottom-1.5 w-full h-full"
                     >
                       <Button

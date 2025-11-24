@@ -1,14 +1,14 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import SearchInput from '@/components/filters/SearchInput';
-import SortSelect, { type SortOrder } from '@/components/filters/SortSelect';
+import React from "react";
+import { X } from "lucide-react";
+import SearchInput from "@/components/filters/SearchInput";
+import SortSelect, { type SortOrder } from "@/components/filters/SortSelect";
 import MultiSelectDropdown, {
   type MultiSelectItem,
-} from '@/components/filters/MultiSelectDropdown';
-import FeaturedToggle from '@/components/filters/FeaturedToggle';
+} from "@/components/filters/MultiSelectDropdown";
+import FeaturedToggle from "@/components/filters/FeaturedToggle";
 
 export interface FiltersBarSection {
-  type: 'multiselect';
+  type: "multiselect";
   label: string;
   items: MultiSelectItem[];
   selected: string[];
@@ -116,7 +116,7 @@ const FiltersBar: React.FC<FiltersBarPropsBase> = ({
               Search: “{searchQuery}”
               <button
                 className="p-0.5 hover:text-red-600"
-                onClick={() => onSearchChange('')}
+                onClick={() => onSearchChange("")}
                 aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />

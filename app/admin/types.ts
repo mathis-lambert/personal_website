@@ -1,18 +1,18 @@
-import type { Article, Project, ResumeData } from '@/types';
+import type { Article, Project, ResumeData } from "@/types";
 
 // Create inputs (required fields, others optional)
 export type AdminCreateProjectInput = Pick<
   Project,
-  'title' | 'date' | 'technologies'
+  "title" | "date" | "technologies"
 > &
-  Partial<Omit<Project, 'id' | 'date' | 'title' | 'technologies'>>;
+  Partial<Omit<Project, "id" | "date" | "title" | "technologies">>;
 
 export type AdminCreateArticleInput = Pick<
   Article,
-  'title' | 'excerpt' | 'content' | 'date' | 'tags'
+  "title" | "excerpt" | "content" | "date" | "tags"
 > &
   Partial<
-    Omit<Article, 'id' | 'title' | 'excerpt' | 'content' | 'date' | 'tags'>
+    Omit<Article, "id" | "title" | "excerpt" | "content" | "date" | "tags">
   >;
 
 export type AdminUpdateProjectInput = Partial<Project>;

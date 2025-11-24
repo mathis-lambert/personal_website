@@ -25,12 +25,12 @@ export async function fetchWithTimeout(
   const onParentAbort = () => controller.abort();
   if (parentSignal) {
     if (parentSignal.aborted) onParentAbort();
-    else parentSignal.addEventListener('abort', onParentAbort);
+    else parentSignal.addEventListener("abort", onParentAbort);
   }
 
   const timeoutId = setTimeout(() => {
     try {
-      controller.abort(new DOMException('Timeout', 'AbortError'));
+      controller.abort(new DOMException("Timeout", "AbortError"));
     } catch {
       controller.abort();
     }
@@ -62,7 +62,7 @@ export async function fetchWithTimeout(
     if (authToken) {
       merged.Authorization = `Bearer ${authToken}`;
     }
-    const m = (method ?? 'GET').toUpperCase();
+    const m = (method ?? "GET").toUpperCase();
     return merged;
   };
 
@@ -92,14 +92,14 @@ export async function fetchWithTimeout(
     } = init ?? {};
     void _ignoredTimeout;
     void _ignoredSignal;
-    const method = (rest.method ?? 'GET').toUpperCase();
+    const method = (rest.method ?? "GET").toUpperCase();
 
     const doFetch = async (): Promise<Response> =>
       await fetch(input, {
         ...(rest as RequestInit),
         headers: buildHeaders(headers, authToken, method),
         signal: controller.signal,
-        credentials: 'include',
+        credentials: "include",
       });
 
     // First attempt
@@ -111,11 +111,11 @@ export async function fetchWithTimeout(
     return await doFetch();
   } finally {
     clearTimeout(timeoutId);
-    if (parentSignal) parentSignal.removeEventListener('abort', onParentAbort);
+    if (parentSignal) parentSignal.removeEventListener("abort", onParentAbort);
   }
 }
 
 export function sanitizeUrl(url?: string): string | undefined {
   if (!url) return url;
-  return url.replace(/:\s*\/\//, '://');
+  return url.replace(/:\s*\/\//, "://");
 }

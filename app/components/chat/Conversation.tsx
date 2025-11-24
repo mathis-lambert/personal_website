@@ -1,9 +1,9 @@
-'use client';
-import React, { useEffect, useRef } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import AssistantMessage from '@/components/chat/AssistantMessage';
-import UserMessage from '@/components/chat/UserMessage';
-import { useChat } from '@/hooks/useChat';
+"use client";
+import React, { useEffect, useRef } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import AssistantMessage from "@/components/chat/AssistantMessage";
+import UserMessage from "@/components/chat/UserMessage";
+import { useChat } from "@/hooks/useChat";
 
 const Conversation: React.FC = () => {
   const {
@@ -36,9 +36,9 @@ const Conversation: React.FC = () => {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            {msg.role === 'user' ? (
+            {msg.role === "user" ? (
               <UserMessage content={msg.content} />
             ) : (
               <AssistantMessage
@@ -64,7 +64,7 @@ const Conversation: React.FC = () => {
         {error && (
           <div className="flex justify-center pt-2">
             <p className="text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-3 py-1.5 rounded text-sm shadow-sm">
-              Error: {error.message || 'An error occurred.'}
+              Error: {error.message || "An error occurred."}
             </p>
           </div>
         )}

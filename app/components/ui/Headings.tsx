@@ -1,8 +1,8 @@
-'use client';
-import { motion } from 'framer-motion';
+"use client";
+import { motion } from "framer-motion";
 
 const baseClassName =
-  'text-gray-900 dark:text-gray-100 break-word font-extrabold transition-colors duration-300 ease-in-out';
+  "text-gray-900 dark:text-gray-100 break-word font-extrabold transition-colors duration-300 ease-in-out";
 
 const Heading1 = ({
   children,
@@ -19,7 +19,7 @@ const Heading1 = ({
       className={`text-4xl sm:text-5xl ${baseClassName} ${className}`}
       initial={{ opacity: 0, x: -50 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.75, ease: 'easeOut', delay: delay }}
+      transition={{ duration: 0.75, ease: "easeOut", delay: delay }}
       exit={{ opacity: 0, x: -50 }}
     >
       {children}

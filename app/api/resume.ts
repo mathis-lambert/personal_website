@@ -1,5 +1,5 @@
-import type { ResumeData } from '@/types';
-import { fetchWithTimeout, sanitizeUrl } from './utils';
+import type { ResumeData } from "@/types";
+import { fetchWithTimeout, sanitizeUrl } from "./utils";
 
 export function normalizeResumeApi(p: ResumeData): ResumeData {
   return {
@@ -18,8 +18,7 @@ export function normalizeResumeApi(p: ResumeData): ResumeData {
 export async function getResume(options?: {
   signal?: AbortSignal;
 }): Promise<ResumeData> {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
   const res = await fetchWithTimeout(`${apiUrl}/api/resume`, {
     signal: options?.signal,
     timeoutMs: 10000,
@@ -36,18 +35,18 @@ export async function exportResumePdf(options?: {
   timeoutMs?: number;
 }): Promise<Blob> {
   const apiUrl = sanitizeUrl(
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || '',
+    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "",
   );
   const res = await fetchWithTimeout(`${apiUrl}/api/resume/export`, {
-    method: 'GET',
+    method: "GET",
     signal: options?.signal,
     timeoutMs: options?.timeoutMs ?? 20000,
-    headers: { Accept: 'application/pdf' },
+    headers: { Accept: "application/pdf" },
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
+    const text = await res.text().catch(() => "");
     throw new Error(
-      `Resume PDF export failed: ${res.status}${text ? ` - ${text}` : ''}`,
+      `Resume PDF export failed: ${res.status}${text ? ` - ${text}` : ""}`,
     );
   }
   return res.blob();
@@ -60,9 +59,9 @@ export async function downloadResumePdf(options?: {
   const blob = await exportResumePdf({ signal: options?.signal });
   const url = URL.createObjectURL(blob);
   try {
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = options?.filename ?? 'mathis_lambert_resume.pdf';
+    a.download = options?.filename ?? "mathis_lambert_resume.pdf";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

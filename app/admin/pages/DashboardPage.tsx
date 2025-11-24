@@ -1,21 +1,21 @@
-'use client';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import {
   getCollectionData,
   getEventsAnalytics,
   getEventsList,
-} from '@/api/admin';
+} from "@/api/admin";
 import type {
   Article,
   Project,
   EventsAnalyticsResponse,
   EventsListResponse,
-} from '@/types';
-import type { TimelineData } from '@/components/ui/ScrollableTimeline';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "@/types";
+import type { TimelineData } from "@/components/ui/ScrollableTimeline";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,13 +23,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown, RefreshCw } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import {
   ChartContainer,
   ChartTooltipContent,
   ChartEmptyState,
-} from '@/components/ui/chart';
+} from "@/components/ui/chart";
 import {
   Area,
   AreaChart,
@@ -41,7 +41,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from "recharts";
 
 const DashboardPage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -50,10 +50,10 @@ const DashboardPage: React.FC = () => {
   const [errCounts, setErrCounts] = useState<string | null>(null);
 
   // Analytics state
-  type Preset = '7d' | '30d' | '90d' | 'custom';
-  const [preset, setPreset] = useState<Preset>('7d');
-  const [customStart, setCustomStart] = useState<string>(''); // yyyy-mm-dd
-  const [customEnd, setCustomEnd] = useState<string>(''); // yyyy-mm-dd
+  type Preset = "7d" | "30d" | "90d" | "custom";
+  const [preset, setPreset] = useState<Preset>("7d");
+  const [customStart, setCustomStart] = useState<string>(""); // yyyy-mm-dd
+  const [customEnd, setCustomEnd] = useState<string>(""); // yyyy-mm-dd
   const [analytics, setAnalytics] = useState<EventsAnalyticsResponse | null>(
     null,
   );
@@ -79,10 +79,10 @@ const DashboardPage: React.FC = () => {
       setErrCounts(null);
       try {
         const [projects, articles, experiences, studies] = await Promise.all([
-          getCollectionData<Project[]>('projects', token),
-          getCollectionData<Article[]>('articles', token),
-          getCollectionData<TimelineData[]>('experiences', token),
-          getCollectionData<TimelineData[]>('studies', token),
+          getCollectionData<Project[]>("projects", token),
+          getCollectionData<Article[]>("articles", token),
+          getCollectionData<TimelineData[]>("experiences", token),
+          getCollectionData<TimelineData[]>("studies", token),
         ]);
         if (!canceled)
           setCounts({
@@ -92,7 +92,7 @@ const DashboardPage: React.FC = () => {
             studies: Array.isArray(studies) ? studies.length : 0,
           });
       } catch (e) {
-        if (!canceled) setErrCounts((e as Error)?.message ?? 'Failed to load');
+        if (!canceled) setErrCounts((e as Error)?.message ?? "Failed to load");
       } finally {
         if (!canceled) setLoadingCounts(false);
       }
@@ -108,23 +108,23 @@ const DashboardPage: React.FC = () => {
   const { startIso, endIso, granularity } = useMemo(() => {
     const now = new Date();
     let start = new Date();
-    if (preset === '7d') start.setDate(now.getDate() - 7);
-    else if (preset === '30d') start.setDate(now.getDate() - 30);
-    else if (preset === '90d') start.setDate(now.getDate() - 90);
+    if (preset === "7d") start.setDate(now.getDate() - 7);
+    else if (preset === "30d") start.setDate(now.getDate() - 30);
+    else if (preset === "90d") start.setDate(now.getDate() - 90);
     else {
       // custom
       const s = customStart
-        ? new Date(customStart + 'T00:00:00Z')
+        ? new Date(customStart + "T00:00:00Z")
         : new Date(now.getTime() - 7 * 86400000);
-      const e = customEnd ? new Date(customEnd + 'T23:59:59Z') : now;
+      const e = customEnd ? new Date(customEnd + "T23:59:59Z") : now;
       start = s;
       now.setTime(e.getTime());
     }
     const ms = now.getTime() - start.getTime();
     const days = ms / 86400000;
-    let g: 'hour' | 'day' | 'month' = 'day';
-    if (days <= 3) g = 'hour';
-    else if (days > 180) g = 'month';
+    let g: "hour" | "day" | "month" = "day";
+    if (days <= 3) g = "hour";
+    else if (days > 180) g = "month";
     const startIso = start.toISOString();
     const endIso = now.toISOString();
     return { startIso, endIso, granularity: g };
@@ -142,7 +142,7 @@ const DashboardPage: React.FC = () => {
       })
       .catch((e) => {
         if (!canceled)
-          setErrAnalytics((e as Error)?.message ?? 'Failed to load analytics');
+          setErrAnalytics((e as Error)?.message ?? "Failed to load analytics");
       })
       .finally(() => {
         if (!canceled) setLoadingAnalytics(false);
@@ -167,7 +167,7 @@ const DashboardPage: React.FC = () => {
           start: startIso,
           end: endIso,
           granularity,
-          actions: ['chat_completion'],
+          actions: ["chat_completion"],
         },
         token,
       ),
@@ -176,8 +176,8 @@ const DashboardPage: React.FC = () => {
           start: startIso,
           end: endIso,
           granularity,
-          actions: ['chat_completion'],
-          groupBy: 'location',
+          actions: ["chat_completion"],
+          groupBy: "location",
         },
         token,
       ),
@@ -185,9 +185,9 @@ const DashboardPage: React.FC = () => {
         {
           start: startIso,
           end: endIso,
-          action: 'chat_completion',
+          action: "chat_completion",
           limit: 50,
-          sort: 'desc',
+          sort: "desc",
         },
         token,
       ),
@@ -200,7 +200,7 @@ const DashboardPage: React.FC = () => {
       })
       .catch((e) => {
         if (!canceled)
-          setErrActivity((e as Error)?.message ?? 'Failed to load activity');
+          setErrActivity((e as Error)?.message ?? "Failed to load activity");
       })
       .finally(() => {
         if (!canceled) setLoadingActivity(false);
@@ -241,26 +241,26 @@ const DashboardPage: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="secondary">
-                  Range: {preset.toUpperCase()}{' '}
+                  Range: {preset.toUpperCase()}{" "}
                   <ChevronDown className="ml-1 size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Quick ranges</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {(['7d', '30d', '90d'] as Preset[]).map((p) => (
+                {(["7d", "30d", "90d"] as Preset[]).map((p) => (
                   <DropdownMenuItem key={p} onClick={() => setPreset(p)}>
-                    Last {p.replace('d', ' days')}
+                    Last {p.replace("d", " days")}
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setPreset('custom')}>
+                <DropdownMenuItem onClick={() => setPreset("custom")}>
                   Custom…
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {preset === 'custom' && (
+            {preset === "custom" && (
               <div className="flex items-center gap-2">
                 <Input
                   type="date"
@@ -296,7 +296,7 @@ const DashboardPage: React.FC = () => {
               <div className="text-red-600 text-sm">{errAnalytics}</div>
             ) : analytics && analytics.series.length ? (
               <ChartContainer
-                config={{ total: { color: 'var(--chart-1)' } }}
+                config={{ total: { color: "var(--chart-1)" } }}
                 className="h-[260px] w-full"
               >
                 <ResponsiveContainer>
@@ -423,26 +423,26 @@ const DashboardPage: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="secondary">
-                  Range: {preset.toUpperCase()}{' '}
+                  Range: {preset.toUpperCase()}{" "}
                   <ChevronDown className="ml-1 size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Quick ranges</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {(['7d', '30d', '90d'] as Preset[]).map((p) => (
+                {(["7d", "30d", "90d"] as Preset[]).map((p) => (
                   <DropdownMenuItem key={p} onClick={() => setPreset(p)}>
-                    Last {p.replace('d', ' days')}
+                    Last {p.replace("d", " days")}
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setPreset('custom')}>
+                <DropdownMenuItem onClick={() => setPreset("custom")}>
                   Custom…
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {preset === 'custom' && (
+            {preset === "custom" && (
               <div className="flex items-center gap-2">
                 <Input
                   type="date"
@@ -550,7 +550,7 @@ const DashboardPage: React.FC = () => {
                       pairs.sort((a, b) => b[1] - a[1]);
                       const top = pairs.slice(0, 5);
                       return top.map(([name, value]) => ({
-                        name: name || 'unknown',
+                        name: name || "unknown",
                         value,
                       }));
                     })()}
@@ -627,16 +627,16 @@ const DashboardPage: React.FC = () => {
                       const ts = ev.created_at
                         ? new Date(ev.created_at)
                             .toISOString()
-                            .replace('T', ' ')
-                            .replace('Z', '')
-                        : 'n/a';
-                      const loc = ev.request_body?.location || '';
+                            .replace("T", " ")
+                            .replace("Z", "")
+                        : "n/a";
+                      const loc = ev.request_body?.location || "";
                       const messages = ev.request_body?.messages || [];
                       const last =
                         Array.isArray(messages) && messages.length
                           ? messages[messages.length - 1]
                           : null;
-                      const content = last?.content ?? '';
+                      const content = last?.content ?? "";
                       return (
                         <tr key={idx} className="border-b last:border-0">
                           <td className="px-3 py-2 whitespace-nowrap tabular-nums">

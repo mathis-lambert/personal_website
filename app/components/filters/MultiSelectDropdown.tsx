@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export type MultiSelectItem = { value: string; label: string };
 
@@ -53,7 +53,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={contentClassName ? contentClassName : 'w-56'}
+        className={contentClassName ? contentClassName : "w-56"}
       >
         <div className="flex items-center justify-between px-2 py-1">
           <DropdownMenuLabel className="p-0 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">

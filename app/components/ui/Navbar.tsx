@@ -1,8 +1,9 @@
-'use client';
-import Link from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
-import { AnimatePresence, motion, type Variants } from 'framer-motion';
-import { useChat } from '@/hooks/useChat';
+"use client";
+import Link from "next/link";
+import { useCallback, useMemo, useState } from "react";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { useChat } from "@/hooks/useChat";
+import Image from "next/image";
 
 interface NavLink {
   to: string;
@@ -30,17 +31,17 @@ const Navbar = () => {
 
   const navLinks = useMemo<NavLink[]>(
     () => [
-      { to: '/', text: 'Home', onClick: closeChat },
-      { to: '/projects', text: 'Projects', onClick: closeChat },
-      { to: '/blog', text: 'Blog', onClick: closeChat },
-      { to: '/resume', text: 'Resume', onClick: closeChat },
-      { to: '#', text: 'Chat', onClick: handleChatToggle },
+      { to: "/", text: "Home", onClick: closeChat },
+      { to: "/projects", text: "Projects", onClick: closeChat },
+      { to: "/blog", text: "Blog", onClick: closeChat },
+      { to: "/resume", text: "Resume", onClick: closeChat },
+      { to: "#", text: "Chat", onClick: handleChatToggle },
     ],
     [handleChatToggle, closeChat],
   );
 
   const connectLink: NavLink = {
-    to: 'https://www.linkedin.com/in/mathis-lambert/',
+    to: "https://www.linkedin.com/in/mathis-lambert/",
     text: "Let's connect",
   };
 
@@ -63,8 +64,8 @@ const Navbar = () => {
   };
 
   const menuOverlayVariants: Variants = {
-    hidden: { opacity: 0, transition: { duration: 0.3, ease: 'easeInOut' } },
-    visible: { opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } },
+    hidden: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+    visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
   };
 
   const menuItemVariants: Variants = {
@@ -75,7 +76,7 @@ const Navbar = () => {
       transition: {
         delay: i * 0.1 + 0.3,
         duration: 0.3,
-        ease: 'easeOut',
+        ease: "easeOut",
       },
     }),
     exit: (i: number) => ({
@@ -84,7 +85,7 @@ const Navbar = () => {
       transition: {
         delay: i * 0.05,
         duration: 0.2,
-        ease: 'easeIn',
+        ease: "easeIn",
       },
     }),
   };
@@ -95,20 +96,22 @@ const Navbar = () => {
         className="fixed top-0 left-0 w-full h-14 lg:h-20 z-[1001] lg:py-3"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         exit={{ opacity: 0, y: -50 }}
       >
         <div className="absolute w-2/3 h-32 blur-3xl bg-gradient-to-t from-blue-300 to-blue-700 opacity-15 rounded-full left-1/2 transform -translate-x-1/2 -z-10 -translate-y-1/2 lg:mx-6" />
-        <div className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-gray-700 px-2 py-2">
+        <div className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-white/15 dark:backdrop-blur-lg px-2 py-2">
           <Link
             href="/"
             className="flex items-center gap-2 flex-shrink-0 group"
             onClick={closeMenu}
           >
-            <img
+            <Image
               src="/images/me.jpeg"
               alt="Profile pic"
               className="aspect-square inline-block bg-white rounded-full w-10 h-10 object-contain group-hover:transform group-hover:scale-105 transition-transform duration-300"
+              width={40}
+              height={40}
             />
             <span className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
               Mathis
@@ -148,20 +151,20 @@ const Navbar = () => {
                 <motion.div
                   className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
                   variants={burgerVariants}
-                  animate={isMenuOpen ? 'topOpen' : 'topClosed'}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  animate={isMenuOpen ? "topOpen" : "topClosed"}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
                 <motion.div
                   className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
                   variants={burgerVariants}
-                  animate={isMenuOpen ? 'middleOpen' : 'middleClosed'}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  animate={isMenuOpen ? "middleOpen" : "middleClosed"}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
                 <motion.div
                   className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
                   variants={burgerVariants}
-                  animate={isMenuOpen ? 'bottomOpen' : 'bottomClosed'}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  animate={isMenuOpen ? "bottomOpen" : "bottomClosed"}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 />
               </button>
             </div>

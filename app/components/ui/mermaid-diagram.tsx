@@ -1,8 +1,8 @@
-'use client';
-import React, { useEffect, useRef } from 'react';
+"use client";
+import React, { useEffect, useRef } from "react";
 
-type MmdTheme = 'default' | 'base' | 'dark' | 'forest' | 'neutral' | undefined;
-type Layout = 'dagre' | 'elk' | undefined;
+type MmdTheme = "default" | "base" | "dark" | "forest" | "neutral" | undefined;
+type Layout = "dagre" | "elk" | undefined;
 
 const FRONTMATTER_RE = /^\s*---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/;
 
@@ -15,7 +15,7 @@ function extractConfigAndBody(src: string): {
   if (!m) return { body: src };
 
   const front = m[1];
-  const body = src.slice(m[0].length).replace(/^\s+/, '');
+  const body = src.slice(m[0].length).replace(/^\s+/, "");
 
   // chercher bloc "config:" puis lignes indentées "key: value"
   const cfgStart = front.search(/(^|\r?\n)config:\s*\r?$/m);
@@ -30,9 +30,9 @@ function extractConfigAndBody(src: string): {
     const m2 = raw.match(/^\s*([\w-]+):\s*(.+?)\s*$/);
     if (!m2) continue;
     const key = m2[1];
-    const val = m2[2].replace(/^["']|["']$/g, '');
-    if (key === 'theme') theme = val as MmdTheme;
-    if (key === 'layout') layout = val as Layout;
+    const val = m2[2].replace(/^["']|["']$/g, "");
+    if (key === "theme") theme = val as MmdTheme;
+    if (key === "layout") layout = val as Layout;
   }
 
   return { theme, layout, body };
@@ -49,8 +49,8 @@ export const MermaidDiagram: React.FC<{
     const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
 
     (async () => {
-      if (typeof window === 'undefined') return;
-      const mod = await import('mermaid');
+      if (typeof window === "undefined") return;
+      const mod = await import("mermaid");
       const mermaid = mod.default ?? mod;
 
       const { theme, layout, body } = extractConfigAndBody(source);
@@ -59,11 +59,11 @@ export const MermaidDiagram: React.FC<{
 
       try {
         const res = await mermaid.render(id, body);
-        const svg = typeof res === 'string' ? res : (res.svg ?? res);
+        const svg = typeof res === "string" ? res : (res.svg ?? res);
         if (mounted && ref.current) ref.current.innerHTML = svg;
       } catch (e) {
         if (mounted && ref.current)
-          ref.current.textContent = 'Erreur mermaid: ' + String(e);
+          ref.current.textContent = "Erreur mermaid: " + String(e);
       }
     })();
 
@@ -72,5 +72,5 @@ export const MermaidDiagram: React.FC<{
     };
   }, [source]);
 
-  return <div ref={ref} className={className ?? 'my-4 prose-mermaid'} />;
+  return <div ref={ref} className={className ?? "my-4 prose-mermaid"} />;
 };

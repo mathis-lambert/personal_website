@@ -1,6 +1,6 @@
-import React from 'react';
-import { Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FeaturedToggleProps {
   checked: boolean;
@@ -11,7 +11,7 @@ interface FeaturedToggleProps {
 const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
   checked,
   onChange,
-  label = 'Featured only',
+  label = "Featured only",
 }) => {
   return (
     <button
@@ -20,22 +20,22 @@ const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        'inline-flex items-center h-9 px-2 rounded-full border transition-colors select-none',
+        "inline-flex items-center h-9 px-2 rounded-full border transition-colors select-none",
         checked
-          ? 'bg-yellow-200/30 border-yellow-300/30 hover:bg-yellow-200/50 hover:border-yellow-300/80'
-          : 'bg-gray-400/10  border-white/30 dark:border-white/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40',
+          ? "bg-yellow-200/30 border-yellow-300/30 hover:bg-yellow-200/50 hover:border-yellow-300/80"
+          : "bg-gray-400/10  border-white/30 dark:border-white/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40",
       )}
     >
       <span
         className={cn(
-          'relative inline-flex items-center w-10 h-6 rounded-full transition-colors',
-          checked ? 'bg-yellow-500/80' : 'bg-gray-500/30',
+          "relative inline-flex items-center w-10 h-6 rounded-full transition-colors",
+          checked ? "bg-yellow-500/80" : "bg-gray-500/30",
         )}
       >
         <span
           className={cn(
-            'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform',
-            checked ? 'translate-x-4' : 'translate-x-0',
+            "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform",
+            checked ? "translate-x-4" : "translate-x-0",
           )}
         />
       </span>

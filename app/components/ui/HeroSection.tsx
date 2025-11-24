@@ -1,12 +1,12 @@
 "use client";
 
-'use client';
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Heading1 } from '@/components/ui/Headings';
-import GlowingText from '@/components/ui/GlowingText';
-import { Badge } from '@/components/ui/Badge';
-import { Patchwork } from './Patchwork';
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import { Heading1 } from "@/components/ui/Headings";
+import GlowingText from "@/components/ui/GlowingText";
+import { Badge } from "@/components/ui/Badge";
+import { Patchwork } from "./Patchwork";
 
 interface StickerConfig {
   id: number;
@@ -26,36 +26,36 @@ interface StickerConfig {
 const stickerData: StickerConfig[] = [
   {
     id: 2,
-    src: '/images/sticker-2.png',
-    alt: 'Sticker 2',
-    width: 'w-[120px]',
-    height: 'h-[120px]',
-    top: 'top-[-1rem]',
-    left: 'left-[25%]',
+    src: "/images/sticker-2.png",
+    alt: "Sticker 2",
+    width: "w-[120px]",
+    height: "h-[120px]",
+    top: "top-[-1rem]",
+    left: "left-[25%]",
     rotation: 5,
     zIndex: 20,
     animationDelay: 0.6,
   },
   {
     id: 3,
-    src: '/images/sticker-11.png',
-    alt: 'Sticker 3',
-    width: 'w-[152px]',
-    height: 'h-[152px]',
-    top: 'top-[3rem]', // Example: 48px from top edge
-    left: 'left-[-1.5rem]', // Example: -24px from left edge
+    src: "/images/sticker-11.png",
+    alt: "Sticker 3",
+    width: "w-[152px]",
+    height: "h-[152px]",
+    top: "top-[3rem]", // Example: 48px from top edge
+    left: "left-[-1.5rem]", // Example: -24px from left edge
     rotation: 10,
     zIndex: 30,
     animationDelay: 0.7,
   },
   {
     id: 4,
-    src: '/images/sticker-10.png',
-    alt: 'Sticker 4',
-    width: 'w-[136px]',
-    height: 'h-[136px]',
-    top: 'top-[5rem]', // Example: 80px from top edge
-    right: 'right-4', // Example: 16px from right edge
+    src: "/images/sticker-10.png",
+    alt: "Sticker 4",
+    width: "w-[136px]",
+    height: "h-[136px]",
+    top: "top-[5rem]", // Example: 80px from top edge
+    right: "right-4", // Example: 16px from right edge
     rotation: -15,
     zIndex: 10,
     animationDelay: 0.7,
@@ -71,7 +71,7 @@ export const HeroSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.75, ease: 'easeInOut', delay: 0.1 }}
+            transition={{ duration: 0.75, ease: "easeInOut", delay: 0.1 }}
           >
             <Heading1>Hi, I'm Mathis Lambert !</Heading1>
             <Heading1>
@@ -79,19 +79,19 @@ export const HeroSection: React.FC = () => {
             </Heading1>
             <Heading1>
               <span className="opacity-20">in</span>&nbsp;
-              <GlowingText color={'text-sky-500'}>AI</GlowingText>&nbsp;
+              <GlowingText color={"text-sky-500"}>AI</GlowingText>&nbsp;
               <span className="opacity-20">and</span>&nbsp;
-              <GlowingText color={'text-sky-500'}>Computer science</GlowingText>
+              <GlowingText color={"text-sky-500"}>Computer science</GlowingText>
             </Heading1>
-            <div className={'flex items-center gap-2 mt-4 flex-wrap'}>
+            <div className={"flex items-center gap-2 mt-4 flex-wrap"}>
               <Badge
-                content={'Working at Free Pro'}
-                colorScheme={'green'}
+                content={"Working at Free Pro"}
+                colorScheme={"green"}
                 delay={0}
               />
               <Badge
-                content={'Studying at CPE Lyon'}
-                colorScheme={'blue'}
+                content={"Studying at CPE Lyon"}
+                colorScheme={"blue"}
                 delay={0.25}
               />
             </div>
@@ -99,7 +99,7 @@ export const HeroSection: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, x: -50, y: 0 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
-            transition={{ duration: 0.75, ease: 'easeInOut', delay: 0.2 }}
+            transition={{ duration: 0.75, ease: "easeInOut", delay: 0.2 }}
             exit={{ opacity: 0, y: -50 }}
             className="mt-8"
           >

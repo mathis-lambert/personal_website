@@ -1,7 +1,7 @@
-import ProjectsPage from '@/admin/pages/ProjectsPage';
+import ProjectsPage from "@/admin/pages/ProjectsPage";
 
 export const metadata = {
-  title: 'Admin · Projects',
+  title: "Admin · Projects",
 };
 
 export default function AdminProjects() {

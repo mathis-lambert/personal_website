@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -8,13 +8,13 @@ import {
   DialogHeader,
   DialogOverlay,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 export function MaintenanceDialog() {
   return (
     <Dialog defaultOpen modal>
       <DialogOverlay
-        className={'fixed inset-0 bg-white/30 dark:bg-white/10 backdrop-blur'}
+        className={"fixed inset-0 bg-white/30 dark:bg-white/10 backdrop-blur"}
       />
       <DialogContent
         className="

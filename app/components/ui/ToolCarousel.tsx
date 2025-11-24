@@ -1,12 +1,12 @@
-'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import { motion, useAnimation, useReducedMotion } from 'framer-motion';
-import SvgIcon from '@/components/ui/SvgIcon';
-import { LOGOS } from '@/components/ui/logos';
+"use client";
+import React, { useCallback, useEffect, useState } from "react";
+import { motion, useAnimation, useReducedMotion } from "framer-motion";
+import SvgIcon from "@/components/ui/SvgIcon";
+import { LOGOS } from "@/components/ui/logos";
 
 const ICON_SIZE = 36;
-const ITEM_WIDTH_HEIGHT = 'w-16 h-16';
-const ITEM_SPACING = 'space-x-2';
+const ITEM_WIDTH_HEIGHT = "w-16 h-16";
+const ITEM_SPACING = "space-x-2";
 const SCROLL_DURATION = 20;
 const MOBILE_BREAKPOINT = 768;
 
@@ -17,35 +17,35 @@ type ToolItem = { name: string; icon: React.ReactNode };
 
 const allTools: ToolItem[] = [
   {
-    name: 'Python',
+    name: "Python",
     icon: <SvgIcon path={logo.python} alt="Python" size={ICON_SIZE} />,
   },
   {
-    name: 'FastAPI',
+    name: "FastAPI",
     icon: <SvgIcon path={logo.fastapi} alt="FastAPI" size={ICON_SIZE} />,
   },
   {
-    name: 'Docker',
+    name: "Docker",
     icon: <SvgIcon path={logo.docker} alt="Docker" size={ICON_SIZE} />,
   },
   {
-    name: 'PyCharm',
+    name: "PyCharm",
     icon: <SvgIcon path={logo.pycharm} alt="PyCharm" size={ICON_SIZE} />,
   },
   {
-    name: 'React',
+    name: "React",
     icon: <SvgIcon path={logo.react} alt="React" size={ICON_SIZE} />,
   },
   {
-    name: 'TypeScript',
+    name: "TypeScript",
     icon: <SvgIcon path={logo.typescript} alt="TypeScript" size={ICON_SIZE} />,
   },
   {
-    name: 'Linux',
+    name: "Linux",
     icon: <SvgIcon path={logo.linux} alt="Linux" size={ICON_SIZE} />,
   },
   {
-    name: 'Bash',
+    name: "Bash",
     icon: (
       <SvgIcon
         path={logo.bashLight}
@@ -56,11 +56,11 @@ const allTools: ToolItem[] = [
     ),
   },
   {
-    name: 'Tailwind',
+    name: "Tailwind",
     icon: <SvgIcon path={logo.tailwind} alt="Tailwind" size={ICON_SIZE} />,
   },
   {
-    name: 'Mistral',
+    name: "Mistral",
     icon: (
       <SvgIcon
         path={logo.mistralLight}
@@ -71,7 +71,7 @@ const allTools: ToolItem[] = [
     ),
   },
   {
-    name: 'OpenAI',
+    name: "OpenAI",
     icon: (
       <SvgIcon
         path={logo.openaiLight}
@@ -82,7 +82,7 @@ const allTools: ToolItem[] = [
     ),
   },
   {
-    name: 'Github',
+    name: "Github",
     icon: (
       <SvgIcon
         path={logo.githubLight}
@@ -93,38 +93,38 @@ const allTools: ToolItem[] = [
     ),
   },
   {
-    name: 'GitLab',
+    name: "GitLab",
     icon: <SvgIcon path={logo.gitlab} alt="GitLab" size={ICON_SIZE} />,
   },
   {
-    name: 'Hugging Face',
+    name: "Hugging Face",
     icon: (
       <SvgIcon path={logo.huggingface} alt="Hugging Face" size={ICON_SIZE} />
     ),
   },
   {
-    name: 'Arc',
+    name: "Arc",
     icon: <SvgIcon path={logo.arc} alt="Arc" size={ICON_SIZE} />,
   },
 
   {
-    name: 'Vite',
+    name: "Vite",
     icon: <SvgIcon path={logo.vite} alt="Vite" size={ICON_SIZE} />,
   },
   {
-    name: 'vLLM',
+    name: "vLLM",
     icon: <SvgIcon path={logo.vllmColor} alt="vLLM" size={ICON_SIZE} />,
   },
   {
-    name: 'Qdrant',
+    name: "Qdrant",
     icon: <SvgIcon path={logo.qdrant} alt="Qdrant" size={ICON_SIZE} />,
   },
   {
-    name: 'NVIDIA',
+    name: "NVIDIA",
     icon: <SvgIcon path={logo.nvidia} alt="NVIDIA" size={ICON_SIZE} />,
   },
   {
-    name: 'Shadcn',
+    name: "Shadcn",
     icon: (
       <SvgIcon
         path={logo.shadcnLight}
@@ -135,7 +135,7 @@ const allTools: ToolItem[] = [
     ),
   },
   {
-    name: 'Figma',
+    name: "Figma",
     icon: <SvgIcon path={logo.figma} alt="Figma" size={ICON_SIZE} />,
   },
 ];
@@ -166,25 +166,25 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
     );
     const handleResize = (event: MediaQueryListEvent) =>
       setIsMobile(event.matches);
-    mediaQueryList.addEventListener('change', handleResize);
-    return () => mediaQueryList.removeEventListener('change', handleResize);
+    mediaQueryList.addEventListener("change", handleResize);
+    return () => mediaQueryList.removeEventListener("change", handleResize);
   }, []);
 
   const startScrolling = useCallback(() => {
     if (shouldReduceMotion) return;
     controlsTop.start({
-      x: '-50%',
+      x: "-50%",
       transition: {
         duration: SCROLL_DURATION,
-        ease: 'linear',
+        ease: "linear",
         repeat: Infinity,
       },
     });
     controlsBottom.start({
-      x: ['-50%', '0%'],
+      x: ["-50%", "0%"],
       transition: {
         duration: SCROLL_DURATION,
-        ease: 'linear',
+        ease: "linear",
         repeat: Infinity,
       },
     });
@@ -195,12 +195,12 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
     controlsTop.stop();
     controlsBottom.stop();
     controlsTop.start({
-      x: '0%',
-      transition: { duration: 0.6, type: 'spring', stiffness: 100 },
+      x: "0%",
+      transition: { duration: 0.6, type: "spring", stiffness: 100 },
     });
     controlsBottom.start({
-      x: '-50%',
-      transition: { duration: 0.6, type: 'spring', stiffness: 100 },
+      x: "-50%",
+      transition: { duration: 0.6, type: "spring", stiffness: 100 },
     });
   }, [isMobile, shouldReduceMotion, controlsTop, controlsBottom]);
 
@@ -210,8 +210,8 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
     } else {
       controlsTop.stop();
       controlsBottom.stop();
-      controlsTop.set({ x: '0%' });
-      controlsBottom.set({ x: '-50%' });
+      controlsTop.set({ x: "0%" });
+      controlsBottom.set({ x: "-50%" });
     }
   }, [
     isMobile,
@@ -224,7 +224,7 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
   const renderRow = (
     tools: typeof allTools,
     controls: typeof controlsTop,
-    initialX: string = '0%',
+    initialX: string = "0%",
   ) => (
     <div className="relative w-full overflow-hidden min-h-[4rem]">
       <motion.div
@@ -258,10 +258,10 @@ const ToolCarousel: React.FC<{ showToolNames?: boolean }> = ({
       onMouseLeave={isMobile ? undefined : stopScrolling}
     >
       <div className="flex w-full">
-        {renderRow(topRowTools, controlsTop, '0%')}
+        {renderRow(topRowTools, controlsTop, "0%")}
       </div>
       <div className="flex w-full">
-        {renderRow(bottomRowTools, controlsBottom, '-50%')}
+        {renderRow(bottomRowTools, controlsBottom, "-50%")}
       </div>
     </div>
   );

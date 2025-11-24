@@ -1,7 +1,7 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useAdminAuth } from '@/admin/providers/AdminAuthProvider';
-import { getCollectionData, updateItem } from '@/api/admin';
+"use client";
+import React, { useEffect, useState } from "react";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
+import { getCollectionData, updateItem } from "@/api/admin";
 import type {
   ResumeData,
   Contact,
@@ -9,9 +9,9 @@ import type {
   Experience,
   Education,
   Certification,
-} from '@/types';
-import { Plus, Save, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+} from "@/types";
+import { Plus, Save, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const ResumePage: React.FC = () => {
   const { token } = useAdminAuth();
@@ -35,14 +35,14 @@ const ResumePage: React.FC = () => {
       setLoading(true);
       setErr(null);
       try {
-        const raw = await getCollectionData<ResumeData>('resume', token);
+        const raw = await getCollectionData<ResumeData>("resume", token);
         const obj = Array.isArray(raw) ? raw[0] : raw;
         const contact: Contact = {
-          email: obj?.contact?.email ?? '',
-          phone: obj?.contact?.phone ?? '',
-          linkedin: obj?.contact?.linkedin ?? '',
-          github: obj?.contact?.github ?? '',
-          website: obj?.contact?.website ?? '',
+          email: obj?.contact?.email ?? "",
+          phone: obj?.contact?.phone ?? "",
+          linkedin: obj?.contact?.linkedin ?? "",
+          github: obj?.contact?.github ?? "",
+          website: obj?.contact?.website ?? "",
         };
         const technical_skills: TechnicalSkills = {
           languages: Array.isArray(obj?.technical_skills?.languages)
@@ -76,9 +76,9 @@ const ResumePage: React.FC = () => {
           : [];
         if (!canceled)
           setData({
-            name: obj?.name ?? '',
+            name: obj?.name ?? "",
             contact,
-            personal_statement: obj?.personal_statement ?? '',
+            personal_statement: obj?.personal_statement ?? "",
             experiences,
             education,
             certifications,
@@ -87,7 +87,7 @@ const ResumePage: React.FC = () => {
             passions: Array.isArray(obj?.passions) ? obj.passions : [],
           });
       } catch (e) {
-        if (!canceled) setErr((e as Error)?.message ?? 'Failed to load');
+        if (!canceled) setErr((e as Error)?.message ?? "Failed to load");
       } finally {
         if (!canceled) setLoading(false);
       }
@@ -110,63 +110,63 @@ const ResumePage: React.FC = () => {
     if (!token) return;
     const fd = new FormData(form);
     const patch: Partial<ResumeData> = {
-      name: String(fd.get('name') || ''),
+      name: String(fd.get("name") || ""),
       contact: {
-        email: String(fd.get('email') || ''),
-        phone: String(fd.get('phone') || ''),
-        linkedin: String(fd.get('linkedin') || ''),
-        github: String(fd.get('github') || ''),
-        website: String(fd.get('website') || ''),
+        email: String(fd.get("email") || ""),
+        phone: String(fd.get("phone") || ""),
+        linkedin: String(fd.get("linkedin") || ""),
+        github: String(fd.get("github") || ""),
+        website: String(fd.get("website") || ""),
       },
-      personal_statement: String(fd.get('personal_statement') || ''),
-      skills: String(fd.get('skills') || '')
-        .split(',')
+      personal_statement: String(fd.get("personal_statement") || ""),
+      skills: String(fd.get("skills") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      passions: String(fd.get('passions') || '')
-        .split(',')
+      passions: String(fd.get("passions") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
     };
     setSavingProfile(true);
     try {
-      const res = await updateItem('resume', 'main', patch, token);
+      const res = await updateItem("resume", "main", patch, token);
       const merged = (res?.item || {}) as ResumeData;
 
       const next: ResumeData = {
-        name: merged?.name ?? data?.name ?? '',
+        name: merged?.name ?? data?.name ?? "",
         contact: {
           email:
             merged?.contact?.email ??
             (patch.contact as Contact)?.email ??
             data?.contact?.email ??
-            '',
+            "",
           phone:
             merged?.contact?.phone ??
             (patch.contact as Contact)?.phone ??
             data?.contact?.phone ??
-            '',
+            "",
           linkedin:
             merged?.contact?.linkedin ??
             (patch.contact as Contact)?.linkedin ??
             data?.contact?.linkedin ??
-            '',
+            "",
           github:
             merged?.contact?.github ??
             (patch.contact as Contact)?.github ??
             data?.contact?.github ??
-            '',
+            "",
           website:
             merged?.contact?.website ??
             (patch.contact as Contact)?.website ??
             data?.contact?.website ??
-            '',
+            "",
         },
         personal_statement:
           merged?.personal_statement ??
           (patch.personal_statement as string) ??
           data?.personal_statement ??
-          '',
+          "",
         experiences: Array.isArray(merged?.experiences)
           ? (merged.experiences as Experience[])
           : (data?.experiences ?? []),
@@ -192,9 +192,9 @@ const ResumePage: React.FC = () => {
           : (patch.passions ?? data?.passions ?? []),
       };
       setData(next);
-      toast.success('Profile saved');
+      toast.success("Profile saved");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingProfile(false);
     }
@@ -204,32 +204,32 @@ const ResumePage: React.FC = () => {
     if (!token) return;
     const fd = new FormData(form);
     const technical_skills: TechnicalSkills = {
-      languages: String(fd.get('languages') || '')
-        .split(',')
+      languages: String(fd.get("languages") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      programming: String(fd.get('programming') || '')
-        .split(',')
+      programming: String(fd.get("programming") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      ai_ml: String(fd.get('ai_ml') || '')
-        .split(',')
+      ai_ml: String(fd.get("ai_ml") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      systems_and_infra: String(fd.get('systems_and_infra') || '')
-        .split(',')
+      systems_and_infra: String(fd.get("systems_and_infra") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      web: String(fd.get('web') || '')
-        .split(',')
+      web: String(fd.get("web") || "")
+        .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
     };
     setSavingTech(true);
     try {
       const res = await updateItem(
-        'resume',
-        'main',
+        "resume",
+        "main",
         { technical_skills },
         token,
       );
@@ -244,9 +244,9 @@ const ResumePage: React.FC = () => {
             }
           : null,
       );
-      toast.success('Technical skills saved');
+      toast.success("Technical skills saved");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingTech(false);
     }
@@ -264,8 +264,8 @@ const ResumePage: React.FC = () => {
           .filter(Boolean),
       }));
       const res = await updateItem(
-        'resume',
-        'main',
+        "resume",
+        "main",
         { experiences: sanitized },
         token,
       );
@@ -275,9 +275,9 @@ const ResumePage: React.FC = () => {
         : sanitized;
       setData((prev) => (prev ? { ...prev, experiences: next } : prev));
       setExperiences(next);
-      toast.success('Experiences saved');
+      toast.success("Experiences saved");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingExp(false);
     }
@@ -287,16 +287,16 @@ const ResumePage: React.FC = () => {
     if (!token) return;
     setSavingEdu(true);
     try {
-      const res = await updateItem('resume', 'main', { education }, token);
+      const res = await updateItem("resume", "main", { education }, token);
       const merged = (res?.item || {}) as ResumeData;
       const next = Array.isArray(merged?.education)
         ? (merged.education as Education[])
         : education;
       setData((prev) => (prev ? { ...prev, education: next } : prev));
       setEducation(next);
-      toast.success('Education saved');
+      toast.success("Education saved");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingEdu(false);
     }
@@ -309,11 +309,11 @@ const ResumePage: React.FC = () => {
       // Normalize issued_date empty string -> null
       const payload = certifications.map((c) => ({
         ...c,
-        issued_date: (c.issued_date ?? '') === '' ? null : c.issued_date,
+        issued_date: (c.issued_date ?? "") === "" ? null : c.issued_date,
       }));
       const res = await updateItem(
-        'resume',
-        'main',
+        "resume",
+        "main",
         { certifications: payload },
         token,
       );
@@ -323,9 +323,9 @@ const ResumePage: React.FC = () => {
         : payload;
       setData((prev) => (prev ? { ...prev, certifications: next } : prev));
       setCertifications(next);
-      toast.success('Certifications saved');
+      toast.success("Certifications saved");
     } catch (e) {
-      toast.error((e as Error)?.message ?? 'Save failed');
+      toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingCerts(false);
     }
@@ -363,31 +363,31 @@ const ResumePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="email"
-                  defaultValue={data.contact?.email || ''}
+                  defaultValue={data.contact?.email || ""}
                   placeholder="Email"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="phone"
-                  defaultValue={data.contact?.phone || ''}
+                  defaultValue={data.contact?.phone || ""}
                   placeholder="Phone"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="linkedin"
-                  defaultValue={data.contact?.linkedin || ''}
+                  defaultValue={data.contact?.linkedin || ""}
                   placeholder="LinkedIn"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="github"
-                  defaultValue={data.contact?.github || ''}
+                  defaultValue={data.contact?.github || ""}
                   placeholder="GitHub"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="website"
-                  defaultValue={data.contact?.website || ''}
+                  defaultValue={data.contact?.website || ""}
                   placeholder="Website"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -398,7 +398,7 @@ const ResumePage: React.FC = () => {
               <div className="font-medium mb-3">Personal Statement</div>
               <textarea
                 name="personal_statement"
-                defaultValue={data.personal_statement || ''}
+                defaultValue={data.personal_statement || ""}
                 placeholder="A brief personal statement or summary"
                 className="border rounded-md px-3 py-2 bg-background w-full h-24"
               />
@@ -409,13 +409,13 @@ const ResumePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
                   name="skills"
-                  defaultValue={(data.skills || []).join(', ')}
+                  defaultValue={(data.skills || []).join(", ")}
                   placeholder="Skills (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="passions"
-                  defaultValue={(data.passions || []).join(', ')}
+                  defaultValue={(data.passions || []).join(", ")}
                   placeholder="Passions (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -429,7 +429,7 @@ const ResumePage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
               >
                 {savingProfile ? (
-                  'Saving…'
+                  "Saving…"
                 ) : (
                   <>
                     <Save size={16} /> Save
@@ -451,7 +451,7 @@ const ResumePage: React.FC = () => {
                 <input
                   name="languages"
                   defaultValue={(data?.technical_skills?.languages || []).join(
-                    ', ',
+                    ", ",
                   )}
                   placeholder="Languages (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
@@ -460,14 +460,14 @@ const ResumePage: React.FC = () => {
                   name="programming"
                   defaultValue={(
                     data?.technical_skills?.programming || []
-                  ).join(', ')}
+                  ).join(", ")}
                   placeholder="Programming (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="ai_ml"
                   defaultValue={(data?.technical_skills?.ai_ml || []).join(
-                    ', ',
+                    ", ",
                   )}
                   placeholder="AI/ML (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
@@ -476,13 +476,13 @@ const ResumePage: React.FC = () => {
                   name="systems_and_infra"
                   defaultValue={(
                     data?.technical_skills?.systems_and_infra || []
-                  ).join(', ')}
+                  ).join(", ")}
                   placeholder="Systems & Infra (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
                 <input
                   name="web"
-                  defaultValue={(data?.technical_skills?.web || []).join(', ')}
+                  defaultValue={(data?.technical_skills?.web || []).join(", ")}
                   placeholder="Web (comma)"
                   className="border rounded-md px-3 py-2 bg-background"
                 />
@@ -495,7 +495,7 @@ const ResumePage: React.FC = () => {
                 className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
               >
                 {savingTech ? (
-                  'Saving…'
+                  "Saving…"
                 ) : (
                   <>
                     <Save size={16} /> Save Technical Skills
@@ -514,11 +514,11 @@ const ResumePage: React.FC = () => {
                   setExperiences((prev) => [
                     ...prev,
                     {
-                      role: '',
-                      position: '',
-                      company: '',
-                      period: '',
-                      location: '',
+                      role: "",
+                      position: "",
+                      company: "",
+                      period: "",
+                      location: "",
                       current: false,
                       highlight: false,
                       hide: false,
@@ -664,9 +664,9 @@ const ResumePage: React.FC = () => {
                     </div>
                     <textarea
                       className="w-full border rounded-md px-3 py-2 min-h-[100px]"
-                      value={(exp.description || []).join('\n')}
+                      value={(exp.description || []).join("\n")}
                       onChange={(e) => {
-                        const lines = e.target.value.split('\n');
+                        const lines = e.target.value.split("\n");
                         setExperiences((prev) =>
                           prev.map((x, i) =>
                             i === idx ? { ...x, description: lines } : x,
@@ -699,7 +699,7 @@ const ResumePage: React.FC = () => {
                 onClick={() => void saveExperiences()}
               >
                 {savingExp ? (
-                  'Saving…'
+                  "Saving…"
                 ) : (
                   <>
                     <Save size={16} /> Save Experiences
@@ -718,11 +718,11 @@ const ResumePage: React.FC = () => {
                   setEducation((prev) => [
                     ...prev,
                     {
-                      institution: '',
-                      degree: '',
-                      location: '',
-                      description: '',
-                      period: '',
+                      institution: "",
+                      degree: "",
+                      location: "",
+                      description: "",
+                      period: "",
                     },
                   ])
                 }
@@ -794,7 +794,7 @@ const ResumePage: React.FC = () => {
                     </div>
                     <textarea
                       className="w-full border rounded-md px-3 py-2 min-h-[80px]"
-                      value={edu.description || ''}
+                      value={edu.description || ""}
                       onChange={(e) =>
                         setEducation((prev) =>
                           prev.map((x, i) =>
@@ -828,7 +828,7 @@ const ResumePage: React.FC = () => {
                 onClick={() => void saveEducation()}
               >
                 {savingEdu ? (
-                  'Saving…'
+                  "Saving…"
                 ) : (
                   <>
                     <Save size={16} /> Save Education
@@ -847,10 +847,10 @@ const ResumePage: React.FC = () => {
                   setCertifications((prev) => [
                     ...prev,
                     {
-                      provider: '',
-                      title: '',
+                      provider: "",
+                      title: "",
                       issued_date: null,
-                      status: 'issued',
+                      status: "issued",
                     },
                   ])
                 }
@@ -892,7 +892,7 @@ const ResumePage: React.FC = () => {
                     <input
                       placeholder="Issued date (e.g. Jan 2023)"
                       className="border rounded-md px-3 py-2"
-                      value={cert.issued_date ?? ''}
+                      value={cert.issued_date ?? ""}
                       onChange={(e) =>
                         setCertifications((prev) =>
                           prev.map((x, i) =>
@@ -913,7 +913,7 @@ const ResumePage: React.FC = () => {
                               ? {
                                   ...x,
                                   status: e.target
-                                    .value as Certification['status'],
+                                    .value as Certification["status"],
                                 }
                               : x,
                           ),
@@ -950,7 +950,7 @@ const ResumePage: React.FC = () => {
                 onClick={() => void saveCertifications()}
               >
                 {savingCerts ? (
-                  'Saving…'
+                  "Saving…"
                 ) : (
                   <>
                     <Save size={16} /> Save Certifications

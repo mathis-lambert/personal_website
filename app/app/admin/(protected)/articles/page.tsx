@@ -1,7 +1,7 @@
-import ArticlesPage from '@/admin/pages/ArticlesPage';
+import ArticlesPage from "@/admin/pages/ArticlesPage";
 
 export const metadata = {
-  title: 'Admin · Articles',
+  title: "Admin · Articles",
 };
 
 export default function AdminArticles() {
