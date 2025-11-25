@@ -58,7 +58,6 @@ jobs:
           provenance: false
           sbom: false
           build-args: |
-            NEXT_PUBLIC_ML_BASE_URL=${{ vars.NEXT_PUBLIC_ML_BASE_URL }}
             NEXT_PUBLIC_MAPS_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
             NEXT_PUBLIC_APP_VERSION=${{ github.ref_name }}
             NEXT_PUBLIC_MAINTENANCE_MODE=${{ vars.NEXT_PUBLIC_MAINTENANCE_MODE || 'false' }}
@@ -92,7 +91,6 @@ jobs:
       - name: Remote deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
-          NEXT_PUBLIC_ML_BASE_URL: ${{ vars.NEXT_PUBLIC_ML_BASE_URL }}
           NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
           NEXT_PUBLIC_APP_VERSION: ${{ github.ref_name }}
           NEXT_PUBLIC_MAINTENANCE_MODE: ${{ vars.NEXT_PUBLIC_MAINTENANCE_MODE || 'false' }}
@@ -113,7 +111,7 @@ jobs:
           key: ${{ secrets.ML_DEPLOY_KEY }}
           port: ${{ secrets.ML_DEPLOY_PORT }}
           script_stop: true
-          envs: GITHUB_REF_NAME,NEXT_PUBLIC_ML_BASE_URL,NEXT_PUBLIC_MAPS_PUBLIC_KEY,NEXT_PUBLIC_APP_VERSION,NEXT_PUBLIC_MAINTENANCE_MODE,PUBLIC_BASE_URL,ML_API_BASE_URL,ML_API_KEY,LLM_MODEL_NAME,NEXTAUTH_SECRET,ADMIN_USERNAME,ADMIN_PASSWORD,INTERNAL_API_USERNAME,INTERNAL_API_PASSWORD,MONGODB_URI,MONGODB_DB
+          envs: GITHUB_REF_NAME,NEXT_PUBLIC_MAPS_PUBLIC_KEY,NEXT_PUBLIC_APP_VERSION,NEXT_PUBLIC_MAINTENANCE_MODE,PUBLIC_BASE_URL,ML_API_BASE_URL,ML_API_KEY,LLM_MODEL_NAME,NEXTAUTH_SECRET,ADMIN_USERNAME,ADMIN_PASSWORD,INTERNAL_API_USERNAME,INTERNAL_API_PASSWORD,MONGODB_URI,MONGODB_DB
           script: |
             set -euo pipefail
             OWNER='${{ github.repository_owner }}'
@@ -131,7 +129,6 @@ jobs:
               printf '%s' '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io -u '${{ secrets.GHCR_USERNAME || github.actor }}' --password-stdin
             fi
 
-            NEXT_PUBLIC_ML_BASE_URL=${NEXT_PUBLIC_ML_BASE_URL:-https://api.mathislambert.fr}
             NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION:-$TAG}
             NEXT_PUBLIC_MAINTENANCE_MODE=${NEXT_PUBLIC_MAINTENANCE_MODE:-false}
             PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-https://mathislambert.fr}
@@ -141,7 +138,6 @@ jobs:
             cd "$INSTALL_DIR"
             OWNER="$OWNER_LC" IMAGE_TAG="$TAG" docker compose -f compose.prod.yaml pull
             OWNER="$OWNER_LC" IMAGE_TAG="$TAG" \
-              NEXT_PUBLIC_ML_BASE_URL="$NEXT_PUBLIC_ML_BASE_URL" \
               NEXT_PUBLIC_MAPS_PUBLIC_KEY="$NEXT_PUBLIC_MAPS_PUBLIC_KEY" \
               NEXT_PUBLIC_APP_VERSION="$NEXT_PUBLIC_APP_VERSION" \
               NEXT_PUBLIC_MAINTENANCE_MODE="$NEXT_PUBLIC_MAINTENANCE_MODE" \
