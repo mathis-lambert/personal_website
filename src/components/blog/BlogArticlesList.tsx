@@ -145,7 +145,7 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
           >
             {filteredAndSortedArticles.map((article, index) => (
               <BlogArticleCard
-                key={article.id}
+                key={article._id}
                 article={article}
                 animationDelay={index * 0.08}
               />

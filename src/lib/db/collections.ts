@@ -10,20 +10,16 @@ type BaseDocument = Document & {
   updatedAt?: Date;
 };
 
-export type ProjectDocument = Project & BaseDocument;
+export type ProjectDocument = Omit<Project, "_id"> & BaseDocument;
 
-export type ArticleDocument = Article & BaseDocument;
+export type ArticleDocument = Omit<Article, "_id"> & BaseDocument;
 
 export type TimelineDocument = TimelineEntry &
   BaseDocument & {
-    id: string;
     order?: number;
   };
 
-export type ResumeDocument = ResumeData &
-  BaseDocument & {
-    id: string;
-  };
+export type ResumeDocument = ResumeData & BaseDocument;
 
 export type EventDocument = BaseDocument & {
   job_id?: string;
@@ -41,19 +37,36 @@ export const COLLECTION_NAMES = {
   events: "events",
 } as const;
 
-export const DEFAULT_RESUME_ID = "primary";
-
 let indexesPromise: Promise<void> | null = null;
 
 const ensureIndexes = async () => {
   if (indexesPromise) return indexesPromise;
   indexesPromise = (async () => {
     const db = await getMongoDb();
+
+    // Drop legacy indexes on `id` now that we rely solely on Mongo's `_id`.
+    // This prevents IndexKeySpecsConflict and cleans up old unique constraints.
+    await Promise.all(
+      [
+        COLLECTION_NAMES.projects,
+        COLLECTION_NAMES.articles,
+        COLLECTION_NAMES.experiences,
+        COLLECTION_NAMES.studies,
+        COLLECTION_NAMES.resume,
+      ].map(async (name) => {
+        const collection = db.collection(name);
+        const indexes = await collection.indexes();
+        const hasLegacyIdIndex = indexes.find((idx) => idx.name === "id_1");
+        if (hasLegacyIdIndex) {
+          await collection.dropIndex("id_1");
+        }
+      }),
+    );
+
     const specs: Array<[string, IndexDescription[]]> = [
       [
         COLLECTION_NAMES.projects,
         [
-          { key: { id: 1 }, unique: true },
           { key: { slug: 1 }, unique: true, sparse: true },
           { key: { date: -1 } },
         ],
@@ -61,20 +74,13 @@ const ensureIndexes = async () => {
       [
         COLLECTION_NAMES.articles,
         [
-          { key: { id: 1 }, unique: true },
           { key: { slug: 1 }, unique: true, sparse: true },
           { key: { date: -1 } },
         ],
       ],
-      [
-        COLLECTION_NAMES.experiences,
-        [{ key: { id: 1 }, unique: true }, { key: { order: 1 } }],
-      ],
-      [
-        COLLECTION_NAMES.studies,
-        [{ key: { id: 1 }, unique: true }, { key: { order: 1 } }],
-      ],
-      [COLLECTION_NAMES.resume, [{ key: { id: 1 }, unique: true }]],
+      [COLLECTION_NAMES.experiences, [{ key: { order: 1 } }]],
+      [COLLECTION_NAMES.studies, [{ key: { order: 1 } }]],
+      [COLLECTION_NAMES.resume, []],
       [
         COLLECTION_NAMES.events,
         [{ key: { created_at: -1 } }, { key: { action: 1, created_at: -1 } }],
@@ -82,9 +88,10 @@ const ensureIndexes = async () => {
     ];
 
     await Promise.all(
-      specs.map(([name, indexes]) =>
-        db.collection(name).createIndexes(indexes),
-      ),
+      specs.map(([name, indexes]) => {
+        if (!indexes.length) return Promise.resolve();
+        return db.collection(name).createIndexes(indexes);
+      }),
     );
   })();
   return indexesPromise;

@@ -1,9 +1,11 @@
-import { promises as fs } from "fs";
-import path from "path";
-import type { Collection, Filter } from "mongodb";
+import {
+  ObjectId,
+  type Collection,
+  type Filter,
+  type OptionalId,
+} from "mongodb";
 
 import {
-  DEFAULT_RESUME_ID,
   type ArticleDocument,
   type ProjectDocument,
   type ResumeDocument,
@@ -24,17 +26,6 @@ import type {
   TimelineEntry,
 } from "@/types";
 
-const DATA_DIR = path.join(process.cwd(), "app", "data");
-const SEED_FILES = {
-  projects: "projects.json",
-  articles: "articles.json",
-  experiences: "experiences.json",
-  studies: "studies.json",
-  resume: "resume.json",
-} as const;
-
-type SeedCollectionName = keyof typeof SEED_FILES;
-
 type CollectionData<T> = T extends "resume"
   ? ResumeData | null
   : T extends "projects"
@@ -42,8 +33,6 @@ type CollectionData<T> = T extends "resume"
     : T extends "articles"
       ? Article[]
       : TimelineEntry[];
-
-const seedPromises: Partial<Record<SeedCollectionName, Promise<void>>> = {};
 
 const slugify = (value: string): string => {
   const slug = value
@@ -83,18 +72,19 @@ const coerceStringArray = (value: unknown): string[] =>
     : [];
 
 const buildProjectDocument = (
-  input: Record<string, unknown>,
-  id: string,
+  input: Project | Record<string, unknown>,
   slug: string,
   now: Date,
-): ProjectDocument => {
+): OptionalId<ProjectDocument> => {
   const data = input as Partial<Project>;
   const { title, date, technologies, ...rest } = data;
+  const cleanRest = { ...(rest as Record<string, unknown>) };
+  delete cleanRest.id;
+  delete cleanRest._id;
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
 
-  return {
-    ...rest,
-    id,
+  const doc: OptionalId<ProjectDocument> = {
+    ...cleanRest,
     slug,
     title: asString(title) ?? "Untitled project",
     date: coerceDateString(date, now.toISOString()),
@@ -102,21 +92,23 @@ const buildProjectDocument = (
     createdAt: createdAt ?? now,
     updatedAt: now,
   };
+  return doc;
 };
 
 const buildArticleDocument = (
-  input: Record<string, unknown>,
-  id: string,
+  input: Article | Record<string, unknown>,
   slug: string,
   now: Date,
-): ArticleDocument => {
+): OptionalId<ArticleDocument> => {
   const data = input as Partial<Article>;
   const { title, excerpt, content, date, tags, metrics, ...rest } = data;
+  const cleanRest = { ...(rest as Record<string, unknown>) };
+  delete cleanRest.id;
+  delete cleanRest._id;
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
 
-  return {
-    ...rest,
-    id,
+  const doc: OptionalId<ArticleDocument> = {
+    ...cleanRest,
     slug,
     title: asString(title) ?? "Untitled article",
     excerpt: asString(excerpt) ?? "",
@@ -127,6 +119,7 @@ const buildArticleDocument = (
     createdAt: createdAt ?? now,
     updatedAt: now,
   };
+  return doc;
 };
 
 const parseIndex = (itemId: string): number | null => {
@@ -161,11 +154,10 @@ const stripProject = (
     order: _order,
     ...rest
   } = doc;
-  void _mongoId;
   void _createdAt;
   void _updatedAt;
   void _order;
-  return rest as Project;
+  return { ...rest, _id: _mongoId ? String(_mongoId) : "" } as Project;
 };
 
 const stripArticle = (
@@ -179,11 +171,10 @@ const stripArticle = (
     order: _order,
     ...rest
   } = doc;
-  void _mongoId;
   void _createdAt;
   void _updatedAt;
   void _order;
-  return rest as Article;
+  return { ...rest, _id: _mongoId ? String(_mongoId) : "" } as Article;
 };
 
 const stripTimeline = (
@@ -192,14 +183,12 @@ const stripTimeline = (
   if (!doc) return null;
   const {
     _id: _mongoId,
-    id: _id,
     order: _order,
     createdAt: _createdAt,
     updatedAt: _updatedAt,
     ...rest
   } = doc;
   void _mongoId;
-  void _id;
   void _order;
   void _createdAt;
   void _updatedAt;
@@ -212,45 +201,31 @@ const stripResume = (
   if (!doc) return null;
   const {
     _id: _mongoId,
-    id: _id,
     createdAt: _createdAt,
     updatedAt: _updatedAt,
     ...rest
   } = doc;
   void _mongoId;
-  void _id;
   void _createdAt;
   void _updatedAt;
   return rest as ResumeData;
 };
 
-const readSeed = async <T>(name: SeedCollectionName): Promise<T | null> => {
-  try {
-    const raw = await fs.readFile(
-      path.join(DATA_DIR, SEED_FILES[name]),
-      "utf-8",
-    );
-    return JSON.parse(raw) as T;
-  } catch (err: unknown) {
-    const error = err as NodeJS.ErrnoException;
-    if (error?.code === "ENOENT") return null;
-    throw err;
-  }
-};
-
-const ensureUniqueFieldDb = async <T extends { id?: string; slug?: string }>(
+const ensureUniqueSlugDb = async <T extends { slug?: string }>(
   collection: Collection<T>,
-  key: "id" | "slug",
   base: string,
-  excludeId?: string,
+  excludeObjectId?: ObjectId,
 ): Promise<string> => {
   let candidate = base || "item";
   let suffix = 2;
   while (true) {
     const filter: Filter<T> =
-      excludeId != null
-        ? ({ [key]: candidate, id: { $ne: excludeId } } as unknown as Filter<T>)
-        : ({ [key]: candidate } as unknown as Filter<T>);
+      excludeObjectId != null
+        ? ({
+            slug: candidate,
+            _id: { $ne: excludeObjectId },
+          } as unknown as Filter<T>)
+        : ({ slug: candidate } as unknown as Filter<T>);
     const existing = await collection.findOne(filter, {
       projection: { _id: 1 },
     });
@@ -260,100 +235,25 @@ const ensureUniqueFieldDb = async <T extends { id?: string; slug?: string }>(
   }
 };
 
-const buildTimelineDocs = (
-  items: TimelineEntry[],
-  collection: "experiences" | "studies",
-) => {
-  const ids = new Set<string>();
+const parseObjectId = (value: string): ObjectId | null => {
+  if (!value || typeof value !== "string") return null;
+  try {
+    return ObjectId.isValid(value) ? new ObjectId(value) : null;
+  } catch {
+    return null;
+  }
+};
+
+const buildTimelineDocs = (items: TimelineEntry[]) => {
   const now = new Date();
   return items.map((item, idx) => {
-    const base = slugify(
-      `${item.title || collection}-${item.company || ""}-${item.date || idx}`,
-    );
-    const id = ensureUniqueInSet(ids, base);
     return {
       ...item,
-      id,
       order: idx,
       createdAt: now,
       updatedAt: now,
     };
   });
-};
-
-const seedTasks: Record<SeedCollectionName, () => Promise<void>> = {
-  projects: async () => {
-    const collection = await getProjectsCollection();
-    if ((await collection.estimatedDocumentCount()) > 0) return;
-    const seed = await readSeed<Project[]>("projects");
-    if (!seed?.length) return;
-
-    const ids = new Set<string>();
-    const slugs = new Set<string>();
-    const now = new Date();
-    const docs = seed.map((item, idx) => {
-      const baseId = item.id || slugify(item.title || `project-${idx}`);
-      const id = ensureUniqueInSet(ids, String(baseId));
-      const baseSlug = slugify(item.slug || item.title || id);
-      const slug = ensureUniqueInSet(slugs, baseSlug);
-      return { ...item, id, slug, createdAt: now, updatedAt: now };
-    });
-    await collection.insertMany(docs);
-  },
-  articles: async () => {
-    const collection = await getArticlesCollection();
-    if ((await collection.estimatedDocumentCount()) > 0) return;
-    const seed = await readSeed<Article[]>("articles");
-    if (!seed?.length) return;
-
-    const ids = new Set<string>();
-    const slugs = new Set<string>();
-    const now = new Date();
-    const docs = seed.map((item, idx) => {
-      const baseId = item.id || slugify(item.title || `article-${idx}`);
-      const id = ensureUniqueInSet(ids, String(baseId));
-      const baseSlug = slugify(item.slug || item.title || id);
-      const slug = ensureUniqueInSet(slugs, baseSlug);
-      return { ...item, id, slug, createdAt: now, updatedAt: now };
-    });
-    await collection.insertMany(docs);
-  },
-  experiences: async () => {
-    const collection = await getExperiencesCollection();
-    if ((await collection.estimatedDocumentCount()) > 0) return;
-    const seed = await readSeed<TimelineEntry[]>("experiences");
-    if (!seed?.length) return;
-    const docs = buildTimelineDocs(seed, "experiences");
-    await collection.insertMany(docs);
-  },
-  studies: async () => {
-    const collection = await getStudiesCollection();
-    if ((await collection.estimatedDocumentCount()) > 0) return;
-    const seed = await readSeed<TimelineEntry[]>("studies");
-    if (!seed?.length) return;
-    const docs = buildTimelineDocs(seed, "studies");
-    await collection.insertMany(docs);
-  },
-  resume: async () => {
-    const collection = await getResumeCollection();
-    if ((await collection.estimatedDocumentCount()) > 0) return;
-    const seed = await readSeed<ResumeData>("resume");
-    if (!seed) return;
-    const now = new Date();
-    await collection.insertOne({
-      ...seed,
-      id: DEFAULT_RESUME_ID,
-      createdAt: now,
-      updatedAt: now,
-    });
-  },
-};
-
-const ensureSeeded = async (name: SeedCollectionName) => {
-  if (!seedPromises[name]) {
-    seedPromises[name] = seedTasks[name]();
-  }
-  return seedPromises[name];
 };
 
 export const listCollections = (): AdminCollectionName[] => [
@@ -384,45 +284,59 @@ export async function getCollection<T extends AdminCollectionName>(
 }
 
 export async function getAllProjects(): Promise<Project[]> {
-  await ensureSeeded("projects");
   const collection = await getProjectsCollection();
   const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  if (!docs.length) {
+    console.info("No project entries found in the database.");
+    return [];
+  }
   return docs.map((doc) => stripProject(doc)!).filter(Boolean);
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  await ensureSeeded("projects");
   const collection = await getProjectsCollection();
-  const doc = await collection.findOne({
-    $or: [{ slug }, { id: slug }],
-  });
+  const objectId = parseObjectId(slug);
+  const doc = await collection.findOne(
+    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+  );
+  if (!doc) {
+    console.info("No project entry found for the requested slug or id.");
+    return null;
+  }
   return stripProject(doc);
 }
 
 export async function getAllArticles(): Promise<Article[]> {
-  await ensureSeeded("articles");
   const collection = await getArticlesCollection();
   const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  if (!docs.length) {
+    console.info("No article entries found in the database.");
+    return [];
+  }
   return docs.map((doc) => stripArticle(doc)!).filter(Boolean);
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  await ensureSeeded("articles");
   const collection = await getArticlesCollection();
-  const doc = await collection.findOne({
-    $or: [{ slug }, { id: slug }],
-  });
+  const objectId = parseObjectId(slug);
+  const doc = await collection.findOne(
+    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+  );
+  if (!doc) {
+    console.info("No article entry found for the requested slug or id.");
+    return null;
+  }
   return stripArticle(doc);
 }
 
 export async function updateArticleMetric(
   eventType: "like" | "share" | "read",
-  payload: { id?: string; slug?: string },
+  payload: { _id?: string; slug?: string },
 ): Promise<ArticleMetrics | null> {
-  await ensureSeeded("articles");
   const collection = await getArticlesCollection();
-  const filter = payload.id
-    ? { id: payload.id }
+  const objectId = payload._id ? parseObjectId(payload._id) : null;
+  const filter = objectId
+    ? { _id: objectId }
     : payload.slug
       ? { slug: payload.slug }
       : null;
@@ -451,13 +365,13 @@ export async function updateArticleMetric(
 }
 
 export async function getArticleMetrics(payload: {
-  id?: string;
+  _id?: string;
   slug?: string;
 }): Promise<ArticleMetrics | null> {
-  await ensureSeeded("articles");
   const collection = await getArticlesCollection();
-  const filter = payload.id
-    ? { id: payload.id }
+  const objectId = payload._id ? parseObjectId(payload._id) : null;
+  const filter = objectId
+    ? { _id: objectId }
     : payload.slug
       ? { slug: payload.slug }
       : null;
@@ -473,29 +387,41 @@ export async function getArticleMetrics(payload: {
 }
 
 export async function getExperiences(): Promise<TimelineEntry[]> {
-  await ensureSeeded("experiences");
   const collection = await getExperiencesCollection();
   const docs = await collection
     .find()
     .sort({ order: 1, date: -1, _id: 1 })
     .toArray();
+  if (!docs.length) {
+    console.info("No experience entries found in the database.");
+    return [];
+  }
   return docs.map((doc) => stripTimeline(doc)!).filter(Boolean);
 }
 
 export async function getStudies(): Promise<TimelineEntry[]> {
-  await ensureSeeded("studies");
   const collection = await getStudiesCollection();
   const docs = await collection
     .find()
     .sort({ order: 1, date: -1, _id: 1 })
     .toArray();
+  if (!docs.length) {
+    console.info("No study entries found in the database.");
+    return [];
+  }
   return docs.map((doc) => stripTimeline(doc)!).filter(Boolean);
 }
 
 export async function getResume(): Promise<ResumeData | null> {
-  await ensureSeeded("resume");
   const collection = await getResumeCollection();
-  const doc = await collection.findOne({ id: DEFAULT_RESUME_ID });
+  const doc = await collection.findOne(
+    {},
+    { sort: { createdAt: -1, _id: -1 } },
+  );
+  if (!doc) {
+    console.info("No resume entry found in the database.");
+    return null;
+  }
   return stripResume(doc);
 }
 
@@ -503,68 +429,70 @@ export async function upsertResume(
   patch: Partial<ResumeData>,
 ): Promise<ResumeData> {
   const collection = await getResumeCollection();
-  const current = ((await getResume()) || {}) as ResumeData;
-  const updated = { ...current, ...patch } as ResumeData;
-  await collection.updateOne(
-    { id: DEFAULT_RESUME_ID },
-    {
-      $set: { ...updated, id: DEFAULT_RESUME_ID, updatedAt: new Date() },
-      $setOnInsert: { createdAt: new Date() },
-    },
-    { upsert: true },
+  const existing = await collection.findOne(
+    {},
+    { sort: { createdAt: -1, _id: -1 } },
   );
-  return updated;
+  const now = new Date();
+  if (!existing) {
+    const doc = { ...(patch as ResumeData), createdAt: now, updatedAt: now };
+    await collection.insertOne(doc);
+    return doc;
+  }
+  const { _id, ...rest } = existing;
+  const updated = { ...rest, ...patch };
+  await collection.updateOne({ _id }, { $set: { ...updated, updatedAt: now } });
+  return updated as ResumeData;
 }
 
 export async function replaceResume(data: ResumeData): Promise<void> {
   const collection = await getResumeCollection();
+  const existing = await collection.findOne(
+    {},
+    { sort: { createdAt: -1, _id: -1 } },
+  );
+  const now = new Date();
+  if (!existing) {
+    await collection.insertOne({ ...data, createdAt: now, updatedAt: now });
+    return;
+  }
   await collection.updateOne(
-    { id: DEFAULT_RESUME_ID },
-    {
-      $set: { ...data, id: DEFAULT_RESUME_ID, updatedAt: new Date() },
-      $setOnInsert: { createdAt: new Date() },
-    },
-    { upsert: true },
+    { _id: existing._id },
+    { $set: { ...data, updatedAt: now } },
   );
 }
 
 export async function createProjectOrArticle(
   collection: Extract<AdminCollectionName, "projects" | "articles">,
   item: Record<string, unknown>,
-): Promise<{ id: string; item: Project | Article }> {
+): Promise<{ _id: string; item: Project | Article }> {
   if (collection === "projects") {
-    await ensureSeeded("projects");
     const col = await getProjectsCollection();
     const title = asString(item.title);
     const slugCandidate = asString(item.slug);
-    const baseId = asString(item.id) || slugify(title || "project");
-    const id = await ensureUniqueFieldDb(col, "id", String(baseId));
-    const slug = await ensureUniqueFieldDb(
+    const slug = await ensureUniqueSlugDb(
       col,
-      "slug",
-      slugify(slugCandidate || title || baseId),
+      slugify(slugCandidate || title || "project"),
     );
     const now = new Date();
-    const doc = buildProjectDocument(item, id, slug, now);
-    await col.insertOne(doc);
-    return { id, item: stripProject(doc)! };
+    const doc = buildProjectDocument(item, slug, now);
+    const result = await col.insertOne(doc);
+    const inserted = { ...doc, _id: result.insertedId };
+    return { _id: String(result.insertedId), item: stripProject(inserted)! };
   }
 
-  await ensureSeeded("articles");
   const col = await getArticlesCollection();
   const title = asString(item.title);
   const slugCandidate = asString(item.slug);
-  const baseId = asString(item.id) || slugify(title || "article");
-  const id = await ensureUniqueFieldDb(col, "id", String(baseId));
-  const slug = await ensureUniqueFieldDb(
+  const slug = await ensureUniqueSlugDb(
     col,
-    "slug",
-    slugify(slugCandidate || title || baseId),
+    slugify(slugCandidate || title || "article"),
   );
   const now = new Date();
-  const doc = buildArticleDocument(item, id, slug, now);
-  await col.insertOne(doc);
-  return { id, item: stripArticle(doc)! };
+  const doc = buildArticleDocument(item, slug, now);
+  const result = await col.insertOne(doc);
+  const inserted = { ...doc, _id: result.insertedId };
+  return { _id: String(result.insertedId), item: stripArticle(inserted)! };
 }
 
 export async function updateItem(
@@ -578,34 +506,29 @@ export async function updateItem(
   }
 
   if (collection === "projects") {
-    await ensureSeeded("projects");
     const col = await getProjectsCollection();
-    const existing = await col.findOne({ id: itemId });
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    const existing = await col.findOne({ _id: objectId });
     if (!existing) throw new Error("Item not found");
 
+    const safePatch = { ...(patch as Record<string, unknown>) };
+    delete safePatch._id;
+    delete safePatch.id;
     const updates: Record<string, unknown> = {
-      ...patch,
+      ...safePatch,
       updatedAt: new Date(),
     };
     if (patch.slug) {
-      updates.slug = await ensureUniqueFieldDb(
+      updates.slug = await ensureUniqueSlugDb(
         col,
-        "slug",
         slugify(String(patch.slug)),
-        existing.id,
-      );
-    }
-    if (patch.id) {
-      updates.id = await ensureUniqueFieldDb(
-        col,
-        "id",
-        String(patch.id),
-        existing.id,
+        objectId,
       );
     }
 
     const result = await col.findOneAndUpdate(
-      { id: itemId },
+      { _id: objectId },
       { $set: updates },
       { returnDocument: "after" },
     );
@@ -616,34 +539,29 @@ export async function updateItem(
   }
 
   if (collection === "articles") {
-    await ensureSeeded("articles");
     const col = await getArticlesCollection();
-    const existing = await col.findOne({ id: itemId });
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    const existing = await col.findOne({ _id: objectId });
     if (!existing) throw new Error("Item not found");
 
+    const safePatch = { ...(patch as Record<string, unknown>) };
+    delete safePatch._id;
+    delete safePatch.id;
     const updates: Record<string, unknown> = {
-      ...patch,
+      ...safePatch,
       updatedAt: new Date(),
     };
     if (patch.slug) {
-      updates.slug = await ensureUniqueFieldDb(
+      updates.slug = await ensureUniqueSlugDb(
         col,
-        "slug",
         slugify(String(patch.slug)),
-        existing.id,
-      );
-    }
-    if (patch.id) {
-      updates.id = await ensureUniqueFieldDb(
-        col,
-        "id",
-        String(patch.id),
-        existing.id,
+        objectId,
       );
     }
 
     const result = await col.findOneAndUpdate(
-      { id: itemId },
+      { _id: objectId },
       { $set: updates },
       { returnDocument: "after" },
     );
@@ -658,7 +576,6 @@ export async function updateItem(
     collection === "experiences"
       ? await getExperiencesCollection()
       : await getStudiesCollection();
-  await ensureSeeded(collection);
   const idx = parseIndex(itemId);
   let filter: Record<string, unknown>;
   if (idx != null) {
@@ -669,9 +586,11 @@ export async function updateItem(
       .limit(1)
       .next();
     if (!doc) throw new Error("Item not found");
-    filter = { id: doc.id };
+    filter = { _id: doc._id };
   } else {
-    filter = { id: itemId };
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    filter = { _id: objectId };
   }
 
   const result = await col.findOneAndUpdate(
@@ -686,12 +605,12 @@ export async function updateItem(
 
 const resequenceTimeline = async (col: Collection<TimelineDocument>) => {
   const docs = await col
-    .find({}, { projection: { id: 1 } })
+    .find({}, { projection: { _id: 1 } })
     .sort({ order: 1, date: -1, _id: 1 })
     .toArray();
   if (!docs.length) return;
   const bulk = docs.map((doc, idx) => ({
-    updateOne: { filter: { id: doc.id }, update: { $set: { order: idx } } },
+    updateOne: { filter: { _id: doc._id }, update: { $set: { order: idx } } },
   }));
   await col.bulkWrite(bulk);
 };
@@ -701,9 +620,10 @@ export async function deleteItem(
   itemId: string,
 ): Promise<Project | Article | TimelineEntry> {
   if (collection === "projects") {
-    await ensureSeeded("projects");
     const col = await getProjectsCollection();
-    const result = await col.findOneAndDelete({ id: itemId });
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    const result = await col.findOneAndDelete({ _id: objectId });
     if (!result) throw new Error("Delete failed");
     const deleted = result.value;
     if (!deleted) throw new Error("Item not found");
@@ -711,9 +631,10 @@ export async function deleteItem(
   }
 
   if (collection === "articles") {
-    await ensureSeeded("articles");
     const col = await getArticlesCollection();
-    const result = await col.findOneAndDelete({ id: itemId });
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    const result = await col.findOneAndDelete({ _id: objectId });
     if (!result) throw new Error("Delete failed");
     const deleted = result.value;
     if (!deleted) throw new Error("Item not found");
@@ -724,7 +645,6 @@ export async function deleteItem(
     collection === "experiences"
       ? await getExperiencesCollection()
       : await getStudiesCollection();
-  await ensureSeeded(collection);
   const idx = parseIndex(itemId);
   let filter: Record<string, unknown>;
   if (idx != null) {
@@ -735,9 +655,11 @@ export async function deleteItem(
       .limit(1)
       .next();
     if (!doc) throw new Error("Item not found");
-    filter = { id: doc.id };
+    filter = { _id: doc._id };
   } else {
-    filter = { id: itemId };
+    const objectId = parseObjectId(itemId);
+    if (!objectId) throw new Error("Invalid item id");
+    filter = { _id: objectId };
   }
   const result = await col.findOneAndDelete(filter);
   if (!result) throw new Error("Delete failed");
@@ -764,21 +686,20 @@ export async function replaceCollection(
 
   if (name === "projects") {
     const col = await getProjectsCollection();
-    const ids = new Set<string>();
     const slugs = new Set<string>();
     const now = new Date();
     const docs = (payload as unknown[]).map((item, idx) => {
       if (!item || typeof item !== "object") {
         throw new Error("Each item must be an object");
       }
-      const record = item as Record<string, unknown>;
+      const record = { ...(item as Record<string, unknown>) };
+      delete (record as Record<string, unknown>)._id;
+      delete (record as Record<string, unknown>).id;
       const title = asString(record.title);
-      const baseId = asString(record.id) || slugify(title || `${name}-${idx}`);
-      const id = ensureUniqueInSet(ids, baseId);
-      const slugSource = asString(record.slug) || title || id;
+      const slugSource = asString(record.slug) || title || `${name}-${idx + 1}`;
       const slug = ensureUniqueInSet(slugs, slugify(slugSource));
 
-      return buildProjectDocument(record, id, slug, now);
+      return buildProjectDocument(record, slug, now);
     });
 
     await col.deleteMany({});
@@ -790,21 +711,20 @@ export async function replaceCollection(
 
   if (name === "articles") {
     const col = await getArticlesCollection();
-    const ids = new Set<string>();
     const slugs = new Set<string>();
     const now = new Date();
     const docs = (payload as unknown[]).map((item, idx) => {
       if (!item || typeof item !== "object") {
         throw new Error("Each item must be an object");
       }
-      const record = item as Record<string, unknown>;
+      const record = { ...(item as Record<string, unknown>) };
+      delete (record as Record<string, unknown>)._id;
+      delete (record as Record<string, unknown>).id;
       const title = asString(record.title);
-      const baseId = asString(record.id) || slugify(title || `${name}-${idx}`);
-      const id = ensureUniqueInSet(ids, baseId);
-      const slugSource = asString(record.slug) || title || id;
+      const slugSource = asString(record.slug) || title || `${name}-${idx + 1}`;
       const slug = ensureUniqueInSet(slugs, slugify(slugSource));
 
-      return buildArticleDocument(record, id, slug, now);
+      return buildArticleDocument(record, slug, now);
     });
 
     await col.deleteMany({});
@@ -819,7 +739,7 @@ export async function replaceCollection(
     name === "experiences"
       ? await getExperiencesCollection()
       : await getStudiesCollection();
-  const docs = buildTimelineDocs(payload as TimelineEntry[], name);
+  const docs = buildTimelineDocs(payload as TimelineEntry[]);
   await col.deleteMany({});
   if (docs.length) {
     await col.insertMany(docs);

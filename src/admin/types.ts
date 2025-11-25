@@ -5,16 +5,16 @@ export type AdminCreateProjectInput = Pick<
   Project,
   "title" | "date" | "technologies"
 > &
-  Partial<Omit<Project, "id" | "date" | "title" | "technologies">>;
+  Partial<Omit<Project, "_id" | "date" | "title" | "technologies">>;
 
 export type AdminCreateArticleInput = Pick<
   Article,
   "title" | "excerpt" | "content" | "date" | "tags"
 > &
   Partial<
-    Omit<Article, "id" | "title" | "excerpt" | "content" | "date" | "tags">
+    Omit<Article, "_id" | "title" | "excerpt" | "content" | "date" | "tags">
   >;
 
-export type AdminUpdateProjectInput = Partial<Project>;
-export type AdminUpdateArticleInput = Partial<Article>;
+export type AdminUpdateProjectInput = Partial<Omit<Project, "_id">>;
+export type AdminUpdateArticleInput = Partial<Omit<Article, "_id">>;
 export type AdminUpdateResumeInput = Partial<ResumeData>;

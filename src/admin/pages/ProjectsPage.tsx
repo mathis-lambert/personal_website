@@ -145,10 +145,10 @@ const ProjectsPage: React.FC = () => {
     };
     setSaveLoading(true);
     try {
-      const res = await updateItem("projects", editTarget.id, patch, token);
+      const res = await updateItem("projects", editTarget._id, patch, token);
       setItems((prev) =>
         prev.map((it) =>
-          it.id === editTarget.id ? (res.item as Project) : it,
+          it._id === editTarget._id ? (res.item as Project) : it,
         ),
       );
       setEditOpen(false);
@@ -165,7 +165,7 @@ const ProjectsPage: React.FC = () => {
     setDeleteLoading(true);
     try {
       await deleteItem("projects", id, token);
-      setItems((prev) => prev.filter((x) => x.id !== id));
+      setItems((prev) => prev.filter((x) => x._id !== id));
       toast.success("Project deleted");
     } catch (e) {
       toast.error((e as Error)?.message ?? "Delete failed");
@@ -201,14 +201,14 @@ const ProjectsPage: React.FC = () => {
         <div className="space-y-3">
           {sorted.map((p) => (
             <div
-              key={p.id}
+              key={p._id}
               className="border rounded-lg p-4 bg-card transition hover:shadow-sm"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{p.title}</div>
                   <div className="text-xs text-muted-foreground">
-                    {p.id} • {p.slug} • {p.date}
+                    {p._id} • {p.slug} • {p.date}
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -220,7 +220,7 @@ const ProjectsPage: React.FC = () => {
                   </button>
                   <button
                     className="inline-flex items-center gap-2 border rounded-md px-3 py-1 text-red-600 hover:bg-red-500/10"
-                    onClick={() => askDelete(p.id)}
+                    onClick={() => askDelete(p._id)}
                   >
                     <Trash2 size={16} /> Delete
                   </button>
@@ -403,7 +403,7 @@ const ProjectsPage: React.FC = () => {
               className="space-y-4"
             >
               <div className="text-xs text-muted-foreground">
-                ID: {editTarget.id}
+                ID: {editTarget._id}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input

@@ -241,7 +241,7 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
           >
             {filteredAndSortedProjects.map((project, index) => (
               <ProjectCard
-                key={project.id}
+                key={project._id}
                 project={project}
                 animationDelay={index * 0.08} // Stagger animation
               />

@@ -68,7 +68,7 @@ export function HomePageContent({
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {featuredProjects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} animationDelay={i * 0.08} />
+            <ProjectCard key={p._id} project={p} animationDelay={i * 0.08} />
           ))}
         </div>
         {featuredProjects.length === 0 && (
@@ -90,7 +90,11 @@ export function HomePageContent({
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {latestArticles.map((a, i) => (
-            <BlogArticleCard key={a.id} article={a} animationDelay={i * 0.08} />
+            <BlogArticleCard
+              key={a._id}
+              article={a}
+              animationDelay={i * 0.08}
+            />
           ))}
         </div>
         {latestArticles.length === 0 && (

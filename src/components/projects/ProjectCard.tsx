@@ -19,7 +19,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   animationDelay = 0.1,
 }) => {
   const router = useRouter();
-  const detailsPath = `/projects/${project.slug || project.id}`;
+  const detailsPath = `/projects/${project.slug || project._id}`;
 
   const formattedDate = new Date(project.date).toLocaleDateString("en-US", {
     year: "numeric",

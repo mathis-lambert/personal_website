@@ -214,7 +214,7 @@ export interface ProjectMetrics {
 
 // Shared Project interface for cards, list and detail view
 export interface Project {
-  id: string;
+  _id: string;
   slug?: string;
   title: string;
   subtitle?: string;
@@ -279,7 +279,7 @@ export interface ArticleMetrics {
 }
 
 export interface Article {
-  id: string;
+  _id: string;
   slug?: string;
   title: string;
   excerpt: string;

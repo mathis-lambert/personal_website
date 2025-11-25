@@ -24,9 +24,9 @@ export async function POST(
     );
   }
   const body = await req.json();
-  const { id, item } = await createProjectOrArticle(
+  const { _id, item } = await createProjectOrArticle(
     collection as Extract<AdminCollectionName, "projects" | "articles">,
     body,
   );
-  return NextResponse.json({ ok: true, id, item });
+  return NextResponse.json({ ok: true, _id, item });
 }

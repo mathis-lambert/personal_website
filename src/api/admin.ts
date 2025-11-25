@@ -63,17 +63,17 @@ export async function createItem(
   collection: "projects",
   item: AdminCreateProjectInput,
   token?: string,
-): Promise<{ ok: boolean; id: string; item: Project }>;
+): Promise<{ ok: boolean; _id: string; item: Project }>;
 export async function createItem(
   collection: "articles",
   item: AdminCreateArticleInput,
   token?: string,
-): Promise<{ ok: boolean; id: string; item: Article }>;
+): Promise<{ ok: boolean; _id: string; item: Article }>;
 export async function createItem(
   collection: Extract<AdminCollectionName, "projects" | "articles">,
   item: AdminCreateProjectInput | AdminCreateArticleInput,
   token?: string,
-): Promise<{ ok: boolean; id: string; item: Project | Article }> {
+): Promise<{ ok: boolean; _id: string; item: Project | Article }> {
   const res = await fetchWithTimeout(`/api/admin/${collection}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -85,7 +85,7 @@ export async function createItem(
     throw new Error(`Failed to create ${collection} item: ${res.status}`);
   return (await res.json()) as {
     ok: boolean;
-    id: string;
+    _id: string;
     item: Project | Article;
   };
 }

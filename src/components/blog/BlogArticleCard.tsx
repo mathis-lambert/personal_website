@@ -41,7 +41,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
       exit={{ opacity: 0, y: 30 }}
     >
       <Link
-        href={`/blog/${article.slug || article.id}`}
+        href={`/blog/${article.slug || article._id}`}
         className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/10 dark:focus-visible:ring-offset-black/30 rounded-3xl"
         aria-label={`Read article: ${article.title}`}
       >
