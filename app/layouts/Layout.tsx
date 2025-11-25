@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AbstractGradientBackground from "@/components/ui/AbstractGradientBackground";
 import Navbar from "@/components/ui/Navbar";
 import ChatPanel from "@/components/chat/ChatPanel";
@@ -7,6 +7,30 @@ import FloatingChatInput from "@/components/chat/FloatingChatInput";
 import Footer from "@/components/ui/Footer";
 import { MaintenanceDialog } from "@/components/ui/MaintenanceDialog";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import Loader from "@/components/ui/Loader";
+
+const RouteLoaderOverlay = () => {
+  const [visible, setVisible] = useState(true);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    hideTimer.current = setTimeout(() => setVisible(false), 380);
+
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <Loader
+      message="Loading the experience..."
+      spinnerSize={10}
+      textSize="text-lg"
+    />
+  );
+};
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [maintenanceMode] = useState(
@@ -36,6 +60,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <Footer />
 
       {maintenanceMode && <MaintenanceDialog />}
+
+      <RouteLoaderOverlay />
     </div>
   );
 };

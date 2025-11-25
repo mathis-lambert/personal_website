@@ -1,23 +1,48 @@
 "use client";
 
-import { motion, MotionConfig } from "framer-motion";
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  type Variants,
+} from "framer-motion";
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+
+const pageVariants: Variants = {
+  initial: { opacity: 0, y: 12, filter: "blur(4px)", scale: 0.995 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    scale: 1,
+    transition: { duration: 0.28, ease: "easeOut" },
+  },
+  exit: {
+    opacity: 0,
+    y: -12,
+    filter: "blur(6px)",
+    scale: 0.995,
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
+};
 
 export default function SiteTemplate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  // Keep a light entry animation per page without gating children animations.
   return (
     <MotionConfig reducedMotion="user">
-      <motion.div
-        key={pathname}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
-      >
-        {children}
-      </motion.div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={pathname}
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
     </MotionConfig>
   );
 }

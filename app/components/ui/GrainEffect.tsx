@@ -1,6 +1,6 @@
 "use client";
 // src/components/GrainEffect.tsx
-import React, { useMemo, useId, useEffect, useState } from "react";
+import React, { useMemo, useId } from "react";
 import { useTheme } from "@/components/theme-provider";
 
 interface GrainEffectProps {
@@ -21,13 +21,7 @@ const GrainEffect: React.FC<GrainEffectProps> = ({
   const filterId = useId();
   const uniqueFilterId = `grain-filter-${filterId}`;
   const { resolvedTheme } = useTheme(); // Récupère le thème résolu (light/dark)
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const effectiveTheme = mounted && resolvedTheme ? resolvedTheme : "light";
+  const effectiveTheme = resolvedTheme || "light";
 
   const grainOpacity = useMemo(() => {
     const clampedSize = Math.max(1, Math.min(100, size));
