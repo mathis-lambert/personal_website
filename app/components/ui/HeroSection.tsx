@@ -1,6 +1,4 @@
 "use client";
-
-"use client";
 import React from "react";
 import { motion } from "framer-motion";
 import { Heading1 } from "@/components/ui/Headings";
@@ -73,9 +71,10 @@ export const HeroSection: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.75, ease: "easeInOut", delay: 0.1 }}
           >
-            <Heading1>Hi, I'm Mathis Lambert !</Heading1>
+            <Heading1>Hi, I&apos;m Mathis Lambert !</Heading1>
             <Heading1>
-              <span className="opacity-20">I'm an</span> engineering student
+              <span className="opacity-20">I&apos;m an</span> engineering
+              student
             </Heading1>
             <Heading1>
               <span className="opacity-20">in</span>&nbsp;
@@ -104,8 +103,8 @@ export const HeroSection: React.FC = () => {
             className="mt-8"
           >
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              I'm passionate about AI, machine learning, and data science, and I
-              enjoy working on practical and innovative solutions within a
+              I&apos;m passionate about AI, machine learning, and data science,
+              and I enjoy working on practical and innovative solutions within a
               collaborative environment. <br />
               With a focus on continuous learning and technical reliability, I
               aim to grow through meaningful, hands-on projects.

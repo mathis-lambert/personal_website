@@ -1,8 +1,14 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import reactRefresh from "eslint-plugin-react-refresh";
 
 const eslintConfig = defineConfig([
+  {
+    plugins: {
+      "react-refresh": reactRefresh,
+    },
+  },
   ...nextVitals,
   ...nextTs,
   // Override default ignores of eslint-config-next.

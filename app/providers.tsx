@@ -10,7 +10,13 @@ import { ChatProvider } from "@/providers/ChatProvider";
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider storageKey="next-ui-theme">
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        storageKey="next-ui-theme"
+      >
         <ChatProvider>
           {children}
           <Toaster />

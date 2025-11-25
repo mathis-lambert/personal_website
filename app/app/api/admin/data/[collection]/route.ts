@@ -43,10 +43,8 @@ export async function PUT(
   try {
     await replaceCollection(collection, payload);
     return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    return NextResponse.json(
-      { detail: err?.message || "Replace failed" },
-      { status: 400 },
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Replace failed";
+    return NextResponse.json({ detail: message }, { status: 400 });
   }
 }

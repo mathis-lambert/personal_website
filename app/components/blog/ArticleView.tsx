@@ -217,11 +217,11 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-start sm:justify-end sm:pl-4 sm:border-l sm:border-white/20 dark:sm:border-white/10">
                 {typeof (metrics?.views ?? article.metrics?.views) ===
                   "number" && (
-                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                      <Eye className="w-3.5 h-3.5" />{" "}
-                      {metrics?.views ?? article.metrics?.views}
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                    <Eye className="w-3.5 h-3.5" />{" "}
+                    {metrics?.views ?? article.metrics?.views}
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <Heart
                     className={cn("w-3.5 h-3.5", isLiked ? "text-red-500" : "")}

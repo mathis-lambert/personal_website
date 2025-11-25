@@ -40,14 +40,16 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role || "admin";
+      if (user && "role" in user && typeof user.role === "string") {
+        token.role = user.role;
+      } else if (!token.role) {
+        token.role = "admin";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = (token as any).role || "admin";
+        session.user.role = token.role || "admin";
       }
       return session;
     },

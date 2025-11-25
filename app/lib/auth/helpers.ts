@@ -4,5 +4,5 @@ import { authOptions } from "./options";
 
 export const requireAdminSession = async () => {
   const session = await getServerSession(authOptions);
-  return session?.user && (session.user as any).role === "admin";
+  return session?.user?.role === "admin";
 };

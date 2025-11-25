@@ -55,14 +55,12 @@ export async function fetchWithTimeout(
   const buildHeaders = (
     headers?: HeadersInit,
     authToken?: string,
-    method?: string,
   ): HeadersInit => {
     const base = normalizeHeaders(headers);
     const merged: Record<string, string> = { ...base };
     if (authToken) {
       merged.Authorization = `Bearer ${authToken}`;
     }
-    const m = (method ?? "GET").toUpperCase();
     return merged;
   };
 
@@ -92,12 +90,11 @@ export async function fetchWithTimeout(
     } = init ?? {};
     void _ignoredTimeout;
     void _ignoredSignal;
-    const method = (rest.method ?? "GET").toUpperCase();
 
     const doFetch = async (): Promise<Response> =>
       await fetch(input, {
         ...(rest as RequestInit),
-        headers: buildHeaders(headers, authToken, method),
+        headers: buildHeaders(headers, authToken),
         signal: controller.signal,
         credentials: "include",
       });
