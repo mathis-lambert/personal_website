@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import type { Collection } from "mongodb";
+import type { Collection, Filter } from "mongodb";
 
 import {
   DEFAULT_RESUME_ID,
@@ -58,6 +58,77 @@ const slugify = (value: string): string => {
 const asString = (value: unknown): string | undefined =>
   typeof value === "string" && value.trim() ? value : undefined;
 
+const asDate = (value: unknown): Date | null => {
+  if (value instanceof Date) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+  return null;
+};
+
+const coerceDateString = (value: unknown, fallback: string): string =>
+  typeof value === "string" && value.trim()
+    ? value
+    : value instanceof Date
+      ? value.toISOString()
+      : fallback;
+
+const coerceStringArray = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value
+        .map((item) => (typeof item === "string" ? item : String(item)))
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+
+const buildProjectDocument = (
+  input: Record<string, unknown>,
+  id: string,
+  slug: string,
+  now: Date,
+): ProjectDocument => {
+  const data = input as Partial<Project>;
+  const { title, date, technologies, ...rest } = data;
+  const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
+
+  return {
+    ...rest,
+    id,
+    slug,
+    title: asString(title) ?? "Untitled project",
+    date: coerceDateString(date, now.toISOString()),
+    technologies: coerceStringArray(technologies),
+    createdAt: createdAt ?? now,
+    updatedAt: now,
+  };
+};
+
+const buildArticleDocument = (
+  input: Record<string, unknown>,
+  id: string,
+  slug: string,
+  now: Date,
+): ArticleDocument => {
+  const data = input as Partial<Article>;
+  const { title, excerpt, content, date, tags, metrics, ...rest } = data;
+  const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
+
+  return {
+    ...rest,
+    id,
+    slug,
+    title: asString(title) ?? "Untitled article",
+    excerpt: asString(excerpt) ?? "",
+    content: asString(content) ?? "",
+    date: coerceDateString(date, now.toISOString()),
+    tags: coerceStringArray(tags),
+    metrics: metrics ?? { views: 0, likes: 0, shares: 0 },
+    createdAt: createdAt ?? now,
+    updatedAt: now,
+  };
+};
+
 const parseIndex = (itemId: string): number | null => {
   try {
     if (itemId.startsWith("index-")) return parseInt(itemId.split("-")[1]!, 10);
@@ -83,11 +154,17 @@ const stripProject = (
   doc: ProjectDocument | null | undefined,
 ): Project | null => {
   if (!doc) return null;
-  const { _id, createdAt, updatedAt, order, ...rest } = doc;
-  void _id;
-  void createdAt;
-  void updatedAt;
-  void order;
+  const {
+    _id: _mongoId,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    order: _order,
+    ...rest
+  } = doc;
+  void _mongoId;
+  void _createdAt;
+  void _updatedAt;
+  void _order;
   return rest as Project;
 };
 
@@ -95,11 +172,17 @@ const stripArticle = (
   doc: ArticleDocument | null | undefined,
 ): Article | null => {
   if (!doc) return null;
-  const { _id, createdAt, updatedAt, order, ...rest } = doc;
-  void _id;
-  void createdAt;
-  void updatedAt;
-  void order;
+  const {
+    _id: _mongoId,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    order: _order,
+    ...rest
+  } = doc;
+  void _mongoId;
+  void _createdAt;
+  void _updatedAt;
+  void _order;
   return rest as Article;
 };
 
@@ -107,12 +190,19 @@ const stripTimeline = (
   doc: TimelineDocument | null | undefined,
 ): TimelineEntry | null => {
   if (!doc) return null;
-  const { _id, id, order, createdAt, updatedAt, ...rest } = doc;
+  const {
+    _id: _mongoId,
+    id: _id,
+    order: _order,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    ...rest
+  } = doc;
+  void _mongoId;
   void _id;
-  void id;
-  void order;
-  void createdAt;
-  void updatedAt;
+  void _order;
+  void _createdAt;
+  void _updatedAt;
   return rest as TimelineEntry;
 };
 
@@ -120,11 +210,17 @@ const stripResume = (
   doc: ResumeDocument | null | undefined,
 ): ResumeData | null => {
   if (!doc) return null;
-  const { _id, id, createdAt, updatedAt, ...rest } = doc;
+  const {
+    _id: _mongoId,
+    id: _id,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    ...rest
+  } = doc;
+  void _mongoId;
   void _id;
-  void id;
-  void createdAt;
-  void updatedAt;
+  void _createdAt;
+  void _updatedAt;
   return rest as ResumeData;
 };
 
@@ -142,8 +238,8 @@ const readSeed = async <T>(name: SeedCollectionName): Promise<T | null> => {
   }
 };
 
-const ensureUniqueFieldDb = async (
-  collection: Collection<Record<string, unknown>>,
+const ensureUniqueFieldDb = async <T extends { id?: string; slug?: string }>(
+  collection: Collection<T>,
   key: "id" | "slug",
   base: string,
   excludeId?: string,
@@ -151,13 +247,10 @@ const ensureUniqueFieldDb = async (
   let candidate = base || "item";
   let suffix = 2;
   while (true) {
-    const filter =
+    const filter: Filter<T> =
       excludeId != null
-        ? ({ [key]: candidate, id: { $ne: excludeId } } as Record<
-            string,
-            unknown
-          >)
-        : ({ [key]: candidate } as Record<string, unknown>);
+        ? ({ [key]: candidate, id: { $ne: excludeId } } as unknown as Filter<T>)
+        : ({ [key]: candidate } as unknown as Filter<T>);
     const existing = await collection.findOne(filter, {
       projection: { _id: 1 },
     });
@@ -348,7 +441,7 @@ export async function updateArticleMetric(
     },
     { returnDocument: "after" },
   );
-  if (!result.value) return null;
+  if (!result || !result.value) return null;
   const metrics = result.value.metrics || {};
   return {
     views: metrics.views ?? 0,
@@ -451,13 +544,8 @@ export async function createProjectOrArticle(
       "slug",
       slugify(slugCandidate || title || baseId),
     );
-    const doc = {
-      ...item,
-      id,
-      slug,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const now = new Date();
+    const doc = buildProjectDocument(item, id, slug, now);
     await col.insertOne(doc);
     return { id, item: stripProject(doc)! };
   }
@@ -473,13 +561,8 @@ export async function createProjectOrArticle(
     "slug",
     slugify(slugCandidate || title || baseId),
   );
-  const doc = {
-    ...item,
-    id,
-    slug,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const now = new Date();
+  const doc = buildArticleDocument(item, id, slug, now);
   await col.insertOne(doc);
   return { id, item: stripArticle(doc)! };
 }
@@ -494,12 +577,9 @@ export async function updateItem(
     return updated;
   }
 
-  if (collection === "projects" || collection === "articles") {
-    await ensureSeeded(collection);
-    const col =
-      collection === "projects"
-        ? await getProjectsCollection()
-        : await getArticlesCollection();
+  if (collection === "projects") {
+    await ensureSeeded("projects");
+    const col = await getProjectsCollection();
     const existing = await col.findOne({ id: itemId });
     if (!existing) throw new Error("Item not found");
 
@@ -529,10 +609,48 @@ export async function updateItem(
       { $set: updates },
       { returnDocument: "after" },
     );
-    if (!result.value) throw new Error("Item not found");
-    return collection === "projects"
-      ? (stripProject(result.value)! as Project)
-      : (stripArticle(result.value)! as Article);
+    if (!result) throw new Error("Update failed");
+    const updated = result.value;
+    if (!updated) throw new Error("Item not found");
+    return stripProject(updated)! as Project;
+  }
+
+  if (collection === "articles") {
+    await ensureSeeded("articles");
+    const col = await getArticlesCollection();
+    const existing = await col.findOne({ id: itemId });
+    if (!existing) throw new Error("Item not found");
+
+    const updates: Record<string, unknown> = {
+      ...patch,
+      updatedAt: new Date(),
+    };
+    if (patch.slug) {
+      updates.slug = await ensureUniqueFieldDb(
+        col,
+        "slug",
+        slugify(String(patch.slug)),
+        existing.id,
+      );
+    }
+    if (patch.id) {
+      updates.id = await ensureUniqueFieldDb(
+        col,
+        "id",
+        String(patch.id),
+        existing.id,
+      );
+    }
+
+    const result = await col.findOneAndUpdate(
+      { id: itemId },
+      { $set: updates },
+      { returnDocument: "after" },
+    );
+    if (!result) throw new Error("Update failed");
+    const updated = result.value;
+    if (!updated) throw new Error("Item not found");
+    return stripArticle(updated)! as Article;
   }
 
   // experiences or studies (index-based in admin UI)
@@ -561,6 +679,7 @@ export async function updateItem(
     { $set: { ...patch, updatedAt: new Date() } },
     { returnDocument: "after" },
   );
+  if (!result) throw new Error("Update failed");
   if (!result.value) throw new Error("Item not found");
   return stripTimeline(result.value)!;
 }
@@ -581,17 +700,24 @@ export async function deleteItem(
   collection: AdminListCollectionName,
   itemId: string,
 ): Promise<Project | Article | TimelineEntry> {
-  if (collection === "projects" || collection === "articles") {
-    await ensureSeeded(collection);
-    const col =
-      collection === "projects"
-        ? await getProjectsCollection()
-        : await getArticlesCollection();
+  if (collection === "projects") {
+    await ensureSeeded("projects");
+    const col = await getProjectsCollection();
     const result = await col.findOneAndDelete({ id: itemId });
-    if (!result.value) throw new Error("Item not found");
-    return collection === "projects"
-      ? (stripProject(result.value)! as Project)
-      : (stripArticle(result.value)! as Article);
+    if (!result) throw new Error("Delete failed");
+    const deleted = result.value;
+    if (!deleted) throw new Error("Item not found");
+    return stripProject(deleted)! as Project;
+  }
+
+  if (collection === "articles") {
+    await ensureSeeded("articles");
+    const col = await getArticlesCollection();
+    const result = await col.findOneAndDelete({ id: itemId });
+    if (!result) throw new Error("Delete failed");
+    const deleted = result.value;
+    if (!deleted) throw new Error("Item not found");
+    return stripArticle(deleted)! as Article;
   }
 
   const col =
@@ -614,6 +740,7 @@ export async function deleteItem(
     filter = { id: itemId };
   }
   const result = await col.findOneAndDelete(filter);
+  if (!result) throw new Error("Delete failed");
   if (!result.value) throw new Error("Item not found");
   await resequenceTimeline(col);
   return stripTimeline(result.value)!;
@@ -635,15 +762,12 @@ export async function replaceCollection(
     throw new Error("Payload must be an array for this collection");
   }
 
-  if (name === "projects" || name === "articles") {
-    const col =
-      name === "projects"
-        ? await getProjectsCollection()
-        : await getArticlesCollection();
+  if (name === "projects") {
+    const col = await getProjectsCollection();
     const ids = new Set<string>();
     const slugs = new Set<string>();
     const now = new Date();
-    const docs = payload.map((item, idx) => {
+    const docs = (payload as unknown[]).map((item, idx) => {
       if (!item || typeof item !== "object") {
         throw new Error("Each item must be an object");
       }
@@ -653,20 +777,34 @@ export async function replaceCollection(
       const id = ensureUniqueInSet(ids, baseId);
       const slugSource = asString(record.slug) || title || id;
       const slug = ensureUniqueInSet(slugs, slugify(slugSource));
-      const createdAtValue = (record as { createdAt?: unknown }).createdAt;
-      const createdAt =
-        createdAtValue instanceof Date
-          ? createdAtValue
-          : typeof createdAtValue === "string"
-            ? new Date(createdAtValue)
-            : now;
-      return {
-        ...record,
-        id,
-        slug,
-        createdAt,
-        updatedAt: now,
-      };
+
+      return buildProjectDocument(record, id, slug, now);
+    });
+
+    await col.deleteMany({});
+    if (docs.length) {
+      await col.insertMany(docs);
+    }
+    return;
+  }
+
+  if (name === "articles") {
+    const col = await getArticlesCollection();
+    const ids = new Set<string>();
+    const slugs = new Set<string>();
+    const now = new Date();
+    const docs = (payload as unknown[]).map((item, idx) => {
+      if (!item || typeof item !== "object") {
+        throw new Error("Each item must be an object");
+      }
+      const record = item as Record<string, unknown>;
+      const title = asString(record.title);
+      const baseId = asString(record.id) || slugify(title || `${name}-${idx}`);
+      const id = ensureUniqueInSet(ids, baseId);
+      const slugSource = asString(record.slug) || title || id;
+      const slug = ensureUniqueInSet(slugs, slugify(slugSource));
+
+      return buildArticleDocument(record, id, slug, now);
     });
 
     await col.deleteMany({});

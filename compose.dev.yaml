@@ -1,35 +1,32 @@
 services:
-  frontend:
+  app:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL}
-        - VITE_MAINTENANCE_MODE=${VITE_MAINTENANCE_MODE}
-        - VITE_MAPS_PUBLIC_KEY=${VITE_MAPS_PUBLIC_KEY}
-        - VITE_TOKEN_EXPIRATION_TIME=${VITE_TOKEN_EXPIRATION_TIME}
-        - VITE_APP_VERSION=${VITE_APP_VERSION}
-    container_name: personal_frontend
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_ML_BASE_URL: ${NEXT_PUBLIC_ML_BASE_URL}
+        NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${NEXT_PUBLIC_MAPS_PUBLIC_KEY}
+        NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-dev}
+        NEXT_PUBLIC_MAINTENANCE_MODE: ${NEXT_PUBLIC_MAINTENANCE_MODE:-false}
+    container_name: personal_website_dev
     restart: unless-stopped
+    env_file: [".env"]
+    environment:
+      NODE_ENV: production
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      ML_API_BASE_URL: ${ML_API_BASE_URL}
+      ML_API_KEY: ${ML_API_KEY}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-openai/gpt-oss-120b}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
+      MONGODB_URI: ${MONGODB_URI}
+      MONGODB_DB: ${MONGODB_DB}
     ports:
-      - "8080:8080"
-    networks: [proxy, monitor]
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: personal_backend
-    restart: unless-stopped
-    env_file: ["./.env"]
-    ports:
-      - "8081:8081"
-    networks: [proxy, databases, monitor]
+      - "3000:3000"
+    networks: [app-network]
 
 networks:
-  proxy:
-    external: true
-  databases:
-    external: true
-  monitor:
-    external: true
+  app-network:
+    driver: bridge

@@ -1,14 +1,11 @@
 import ArticleView from "@/components/blog/ArticleView";
-import { getAllArticles, getArticleBySlug } from "@/lib/data/content";
+import { getArticleBySlug } from "@/lib/data/content";
 import type { Article } from "@/types";
 import { notFound } from "next/navigation";
 
 type Params = { slug: string };
 
-export async function generateStaticParams() {
-  const articles = await getAllArticles();
-  return articles.map((a) => ({ slug: a.slug || a.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;

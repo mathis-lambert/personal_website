@@ -1,45 +1,60 @@
 services:
-  backend:
+  app:
     build:
-      context: ../backend
+      context: ..
       dockerfile: Dockerfile
-    container_name: backend
-    ports:
-      - "8081:8081"
+      target: dev
+    container_name: personal_website_dev
+    working_dir: /app
+    volumes:
+      - ../src:/app
+      - /app/node_modules
     env_file:
-      - .env
+      - ../.env
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      NEXT_PUBLIC_ML_BASE_URL: ${NEXT_PUBLIC_ML_BASE_URL:-http://localhost:3000}
+      NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${NEXT_PUBLIC_MAPS_PUBLIC_KEY}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-dev}
+      NEXT_PUBLIC_MAINTENANCE_MODE: ${NEXT_PUBLIC_MAINTENANCE_MODE:-false}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      ML_API_BASE_URL: ${ML_API_BASE_URL:-https://api.mathislambert.fr}
+      ML_API_KEY: ${ML_API_KEY:-changeme}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-openai/gpt-oss-120b}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://admin:password@mongo:27017/personal_website?authSource=admin}
+      MONGODB_DB: ${MONGODB_DB:-personal_website}
+      CHOKIDAR_USEPOLLING: "1"
+    ports:
+      - "3000:3000"
     depends_on:
       - mongo
-    volumes:
-      - .:/app
-    command:
-      [
-        "uvicorn",
-        "api.main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8081",
-        "--reload",
-      ]
+    command: >
+      sh -c "if [ ! -d node_modules ]; then npm ci; fi;
+      npm run dev -- --hostname 0.0.0.0 --port 3000"
     networks:
       - app-network
 
   mongo:
-    image: mongo:latest
-    container_name: mongo
+    image: mongo:7
+    container_name: personal_mongo
+    restart: always
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
     volumes:
-      - ./mongodb/config/init-db.js:/docker-entrypoint-initdb.d/init-db.js
-      - ./mongodb/data/:/data/db
+      - mongo-data:/data/db
     networks:
       - app-network
-    restart: always
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mongo-data:
