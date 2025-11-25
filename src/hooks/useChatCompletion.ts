@@ -79,7 +79,6 @@ const useChatCompletion = (
 ): ChatState => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const controllerRef = useRef<AbortController | null>(null);
-  const apiUrl = process.env.NEXT_PUBLIC_ML_BASE_URL?.replace(/\/$/, "") || "";
 
   // Memoize the relevant parts of the request for the dependency array
   const requestDependencies = request
@@ -133,7 +132,7 @@ const useChatCompletion = (
       controllerRef.current = null; // Clear the ref
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestDependencies, isActive, apiUrl]); // Dependencies
+  }, [requestDependencies, isActive]); // Dependencies
 
   return state; // Return the state object { result, finishReason, jobId, isLoading, error }
 };

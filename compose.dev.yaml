@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_ML_BASE_URL: ${NEXT_PUBLIC_ML_BASE_URL}
         NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${NEXT_PUBLIC_MAPS_PUBLIC_KEY}
         NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-dev}
         NEXT_PUBLIC_MAINTENANCE_MODE: ${NEXT_PUBLIC_MAINTENANCE_MODE:-false}
