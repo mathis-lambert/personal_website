@@ -58,7 +58,7 @@ jobs:
           provenance: false
           sbom: false
           build-args: |
-            NEXT_PUBLIC_MAPS_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
+            NEXT_PUBLIC_MAPS_PUBLIC_KEY=${{ vars.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
             NEXT_PUBLIC_APP_VERSION=${{ github.ref_name }}
             NEXT_PUBLIC_MAINTENANCE_MODE=${{ vars.NEXT_PUBLIC_MAINTENANCE_MODE || 'false' }}
           tags: ${{ steps.meta_app.outputs.tags }}
@@ -91,7 +91,7 @@ jobs:
       - name: Remote deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
-          NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
+          NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_MAPS_PUBLIC_KEY }}
           NEXT_PUBLIC_APP_VERSION: ${{ github.ref_name }}
           NEXT_PUBLIC_MAINTENANCE_MODE: ${{ vars.NEXT_PUBLIC_MAINTENANCE_MODE || 'false' }}
           PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
@@ -101,10 +101,8 @@ jobs:
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-          INTERNAL_API_USERNAME: ${{ secrets.INTERNAL_API_USERNAME }}
-          INTERNAL_API_PASSWORD: ${{ secrets.INTERNAL_API_PASSWORD }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          MONGODB_DB: ${{ vars.MONGODB_DB || secrets.MONGODB_DATABASE }}
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
         with:
           host: ${{ secrets.ML_DEPLOY_HOST }}
           username: ${{ secrets.ML_DEPLOY_USER }}
@@ -125,8 +123,8 @@ jobs:
             docker network create monitor || true
 
             # Login to GHCR (requires a PAT with read:packages) if provided
-            if [ -n '${{ secrets.GHCR_TOKEN }}' ]; then
-              printf '%s' '${{ secrets.GHCR_TOKEN }}' | docker login ghcr.io -u '${{ secrets.GHCR_USERNAME || github.actor }}' --password-stdin
+            if [ -n '${{ secrets.GITHUB_TOKEN }}' ]; then
+              printf '%s' '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ secrets.GITHUB_TOKEN || github.actor }}' --password-stdin
             fi
 
             NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION:-$TAG}
