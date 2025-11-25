@@ -1,11 +1,11 @@
-import type { Collection, Document, IndexDescription } from "mongodb";
+import type { Collection, Document, IndexDescription, ObjectId } from "mongodb";
 
 import type { Article, Project, ResumeData, TimelineEntry } from "@/types";
 
 import { getMongoDb } from "./client";
 
 type BaseDocument = Document & {
-  _id?: unknown;
+  _id?: ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 };

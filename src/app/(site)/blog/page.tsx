@@ -1,6 +1,8 @@
 import BlogArticlesList from "@/components/blog/BlogArticlesList";
 import { getAllArticles } from "@/lib/data/content";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Blog - Mathis Lambert",
   description: "Articles and notes by Mathis Lambert.",

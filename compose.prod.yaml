@@ -1,47 +1,32 @@
 services:
-  frontend:
-    image: ghcr.io/${OWNER}/personal-website-frontend:${IMAGE_TAG}
-    container_name: personal_frontend
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.personal-frontend.rule=Host(`mathislambert.fr`)"
-      - "traefik.http.routers.personal-frontend.entrypoints=websecure"
-      - "traefik.http.routers.personal-frontend.tls=true"
-      - "traefik.http.routers.personal-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.personal-frontend.loadbalancer.server.port=8080"
-    networks: [proxy, monitor]
-
-  backend:
-    image: ghcr.io/${OWNER}/personal-website-backend:${IMAGE_TAG}
-    container_name: personal_backend
+  app:
+    image: ghcr.io/${OWNER}/personal-website:${IMAGE_TAG}
+    container_name: personal_website
     restart: unless-stopped
     environment:
-      MONGODB_HOST: ${MONGODB_HOST}
-      MONGODB_PORT: ${MONGODB_PORT}
-      MONGODB_USERNAME: ${MONGODB_USERNAME}
-      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
-      MONGODB_DATABASE: ${MONGODB_DATABASE}
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_ML_BASE_URL: ${NEXT_PUBLIC_ML_BASE_URL}
+      NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${NEXT_PUBLIC_MAPS_PUBLIC_KEY}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION}
+      NEXT_PUBLIC_MAINTENANCE_MODE: ${NEXT_PUBLIC_MAINTENANCE_MODE}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      ML_API_BASE_URL: ${ML_API_BASE_URL}
       ML_API_KEY: ${ML_API_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      JWT_EXPIRE_SECONDS: ${JWT_EXPIRE_SECONDS}
-      ADMIN_TOKEN_EXPIRE_SECONDS: ${ADMIN_TOKEN_EXPIRE_SECONDS}
-      TOKEN_AUDIENCE: ${TOKEN_AUDIENCE}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       LLM_MODEL_NAME: ${LLM_MODEL_NAME}
-      INTERNAL_API_USERNAME: ${INTERNAL_API_USERNAME}
-      INTERNAL_API_PASSWORD: ${INTERNAL_API_PASSWORD}
-      MAINTENANCE_MODE: ${MAINTENANCE_MODE}
-      POPULATE_MONGODB: ${POPULATE_MONGODB}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      MONGODB_URI: ${MONGODB_URI}
+      MONGODB_DB: ${MONGODB_DB}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.personal-backend.rule=Host(`mathislambert.fr`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.personal-backend.entrypoints=websecure"
-      - "traefik.http.routers.personal-backend.tls=true"
-      - "traefik.http.routers.personal-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.personal-backend.loadbalancer.server.port=8081"
+      - "traefik.http.routers.personal-website.rule=Host(`mathislambert.fr`)"
+      - "traefik.http.routers.personal-website.entrypoints=websecure"
+      - "traefik.http.routers.personal-website.tls=true"
+      - "traefik.http.routers.personal-website.tls.certresolver=letsencrypt"
+      - "traefik.http.services.personal-website.loadbalancer.server.port=3000"
     networks: [proxy, databases, monitor]
 
 networks:

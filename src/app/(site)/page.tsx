@@ -10,6 +10,8 @@ import { HomePageContent } from "@/components/home/HomePageContent";
 const byDateDesc = (a: { date?: string }, b: { date?: string }) =>
   new Date(b.date ?? "").getTime() - new Date(a.date ?? "").getTime();
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [projects, articles, experiences, studies] = await Promise.all([
     getAllProjects(),

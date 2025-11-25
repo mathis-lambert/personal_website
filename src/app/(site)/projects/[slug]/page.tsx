@@ -1,14 +1,11 @@
 import ProjectView from "@/components/projects/ProjectView";
-import { getAllProjects, getProjectBySlug } from "@/lib/data/content";
+import { getProjectBySlug } from "@/lib/data/content";
 import type { Project } from "@/types";
 import { notFound } from "next/navigation";
 
 type Params = { slug: string };
 
-export async function generateStaticParams() {
-  const projects = await getAllProjects();
-  return projects.map((p) => ({ slug: p.slug || p.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
