@@ -10,13 +10,11 @@ const upstreamApiKey = process.env.ML_API_KEY;
 const upstreamModel = process.env.LLM_MODEL_NAME || "openai/gpt-oss-120b";
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json().catch(() => null)) as
-    | {
-        messages?: Array<{ role: string; content: string }>;
-        location?: string;
-        stream?: boolean;
-      }
-    | null;
+  const body = (await req.json().catch(() => null)) as {
+    messages?: Array<{ role: string; content: string }>;
+    location?: string;
+    stream?: boolean;
+  } | null;
 
   if (!body?.messages || !Array.isArray(body.messages)) {
     return NextResponse.json(

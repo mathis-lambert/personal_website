@@ -28,7 +28,7 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({
   const isReasoningInProgress = isLoading && hasReasoning && !content;
 
   return (
-    <div className="px-4 py-2 rounded-lg inline-block w-full md:max-w-[85%] break-words bg-gray-100/60 text-gray-900 dark:bg-gray-700/60 dark:text-gray-100 shadow-sm">
+    <div className="px-4 py-3 rounded-2xl inline-block w-full max-w-3xl break-words bg-gradient-to-br from-slate-50/80 to-white/60 text-slate-900 border border-white/50 shadow-lg shadow-slate-900/20 backdrop-blur-lg dark:from-slate-800/70 dark:to-slate-900/70 dark:text-slate-50 dark:border-white/10">
       {isLoading && !content ? (
         <div className="py-2">
           {isReasoningInProgress ? (

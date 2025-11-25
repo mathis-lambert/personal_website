@@ -97,8 +97,10 @@ export function ChartEmptyState({ message = "No data" }: { message?: string }) {
   );
 }
 
-export default {
+const ChartComponents = {
   ChartContainer,
   ChartTooltipContent,
   ChartEmptyState,
 };
+
+export default ChartComponents;

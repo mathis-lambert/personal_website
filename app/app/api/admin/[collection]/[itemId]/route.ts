@@ -39,11 +39,9 @@ export async function PATCH(
   try {
     const item = await updateItem(collection, itemId, patch);
     return NextResponse.json({ ok: true, item });
-  } catch (err: any) {
-    return NextResponse.json(
-      { detail: err?.message || "Update failed" },
-      { status: 400 },
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Update failed";
+    return NextResponse.json({ detail: message }, { status: 400 });
   }
 }
 
@@ -71,10 +69,8 @@ export async function DELETE(
       itemId,
     );
     return NextResponse.json({ ok: true, item });
-  } catch (err: any) {
-    return NextResponse.json(
-      { detail: err?.message || "Delete failed" },
-      { status: 400 },
-    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Delete failed";
+    return NextResponse.json({ detail: message }, { status: 400 });
   }
 }

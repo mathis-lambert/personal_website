@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import type { PDFFont, PDFPage } from "pdf-lib";
 
 import type { ResumeData } from "@/types";
 
@@ -9,15 +10,15 @@ const MM_TO_PT = 72 / 25.4;
 type RGB = { r: number; g: number; b: number };
 
 type DrawCtx = {
-  page: ReturnType<PDFDocument["addPage"]>;
+  page: PDFPage;
   y: number; // distance from top, in points
   marginLeft: number;
   marginRight: number;
   contentWidth: number;
   fonts: {
-    regular: any;
-    bold: any;
-    italic: any;
+    regular: PDFFont;
+    bold: PDFFont;
+    italic: PDFFont;
   };
   colors: {
     accent: RGB;
@@ -59,7 +60,7 @@ const sanitize = (text?: string | null) => {
 
 const wrapText = (
   text: string,
-  font: any,
+  font: PDFFont,
   size: number,
   maxWidth: number,
 ): string[] => {
@@ -86,7 +87,7 @@ const wrapText = (
 
 type TextOptions = {
   size?: number;
-  font?: any;
+  font?: PDFFont;
   color?: RGB;
   lineHeight?: number;
   maxWidth?: number;
@@ -172,12 +173,9 @@ const paragraph = (ctx: DrawCtx, text: string, size = 10) => {
   });
 };
 
-const bullets = (
-  ctx: DrawCtx,
-  items: string[],
-  maxItems?: number | null,
-) => {
-  const effective = typeof maxItems === "number" ? items.slice(0, maxItems) : items;
+const bullets = (ctx: DrawCtx, items: string[], maxItems?: number | null) => {
+  const effective =
+    typeof maxItems === "number" ? items.slice(0, maxItems) : items;
   const indent = mm(4);
   const lineHeight = mm(4.5);
   const textWidth = ctx.contentWidth - indent;
@@ -196,7 +194,7 @@ const bullets = (
       color: toRgb(ctx.colors.accent),
     });
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       const y = ctx.page.getHeight() - ctx.y - 8;
       ctx.page.drawText(line, {
         x: ctx.marginLeft + indent,
@@ -220,8 +218,7 @@ const headerBlock = (ctx: DrawCtx, data: ResumeData) => {
   const pieces: string[] = [];
   if (data.contact?.email) pieces.push(data.contact.email);
   if (data.contact?.phone) pieces.push(data.contact.phone);
-  if (data.contact?.linkedin)
-    pieces.push(`LinkedIn: ${data.contact.linkedin}`);
+  if (data.contact?.linkedin) pieces.push(`LinkedIn: ${data.contact.linkedin}`);
   if (data.contact?.github) pieces.push(`GitHub: ${data.contact.github}`);
   if (data.contact?.website) {
     const label = data.contact.website
@@ -348,10 +345,7 @@ const skillsBlock = (ctx: DrawCtx, data: ResumeData) => {
 
   let labelColWidth = 0;
   labels.forEach((label) => {
-    const width = ctx.fonts.bold.widthOfTextAtSize(
-      sanitize(label),
-      10,
-    );
+    const width = ctx.fonts.bold.widthOfTextAtSize(sanitize(label), 10);
     labelColWidth = Math.max(labelColWidth, width);
   });
   labelColWidth += mm(2);
@@ -456,31 +450,29 @@ export async function buildResumePdf(resume: ResumeData | null) {
     },
   };
 
-  const data: ResumeData =
-    resume ||
-    ({
-      name: "Mathis Lambert",
-      contact: {
-        email: "",
-        phone: "",
-        linkedin: "",
-        github: "",
-        website: "",
-      },
-      personal_statement: "Resume data not available.",
-      experiences: [],
-      education: [],
-      certifications: [],
-      technical_skills: {
-        languages: [],
-        programming: [],
-        ai_ml: [],
-        systems_and_infra: [],
-        web: [],
-      },
-      skills: [],
-      passions: [],
-    } as ResumeData);
+  const data: ResumeData = resume ?? {
+    name: "Mathis Lambert",
+    contact: {
+      email: "",
+      phone: "",
+      linkedin: "",
+      github: "",
+      website: "",
+    },
+    personal_statement: "Resume data not available.",
+    experiences: [],
+    education: [],
+    certifications: [],
+    technical_skills: {
+      languages: [],
+      programming: [],
+      ai_ml: [],
+      systems_and_infra: [],
+      web: [],
+    },
+    skills: [],
+    passions: [],
+  };
 
   headerBlock(ctx, data);
   personalStatementBlock(ctx, data);

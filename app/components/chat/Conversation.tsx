@@ -18,21 +18,21 @@ const Conversation: React.FC = () => {
 
   const scrollToBottom = () => {
     if (viewportRef.current) {
-      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+      viewportRef.current.scrollTo({
+        top: viewportRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   };
 
   useEffect(() => {
-    const id = setTimeout(scrollToBottom, 10);
+    const id = setTimeout(scrollToBottom, 20);
     return () => clearTimeout(id);
   }, [messages, streamingResult, isLoading]);
 
   return (
-    <ScrollArea className="flex-grow w-full overflow-y-auto">
-      <div
-        ref={viewportRef}
-        className="h-full w-full py-4 space-y-4 overflow-y-auto"
-      >
+    <ScrollArea ref={viewportRef} className="flex-1 w-full h-full min-h-0">
+      <div className="h-full w-full space-y-4 px-2 sm:px-4 py-4 pb-28">
         {messages.map((msg, index) => (
           <div
             key={index}
@@ -69,7 +69,7 @@ const Conversation: React.FC = () => {
           </div>
         )}
 
-        <div className="h-4" />
+        <div className="h-6" />
       </div>
     </ScrollArea>
   );
