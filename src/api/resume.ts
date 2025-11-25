@@ -1,13 +1,10 @@
-import { fetchWithTimeout, sanitizeUrl } from "./utils";
+import { fetchWithTimeout } from "./utils";
 
 export async function exportResumePdf(options?: {
   signal?: AbortSignal;
   timeoutMs?: number;
 }): Promise<Blob> {
-  const apiUrl = sanitizeUrl(
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "",
-  );
-  const res = await fetchWithTimeout(`${apiUrl}/api/resume/export`, {
+  const res = await fetchWithTimeout(`/api/resume/export`, {
     method: "GET",
     signal: options?.signal,
     timeoutMs: options?.timeoutMs ?? 20000,

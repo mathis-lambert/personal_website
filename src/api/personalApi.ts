@@ -46,12 +46,11 @@ export async function callPersonalApi(
     callbacks?: ApiCallbacks;
   },
 ): Promise<ApiCompletionResult | void> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
   const { signal, callbacks } = options || {};
   const isStreaming = !!callbacks?.onChunk;
 
   try {
-    const response = await fetch(`${apiUrl}/api/chat/completions`, {
+    const response = await fetch(`/api/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

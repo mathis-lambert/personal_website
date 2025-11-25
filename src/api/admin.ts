@@ -17,12 +17,8 @@ import type {
 } from "@/admin/types";
 import type { TimelineData } from "@/components/ui/ScrollableTimeline";
 
-const API_URL =
-  (process.env.NEXT_PUBLIC_API_URL as string | undefined)?.replace(/\/$/, "") ||
-  "";
-
 export async function getCollections(token?: string): Promise<string[]> {
-  const res = await fetchWithTimeout(`${API_URL}/api/admin/collections`, {
+  const res = await fetchWithTimeout(`/api/admin/collections`, {
     timeoutMs: 8000,
     authToken: token,
   });
@@ -38,13 +34,10 @@ export async function getCollectionData<T = unknown>(
   collection: AdminCollectionName,
   token?: string,
 ): Promise<T> {
-  const res = await fetchWithTimeout(
-    `${API_URL}/api/admin/data/${collection}`,
-    {
-      timeoutMs: 10000,
-      authToken: token,
-    },
-  );
+  const res = await fetchWithTimeout(`/api/admin/data/${collection}`, {
+    timeoutMs: 10000,
+    authToken: token,
+  });
   if (!res.ok) throw new Error(`Failed to read ${collection}: ${res.status}`);
   const data = await res.json();
   return data?.data as T;
@@ -55,16 +48,13 @@ export async function replaceCollection(
   data: unknown,
   token?: string,
 ) {
-  const res = await fetchWithTimeout(
-    `${API_URL}/api/admin/data/${collection}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      timeoutMs: 12000,
-      authToken: token,
-    },
-  );
+  const res = await fetchWithTimeout(`/api/admin/data/${collection}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    timeoutMs: 12000,
+    authToken: token,
+  });
   if (!res.ok)
     throw new Error(`Failed to replace ${collection}: ${res.status}`);
 }
@@ -84,7 +74,7 @@ export async function createItem(
   item: AdminCreateProjectInput | AdminCreateArticleInput,
   token?: string,
 ): Promise<{ ok: boolean; id: string; item: Project | Article }> {
-  const res = await fetchWithTimeout(`${API_URL}/api/admin/${collection}`, {
+  const res = await fetchWithTimeout(`/api/admin/${collection}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item),
@@ -139,8 +129,8 @@ export async function updateItem(
   // Special case: resume doesn't need an item id; backend exposes /api/admin/resume
   const url =
     collection === "resume"
-      ? `${API_URL}/api/admin/resume`
-      : `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`;
+      ? `/api/admin/resume`
+      : `/api/admin/${collection}/${encodeURIComponent(id)}`;
 
   const res = await fetchWithTimeout(url, {
     method: "PATCH",
@@ -160,7 +150,7 @@ export async function deleteItem(
   token?: string,
 ) {
   const res = await fetchWithTimeout(
-    `${API_URL}/api/admin/${collection}/${encodeURIComponent(id)}`,
+    `/api/admin/${collection}/${encodeURIComponent(id)}`,
     {
       method: "DELETE",
       timeoutMs: 8000,
@@ -188,7 +178,7 @@ export async function getEventsAnalytics(
   if (params.actions && params.actions.length)
     qs.set("action", params.actions.join(","));
   if (params.groupBy) qs.set("group_by", params.groupBy);
-  const url = `${API_URL}/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const url = `/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,
@@ -220,7 +210,7 @@ export async function getEventsList(
   if (params.limit != null) qs.set("limit", String(params.limit));
   if (params.skip != null) qs.set("skip", String(params.skip));
   if (params.sort) qs.set("sort", params.sort);
-  const url = `${API_URL}/api/admin/events${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const url = `/api/admin/events${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,
