@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Mathis Lambert | Software & AI Engineer",
   description: "Portfolio, projects, resume, and writings by Mathis Lambert.",
   metadataBase: new URL(baseUrl),
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
