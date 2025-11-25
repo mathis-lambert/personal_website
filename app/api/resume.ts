@@ -1,34 +1,4 @@
-import type { ResumeData } from "@/types";
 import { fetchWithTimeout, sanitizeUrl } from "./utils";
-
-export function normalizeResumeApi(p: ResumeData): ResumeData {
-  return {
-    name: p.name,
-    contact: p.contact,
-    personal_statement: p.personal_statement,
-    experiences: p.experiences,
-    education: p.education,
-    technical_skills: p.technical_skills,
-    certifications: p.certifications,
-    skills: p.skills,
-    passions: p.passions,
-  };
-}
-
-export async function getResume(options?: {
-  signal?: AbortSignal;
-}): Promise<ResumeData> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
-  const res = await fetchWithTimeout(`${apiUrl}/api/resume`, {
-    signal: options?.signal,
-    timeoutMs: 10000,
-  });
-  if (!res.ok) {
-    throw new Error(`Resumes request failed: ${res.status}`);
-  }
-  const data = await res.json();
-  return normalizeResumeApi(data.resume);
-}
 
 export async function exportResumePdf(options?: {
   signal?: AbortSignal;

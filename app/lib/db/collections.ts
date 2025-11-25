@@ -1,38 +1,31 @@
-import type { Collection, IndexDescription } from "mongodb";
+import type { Collection, Document, IndexDescription } from "mongodb";
 
 import type { Article, Project, ResumeData, TimelineEntry } from "@/types";
 
 import { getMongoDb } from "./client";
 
-export type ProjectDocument = Project & {
+type BaseDocument = Document & {
   _id?: unknown;
   createdAt?: Date;
   updatedAt?: Date;
 };
 
-export type ArticleDocument = Article & {
-  _id?: unknown;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
+export type ProjectDocument = Project & BaseDocument;
 
-export type TimelineDocument = TimelineEntry & {
-  id: string;
-  order?: number;
-  _id?: unknown;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
+export type ArticleDocument = Article & BaseDocument;
 
-export type ResumeDocument = ResumeData & {
-  id: string;
-  _id?: unknown;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
+export type TimelineDocument = TimelineEntry &
+  BaseDocument & {
+    id: string;
+    order?: number;
+  };
 
-export type EventDocument = {
-  _id?: unknown;
+export type ResumeDocument = ResumeData &
+  BaseDocument & {
+    id: string;
+  };
+
+export type EventDocument = BaseDocument & {
   job_id?: string;
   action?: string;
   request_body?: Record<string, unknown>;
@@ -97,7 +90,9 @@ const ensureIndexes = async () => {
   return indexesPromise;
 };
 
-const getCollection = async <T>(name: string): Promise<Collection<T>> => {
+const getCollection = async <T extends Document>(
+  name: string,
+): Promise<Collection<T>> => {
   await ensureIndexes();
   const db = await getMongoDb();
   return db.collection<T>(name);

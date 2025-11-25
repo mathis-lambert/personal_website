@@ -26,6 +26,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [metrics, setMetrics] = useState<Article["metrics"]>(article?.metrics);
   const breadcrumbItems = useMemo(
     () => [
       { label: "Home", href: "/" },
@@ -35,8 +36,6 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     [article?.title],
   );
 
-  const metrics = article?.metrics;
-  const sharesCount = metrics?.shares ?? 0;
   if (isLoading) {
     return (
       <motion.section
@@ -106,6 +105,17 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
   const isFeatured = Boolean(article.isFeatured);
   const likesCount =
     (metrics?.likes ?? article.metrics?.likes ?? 0) + (isLiked ? 1 : 0);
+  const sharesCount = metrics?.shares ?? article.metrics?.shares ?? 0;
+
+  const trackArticleShare = (): Article["metrics"] => {
+    const nextMetrics: Article["metrics"] = {
+      views: metrics?.views ?? article.metrics?.views ?? 0,
+      likes: metrics?.likes ?? article.metrics?.likes ?? 0,
+      shares: (metrics?.shares ?? article.metrics?.shares ?? 0) + 1,
+    };
+    setMetrics(nextMetrics);
+    return nextMetrics;
+  };
 
   const handleShare = async () => {
     const url = window.location?.href ?? "";
@@ -117,11 +127,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        trackArticleShare(article)
-          .then((m) => {
-            if (m) setMetrics(m);
-          })
-          .catch(() => {});
+        trackArticleShare();
         return;
       }
     } catch {
@@ -130,11 +136,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedShare(true);
-      trackArticleShare(article)
-        .then((m) => {
-          if (m) setMetrics(m);
-        })
-        .catch(() => {});
+      trackArticleShare();
       setTimeout(() => setCopiedShare(false), 2000);
     } catch {
       // ignore
@@ -215,11 +217,11 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 justify-start sm:justify-end sm:pl-4 sm:border-l sm:border-white/20 dark:sm:border-white/10">
                 {typeof (metrics?.views ?? article.metrics?.views) ===
                   "number" && (
-                  <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                    <Eye className="w-3.5 h-3.5" />{" "}
-                    {metrics?.views ?? article.metrics?.views}
-                  </span>
-                )}
+                    <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                      <Eye className="w-3.5 h-3.5" />{" "}
+                      {metrics?.views ?? article.metrics?.views}
+                    </span>
+                  )}
                 <span className="inline-flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <Heart
                     className={cn("w-3.5 h-3.5", isLiked ? "text-red-500" : "")}
