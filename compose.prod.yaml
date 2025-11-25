@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
       NEXT_PUBLIC_MAPS_PUBLIC_KEY: ${NEXT_PUBLIC_MAPS_PUBLIC_KEY}
       NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION}
       NEXT_PUBLIC_MAINTENANCE_MODE: ${NEXT_PUBLIC_MAINTENANCE_MODE}
