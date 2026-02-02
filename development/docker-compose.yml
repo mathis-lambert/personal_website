@@ -37,7 +37,7 @@ services:
       - app-network
 
   mongo:
-    image: mongo:7
+    image: mongo:latest
     container_name: personal_mongo
     restart: always
     ports:
@@ -45,6 +45,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB:-personal_website}
     volumes:
       - mongo-data:/data/db
     networks:

@@ -1,4 +1,10 @@
-import type { Collection, Document, IndexDescription, ObjectId } from "mongodb";
+import type {
+  Collection,
+  Document,
+  IndexDescription,
+  IndexDescriptionInfo,
+  ObjectId,
+} from "mongodb";
 
 import type { Article, Project, ResumeData, TimelineEntry } from "@/types";
 
@@ -54,8 +60,12 @@ const ensureIndexes = async () => {
         COLLECTION_NAMES.studies,
         COLLECTION_NAMES.resume,
       ].map(async (name) => {
+        const exists = await db.listCollections({ name }).hasNext();
+        if (!exists) return;
+
         const collection = db.collection(name);
-        const indexes = await collection.indexes();
+        const indexes: IndexDescriptionInfo[] = await collection.indexes();
+
         const hasLegacyIdIndex = indexes.find((idx) => idx.name === "id_1");
         if (hasLegacyIdIndex) {
           await collection.dropIndex("id_1");
