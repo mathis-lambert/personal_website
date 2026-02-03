@@ -15,8 +15,7 @@ import type {
 
 const tools = buildSelfTools();
 
-const createModel = (streaming: boolean) => {
-  const env = getAiEnv();
+const createModel = (env: ReturnType<typeof getAiEnv>, streaming: boolean) => {
   return new ChatOpenAI({
     model: env.model,
     temperature: 0.2,
@@ -32,9 +31,20 @@ const createModel = (streaming: boolean) => {
     streamUsage: true,
   });
 };
+const createAgentInstance = (options: {
+  streaming: boolean;
+  location?: string;
+}) => {
+  const env = getAiEnv();
+  const systemPrompt = buildSystemPrompt(options.location);
+  const agent = createAgent({
+    model: createModel(env, options.streaming),
+    tools,
+    systemPrompt,
+  });
 
-const model = createModel(false);
-const streamingModel = createModel(true);
+  return { agent, env };
+};
 
 export type AgentRunOptions = {
   messages: AgentMessage[];
@@ -44,12 +54,9 @@ export type AgentRunOptions = {
 export const runAgent = async (
   options: AgentRunOptions,
 ): Promise<AgentResponse> => {
-  const env = getAiEnv();
-  const systemPrompt = buildSystemPrompt(options.location);
-  const agent = createAgent({
-    model,
-    tools,
-    systemPrompt,
+  const { agent, env } = createAgentInstance({
+    streaming: false,
+    location: options.location,
   });
 
   const result = await agent.invoke({
@@ -74,12 +81,9 @@ export const runAgent = async (
 export const streamAgent = async function* (
   options: AgentRunOptions,
 ): AsyncGenerator<AgentStreamEvent> {
-  const env = getAiEnv();
-  const systemPrompt = buildSystemPrompt(options.location);
-  const agent = createAgent({
-    model: streamingModel,
-    tools,
-    systemPrompt,
+  const { agent, env } = createAgentInstance({
+    streaming: true,
+    location: options.location,
   });
 
   const stream = agent.streamEvents(
