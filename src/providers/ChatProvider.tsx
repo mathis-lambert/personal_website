@@ -1,78 +1,50 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import useChatCompletion from "@/hooks/useChatCompletion";
-import type { ChatCompletionsRequest, Message } from "@/types.ts";
+import React, { useCallback, useMemo, useState } from "react";
+import useChatAgent from "@/hooks/useChatAgent";
+import type { AgentMessage, AgentRequest } from "@/types/agent";
 import { ChatContext, type ChatContextType } from "@/hooks/useChat";
 
 interface ChatProviderProps {
   children: React.ReactNode;
 }
 
+const updateLastAssistantContent = (
+  messages: AgentMessage[],
+  content: string,
+): AgentMessage[] => {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i]?.role !== "assistant") continue;
+    if (messages[i]?.content === content) return messages;
+    const next = [...messages];
+    next[i] = { ...next[i], content };
+    return next;
+  }
+  return messages;
+};
+
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentRequest, setCurrentRequest] =
-    useState<ChatCompletionsRequest | null>(null);
+  const [messages, setMessages] = useState<AgentMessage[]>([]);
+  const [currentRequest, setCurrentRequest] = useState<AgentRequest | null>(
+    null,
+  );
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
-  const responseAddedRef = useRef<boolean>(false);
-
-  const {
-    result,
-    reasoning,
-    reasoning_content,
-    isLoading,
-    error,
-    finishReason,
-    jobId,
-  } = useChatCompletion(currentRequest, !!currentRequest);
-
-  useEffect(() => {
-    if (
-      !isLoading &&
-      result &&
-      finishReason &&
-      !responseAddedRef.current &&
-      currentRequest
-    ) {
-      responseAddedRef.current = true;
-      void Promise.resolve().then(() => {
-        setMessages((prevMessages) => {
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          if (
-            lastMessage?.role === "assistant" &&
-            lastMessage.content === result
-          ) {
-            return prevMessages;
-          }
-          const messagesWithoutPartial = prevMessages.filter(
-            (msg) => !(msg.role === "assistant" && msg.content === ""),
-          );
-          return [
-            ...messagesWithoutPartial,
-            {
-              role: "assistant",
-              content: result,
-              reasoning: reasoning || null,
-              reasoning_content: reasoning_content || null,
-            },
-          ];
-        });
-        setCurrentRequest(null);
-      });
-    }
-
-    if (isLoading && currentRequest && !responseAddedRef.current) {
-      responseAddedRef.current = false;
-    }
-  }, [
-    isLoading,
-    result,
-    reasoning,
-    reasoning_content,
-    finishReason,
+  const { result, response, isLoading, error } = useChatAgent(
     currentRequest,
-    jobId,
-  ]);
+    !!currentRequest,
+  );
+
+  const overlayContent = useMemo(() => {
+    if (!currentRequest) return null;
+    if (response?.message?.content) return response.message.content;
+    if (isLoading && result) return result;
+    return null;
+  }, [currentRequest, response, isLoading, result]);
+
+  const displayMessages = useMemo(() => {
+    if (!overlayContent) return messages;
+    return updateLastAssistantContent(messages, overlayContent);
+  }, [messages, overlayContent]);
 
   const openChat = useCallback(() => {
     setIsChatOpen(true);
@@ -94,32 +66,29 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         setIsChatOpen(true);
       }
 
-      const userMessage: Message = { role: "user", content: message };
-      const updatedMessages = [...messages, userMessage];
-      setMessages(updatedMessages);
-      const newRequest: ChatCompletionsRequest = {
-        messages: updatedMessages,
+      const userMessage: AgentMessage = { role: "user", content: message };
+      const baseMessages = overlayContent
+        ? updateLastAssistantContent(messages, overlayContent)
+        : messages;
+      const requestMessages = [...baseMessages, userMessage];
+      const placeholder: AgentMessage = { role: "assistant", content: "" };
+      setMessages([...requestMessages, placeholder]);
+      const newRequest: AgentRequest = {
+        messages: requestMessages,
         location,
+        stream: true,
       };
 
       setCurrentRequest(newRequest);
-      responseAddedRef.current = false;
     },
-    [messages, isLoading, currentRequest, isChatOpen],
+    [messages, isLoading, currentRequest, isChatOpen, overlayContent],
   );
 
   const contextValue: ChatContextType = {
     isChatOpen,
-    messages,
+    messages: displayMessages,
     isLoading: isLoading && !!currentRequest,
     error,
-    streamingResult: isLoading && !!currentRequest && result ? result : "",
-    streamingReasoning:
-      isLoading && !!currentRequest && reasoning ? reasoning : "",
-    streamingReasoningContent:
-      isLoading && !!currentRequest && reasoning_content
-        ? reasoning_content
-        : "",
     openChat,
     toggleChat,
     closeChat,

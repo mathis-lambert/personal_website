@@ -60,7 +60,7 @@ const DashboardPage: React.FC = () => {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [errAnalytics, setErrAnalytics] = useState<string | null>(null);
   const [refreshTs, setRefreshTs] = useState(0);
-  // Activity (chat_completion) state
+  // Activity (agent_completion) state
   const [chatSeries, setChatSeries] = useState<EventsAnalyticsResponse | null>(
     null,
   );
@@ -167,7 +167,7 @@ const DashboardPage: React.FC = () => {
           start: startIso,
           end: endIso,
           granularity,
-          actions: ["chat_completion"],
+          actions: ["agent_completion"],
         },
         token,
       ),
@@ -176,7 +176,7 @@ const DashboardPage: React.FC = () => {
           start: startIso,
           end: endIso,
           granularity,
-          actions: ["chat_completion"],
+          actions: ["agent_completion"],
           groupBy: "location",
         },
         token,
@@ -185,7 +185,7 @@ const DashboardPage: React.FC = () => {
         {
           start: startIso,
           end: endIso,
-          action: "chat_completion",
+          action: "agent_completion",
           limit: 50,
           sort: "desc",
         },

@@ -5,7 +5,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Features
 
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
-- Chat assistant UI that calls `/api/chat/completions`, proxying to `ML_API_BASE_URL` with SSE and logging events to Mongo.
+- Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE and logging events to Mongo.
 - Credentials-protected admin area at `/admin` (NextAuth JWT) to inspect content collections and activity.
 - Resume export at `/api/resume/export` plus DB-backed metrics/analytics; `/api/health` pings Mongo connectivity.
 - Tailwind v4 + Radix UI + framer-motion components, with Google Maps embed gated by `NEXT_PUBLIC_MAPS_PUBLIC_KEY`.
@@ -22,7 +22,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 
 - Copy `src/.env.example` to `src/.env` for `npm run dev`; copy `.env.example` to `.env` for Docker/compose.
 - Set `NEXT_PUBLIC_MAPS_PUBLIC_KEY`, `NEXT_PUBLIC_APP_VERSION`, and `NEXT_PUBLIC_MAINTENANCE_MODE` before building images (they are baked into the client).
-- Provide runtime secrets: `PUBLIC_BASE_URL`, `ML_API_BASE_URL`, `ML_API_KEY`, `LLM_MODEL_NAME`, `NEXTAUTH_SECRET`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (or `INTERNAL_API_*`), and `MONGODB_URI`/`MONGODB_DB`. Optional Mongo bootstrap creds: `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`.
+- Provide runtime secrets: `PUBLIC_BASE_URL`, `ML_API_BASE_URL`, `ML_API_KEY`, `LLM_MODEL_NAME`, `ML_API_VECTOR_STORE_ID`, `NEXTAUTH_SECRET`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (or `INTERNAL_API_*`), and `MONGODB_URI`/`MONGODB_DB`. Optional Mongo bootstrap creds: `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`.
 - `NEXTAUTH_URL` should point at the external URL in production when using NextAuth callbacks.
 
 ## Run locally
@@ -40,7 +40,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## API surface
 
 - `GET /api/health` — database health check.
-- `POST /api/chat/completions` — proxies to upstream ML API (SSE supported) and records `chat_completion` events.
+- `POST /api/agent` — agentic Responses API proxy (SSE supported) and records `agent_completion` events.
 - `GET /api/resume/export` — latest resume PDF; logs `resume_export` events.
 - `/api/auth/[...nextauth]` — credentials login for `/admin`; `/api/admin/*` — protected CRUD + analytics endpoints.
 

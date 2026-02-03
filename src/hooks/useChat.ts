@@ -1,15 +1,12 @@
 "use client";
 import { createContext, useContext } from "react";
-import type { Message } from "@/types.ts";
+import type { AgentMessage } from "@/types/agent";
 
 export interface ChatContextType {
   isChatOpen: boolean;
-  messages: Message[];
+  messages: AgentMessage[];
   isLoading: boolean;
   error: Error | null;
-  streamingResult: string;
-  streamingReasoning: string;
-  streamingReasoningContent: string;
   openChat: () => void;
   toggleChat: () => void;
   closeChat: () => void;

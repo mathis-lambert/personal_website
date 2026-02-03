@@ -6,14 +6,7 @@ import UserMessage from "@/components/chat/UserMessage";
 import { useChat } from "@/hooks/useChat";
 
 const Conversation: React.FC = () => {
-  const {
-    messages,
-    isLoading,
-    streamingResult,
-    streamingReasoning,
-    streamingReasoningContent,
-    error,
-  } = useChat();
+  const { messages, isLoading, error } = useChat();
   const viewportRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,7 +21,7 @@ const Conversation: React.FC = () => {
   useEffect(() => {
     const id = setTimeout(scrollToBottom, 20);
     return () => clearTimeout(id);
-  }, [messages, streamingResult, isLoading]);
+  }, [messages, isLoading]);
 
   return (
     <ScrollArea ref={viewportRef} className="flex-1 w-full h-full min-h-0">
@@ -43,23 +36,13 @@ const Conversation: React.FC = () => {
             ) : (
               <AssistantMessage
                 content={msg.content}
-                reasoning={msg.reasoning}
-                reasoning_content={msg.reasoning_content}
+                isLoading={
+                  isLoading && index === messages.length - 1 && !msg.content
+                }
               />
             )}
           </div>
         ))}
-
-        {isLoading && (
-          <div className="flex justify-start">
-            <AssistantMessage
-              content={streamingResult}
-              reasoning={streamingReasoning}
-              reasoning_content={streamingReasoningContent}
-              isLoading={!streamingResult}
-            />
-          </div>
-        )}
 
         {error && (
           <div className="flex justify-center pt-2">
