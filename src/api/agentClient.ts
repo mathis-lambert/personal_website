@@ -123,7 +123,11 @@ export async function callAgentApi(
         }
 
         if (eventName === "error" || payload.type === "error") {
-          callbacks?.onError?.(new Error(payload.error));
+          if (payload.type === "error") {
+            callbacks?.onError?.(new Error(payload.error));
+          } else {
+            callbacks?.onError?.(new Error("Agent stream error."));
+          }
         }
       }
     }
