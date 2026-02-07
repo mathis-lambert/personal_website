@@ -469,13 +469,11 @@ export async function updateItem(
       );
     }
 
-    const result = await col.findOneAndUpdate(
+    const updated = await col.findOneAndUpdate(
       { _id: objectId },
       { $set: updates },
       { returnDocument: "after" },
     );
-    if (!result) throw new Error("Update failed");
-    const updated = result.value;
     if (!updated) throw new Error("Item not found");
     return stripProject(updated)! as Project;
   }
@@ -502,13 +500,11 @@ export async function updateItem(
       );
     }
 
-    const result = await col.findOneAndUpdate(
+    const updated = await col.findOneAndUpdate(
       { _id: objectId },
       { $set: updates },
       { returnDocument: "after" },
     );
-    if (!result) throw new Error("Update failed");
-    const updated = result.value;
     if (!updated) throw new Error("Item not found");
     return stripArticle(updated)! as Article;
   }
@@ -535,14 +531,13 @@ export async function updateItem(
     filter = { _id: objectId };
   }
 
-  const result = await col.findOneAndUpdate(
+  const updated = await col.findOneAndUpdate(
     filter,
     { $set: { ...patch, updatedAt: new Date() } },
     { returnDocument: "after" },
   );
-  if (!result) throw new Error("Update failed");
-  if (!result.value) throw new Error("Item not found");
-  return stripTimeline(result.value)!;
+  if (!updated) throw new Error("Item not found");
+  return stripTimeline(updated)!;
 }
 
 const resequenceTimeline = async (col: Collection<TimelineDocument>) => {
@@ -565,9 +560,7 @@ export async function deleteItem(
     const col = await getProjectsCollection();
     const objectId = parseObjectId(itemId);
     if (!objectId) throw new Error("Invalid item id");
-    const result = await col.findOneAndDelete({ _id: objectId });
-    if (!result) throw new Error("Delete failed");
-    const deleted = result.value;
+    const deleted = await col.findOneAndDelete({ _id: objectId });
     if (!deleted) throw new Error("Item not found");
     return stripProject(deleted)! as Project;
   }
@@ -576,9 +569,7 @@ export async function deleteItem(
     const col = await getArticlesCollection();
     const objectId = parseObjectId(itemId);
     if (!objectId) throw new Error("Invalid item id");
-    const result = await col.findOneAndDelete({ _id: objectId });
-    if (!result) throw new Error("Delete failed");
-    const deleted = result.value;
+    const deleted = await col.findOneAndDelete({ _id: objectId });
     if (!deleted) throw new Error("Item not found");
     return stripArticle(deleted)! as Article;
   }
@@ -603,11 +594,10 @@ export async function deleteItem(
     if (!objectId) throw new Error("Invalid item id");
     filter = { _id: objectId };
   }
-  const result = await col.findOneAndDelete(filter);
-  if (!result) throw new Error("Delete failed");
-  if (!result.value) throw new Error("Item not found");
+  const deleted = await col.findOneAndDelete(filter);
+  if (!deleted) throw new Error("Item not found");
   await resequenceTimeline(col);
-  return stripTimeline(result.value)!;
+  return stripTimeline(deleted)!;
 }
 
 export async function replaceCollection(
