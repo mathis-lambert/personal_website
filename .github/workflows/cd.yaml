@@ -98,13 +98,15 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           MONGODB_DB: ${{ secrets.MONGODB_DB }}
+          ANALYTICS_LOG_RETENTION_DAYS: ${{ vars.ANALYTICS_LOG_RETENTION_DAYS || '180' }}
+          ANALYTICS_HASH_SALT: ${{ secrets.ANALYTICS_HASH_SALT }}
         with:
           host: ${{ secrets.ML_DEPLOY_HOST }}
           username: ${{ secrets.ML_DEPLOY_USER }}
           key: ${{ secrets.ML_DEPLOY_KEY }}
           port: ${{ secrets.ML_DEPLOY_PORT }}
           script_stop: true
-          envs: GITHUB_REF_NAME,NEXT_PUBLIC_MAPS_PUBLIC_KEY,NEXT_PUBLIC_APP_VERSION,NEXT_PUBLIC_MAINTENANCE_MODE,PUBLIC_BASE_URL,ML_API_BASE_URL,ML_API_KEY,LLM_MODEL_NAME,NEXTAUTH_SECRET,ADMIN_USERNAME,ADMIN_PASSWORD,INTERNAL_API_USERNAME,INTERNAL_API_PASSWORD,MONGODB_URI,MONGODB_DB
+          envs: GITHUB_REF_NAME,NEXT_PUBLIC_MAPS_PUBLIC_KEY,NEXT_PUBLIC_APP_VERSION,NEXT_PUBLIC_MAINTENANCE_MODE,PUBLIC_BASE_URL,ML_API_BASE_URL,ML_API_KEY,LLM_MODEL_NAME,NEXTAUTH_SECRET,ADMIN_USERNAME,ADMIN_PASSWORD,INTERNAL_API_USERNAME,INTERNAL_API_PASSWORD,MONGODB_URI,MONGODB_DB,ANALYTICS_LOG_RETENTION_DAYS,ANALYTICS_HASH_SALT
           script: |
             set -euo pipefail
             OWNER='${{ github.repository_owner }}'
@@ -127,6 +129,7 @@ jobs:
             PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-https://mathislambert.fr}
             ML_API_BASE_URL=${ML_API_BASE_URL:-https://api.mathislambert.fr}
             MONGODB_DB=${MONGODB_DB:-personal_website}
+            ANALYTICS_LOG_RETENTION_DAYS=${ANALYTICS_LOG_RETENTION_DAYS:-180}
 
             cd "$INSTALL_DIR"
             OWNER="$OWNER_LC" IMAGE_TAG="$TAG" docker compose -f compose.prod.yaml pull
@@ -143,6 +146,8 @@ jobs:
               ADMIN_PASSWORD="${ADMIN_PASSWORD:-$INTERNAL_API_PASSWORD}" \
               MONGODB_URI="$MONGODB_URI" \
               MONGODB_DB="$MONGODB_DB" \
+              ANALYTICS_LOG_RETENTION_DAYS="$ANALYTICS_LOG_RETENTION_DAYS" \
+              ANALYTICS_HASH_SALT="$ANALYTICS_HASH_SALT" \
               docker compose -f compose.prod.yaml up -d --remove-orphans
 
             docker image prune -f || true

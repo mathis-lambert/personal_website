@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { withApiAnalytics } from "@/lib/analytics/server";
 import {
   deleteItem,
   listCollections,
@@ -17,10 +18,10 @@ type AdminParams = {
   itemId: string;
 };
 
-export async function PATCH(
+const patchHandler = async (
   req: NextRequest,
   { params }: { params: Promise<AdminParams> },
-) {
+) => {
   const { collection, itemId } = await params;
 
   if (!(await requireAdminSession())) {
@@ -35,7 +36,7 @@ export async function PATCH(
       { status: 400 },
     );
   }
-  const patch = await req.json();
+  const patch = (await req.json()) as Record<string, unknown>;
   try {
     const item = await updateItem(collection, itemId, patch);
     return NextResponse.json({ ok: true, item });
@@ -43,12 +44,12 @@ export async function PATCH(
     const message = err instanceof Error ? err.message : "Update failed";
     return NextResponse.json({ detail: message }, { status: 400 });
   }
-}
+};
 
-export async function DELETE(
+const deleteHandler = async (
   _req: NextRequest,
   { params }: { params: Promise<AdminParams> },
-) {
+) => {
   const { collection, itemId } = await params;
 
   if (!(await requireAdminSession())) {
@@ -73,4 +74,21 @@ export async function DELETE(
     const message = err instanceof Error ? err.message : "Delete failed";
     return NextResponse.json({ detail: message }, { status: 400 });
   }
-}
+};
+
+export const PATCH = withApiAnalytics(
+  {
+    route: "/api/admin/:collection/:itemId",
+    actorType: "admin",
+  },
+  patchHandler,
+);
+
+export const DELETE = withApiAnalytics(
+  {
+    route: "/api/admin/:collection/:itemId",
+    actorType: "admin",
+    captureRequestBody: false,
+  },
+  deleteHandler,
+);

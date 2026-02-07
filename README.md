@@ -5,29 +5,32 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Features
 
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
-- Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE and logging events to Mongo.
-- Credentials-protected admin area at `/admin` (NextAuth JWT) to inspect content collections and activity.
-- Resume export at `/api/resume/export` plus DB-backed metrics/analytics; `/api/health` pings Mongo connectivity.
+- Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE.
+- Mandatory API analytics wrapper (`withApiAnalytics`) on all API routes except `/api/health` and NextAuth, with redacted structured logs in MongoDB.
+- Credentials-protected admin area at `/admin` with granular observability (overview, timeseries, endpoint latency, error stream, activity feed).
+- UI analytics ingestion endpoint at `/api/analytics/track` (page views + key interactions).
+- Resume export at `/api/resume/export`; `/api/health` pings Mongo connectivity.
 - Tailwind v4 + Radix UI + framer-motion components, with Google Maps embed gated by `NEXT_PUBLIC_MAPS_PUBLIC_KEY`.
 
 ## Stack and layout
 
 - Next.js 16 / React 19 / TypeScript with standalone output.
-- MongoDB for content, resume data, and event logs.
+- MongoDB for content, analytics logs (`api_request_logs`, `ui_events`), and operational dashboards.
 - Docker multi-stage build (`Dockerfile`) producing a single runtime image.
 - Compose files: `development/docker-compose.yml` (local dev with Mongo), `compose.dev.yaml` (local prod build), `compose.prod.yaml` (server deploy with Traefik labels).
 - GitHub Actions `.github/workflows/cd.yaml` builds/pushes `ghcr.io/<owner>/personal-website` on tags and redeploys to the Raspberry Pi host.
 
 ## Environment
 
-- Copy `src/.env.example` to `src/.env` for `npm run dev`; copy `.env.example` to `.env` for Docker/compose.
+- Copy `.env.example` to `.env` for local/dev/prod compose and local Node runs.
 - Set `NEXT_PUBLIC_MAPS_PUBLIC_KEY`, `NEXT_PUBLIC_APP_VERSION`, and `NEXT_PUBLIC_MAINTENANCE_MODE` before building images (they are baked into the client).
-- Provide runtime secrets: `PUBLIC_BASE_URL`, `ML_API_BASE_URL`, `ML_API_KEY`, `LLM_MODEL_NAME`, `ML_API_VECTOR_STORE_ID`, `NEXTAUTH_SECRET`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (or `INTERNAL_API_*`), and `MONGODB_URI`/`MONGODB_DB`. Optional Mongo bootstrap creds: `MONGO_INITDB_ROOT_USERNAME`, `MONGO_INITDB_ROOT_PASSWORD`.
+- Provide runtime secrets: `PUBLIC_BASE_URL`, `ML_API_BASE_URL`, `ML_API_KEY`, `LLM_MODEL_NAME`, `ML_API_VECTOR_STORE_ID`, `NEXTAUTH_SECRET`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (or `INTERNAL_API_*`), `MONGODB_URI`/`MONGODB_DB`, and `ANALYTICS_HASH_SALT`. Optional retention tuning: `ANALYTICS_LOG_RETENTION_DAYS`.
 - `NEXTAUTH_URL` should point at the external URL in production when using NextAuth callbacks.
 
 ## Run locally
 
 - Node: `cd src && npm ci && npm run dev` (expects Mongo reachable at `MONGODB_URI`, defaults to `mongodb://localhost:27017/personal_website`).
+- Route instrumentation check: `cd src && npm run check:api-analytics`.
 - Docker with live reload + Mongo: `docker compose -f development/docker-compose.yml up --build` (bind-mounts `src/` into the dev container).
 - Prod-like image locally: `docker compose -f compose.dev.yaml up --build` (reads build args from `.env`).
 
@@ -40,9 +43,16 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## API surface
 
 - `GET /api/health` — database health check.
-- `POST /api/agent` — agentic Responses API proxy (SSE supported) and records `agent_completion` events.
-- `GET /api/resume/export` — latest resume PDF; logs `resume_export` events.
-- `/api/auth/[...nextauth]` — credentials login for `/admin`; `/api/admin/*` — protected CRUD + analytics endpoints.
+- `POST /api/agent` — agentic Responses API proxy (SSE supported).
+- `GET /api/resume/export` — latest resume PDF export.
+- `POST /api/analytics/track` — ingest UI analytics events.
+- `/api/auth/[...nextauth]` — credentials login for `/admin`.
+- `/api/admin/*` — protected CRUD + analytics endpoints:
+- `/api/admin/analytics/overview`
+- `/api/admin/analytics/timeseries`
+- `/api/admin/analytics/endpoints`
+- `/api/admin/analytics/errors`
+- `/api/admin/analytics/activity`
 
 ## License
 

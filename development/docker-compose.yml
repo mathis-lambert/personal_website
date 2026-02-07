@@ -25,6 +25,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
       MONGODB_URI: ${MONGODB_URI:-mongodb://admin:password@mongo:27017/personal_website?authSource=admin}
       MONGODB_DB: ${MONGODB_DB:-personal_website}
+      ANALYTICS_LOG_RETENTION_DAYS: ${ANALYTICS_LOG_RETENTION_DAYS:-180}
+      ANALYTICS_HASH_SALT: ${ANALYTICS_HASH_SALT:-dev-analytics-salt}
       CHOKIDAR_USEPOLLING: "1"
     ports:
       - "3000:3000"

@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import useChatAgent from "@/hooks/useChatAgent";
 import type { AgentMessage, AgentRequest } from "@/types/agent";
 import { ChatContext, type ChatContextType } from "@/hooks/useChat";
+import { trackUiEvent } from "@/api/analytics";
 
 interface ChatProviderProps {
   children: React.ReactNode;
@@ -48,25 +49,35 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const openChat = useCallback(() => {
     setIsChatOpen(true);
+    void trackUiEvent({ name: "chat_open" });
   }, []);
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false);
+    void trackUiEvent({ name: "chat_close" });
   }, []);
 
   const toggleChat = useCallback(() => {
-    setIsChatOpen((prev) => !prev);
+    setIsChatOpen((prev) => {
+      const next = !prev;
+      void trackUiEvent({ name: next ? "chat_open" : "chat_close" });
+      return next;
+    });
   }, []);
 
   const sendMessage = useCallback(
     (message: string, location: string) => {
-      if (!message.trim() || (isLoading && !!currentRequest)) return;
+      const trimmedMessage = message.trim();
+      if (!trimmedMessage || (isLoading && !!currentRequest)) return;
 
       if (!isChatOpen) {
         setIsChatOpen(true);
       }
 
-      const userMessage: AgentMessage = { role: "user", content: message };
+      const userMessage: AgentMessage = {
+        role: "user",
+        content: trimmedMessage,
+      };
       const baseMessages = overlayContent
         ? updateLastAssistantContent(messages, overlayContent)
         : messages;
@@ -78,6 +89,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         location,
         stream: true,
       };
+
+      void trackUiEvent({
+        name: "chat_submit",
+        properties: {
+          location,
+          promptLength: trimmedMessage.length,
+        },
+      });
 
       setCurrentRequest(newRequest);
     },

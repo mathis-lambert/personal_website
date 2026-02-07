@@ -190,37 +190,106 @@ export interface Article {
   metrics?: ArticleMetrics;
 }
 
-export interface EventLog {
-  job_id?: string;
-  action?: string;
-  created_at?: string; // ISO
-  request_body?: {
-    location?: string;
-    messages?: Array<{ role: string; content: string }>;
-    [k: string]: unknown;
-  } & Record<string, unknown>;
+export type AnalyticsGranularity = "hour" | "day" | "month";
+
+export type ApiActorType = "public" | "admin" | "system";
+
+export interface AnalyticsRange {
+  start: string;
+  end: string;
+  granularity?: AnalyticsGranularity;
 }
 
-export interface EventsListResponse {
-  ok: boolean;
-  total: number;
-  items: EventLog[];
+export interface AnalyticsKpiSummary {
+  totalRequests: number;
+  errorRequests: number;
+  errorRate: number;
+  avgLatencyMs: number;
+  p95LatencyMs: number;
+  uniqueRoutes: number;
+  uniqueVisitors: number;
+  uiEvents: number;
 }
 
-export type EventsAnalyticsSeriesPoint = {
-  bucket: string; // e.g. 2025-01-01 or 2025-01-01T13:00Z
-  total: number;
-  // dynamic keys per action name
-  [action: string]: number | string;
-};
-
-export interface EventsAnalyticsResponse {
+export interface AdminAnalyticsOverviewResponse {
   ok: boolean;
-  range: { start: string; end: string; granularity: "hour" | "day" | "month" };
-  actions: string[];
-  series: EventsAnalyticsSeriesPoint[];
-  totals: { total: number; byAction: Record<string, number> };
-  group_by?: "action" | "location";
+  range: AnalyticsRange;
+  summary: AnalyticsKpiSummary;
+}
+
+export interface AnalyticsTimeseriesPoint {
+  bucket: string;
+  requests: number;
+  errors: number;
+  uiEvents: number;
+}
+
+export interface AdminAnalyticsTimeseriesResponse {
+  ok: boolean;
+  range: AnalyticsRange;
+  series: AnalyticsTimeseriesPoint[];
+}
+
+export interface EndpointAnalyticsItem {
+  route: string;
+  method: string;
+  count: number;
+  errorRate: number;
+  avgLatencyMs: number;
+  p50LatencyMs: number;
+  p95LatencyMs: number;
+  lastSeenAt: string;
+}
+
+export interface AdminAnalyticsEndpointsResponse {
+  ok: boolean;
+  range: AnalyticsRange;
+  items: EndpointAnalyticsItem[];
+}
+
+export interface ApiErrorEvent {
+  timestamp: string;
+  route: string;
+  path: string;
+  method: string;
+  status: number;
+  durationMs: number;
+  actorType: ApiActorType;
+  message?: string;
+}
+
+export interface AdminAnalyticsErrorsResponse {
+  ok: boolean;
+  total: number;
+  items: ApiErrorEvent[];
+}
+
+export interface ApiActivityItem {
+  kind: "api_request";
+  timestamp: string;
+  route: string;
+  path: string;
+  method: string;
+  status: number;
+  durationMs: number;
+  actorType: ApiActorType;
+}
+
+export interface UiActivityItem {
+  kind: "ui_event";
+  timestamp: string;
+  name: string;
+  path?: string;
+  actorType: Exclude<ApiActorType, "system">;
+  sessionId?: string;
+}
+
+export type AnalyticsActivityItem = ApiActivityItem | UiActivityItem;
+
+export interface AdminAnalyticsActivityResponse {
+  ok: boolean;
+  total: number;
+  items: AnalyticsActivityItem[];
 }
 
 export type AdminCollectionName =

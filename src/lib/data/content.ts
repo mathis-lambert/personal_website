@@ -20,7 +20,6 @@ import type {
   AdminCollectionName,
   AdminListCollectionName,
   Article,
-  ArticleMetrics,
   Project,
   ResumeData,
   TimelineEntry,
@@ -327,63 +326,6 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     return null;
   }
   return stripArticle(doc);
-}
-
-export async function updateArticleMetric(
-  eventType: "like" | "share" | "read",
-  payload: { _id?: string; slug?: string },
-): Promise<ArticleMetrics | null> {
-  const collection = await getArticlesCollection();
-  const objectId = payload._id ? parseObjectId(payload._id) : null;
-  const filter = objectId
-    ? { _id: objectId }
-    : payload.slug
-      ? { slug: payload.slug }
-      : null;
-  if (!filter) return null;
-  const incKey =
-    eventType === "like"
-      ? "metrics.likes"
-      : eventType === "share"
-        ? "metrics.shares"
-        : "metrics.views";
-  const result = await collection.findOneAndUpdate(
-    filter,
-    {
-      $inc: { [incKey]: 1 },
-      $set: { updatedAt: new Date() },
-    },
-    { returnDocument: "after" },
-  );
-  if (!result || !result.value) return null;
-  const metrics = result.value.metrics || {};
-  return {
-    views: metrics.views ?? 0,
-    likes: metrics.likes ?? 0,
-    shares: metrics.shares ?? 0,
-  };
-}
-
-export async function getArticleMetrics(payload: {
-  _id?: string;
-  slug?: string;
-}): Promise<ArticleMetrics | null> {
-  const collection = await getArticlesCollection();
-  const objectId = payload._id ? parseObjectId(payload._id) : null;
-  const filter = objectId
-    ? { _id: objectId }
-    : payload.slug
-      ? { slug: payload.slug }
-      : null;
-  if (!filter) return null;
-  const doc = await collection.findOne(filter, { projection: { metrics: 1 } });
-  if (!doc) return null;
-  const metrics = doc.metrics || {};
-  return {
-    views: metrics.views ?? 0,
-    likes: metrics.likes ?? 0,
-    shares: metrics.shares ?? 0,
-  };
 }
 
 export async function getExperiences(): Promise<TimelineEntry[]> {

@@ -21,6 +21,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
       MONGODB_URI: ${MONGODB_URI}
       MONGODB_DB: ${MONGODB_DB}
+      ANALYTICS_LOG_RETENTION_DAYS: ${ANALYTICS_LOG_RETENTION_DAYS:-180}
+      ANALYTICS_HASH_SALT: ${ANALYTICS_HASH_SALT:-dev-analytics-salt}
     ports:
       - "3000:3000"
     networks: [app-network]

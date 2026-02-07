@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { withApiAnalytics } from "@/lib/analytics/server";
 import {
   createProjectOrArticle,
   type AdminCollectionName,
@@ -8,10 +9,10 @@ import { requireAdminSession } from "@/lib/auth/helpers";
 
 const creatable = new Set<AdminCollectionName>(["projects", "articles"]);
 
-export async function POST(
+const postHandler = async (
   req: NextRequest,
   { params }: { params: Promise<{ collection: string }> },
-) {
+) => {
   const { collection } = await params;
 
   if (!(await requireAdminSession())) {
@@ -23,10 +24,18 @@ export async function POST(
       { status: 400 },
     );
   }
-  const body = await req.json();
+  const body = (await req.json()) as Record<string, unknown>;
   const { _id, item } = await createProjectOrArticle(
     collection as Extract<AdminCollectionName, "projects" | "articles">,
     body,
   );
   return NextResponse.json({ ok: true, _id, item });
-}
+};
+
+export const POST = withApiAnalytics(
+  {
+    route: "/api/admin/:collection",
+    actorType: "admin",
+  },
+  postHandler,
+);

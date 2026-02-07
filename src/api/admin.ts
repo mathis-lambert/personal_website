@@ -1,10 +1,15 @@
 import { fetchWithTimeout } from "@/api/utils";
 import type {
+  AdminAnalyticsActivityResponse,
+  AdminAnalyticsEndpointsResponse,
+  AdminAnalyticsErrorsResponse,
+  AdminAnalyticsOverviewResponse,
+  AdminAnalyticsTimeseriesResponse,
   AdminCollectionName,
   AdminListCollectionName,
+  AnalyticsGranularity,
+  ApiActorType,
   Article,
-  EventsAnalyticsResponse,
-  EventsListResponse,
   Project,
   ResumeData,
 } from "@/types";
@@ -126,7 +131,6 @@ export async function updateItem(
   patch: unknown,
   token?: string,
 ): Promise<{ ok: boolean; item: unknown }> {
-  // Special case: resume doesn't need an item id; backend exposes /api/admin/resume
   const url =
     collection === "resume"
       ? `/api/admin/resume`
@@ -161,60 +165,121 @@ export async function deleteItem(
     throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
 }
 
-export async function getEventsAnalytics(
-  params: {
-    start?: string; // ISO8601
-    end?: string; // ISO8601
-    granularity?: "hour" | "day" | "month";
-    actions?: string[]; // optional filter list
-    groupBy?: "action" | "location";
-  },
-  token?: string,
-): Promise<EventsAnalyticsResponse> {
+type AnalyticsCommonParams = {
+  start?: string;
+  end?: string;
+  route?: string;
+  method?: string;
+  actorType?: ApiActorType;
+};
+
+const withCommonAnalyticsParams = (
+  params: AnalyticsCommonParams,
+): URLSearchParams => {
   const qs = new URLSearchParams();
   if (params.start) qs.set("start", params.start);
   if (params.end) qs.set("end", params.end);
-  if (params.granularity) qs.set("granularity", params.granularity);
-  if (params.actions && params.actions.length)
-    qs.set("action", params.actions.join(","));
-  if (params.groupBy) qs.set("group_by", params.groupBy);
-  const url = `/api/admin/analytics/events${qs.toString() ? `?${qs.toString()}` : ""}`;
+  if (params.route) qs.set("route", params.route);
+  if (params.method) qs.set("method", params.method.toUpperCase());
+  if (params.actorType) qs.set("actor_type", params.actorType);
+  return qs;
+};
+
+export async function getAnalyticsOverview(
+  params: AnalyticsCommonParams,
+  token?: string,
+): Promise<AdminAnalyticsOverviewResponse> {
+  const qs = withCommonAnalyticsParams(params);
+  const url = `/api/admin/analytics/overview${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,
   });
   if (!res.ok)
-    throw new Error(`Failed to fetch events analytics: ${res.status}`);
-  return (await res.json()) as EventsAnalyticsResponse;
+    throw new Error(`Failed to fetch analytics overview: ${res.status}`);
+  return (await res.json()) as AdminAnalyticsOverviewResponse;
 }
 
-export async function getEventsList(
-  params: {
-    start?: string;
-    end?: string;
-    action?: string | string[];
-    limit?: number;
-    skip?: number;
-    sort?: "asc" | "desc";
+export async function getAnalyticsTimeseries(
+  params: AnalyticsCommonParams & {
+    granularity?: AnalyticsGranularity;
   },
   token?: string,
-): Promise<EventsListResponse> {
-  const qs = new URLSearchParams();
-  if (params.start) qs.set("start", params.start);
-  if (params.end) qs.set("end", params.end);
-  if (params.action)
-    qs.set(
-      "action",
-      Array.isArray(params.action) ? params.action.join(",") : params.action,
-    );
-  if (params.limit != null) qs.set("limit", String(params.limit));
-  if (params.skip != null) qs.set("skip", String(params.skip));
-  if (params.sort) qs.set("sort", params.sort);
-  const url = `/api/admin/events${qs.toString() ? `?${qs.toString()}` : ""}`;
+): Promise<AdminAnalyticsTimeseriesResponse> {
+  const qs = withCommonAnalyticsParams(params);
+  if (params.granularity) qs.set("granularity", params.granularity);
+
+  const url = `/api/admin/analytics/timeseries${qs.toString() ? `?${qs.toString()}` : ""}`;
   const res = await fetchWithTimeout(url, {
     timeoutMs: 12000,
     authToken: token,
   });
-  if (!res.ok) throw new Error(`Failed to fetch events: ${res.status}`);
-  return (await res.json()) as EventsListResponse;
+  if (!res.ok)
+    throw new Error(`Failed to fetch analytics timeseries: ${res.status}`);
+  return (await res.json()) as AdminAnalyticsTimeseriesResponse;
+}
+
+export async function getAnalyticsEndpoints(
+  params: AnalyticsCommonParams & { limit?: number },
+  token?: string,
+): Promise<AdminAnalyticsEndpointsResponse> {
+  const qs = withCommonAnalyticsParams(params);
+  if (params.limit != null) qs.set("limit", String(params.limit));
+
+  const url = `/api/admin/analytics/endpoints${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(`Failed to fetch endpoint analytics: ${res.status}`);
+  return (await res.json()) as AdminAnalyticsEndpointsResponse;
+}
+
+export async function getAnalyticsErrors(
+  params: AnalyticsCommonParams & {
+    statusMin?: number;
+    statusMax?: number;
+    limit?: number;
+    skip?: number;
+  },
+  token?: string,
+): Promise<AdminAnalyticsErrorsResponse> {
+  const qs = withCommonAnalyticsParams(params);
+  if (params.statusMin != null) qs.set("status_min", String(params.statusMin));
+  if (params.statusMax != null) qs.set("status_max", String(params.statusMax));
+  if (params.limit != null) qs.set("limit", String(params.limit));
+  if (params.skip != null) qs.set("skip", String(params.skip));
+
+  const url = `/api/admin/analytics/errors${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(`Failed to fetch analytics errors: ${res.status}`);
+  return (await res.json()) as AdminAnalyticsErrorsResponse;
+}
+
+export async function getAnalyticsActivity(
+  params: AnalyticsCommonParams & {
+    type?: "api" | "ui" | "all";
+    limit?: number;
+    skip?: number;
+  },
+  token?: string,
+): Promise<AdminAnalyticsActivityResponse> {
+  const qs = withCommonAnalyticsParams(params);
+  if (params.type) qs.set("type", params.type);
+  if (params.limit != null) qs.set("limit", String(params.limit));
+  if (params.skip != null) qs.set("skip", String(params.skip));
+
+  const url = `/api/admin/analytics/activity${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(`Failed to fetch analytics activity: ${res.status}`);
+  return (await res.json()) as AdminAnalyticsActivityResponse;
 }

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { Article } from "@/types";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import { trackUiEvent } from "@/api/analytics";
 
 interface BlogArticleCardProps {
   article: Article;
@@ -42,6 +43,16 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
     >
       <Link
         href={`/blog/${article.slug || article._id}`}
+        onClick={() => {
+          void trackUiEvent({
+            name: "article_open",
+            path: `/blog/${article.slug || article._id}`,
+            properties: {
+              slug: article.slug ?? article._id,
+              title: article.title,
+            },
+          });
+        }}
         className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/10 dark:focus-visible:ring-offset-black/30 rounded-3xl"
         aria-label={`Read article: ${article.title}`}
       >

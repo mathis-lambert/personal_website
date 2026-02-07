@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ChatProvider } from "@/providers/ChatProvider";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -18,6 +19,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         storageKey="next-ui-theme"
       >
         <ChatProvider>
+          <PageViewTracker />
           {children}
           <Toaster />
         </ChatProvider>

@@ -19,6 +19,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       MONGODB_URI: ${MONGODB_URI}
       MONGODB_DB: ${MONGODB_DB}
+      ANALYTICS_LOG_RETENTION_DAYS: ${ANALYTICS_LOG_RETENTION_DAYS:-180}
+      ANALYTICS_HASH_SALT: ${ANALYTICS_HASH_SALT}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

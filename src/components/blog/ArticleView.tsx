@@ -16,6 +16,7 @@ import {
 import MarkdownView from "@/components/ui/MarkdownView";
 import Breadcrumb from "@/components/ui/breadcrumb";
 import Image from "next/image";
+import { trackUiEvent } from "@/api/analytics";
 
 interface ArticleViewProps {
   article: Article | null | undefined;
@@ -128,6 +129,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
       if (navigator.share) {
         await navigator.share(shareData);
         trackArticleShare();
+        void trackUiEvent({
+          name: "article_share",
+          properties: {
+            slug: article.slug ?? article._id,
+            channel: "native",
+          },
+        });
         return;
       }
     } catch {
@@ -137,6 +145,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
       await navigator.clipboard.writeText(url);
       setCopiedShare(true);
       trackArticleShare();
+      void trackUiEvent({
+        name: "article_share",
+        properties: {
+          slug: article.slug ?? article._id,
+          channel: "clipboard",
+        },
+      });
       setTimeout(() => setCopiedShare(false), 2000);
     } catch {
       // ignore
@@ -284,6 +299,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                   openShareWindow(
                     `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
                   );
+                  void trackUiEvent({
+                    name: "article_share",
+                    properties: {
+                      slug: article.slug ?? article._id,
+                      channel: "twitter",
+                    },
+                  });
                 }}
                 aria-label="Share on Twitter"
                 title="Share on Twitter"
@@ -298,6 +320,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                   openShareWindow(
                     `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`,
                   );
+                  void trackUiEvent({
+                    name: "article_share",
+                    properties: {
+                      slug: article.slug ?? article._id,
+                      channel: "linkedin",
+                    },
+                  });
                 }}
                 aria-label="Share on LinkedIn"
                 title="Share on LinkedIn"
@@ -317,6 +346,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, isLoading }) => {
                       window.location?.href ?? "",
                     );
                     setCopiedLink(true);
+                    void trackUiEvent({
+                      name: "article_share",
+                      properties: {
+                        slug: article.slug ?? article._id,
+                        channel: "copy_link",
+                      },
+                    });
                     setTimeout(() => setCopiedLink(false), 2000);
                   } catch {
                     // ignore

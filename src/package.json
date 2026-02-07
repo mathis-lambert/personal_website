@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:api-analytics": "node scripts/check-api-analytics.mjs"
   },
   "dependencies": {
     "@fontsource/lato": "^5.2.6",

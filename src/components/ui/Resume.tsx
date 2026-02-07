@@ -23,6 +23,7 @@ import { CertificationsCard } from "../resume/CertificationsCard";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { downloadResumePdf } from "@/api/resume";
+import { trackUiEvent } from "@/api/analytics";
 import { motion } from "framer-motion";
 
 const emptyResume: ResumeData = {
@@ -96,11 +97,20 @@ export default function Resume({
   const data = normalizeResume(resumeData);
 
   const onExportPdf = async () => {
+    void trackUiEvent({ name: "resume_export_click" });
     try {
       setDownloading(true);
       await downloadResumePdf();
+      void trackUiEvent({
+        name: "resume_export_click",
+        properties: { result: "success" },
+      });
     } catch (e) {
       console.error("Failed to export resume PDF", e);
+      void trackUiEvent({
+        name: "resume_export_click",
+        properties: { result: "error" },
+      });
     } finally {
       setDownloading(false);
     }

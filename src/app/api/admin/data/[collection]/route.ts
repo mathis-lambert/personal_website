@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { withApiAnalytics } from "@/lib/analytics/server";
 import {
   getCollection,
   listCollections,
@@ -11,10 +12,10 @@ import { requireAdminSession } from "@/lib/auth/helpers";
 const isValidCollection = (name: string): name is AdminCollectionName =>
   listCollections().includes(name as AdminCollectionName);
 
-export async function GET(
+const getHandler = async (
   _req: NextRequest,
   { params }: { params: Promise<{ collection: string }> },
-) {
+) => {
   const { collection } = await params;
 
   if (!(await requireAdminSession())) {
@@ -25,12 +26,12 @@ export async function GET(
   }
   const data = await getCollection(collection);
   return NextResponse.json({ collection, data });
-}
+};
 
-export async function PUT(
+const putHandler = async (
   req: NextRequest,
   { params }: { params: Promise<{ collection: string }> },
-) {
+) => {
   const { collection } = await params;
 
   if (!(await requireAdminSession())) {
@@ -47,4 +48,21 @@ export async function PUT(
     const message = err instanceof Error ? err.message : "Replace failed";
     return NextResponse.json({ detail: message }, { status: 400 });
   }
-}
+};
+
+export const GET = withApiAnalytics(
+  {
+    route: "/api/admin/data/:collection",
+    actorType: "admin",
+    captureRequestBody: false,
+  },
+  getHandler,
+);
+
+export const PUT = withApiAnalytics(
+  {
+    route: "/api/admin/data/:collection",
+    actorType: "admin",
+  },
+  putHandler,
+);

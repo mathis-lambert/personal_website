@@ -8,6 +8,7 @@ import { BsGithub } from "react-icons/bs";
 import type { Project } from "@/types";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { trackUiEvent } from "@/api/analytics";
 
 interface ProjectCardProps {
   project: Project;
@@ -40,6 +41,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         ? "bg-amber-500/80 text-white border-white/10"
         : "bg-gray-500/70 text-white border-white/10";
 
+  const openDetails = () => {
+    void trackUiEvent({
+      name: "project_open",
+      path: detailsPath,
+      properties: {
+        slug: project.slug ?? project._id,
+        title: project.title,
+      },
+    });
+    router.push(detailsPath);
+  };
+
   return (
     <motion.div
       className="group w-full h-full"
@@ -55,11 +68,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <div
         role="button"
         tabIndex={0}
-        onClick={() => router.push(detailsPath)}
+        onClick={openDetails}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            router.push(detailsPath);
+            openDetails();
           }
         }}
         aria-label={`View details for ${project.title}`}
@@ -150,7 +163,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     href={liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void trackUiEvent({
+                        name: "project_external_open",
+                        properties: {
+                          slug: project.slug ?? project._id,
+                          target: "live",
+                          href: liveUrl,
+                        },
+                      });
+                    }}
                     className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded-sm"
                     aria-label={`View live demo of ${project.title}`}
                     title="View Live Demo"
@@ -163,7 +186,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     href={repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void trackUiEvent({
+                        name: "project_external_open",
+                        properties: {
+                          slug: project.slug ?? project._id,
+                          target: "repo",
+                          href: repoUrl,
+                        },
+                      });
+                    }}
                     className="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 rounded-sm"
                     aria-label={`View source code of ${project.title} on GitHub`}
                     title="View Source Code"

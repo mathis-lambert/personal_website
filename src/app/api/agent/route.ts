@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { runAgent, streamAgent } from "@/lib/ai/agent";
 import { createAgentStream } from "@/lib/ai/stream";
-import { logEvent } from "@/lib/data/events";
+import { withApiAnalytics } from "@/lib/analytics/server";
 import type { AgentMessage, AgentRequest } from "@/types/agent";
 
 export const runtime = "nodejs";
@@ -16,7 +16,7 @@ const isValidMessage = (message: AgentMessage): boolean => {
   );
 };
 
-export async function POST(req: NextRequest) {
+const postHandler = async (req: NextRequest) => {
   const body = (await req.json().catch(() => null)) as AgentRequest | null;
 
   if (!body?.messages || !Array.isArray(body.messages)) {
@@ -34,11 +34,6 @@ export async function POST(req: NextRequest) {
   }
 
   const location = body.location ?? "unknown";
-
-  await logEvent("agent_completion", {
-    location,
-    messages: body.messages,
-  });
 
   const wantsStream =
     body.stream ??
@@ -72,4 +67,12 @@ export async function POST(req: NextRequest) {
       err instanceof Error ? err.message : "Agent request failed.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
+};
+
+export const POST = withApiAnalytics(
+  {
+    route: "/api/agent",
+    actorType: "public",
+  },
+  postHandler,
+);

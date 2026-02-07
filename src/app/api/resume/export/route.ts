@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { withApiAnalytics } from "@/lib/analytics/server";
 import { getResume } from "@/lib/data/content";
-import { logEvent } from "@/lib/data/events";
 import { buildResumePdf } from "@/lib/pdf/resume";
 
-export async function GET() {
+const getHandler = async () => {
   const resume = await getResume();
   const pdfBytes = await buildResumePdf(resume);
-
-  await logEvent("resume_export", {});
 
   return new NextResponse(Buffer.from(pdfBytes), {
     headers: {
@@ -16,4 +14,13 @@ export async function GET() {
       "Content-Disposition": 'attachment; filename="mathis_lambert_resume.pdf"',
     },
   });
-}
+};
+
+export const GET = withApiAnalytics(
+  {
+    route: "/api/resume/export",
+    actorType: "public",
+    captureRequestBody: false,
+  },
+  getHandler,
+);
