@@ -73,30 +73,10 @@ export type UiEventDocument = BaseDocument & {
 };
 
 export type ChatActorDocument = {
-  type: "public" | "admin";
+  type: "public";
   hasSession: boolean;
   ipHash?: string;
   userAgent?: string;
-};
-
-export type ChatConversationDocument = BaseDocument & {
-  kind: "chat_conversation";
-  conversationId: string;
-  sessionId?: string;
-  location?: string;
-  actor: ChatActorDocument;
-  startedAt: Date;
-  lastMessageAt: Date;
-  turnCount: number;
-  successfulTurns: number;
-  failedTurns: number;
-  totalInputChars: number;
-  totalOutputChars: number;
-  totalDurationMs: number;
-  status: "active" | "errored";
-  lastUserMessage?: string;
-  lastAssistantMessage?: string;
-  lastError?: string;
 };
 
 export type ChatConversationTurnDocument = BaseDocument & {
@@ -138,7 +118,6 @@ export const COLLECTION_NAMES = {
   resume: "resume",
   apiRequestLogs: "api_request_logs",
   uiEvents: "ui_events",
-  chatConversations: "chat_conversations",
   chatConversationTurns: "chat_conversation_turns",
 } as const;
 
@@ -257,17 +236,6 @@ const ensureIndexes = async () => {
         ],
       ],
       [
-        COLLECTION_NAMES.chatConversations,
-        [
-          { key: { conversationId: 1 }, unique: true },
-          { key: { lastMessageAt: -1 } },
-          { key: { sessionId: 1, lastMessageAt: -1 }, sparse: true },
-          { key: { "actor.ipHash": 1, lastMessageAt: -1 }, sparse: true },
-          { key: { status: 1, lastMessageAt: -1 } },
-          { key: { lastUserMessage: "text", lastAssistantMessage: "text" } },
-        ],
-      ],
-      [
         COLLECTION_NAMES.chatConversationTurns,
         [
           { key: { turnId: 1 }, unique: true },
@@ -316,12 +284,6 @@ const ensureIndexes = async () => {
         analyticsRetentionSeconds,
       ),
       ensureTtlIndex(
-        db.collection(COLLECTION_NAMES.chatConversations),
-        "last_message_ttl",
-        "lastMessageAt",
-        chatRetentionSeconds,
-      ),
-      ensureTtlIndex(
         db.collection(COLLECTION_NAMES.chatConversationTurns),
         "timestamp_ttl",
         "timestamp",
@@ -360,9 +322,6 @@ export const getApiRequestLogsCollection = () =>
 
 export const getUiEventsCollection = () =>
   getCollection<UiEventDocument>(COLLECTION_NAMES.uiEvents);
-
-export const getChatConversationsCollection = () =>
-  getCollection<ChatConversationDocument>(COLLECTION_NAMES.chatConversations);
 
 export const getChatConversationTurnsCollection = () =>
   getCollection<ChatConversationTurnDocument>(

@@ -25,7 +25,7 @@ export interface AgentResponse {
   message: AgentMessage;
   model?: string;
   usage?: AgentUsage;
-  conversationId?: string;
+  conversationId: string;
 }
 
 export type AgentStreamEvent =

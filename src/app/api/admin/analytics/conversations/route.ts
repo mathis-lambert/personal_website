@@ -10,10 +10,6 @@ const getHandler = async (req: NextRequest) => {
     return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
   }
 
-  const actorRaw = req.nextUrl.searchParams.get("actor_type") ?? undefined;
-  const actorType =
-    actorRaw === "public" || actorRaw === "admin" ? actorRaw : undefined;
-
   const statusRaw = req.nextUrl.searchParams.get("status") ?? undefined;
   const status =
     statusRaw === "active" || statusRaw === "errored" ? statusRaw : undefined;
@@ -21,7 +17,6 @@ const getHandler = async (req: NextRequest) => {
   const data = await listConversations({
     start: req.nextUrl.searchParams.get("start") ?? undefined,
     end: req.nextUrl.searchParams.get("end") ?? undefined,
-    actorType,
     status,
     q: req.nextUrl.searchParams.get("q") ?? undefined,
     sessionId: req.nextUrl.searchParams.get("session_id") ?? undefined,

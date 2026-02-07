@@ -48,6 +48,7 @@ const createAgentInstance = (options: {
 
 export type AgentRunOptions = {
   messages: AgentMessage[];
+  conversationId: string;
   location?: string;
 };
 
@@ -70,6 +71,7 @@ export const runAgent = async (
 
   return {
     id: randomUUID(),
+    conversationId: options.conversationId,
     model: env.model,
     message: {
       role: "assistant",
@@ -127,6 +129,7 @@ export const streamAgent = async function* (
     type: "final",
     response: {
       id: randomUUID(),
+      conversationId: options.conversationId,
       model: env.model,
       message: {
         role: "assistant",

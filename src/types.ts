@@ -299,7 +299,7 @@ export interface ChatConversationListItem {
   conversationId: string;
   sessionId?: string;
   location?: string;
-  actorType: Exclude<ApiActorType, "system">;
+  actorType: "public";
   startedAt: string;
   lastMessageAt: string;
   turnCount: number;

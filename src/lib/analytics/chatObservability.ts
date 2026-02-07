@@ -4,35 +4,11 @@ import type { NextRequest } from "next/server";
 
 import {
   getChatConversationTurnsCollection,
-  getChatConversationsCollection,
   type ChatActorDocument,
-  type ChatConversationDocument,
 } from "@/lib/db/collections";
 import { buildActorContext } from "@/lib/analytics/context";
 import { redactFreeText } from "@/lib/analytics/redaction";
 import type { AgentMessage, AgentRequest, AgentResponse } from "@/types/agent";
-
-type ConversationCounterIncrements = Partial<{
-  turnCount: number;
-  successfulTurns: number;
-  failedTurns: number;
-  totalInputChars: number;
-  totalOutputChars: number;
-  totalDurationMs: number;
-}>;
-
-type SummaryPatch = {
-  conversationId: string;
-  timestamp: Date;
-  actor: ChatActorDocument;
-  sessionId?: string;
-  location?: string;
-  status?: ChatConversationDocument["status"];
-  lastUserMessage?: string;
-  lastAssistantMessage?: string;
-  lastError?: string;
-  increments?: ConversationCounterIncrements;
-};
 
 export type StartedTurn = {
   turnId: string;
@@ -42,11 +18,13 @@ export type StartedTurn = {
   sessionId?: string;
 };
 
-const toPublicOrAdminActor = (req: NextRequest): ChatActorDocument => {
-  const actor = buildActorContext(req, "public");
+const toPublicActor = (req: NextRequest): ChatActorDocument => {
+  const context = buildActorContext(req, "public");
   return {
-    ...actor,
-    type: actor.type === "admin" ? "admin" : "public",
+    type: "public",
+    hasSession: context.hasSession,
+    ipHash: context.ipHash,
+    userAgent: context.userAgent,
   };
 };
 
@@ -86,55 +64,65 @@ const getLastUserMessage = (messages: AgentMessage[]): string | undefined => {
   return undefined;
 };
 
-const totalChars = (messages: AgentMessage[]): number => {
-  return messages.reduce((acc, message) => acc + message.content.length, 0);
+const buildResponsePayload = (input: {
+  message?: string;
+  model?: string;
+  usage?: AgentResponse["usage"];
+}): {
+  message: string;
+  model?: string;
+  usage?: AgentResponse["usage"];
+} | null => {
+  if (typeof input.message !== "string") return null;
+  const message = redactFreeText(input.message);
+  if (!message.length) return null;
+  return {
+    message,
+    model: input.model,
+    usage: input.usage,
+  };
 };
 
-export async function upsertConversationSummary(patch: SummaryPatch) {
-  const collection = await getChatConversationsCollection();
-
-  const setValues: Partial<ChatConversationDocument> = {
-    lastMessageAt: patch.timestamp,
-    location: patch.location,
-    sessionId: patch.sessionId,
-    actor: patch.actor,
-    status: patch.status,
-    lastUserMessage: patch.lastUserMessage,
-    lastAssistantMessage: patch.lastAssistantMessage,
-    lastError: patch.lastError,
+const finalizeTurn = async (input: {
+  turnId: string;
+  status: "completed" | "failed";
+  durationMs: number;
+  response?: {
+    message?: string;
+    model?: string;
+    usage?: AgentResponse["usage"];
   };
+  error?: {
+    name?: string;
+    message: string;
+    stack?: string;
+  };
+}): Promise<void> => {
+  const turnsCollection = await getChatConversationTurnsCollection();
+  const completedAt = new Date();
+  const response = input.response ? buildResponsePayload(input.response) : null;
 
-  const cleanSetValues = Object.fromEntries(
-    Object.entries(setValues).filter(([, value]) => value !== undefined),
-  );
-
-  const increments = Object.fromEntries(
-    Object.entries(patch.increments ?? {}).filter(([, value]) => value),
-  );
-
-  await collection.updateOne(
-    { conversationId: patch.conversationId },
+  await turnsCollection.updateOne(
+    { turnId: input.turnId },
     {
-      $setOnInsert: {
-        kind: "chat_conversation",
-        conversationId: patch.conversationId,
-        startedAt: patch.timestamp,
-        lastMessageAt: patch.timestamp,
-        turnCount: 0,
-        successfulTurns: 0,
-        failedTurns: 0,
-        totalInputChars: 0,
-        totalOutputChars: 0,
-        totalDurationMs: 0,
-        status: "active",
-        actor: patch.actor,
+      $set: {
+        status: input.status,
+        completedAt,
+        durationMs: input.durationMs,
+        ...(response
+          ? {
+              response,
+            }
+          : {}),
+        ...(input.error
+          ? {
+              error: input.error,
+            }
+          : {}),
       },
-      $set: cleanSetValues,
-      ...(Object.keys(increments).length ? { $inc: increments } : {}),
     },
-    { upsert: true },
   );
-}
+};
 
 export async function startTurn(input: {
   req: NextRequest;
@@ -145,7 +133,7 @@ export async function startTurn(input: {
 }): Promise<StartedTurn> {
   const turnsCollection = await getChatConversationTurnsCollection();
 
-  const actor = toPublicOrAdminActor(input.req);
+  const actor = toPublicActor(input.req);
   const timestamp = new Date();
   const sessionId = input.request.sessionId?.trim() || undefined;
   const conversationId = input.request.conversationId?.trim() || randomUUID();
@@ -183,20 +171,6 @@ export async function startTurn(input: {
     },
   });
 
-  await upsertConversationSummary({
-    conversationId,
-    timestamp,
-    actor,
-    sessionId,
-    location: input.request.location,
-    status: "active",
-    lastUserMessage,
-    increments: {
-      turnCount: 1,
-      totalInputChars: totalChars(sanitizedMessages),
-    },
-  });
-
   return {
     turnId,
     conversationId,
@@ -208,113 +182,37 @@ export async function startTurn(input: {
 
 export async function completeTurn(input: {
   turnId: string;
-  conversationId: string;
   response: AgentResponse;
   durationMs: number;
   assistantMessage?: string;
 }): Promise<void> {
-  const turnsCollection = await getChatConversationTurnsCollection();
-  const conversationsCollection = await getChatConversationsCollection();
-  const completedAt = new Date();
-
-  const assistantMessage = redactFreeText(
-    input.assistantMessage ?? input.response.message?.content ?? "",
-  );
-
-  const turn = await turnsCollection.findOne({ turnId: input.turnId });
-  if (!turn) return;
-
-  await turnsCollection.updateOne(
-    { turnId: input.turnId },
-    {
-      $set: {
-        status: "completed",
-        completedAt,
-        durationMs: input.durationMs,
-        response: {
-          message: assistantMessage,
-          model: input.response.model,
-          usage: input.response.usage,
-        },
-      },
-    },
-  );
-
-  const outputChars = assistantMessage.length;
-
-  await upsertConversationSummary({
-    conversationId: input.conversationId,
-    timestamp: completedAt,
-    actor: turn.actor,
-    sessionId: turn.sessionId,
-    location: turn.location,
-    status: "active",
-    lastUserMessage: turn.request?.lastUserMessage,
-    lastAssistantMessage: assistantMessage,
-    lastError: undefined,
-    increments: {
-      successfulTurns: 1,
-      totalOutputChars: outputChars,
-      totalDurationMs: input.durationMs,
+  await finalizeTurn({
+    turnId: input.turnId,
+    status: "completed",
+    durationMs: input.durationMs,
+    response: {
+      message: input.assistantMessage ?? input.response.message?.content ?? "",
+      model: input.response.model,
+      usage: input.response.usage,
     },
   });
-
-  await conversationsCollection.updateOne(
-    { conversationId: input.conversationId },
-    { $unset: { lastError: "" } },
-  );
 }
 
 export async function failTurn(input: {
   turnId: string;
-  conversationId: string;
   error: unknown;
   durationMs: number;
   partialAssistantMessage?: string;
 }): Promise<void> {
-  const turnsCollection = await getChatConversationTurnsCollection();
-  const completedAt = new Date();
   const normalizedError = normalizeError(input.error);
-  const partialAssistantMessage = input.partialAssistantMessage
-    ? redactFreeText(input.partialAssistantMessage)
-    : undefined;
 
-  const turn = await turnsCollection.findOne({ turnId: input.turnId });
-  if (!turn) return;
-
-  await turnsCollection.updateOne(
-    { turnId: input.turnId },
-    {
-      $set: {
-        status: "failed",
-        completedAt,
-        durationMs: input.durationMs,
-        error: normalizedError,
-        ...(partialAssistantMessage
-          ? {
-              response: {
-                message: partialAssistantMessage,
-              },
-            }
-          : {}),
-      },
+  await finalizeTurn({
+    turnId: input.turnId,
+    status: "failed",
+    durationMs: input.durationMs,
+    response: {
+      message: input.partialAssistantMessage,
     },
-  );
-
-  await upsertConversationSummary({
-    conversationId: input.conversationId,
-    timestamp: completedAt,
-    actor: turn.actor,
-    sessionId: turn.sessionId,
-    location: turn.location,
-    status: "errored",
-    lastUserMessage: turn.request?.lastUserMessage,
-    lastAssistantMessage: partialAssistantMessage,
-    lastError: normalizedError.message,
-    increments: {
-      failedTurns: 1,
-      totalOutputChars: partialAssistantMessage?.length ?? 0,
-      totalDurationMs: input.durationMs,
-    },
+    error: normalizedError,
   });
 }

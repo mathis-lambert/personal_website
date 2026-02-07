@@ -7,7 +7,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
 - Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE.
 - Mandatory API analytics wrapper (`withApiAnalytics`) on all API routes except `/api/health` and NextAuth, with redacted structured logs in MongoDB.
-- Dedicated chat transcript observability for `/api/agent` with normalized `chat_conversations` + `chat_conversation_turns` collections (redacted input/output).
+- Dedicated chat transcript observability for `/api/agent` with a turns-only source (`chat_conversation_turns`) and conversation summaries aggregated at read time (redacted input/output).
 - Credentials-protected admin area at `/admin` with granular observability (overview, timeseries, endpoint latency, error stream, activity feed).
 - Discussion explorer at `/admin/discussions` for transcript-level inspection and moderation.
 - UI analytics ingestion endpoint at `/api/analytics/track` (page views + key interactions).
@@ -17,7 +17,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Stack and layout
 
 - Next.js 16 / React 19 / TypeScript with standalone output.
-- MongoDB for content, analytics logs (`api_request_logs`, `ui_events`), and chat transcript monitoring (`chat_conversations`, `chat_conversation_turns`).
+- MongoDB for content, analytics logs (`api_request_logs`, `ui_events`), and chat transcript monitoring (`chat_conversation_turns`).
 - Docker multi-stage build (`Dockerfile`) producing a single runtime image.
 - Compose files: `development/docker-compose.yml` (local dev with Mongo), `compose.dev.yaml` (local prod build), `compose.prod.yaml` (server deploy with Traefik labels).
 - GitHub Actions `.github/workflows/cd.yaml` builds/pushes `ghcr.io/<owner>/personal-website` on tags and redeploys to the Raspberry Pi host.

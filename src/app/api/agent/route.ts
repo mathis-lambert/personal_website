@@ -38,7 +38,6 @@ const safeCompleteTurn = async (input: {
   try {
     await completeTurn({
       turnId: input.startedTurn.turnId,
-      conversationId: input.startedTurn.conversationId,
       response: input.response,
       durationMs: input.durationMs,
       assistantMessage: input.assistantMessage,
@@ -57,7 +56,6 @@ const safeFailTurn = async (input: {
   try {
     await failTurn({
       turnId: input.startedTurn.turnId,
-      conversationId: input.startedTurn.conversationId,
       error: input.error,
       durationMs: input.durationMs,
       partialAssistantMessage: input.partialAssistantMessage,
@@ -85,6 +83,7 @@ const postHandler = async (req: NextRequest) => {
   }
 
   const location = body.location ?? "unknown";
+  const resolvedConversationId = body.conversationId?.trim() || randomUUID();
 
   const wantsStream =
     body.stream ??
@@ -97,7 +96,10 @@ const postHandler = async (req: NextRequest) => {
   try {
     startedTurn = await startTurn({
       req,
-      request: body,
+      request: {
+        ...body,
+        conversationId: resolvedConversationId,
+      },
       route: "/api/agent",
       path: req.nextUrl.pathname,
       streamed: wantsStream,
@@ -115,6 +117,7 @@ const postHandler = async (req: NextRequest) => {
       try {
         const upstream = streamAgent({
           messages: body.messages,
+          conversationId: resolvedConversationId,
           location,
         });
 
@@ -128,7 +131,8 @@ const postHandler = async (req: NextRequest) => {
           if (event.type === "final") {
             const finalResponse: AgentResponse = {
               ...event.response,
-              conversationId: startedTurn?.conversationId,
+              conversationId:
+                startedTurn?.conversationId ?? resolvedConversationId,
               message: {
                 ...event.response.message,
                 content: event.response.message.content || streamedText,
@@ -159,7 +163,8 @@ const postHandler = async (req: NextRequest) => {
         if (startedTurn && !completed) {
           const fallbackResponse: AgentResponse = {
             id: randomUUID(),
-            conversationId: startedTurn.conversationId,
+            conversationId:
+              startedTurn?.conversationId ?? resolvedConversationId,
             message: {
               role: "assistant",
               content: streamedText || "I haven't shared that yet.",
@@ -196,12 +201,13 @@ const postHandler = async (req: NextRequest) => {
   try {
     const response = await runAgent({
       messages: body.messages,
+      conversationId: resolvedConversationId,
       location,
     });
 
     const enrichedResponse: AgentResponse = {
       ...response,
-      conversationId: startedTurn?.conversationId,
+      conversationId: startedTurn?.conversationId ?? resolvedConversationId,
     };
 
     if (startedTurn) {

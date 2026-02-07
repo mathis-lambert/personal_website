@@ -291,7 +291,6 @@ export async function getConversations(
   params: {
     start?: string;
     end?: string;
-    actorType?: "public" | "admin";
     status?: "active" | "errored";
     q?: string;
     sessionId?: string;
@@ -303,7 +302,6 @@ export async function getConversations(
   const qs = new URLSearchParams();
   if (params.start) qs.set("start", params.start);
   if (params.end) qs.set("end", params.end);
-  if (params.actorType) qs.set("actor_type", params.actorType);
   if (params.status) qs.set("status", params.status);
   if (params.q) qs.set("q", params.q);
   if (params.sessionId) qs.set("session_id", params.sessionId);

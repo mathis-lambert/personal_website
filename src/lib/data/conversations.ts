@@ -1,9 +1,7 @@
-import type { Filter } from "mongodb";
+import type { Document, Filter } from "mongodb";
 
 import {
   getChatConversationTurnsCollection,
-  getChatConversationsCollection,
-  type ChatConversationDocument,
   type ChatConversationTurnDocument,
 } from "@/lib/db/collections";
 import type {
@@ -13,6 +11,22 @@ import type {
   ChatConversationDetail,
   ChatConversationTurnItem,
 } from "@/types";
+
+type AggregatedConversation = {
+  conversationId: string;
+  sessionId?: string;
+  location?: string;
+  actorType: "public";
+  startedAt: Date | string;
+  lastMessageAt: Date | string;
+  turnCount: number;
+  successfulTurns: number;
+  failedTurns: number;
+  status: "active" | "errored";
+  lastUserMessage?: string;
+  lastAssistantMessage?: string;
+  lastError?: string;
+};
 
 const clamp = (value: number, min: number, max: number) => {
   return Math.max(min, Math.min(max, value));
@@ -38,14 +52,12 @@ const toIso = (value: Date | string | undefined): string => {
   return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
 };
 
-const mapConversation = (
-  doc: ChatConversationDocument,
-): ChatConversationDetail => {
+const mapConversation = (doc: AggregatedConversation): ChatConversationDetail => {
   return {
     conversationId: doc.conversationId,
     sessionId: doc.sessionId,
     location: doc.location,
-    actorType: doc.actor.type,
+    actorType: "public",
     startedAt: toIso(doc.startedAt),
     lastMessageAt: toIso(doc.lastMessageAt),
     turnCount: doc.turnCount,
@@ -80,40 +92,39 @@ const mapTurn = (doc: ChatConversationTurnDocument): ChatConversationTurnItem =>
   };
 };
 
-export async function listConversations(input: {
-  start?: string;
-  end?: string;
-  actorType?: "public" | "admin";
-  status?: "active" | "errored";
+const buildConversationSummaryPipeline = (input: {
+  conversationId?: string;
   sessionId?: string;
   q?: string;
-  limit?: number;
-  skip?: number;
-}): Promise<AdminConversationsListResponse> {
-  const collection = await getChatConversationsCollection();
+  status?: "active" | "errored";
+  start?: Date;
+  end?: Date;
+}): Document[] => {
+  const baseMatch: Document = {};
 
-  const end = parseDate(input.end, new Date());
-  const start = parseDate(
-    input.start,
-    new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000),
-  );
-
-  const filter: Filter<ChatConversationDocument> = {
-    lastMessageAt: { $gte: start, $lte: end },
-  };
-
-  if (input.actorType) {
-    filter["actor.type"] = input.actorType;
-  }
-  if (input.status) {
-    filter.status = input.status;
+  if (input.conversationId) {
+    baseMatch.conversationId = input.conversationId;
   }
   if (input.sessionId?.trim()) {
-    filter.sessionId = input.sessionId.trim();
+    baseMatch.sessionId = input.sessionId.trim();
   }
+
+  const postMatch: Document = {};
+
+  if (input.start || input.end) {
+    const range: Document = {};
+    if (input.start) range.$gte = input.start;
+    if (input.end) range.$lte = input.end;
+    postMatch.lastMessageAt = range;
+  }
+
+  if (input.status) {
+    postMatch.status = input.status;
+  }
+
   if (input.q?.trim()) {
     const pattern = new RegExp(escapeRegex(input.q.trim()), "i");
-    filter.$or = [
+    postMatch.$or = [
       { lastUserMessage: { $regex: pattern } },
       { lastAssistantMessage: { $regex: pattern } },
       { conversationId: { $regex: pattern } },
@@ -121,18 +132,104 @@ export async function listConversations(input: {
     ];
   }
 
+  return [
+    ...(Object.keys(baseMatch).length ? [{ $match: baseMatch }] : []),
+    { $sort: { conversationId: 1, turnIndex: -1, timestamp: -1 } },
+    {
+      $group: {
+        _id: "$conversationId",
+        conversationId: { $first: "$conversationId" },
+        sessionId: { $first: "$sessionId" },
+        location: { $first: "$location" },
+        startedAt: { $min: "$timestamp" },
+        lastMessageAt: { $max: "$timestamp" },
+        turnCount: { $sum: 1 },
+        successfulTurns: {
+          $sum: {
+            $cond: [{ $eq: ["$status", "completed"] }, 1, 0],
+          },
+        },
+        failedTurns: {
+          $sum: {
+            $cond: [{ $eq: ["$status", "failed"] }, 1, 0],
+          },
+        },
+        lastStatus: { $first: "$status" },
+        lastUserMessage: { $first: "$request.lastUserMessage" },
+        lastAssistantMessage: { $first: "$response.message" },
+        lastError: { $first: "$error.message" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        conversationId: 1,
+        sessionId: 1,
+        location: 1,
+        actorType: { $literal: "public" },
+        startedAt: 1,
+        lastMessageAt: 1,
+        turnCount: 1,
+        successfulTurns: 1,
+        failedTurns: 1,
+        status: {
+          $cond: [{ $eq: ["$lastStatus", "failed"] }, "errored", "active"],
+        },
+        lastUserMessage: 1,
+        lastAssistantMessage: 1,
+        lastError: 1,
+      },
+    },
+    ...(Object.keys(postMatch).length ? [{ $match: postMatch }] : []),
+    { $sort: { lastMessageAt: -1 } },
+  ];
+};
+
+export async function listConversations(input: {
+  start?: string;
+  end?: string;
+  status?: "active" | "errored";
+  sessionId?: string;
+  q?: string;
+  limit?: number;
+  skip?: number;
+}): Promise<AdminConversationsListResponse> {
+  const collection = await getChatConversationTurnsCollection();
+
+  const end = parseDate(input.end, new Date());
+  const start = parseDate(
+    input.start,
+    new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000),
+  );
+
   const limit = clamp(input.limit ?? 50, 1, 200);
   const skip = Math.max(0, input.skip ?? 0);
 
-  const [items, total] = await Promise.all([
-    collection
-      .find(filter)
-      .sort({ lastMessageAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .toArray(),
-    collection.countDocuments(filter),
-  ]);
+  const pipeline: Document[] = [
+    ...buildConversationSummaryPipeline({
+      start,
+      end,
+      status: input.status,
+      sessionId: input.sessionId,
+      q: input.q,
+    }),
+    {
+      $facet: {
+        items: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: "count" }],
+      },
+    },
+  ];
+
+  const [aggregated] = await collection
+    .aggregate<{
+      items: AggregatedConversation[];
+      total: Array<{ count: number }>;
+    }>(pipeline)
+    .toArray();
+
+  const items = aggregated?.items ?? [];
+  const total = aggregated?.total?.[0]?.count ?? 0;
 
   return {
     ok: true,
@@ -144,8 +241,16 @@ export async function listConversations(input: {
 export async function getConversationDetail(
   conversationId: string,
 ): Promise<AdminConversationDetailResponse> {
-  const collection = await getChatConversationsCollection();
-  const item = await collection.findOne({ conversationId });
+  const collection = await getChatConversationTurnsCollection();
+  const [item] = await collection
+    .aggregate<AggregatedConversation>([
+      ...buildConversationSummaryPipeline({
+        conversationId,
+      }),
+      { $limit: 1 },
+    ])
+    .toArray();
+
   return {
     ok: true,
     item: item ? mapConversation(item) : null,
@@ -194,13 +299,6 @@ export async function listConversationTurns(input: {
 }
 
 export async function deleteConversation(conversationId: string): Promise<void> {
-  const [conversations, turns] = await Promise.all([
-    getChatConversationsCollection(),
-    getChatConversationTurnsCollection(),
-  ]);
-
-  await Promise.all([
-    conversations.deleteOne({ conversationId }),
-    turns.deleteMany({ conversationId }),
-  ]);
+  const turns = await getChatConversationTurnsCollection();
+  await turns.deleteMany({ conversationId });
 }

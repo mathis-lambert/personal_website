@@ -35,7 +35,6 @@ const DiscussionsPage: React.FC = () => {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [query, setQuery] = useState("");
-  const [actorType, setActorType] = useState<"" | "public" | "admin">("");
   const [status, setStatus] = useState<"" | "active" | "errored">("");
 
   const [listData, setListData] =
@@ -86,7 +85,6 @@ const DiscussionsPage: React.FC = () => {
           {
             start: startIso,
             end: endIso,
-            actorType: actorType || undefined,
             status: status || undefined,
             q: query || undefined,
             limit: 100,
@@ -121,7 +119,7 @@ const DiscussionsPage: React.FC = () => {
     return () => {
       canceled = true;
     };
-  }, [token, startIso, endIso, actorType, status, query, refreshKey]);
+  }, [token, startIso, endIso, status, query, refreshKey]);
 
   useEffect(() => {
     let canceled = false;
@@ -235,21 +233,12 @@ const DiscussionsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid gap-2 md:grid-cols-3">
+          <div className="grid gap-2 md:grid-cols-2">
             <Input
               placeholder="Search in prompts and answers"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <select
-              value={actorType}
-              onChange={(e) => setActorType(e.target.value as "" | "public" | "admin")}
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            >
-              <option value="">All actors</option>
-              <option value="public">Public</option>
-              <option value="admin">Admin</option>
-            </select>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as "" | "active" | "errored")}
@@ -289,7 +278,7 @@ const DiscussionsPage: React.FC = () => {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {item.actorType} · {item.status}
+                          {item.status}
                         </span>
                         <span className="text-xs text-muted-foreground tabular-nums">
                           {formatUtc(item.lastMessageAt)}
