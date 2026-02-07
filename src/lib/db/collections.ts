@@ -7,6 +7,7 @@ import type {
 } from "mongodb";
 
 import type { Article, Project, ResumeData, TimelineEntry } from "@/types";
+import type { AgentMessage, AgentUsage } from "@/types/agent";
 
 import { getMongoDb } from "./client";
 
@@ -71,6 +72,64 @@ export type UiEventDocument = BaseDocument & {
   properties?: Record<string, unknown>;
 };
 
+export type ChatActorDocument = {
+  type: "public" | "admin";
+  hasSession: boolean;
+  ipHash?: string;
+  userAgent?: string;
+};
+
+export type ChatConversationDocument = BaseDocument & {
+  kind: "chat_conversation";
+  conversationId: string;
+  sessionId?: string;
+  location?: string;
+  actor: ChatActorDocument;
+  startedAt: Date;
+  lastMessageAt: Date;
+  turnCount: number;
+  successfulTurns: number;
+  failedTurns: number;
+  totalInputChars: number;
+  totalOutputChars: number;
+  totalDurationMs: number;
+  status: "active" | "errored";
+  lastUserMessage?: string;
+  lastAssistantMessage?: string;
+  lastError?: string;
+};
+
+export type ChatConversationTurnDocument = BaseDocument & {
+  kind: "chat_turn";
+  turnId: string;
+  conversationId: string;
+  sessionId?: string;
+  turnIndex: number;
+  timestamp: Date;
+  completedAt?: Date;
+  status: "pending" | "completed" | "failed";
+  streamed: boolean;
+  route: string;
+  path: string;
+  location?: string;
+  actor: ChatActorDocument;
+  request: {
+    messages: AgentMessage[];
+    lastUserMessage?: string;
+  };
+  response?: {
+    message: string;
+    model?: string;
+    usage?: AgentUsage;
+  };
+  error?: {
+    name?: string;
+    message: string;
+    stack?: string;
+  };
+  durationMs?: number;
+};
+
 export const COLLECTION_NAMES = {
   projects: "projects",
   articles: "articles",
@@ -79,13 +138,18 @@ export const COLLECTION_NAMES = {
   resume: "resume",
   apiRequestLogs: "api_request_logs",
   uiEvents: "ui_events",
+  chatConversations: "chat_conversations",
+  chatConversationTurns: "chat_conversation_turns",
 } as const;
 
 let indexesPromise: Promise<void> | null = null;
 
-const getRetentionSeconds = (): number | null => {
-  const raw = process.env.ANALYTICS_LOG_RETENTION_DAYS?.trim();
-  if (!raw) return 180 * 24 * 60 * 60;
+const getRetentionSeconds = (
+  envKey: string,
+  defaultDays: number,
+): number | null => {
+  const raw = process.env[envKey]?.trim();
+  if (!raw) return defaultDays * 24 * 60 * 60;
 
   const days = Number(raw);
   if (!Number.isFinite(days) || days <= 0) {
@@ -97,6 +161,7 @@ const getRetentionSeconds = (): number | null => {
 const ensureTtlIndex = async (
   collection: Collection,
   indexName: string,
+  field: string,
   expireAfterSeconds: number | null,
 ) => {
   const indexes = await collection.indexes();
@@ -118,7 +183,7 @@ const ensureTtlIndex = async (
 
   if (!existing || Number(existing.expireAfterSeconds ?? -1) !== expireAfterSeconds) {
     await collection.createIndex(
-      { timestamp: 1 },
+      { [field]: 1 },
       {
         name: indexName,
         expireAfterSeconds,
@@ -191,6 +256,34 @@ const ensureIndexes = async () => {
           { key: { sessionId: 1, timestamp: -1 }, sparse: true },
         ],
       ],
+      [
+        COLLECTION_NAMES.chatConversations,
+        [
+          { key: { conversationId: 1 }, unique: true },
+          { key: { lastMessageAt: -1 } },
+          { key: { sessionId: 1, lastMessageAt: -1 }, sparse: true },
+          { key: { "actor.ipHash": 1, lastMessageAt: -1 }, sparse: true },
+          { key: { status: 1, lastMessageAt: -1 } },
+          { key: { lastUserMessage: "text", lastAssistantMessage: "text" } },
+        ],
+      ],
+      [
+        COLLECTION_NAMES.chatConversationTurns,
+        [
+          { key: { turnId: 1 }, unique: true },
+          { key: { conversationId: 1, turnIndex: 1 }, unique: true },
+          { key: { timestamp: -1 } },
+          { key: { conversationId: 1, timestamp: -1 } },
+          { key: { status: 1, timestamp: -1 } },
+          { key: { "actor.ipHash": 1, timestamp: -1 }, sparse: true },
+          {
+            key: {
+              "request.lastUserMessage": "text",
+              "response.message": "text",
+            },
+          },
+        ],
+      ],
     ];
 
     await Promise.all(
@@ -200,17 +293,39 @@ const ensureIndexes = async () => {
       }),
     );
 
-    const retentionSeconds = getRetentionSeconds();
+    const analyticsRetentionSeconds = getRetentionSeconds(
+      "ANALYTICS_LOG_RETENTION_DAYS",
+      180,
+    );
+    const chatRetentionSeconds = getRetentionSeconds(
+      "CHAT_LOG_RETENTION_DAYS",
+      365,
+    );
+
     await Promise.all([
       ensureTtlIndex(
         db.collection(COLLECTION_NAMES.apiRequestLogs),
         "timestamp_ttl",
-        retentionSeconds,
+        "timestamp",
+        analyticsRetentionSeconds,
       ),
       ensureTtlIndex(
         db.collection(COLLECTION_NAMES.uiEvents),
         "timestamp_ttl",
-        retentionSeconds,
+        "timestamp",
+        analyticsRetentionSeconds,
+      ),
+      ensureTtlIndex(
+        db.collection(COLLECTION_NAMES.chatConversations),
+        "last_message_ttl",
+        "lastMessageAt",
+        chatRetentionSeconds,
+      ),
+      ensureTtlIndex(
+        db.collection(COLLECTION_NAMES.chatConversationTurns),
+        "timestamp_ttl",
+        "timestamp",
+        chatRetentionSeconds,
       ),
     ]);
   })();
@@ -245,3 +360,11 @@ export const getApiRequestLogsCollection = () =>
 
 export const getUiEventsCollection = () =>
   getCollection<UiEventDocument>(COLLECTION_NAMES.uiEvents);
+
+export const getChatConversationsCollection = () =>
+  getCollection<ChatConversationDocument>(COLLECTION_NAMES.chatConversations);
+
+export const getChatConversationTurnsCollection = () =>
+  getCollection<ChatConversationTurnDocument>(
+    COLLECTION_NAMES.chatConversationTurns,
+  );

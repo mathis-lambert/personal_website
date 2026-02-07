@@ -17,7 +17,7 @@ type TrackEventPayload = {
   properties?: Record<string, unknown>;
 };
 
-const getSessionId = (): string | undefined => {
+export const getAnalyticsSessionId = (): string | undefined => {
   if (typeof window === "undefined") return undefined;
   const existing = window.localStorage.getItem(STORAGE_KEY);
   if (existing) return existing;
@@ -41,7 +41,7 @@ export const trackUiEvent = async ({
     name,
     path: path ?? `${window.location.pathname}${window.location.search}`,
     referrer: document.referrer || undefined,
-    sessionId: getSessionId(),
+    sessionId: getAnalyticsSessionId(),
     timestamp: new Date().toISOString(),
     properties,
   };

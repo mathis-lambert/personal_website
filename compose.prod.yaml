@@ -21,6 +21,8 @@ services:
       MONGODB_DB: ${MONGODB_DB}
       ANALYTICS_LOG_RETENTION_DAYS: ${ANALYTICS_LOG_RETENTION_DAYS:-180}
       ANALYTICS_HASH_SALT: ${ANALYTICS_HASH_SALT}
+      CHAT_LOG_RETENTION_DAYS: ${CHAT_LOG_RETENTION_DAYS:-365}
+      CHAT_LOG_MAX_TEXT_CHARS: ${CHAT_LOG_MAX_TEXT_CHARS:-4000}
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

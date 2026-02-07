@@ -12,20 +12,53 @@ const SENSITIVE_KEY_PATTERNS = [
 const MAX_DEPTH = 5;
 const MAX_KEYS_PER_OBJECT = 40;
 const MAX_ITEMS_PER_ARRAY = 40;
-const MAX_STRING_LENGTH = 600;
+
+const getMaxTextLength = (): number => {
+  const raw = process.env.CHAT_LOG_MAX_TEXT_CHARS?.trim();
+  if (!raw) return 4000;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) return 4000;
+  return Math.round(parsed);
+};
 
 const isSensitiveKey = (key: string): boolean => {
   return SENSITIVE_KEY_PATTERNS.some((pattern) => pattern.test(key));
 };
 
-const truncate = (value: string): string => {
-  if (value.length <= MAX_STRING_LENGTH) return value;
-  return `${value.slice(0, MAX_STRING_LENGTH)}…`;
+const truncate = (value: string, maxLength = getMaxTextLength()): string => {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength)}…`;
+};
+
+const redactTokenLikeFragments = (input: string): string => {
+  return input
+    .replace(
+      /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+      "[REDACTED_EMAIL]",
+    )
+    .replace(/\+?\d[\d\s().-]{7,}\d/g, "[REDACTED_PHONE]")
+    .replace(/\b(?:\d[ -]*?){13,19}\b/g, "[REDACTED_CARD]")
+    .replace(
+      /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b/g,
+      "[REDACTED_JWT]",
+    )
+    .replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g, "[REDACTED_KEY]")
+    .replace(
+      /\b(xox[baprs]-[A-Za-z0-9-]{10,}|ghp_[A-Za-z0-9]{20,}|glpat-[A-Za-z0-9_-]{20,})\b/g,
+      "[REDACTED_TOKEN]",
+    )
+    .replace(
+      /(password|passwd|secret|token)\s*[:=]\s*[^\s,;]+/gi,
+      "$1=[REDACTED]",
+    );
+};
+
+export const redactFreeText = (input: string): string => {
+  return redactTokenLikeFragments(input.replace(/\u0000/g, "").trim());
 };
 
 const sanitizeString = (value: string) => {
-  const normalized = value.replace(/\u0000/g, "").trim();
-  return truncate(normalized);
+  return truncate(redactFreeText(value));
 };
 
 export const redactValue = (value: unknown, depth = 0): unknown => {

@@ -12,6 +12,7 @@ import {
   IdCard,
   LogOut,
   DoorOpen,
+  MessageSquareText,
 } from "lucide-react";
 
 type NavItem = {
@@ -37,6 +38,11 @@ const items: NavItem[] = [
     label: "Studies",
     path: "/admin/studies",
     icon: <GraduationCap size={18} />,
+  },
+  {
+    label: "Discussions",
+    path: "/admin/discussions",
+    icon: <MessageSquareText size={18} />,
   },
   { label: "Resume", path: "/admin/resume", icon: <IdCard size={18} /> },
 ];

@@ -9,6 +9,8 @@ export interface AgentMessage {
 export interface AgentRequest {
   messages: AgentMessage[];
   location?: string;
+  sessionId?: string;
+  conversationId?: string;
   stream?: boolean;
 }
 
@@ -23,6 +25,7 @@ export interface AgentResponse {
   message: AgentMessage;
   model?: string;
   usage?: AgentUsage;
+  conversationId?: string;
 }
 
 export type AgentStreamEvent =

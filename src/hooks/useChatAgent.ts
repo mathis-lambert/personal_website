@@ -70,6 +70,8 @@ const useChatAgent = (
     ? JSON.stringify({
         messages: request.messages,
         location: request.location,
+        sessionId: request.sessionId,
+        conversationId: request.conversationId,
       })
     : null;
 

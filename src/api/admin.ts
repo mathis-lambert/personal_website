@@ -1,5 +1,8 @@
 import { fetchWithTimeout } from "@/api/utils";
 import type {
+  AdminConversationDetailResponse,
+  AdminConversationsListResponse,
+  AdminConversationTurnsResponse,
   AdminAnalyticsActivityResponse,
   AdminAnalyticsEndpointsResponse,
   AdminAnalyticsErrorsResponse,
@@ -282,4 +285,93 @@ export async function getAnalyticsActivity(
   if (!res.ok)
     throw new Error(`Failed to fetch analytics activity: ${res.status}`);
   return (await res.json()) as AdminAnalyticsActivityResponse;
+}
+
+export async function getConversations(
+  params: {
+    start?: string;
+    end?: string;
+    actorType?: "public" | "admin";
+    status?: "active" | "errored";
+    q?: string;
+    sessionId?: string;
+    limit?: number;
+    skip?: number;
+  },
+  token?: string,
+): Promise<AdminConversationsListResponse> {
+  const qs = new URLSearchParams();
+  if (params.start) qs.set("start", params.start);
+  if (params.end) qs.set("end", params.end);
+  if (params.actorType) qs.set("actor_type", params.actorType);
+  if (params.status) qs.set("status", params.status);
+  if (params.q) qs.set("q", params.q);
+  if (params.sessionId) qs.set("session_id", params.sessionId);
+  if (params.limit != null) qs.set("limit", String(params.limit));
+  if (params.skip != null) qs.set("skip", String(params.skip));
+
+  const url = `/api/admin/analytics/conversations${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 15000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(`Failed to fetch conversations: ${res.status}`);
+  return (await res.json()) as AdminConversationsListResponse;
+}
+
+export async function getConversationDetail(
+  conversationId: string,
+  token?: string,
+): Promise<AdminConversationDetailResponse> {
+  const res = await fetchWithTimeout(
+    `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}`,
+    {
+      timeoutMs: 10000,
+      authToken: token,
+    },
+  );
+  if (!res.ok)
+    throw new Error(`Failed to fetch conversation ${conversationId}: ${res.status}`);
+  return (await res.json()) as AdminConversationDetailResponse;
+}
+
+export async function getConversationTurns(
+  conversationId: string,
+  params: { q?: string; limit?: number; skip?: number },
+  token?: string,
+): Promise<AdminConversationTurnsResponse> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  if (params.limit != null) qs.set("limit", String(params.limit));
+  if (params.skip != null) qs.set("skip", String(params.skip));
+
+  const url = `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}/turns${qs.toString() ? `?${qs.toString()}` : ""}`;
+  const res = await fetchWithTimeout(url, {
+    timeoutMs: 12000,
+    authToken: token,
+  });
+  if (!res.ok)
+    throw new Error(
+      `Failed to fetch conversation turns ${conversationId}: ${res.status}`,
+    );
+  return (await res.json()) as AdminConversationTurnsResponse;
+}
+
+export async function deleteConversation(
+  conversationId: string,
+  token?: string,
+): Promise<void> {
+  const res = await fetchWithTimeout(
+    `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}`,
+    {
+      method: "DELETE",
+      timeoutMs: 10000,
+      authToken: token,
+    },
+  );
+  if (!res.ok)
+    throw new Error(
+      `Failed to delete conversation ${conversationId}: ${res.status}`,
+    );
 }

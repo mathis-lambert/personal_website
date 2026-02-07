@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import useChatAgent from "@/hooks/useChatAgent";
 import type { AgentMessage, AgentRequest } from "@/types/agent";
 import { ChatContext, type ChatContextType } from "@/hooks/useChat";
-import { trackUiEvent } from "@/api/analytics";
+import { getAnalyticsSessionId, trackUiEvent } from "@/api/analytics";
 
 interface ChatProviderProps {
   children: React.ReactNode;
@@ -87,6 +87,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const newRequest: AgentRequest = {
         messages: requestMessages,
         location,
+        sessionId: getAnalyticsSessionId(),
+        conversationId:
+          response?.conversationId ?? currentRequest?.conversationId ?? undefined,
         stream: true,
       };
 
@@ -100,7 +103,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
       setCurrentRequest(newRequest);
     },
-    [messages, isLoading, currentRequest, isChatOpen, overlayContent],
+    [
+      messages,
+      isLoading,
+      currentRequest,
+      isChatOpen,
+      overlayContent,
+      response?.conversationId,
+    ],
   );
 
   const contextValue: ChatContextType = {
