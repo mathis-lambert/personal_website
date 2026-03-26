@@ -1,7 +1,12 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { PDFFont, PDFPage } from "pdf-lib";
 
-import type { ResumeData } from "@/types";
+import type { ResumeContent } from "@/types";
+import {
+  createEmptyResumeContent,
+  resumeLabels,
+  type ResumeLocale,
+} from "@/lib/resume/localization";
 
 const A4_WIDTH = 595.28; // points
 const A4_HEIGHT = 841.89; // points
@@ -211,7 +216,7 @@ const bullets = (ctx: DrawCtx, items: string[], maxItems?: number | null) => {
   }
 };
 
-const headerBlock = (ctx: DrawCtx, data: ResumeData) => {
+const headerBlock = (ctx: DrawCtx, data: ResumeContent) => {
   h1(ctx, data.name || "");
 
   const sep = "  ·  ";
@@ -234,15 +239,19 @@ const headerBlock = (ctx: DrawCtx, data: ResumeData) => {
   }
 };
 
-const personalStatementBlock = (ctx: DrawCtx, data: ResumeData) => {
+const personalStatementBlock = (ctx: DrawCtx, data: ResumeContent) => {
   if (!data.personal_statement) return;
   paragraph(ctx, data.personal_statement, 9);
   moveCursorMm(ctx, 1);
 };
 
-const educationBlock = (ctx: DrawCtx, data: ResumeData) => {
+const educationBlock = (
+  ctx: DrawCtx,
+  data: ResumeContent,
+  locale: ResumeLocale,
+) => {
   if (!data.education?.length) return;
-  h2(ctx, "Education");
+  h2(ctx, resumeLabels[locale].education);
 
   data.education.slice(0, 3).forEach((edu) => {
     const degreeLine = edu.degree || edu.institution;
@@ -280,9 +289,13 @@ const educationBlock = (ctx: DrawCtx, data: ResumeData) => {
   });
 };
 
-const experiencesBlock = (ctx: DrawCtx, data: ResumeData) => {
+const experiencesBlock = (
+  ctx: DrawCtx,
+  data: ResumeContent,
+  locale: ResumeLocale,
+) => {
   if (!data.experiences?.length) return;
-  h2(ctx, "Experience");
+  h2(ctx, resumeLabels[locale].experience);
 
   let shown = 0;
   for (const exp of data.experiences) {
@@ -327,21 +340,25 @@ const experiencesBlock = (ctx: DrawCtx, data: ResumeData) => {
   }
 };
 
-const skillsBlock = (ctx: DrawCtx, data: ResumeData) => {
-  h2(ctx, "Skills");
+const skillsBlock = (
+  ctx: DrawCtx,
+  data: ResumeContent,
+  locale: ResumeLocale,
+) => {
+  h2(ctx, resumeLabels[locale].technicalSkills);
   const t = data.technical_skills;
   const rows: Array<[string, string[]]> = [
-    ["Programming", t?.programming ?? []],
-    ["AI/ML", t?.ai_ml ?? []],
-    ["Systems & Infra", t?.systems_and_infra ?? []],
-    ["Web", t?.web ?? []],
-    ["Languages", t?.languages ?? []],
+    [resumeLabels[locale].programming, t?.programming ?? []],
+    [resumeLabels[locale].aiMl, t?.ai_ml ?? []],
+    [resumeLabels[locale].systemsAndInfra, t?.systems_and_infra ?? []],
+    [resumeLabels[locale].web, t?.web ?? []],
+    [resumeLabels[locale].languages, t?.languages ?? []],
   ];
 
   const labels: string[] = rows
     .filter(([, items]) => items?.length)
     .map(([label]) => `${label}: `);
-  if (data.skills?.length) labels.push("Core: ");
+  if (data.skills?.length) labels.push(`${resumeLabels[locale].coreSkills}: `);
 
   let labelColWidth = 0;
   labels.forEach((label) => {
@@ -381,12 +398,18 @@ const skillsBlock = (ctx: DrawCtx, data: ResumeData) => {
   };
 
   rows.forEach(([label, items]) => row(label, items));
-  if (data.skills?.length) row("Core", data.skills.slice(0, 12));
+  if (data.skills?.length) {
+    row(resumeLabels[locale].coreSkills, data.skills.slice(0, 12));
+  }
 };
 
-const certificationsBlock = (ctx: DrawCtx, data: ResumeData) => {
+const certificationsBlock = (
+  ctx: DrawCtx,
+  data: ResumeContent,
+  locale: ResumeLocale,
+) => {
   if (!data.certifications?.length) return;
-  h2(ctx, "Certifications");
+  h2(ctx, resumeLabels[locale].certifications);
 
   data.certifications.slice(0, 3).forEach((cert) => {
     const metaParts: string[] = [];
@@ -414,9 +437,13 @@ const certificationsBlock = (ctx: DrawCtx, data: ResumeData) => {
   });
 };
 
-const passionsBlock = (ctx: DrawCtx, data: ResumeData) => {
+const passionsBlock = (
+  ctx: DrawCtx,
+  data: ResumeContent,
+  locale: ResumeLocale,
+) => {
   if (!data.passions?.length) return;
-  h2(ctx, "Interests");
+  h2(ctx, resumeLabels[locale].interests);
   drawTextBlock(ctx, data.passions.slice(0, 10).join(", "), {
     size: 10,
     font: ctx.fonts.regular,
@@ -425,7 +452,10 @@ const passionsBlock = (ctx: DrawCtx, data: ResumeData) => {
   });
 };
 
-export async function buildResumePdf(resume: ResumeData | null) {
+export async function buildResumePdf(
+  resume: ResumeContent | null,
+  locale: ResumeLocale = "en",
+) {
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([A4_WIDTH, A4_HEIGHT]);
 
@@ -450,37 +480,20 @@ export async function buildResumePdf(resume: ResumeData | null) {
     },
   };
 
-  const data: ResumeData = resume ?? {
+  const data: ResumeContent = resume ?? {
+    ...createEmptyResumeContent(),
     name: "Mathis Lambert",
-    contact: {
-      email: "",
-      phone: "",
-      linkedin: "",
-      github: "",
-      website: "",
-    },
-    personal_statement: "Resume data not available.",
-    experiences: [],
-    education: [],
-    certifications: [],
-    technical_skills: {
-      languages: [],
-      programming: [],
-      ai_ml: [],
-      systems_and_infra: [],
-      web: [],
-    },
-    skills: [],
-    passions: [],
+    personal_statement:
+      locale === "fr" ? "CV indisponible." : "Resume data not available.",
   };
 
   headerBlock(ctx, data);
   personalStatementBlock(ctx, data);
-  educationBlock(ctx, data);
-  experiencesBlock(ctx, data);
-  skillsBlock(ctx, data);
-  certificationsBlock(ctx, data);
-  passionsBlock(ctx, data);
+  educationBlock(ctx, data, locale);
+  experiencesBlock(ctx, data, locale);
+  skillsBlock(ctx, data, locale);
+  certificationsBlock(ctx, data, locale);
+  passionsBlock(ctx, data, locale);
 
   return pdf.save();
 }

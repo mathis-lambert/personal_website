@@ -3,15 +3,18 @@ import { Calendar, MapPin } from "lucide-react";
 import type { Experience } from "@/types.ts";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { type ResumeLocale, resumeLabels } from "@/lib/resume/localization";
 
 interface ExperienceCardProps {
   experience: Experience;
   delay?: number;
+  locale?: ResumeLocale;
 }
 
 export const ExperienceCard: React.FC<ExperienceCardProps> = ({
   experience,
   delay = 0,
+  locale = "en",
 }) => (
   <motion.article
     initial={{ opacity: 0, y: 12 }}
@@ -47,7 +50,7 @@ export const ExperienceCard: React.FC<ExperienceCardProps> = ({
       </div>
       {experience.current && (
         <span className="shrink-0 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[11px] md:text-xs px-2 py-0.5 font-medium">
-          Current
+          {resumeLabels[locale].current}
         </span>
       )}
     </div>

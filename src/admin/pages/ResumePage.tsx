@@ -4,6 +4,7 @@ import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import { getCollectionData, updateItem } from "@/api/admin";
 import type {
   ResumeData,
+  ResumeContent,
   Contact,
   TechnicalSkills,
   Experience,
@@ -23,10 +24,12 @@ const ResumePage: React.FC = () => {
   const [savingExp, setSavingExp] = useState(false);
   const [savingEdu, setSavingEdu] = useState(false);
   const [savingCerts, setSavingCerts] = useState(false);
+  const [savingFrench, setSavingFrench] = useState(false);
 
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [education, setEducation] = useState<Education[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [frenchContentJson, setFrenchContentJson] = useState("{}");
 
   useEffect(() => {
     let canceled = false;
@@ -85,6 +88,7 @@ const ResumePage: React.FC = () => {
             technical_skills,
             skills: Array.isArray(obj?.skills) ? obj.skills : [],
             passions: Array.isArray(obj?.passions) ? obj.passions : [],
+            translations: obj?.translations ?? {},
           });
       } catch (e) {
         if (!canceled) setErr((e as Error)?.message ?? "Failed to load");
@@ -103,6 +107,9 @@ const ResumePage: React.FC = () => {
       setExperiences(data.experiences || []);
       setEducation(data.education || []);
       setCertifications(data.certifications || []);
+      setFrenchContentJson(
+        JSON.stringify(data.translations?.fr ?? {}, null, 2),
+      );
     }
   }, [data]);
 
@@ -190,6 +197,7 @@ const ResumePage: React.FC = () => {
         passions: Array.isArray(merged?.passions)
           ? (merged.passions as string[])
           : (patch.passions ?? data?.passions ?? []),
+        translations: merged?.translations ?? data?.translations ?? {},
       };
       setData(next);
       toast.success("Profile saved");
@@ -249,6 +257,45 @@ const ResumePage: React.FC = () => {
       toast.error((e as Error)?.message ?? "Save failed");
     } finally {
       setSavingTech(false);
+    }
+  };
+
+  const saveFrenchVersion = async () => {
+    if (!token) return;
+
+    let parsed: Partial<ResumeContent>;
+    try {
+      const raw = frenchContentJson.trim();
+      parsed = raw ? (JSON.parse(raw) as Partial<ResumeContent>) : {};
+    } catch {
+      toast.error("French JSON is invalid");
+      return;
+    }
+
+    setSavingFrench(true);
+    try {
+      const translations = {
+        ...(data?.translations ?? {}),
+        fr: parsed,
+      };
+      const res = await updateItem("resume", "main", { translations }, token);
+      const merged = (res?.item || {}) as ResumeData;
+      setData((prev) =>
+        prev
+          ? {
+              ...prev,
+              translations: merged?.translations ?? translations,
+            }
+          : null,
+      );
+      setFrenchContentJson(
+        JSON.stringify(merged?.translations?.fr ?? parsed, null, 2),
+      );
+      toast.success("French version saved");
+    } catch (e) {
+      toast.error((e as Error)?.message ?? "Save failed");
+    } finally {
+      setSavingFrench(false);
     }
   };
 
@@ -438,6 +485,36 @@ const ResumePage: React.FC = () => {
               </button>
             </div>
           </form>
+          <div className="border rounded-lg p-4 bg-card space-y-4">
+            <div className="font-medium">French version</div>
+            <p className="text-sm text-muted-foreground">
+              Partial JSON override for the French CV. Any field missing here
+              falls back to the English version. Use the same shape as the
+              resume payload.
+            </p>
+            <textarea
+              className="w-full min-h-[320px] border rounded-md px-3 py-2 bg-background font-mono text-sm"
+              value={frenchContentJson}
+              onChange={(e) => setFrenchContentJson(e.target.value)}
+              spellCheck={false}
+            />
+            <div className="flex justify-end">
+              <button
+                type="button"
+                disabled={savingFrench}
+                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
+                onClick={() => void saveFrenchVersion()}
+              >
+                {savingFrench ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <Save size={16} /> Save French Version
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();

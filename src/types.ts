@@ -46,7 +46,7 @@ export interface TechnicalSkills {
   web: string[];
 }
 
-export interface ResumeData {
+export interface ResumeContent {
   name: string;
   contact: Contact;
   personal_statement: string;
@@ -56,6 +56,14 @@ export interface ResumeData {
   technical_skills: TechnicalSkills;
   skills: string[];
   passions: string[];
+}
+
+export interface ResumeTranslations {
+  fr?: Partial<ResumeContent>;
+}
+
+export interface ResumeData extends ResumeContent {
+  translations?: ResumeTranslations;
 }
 
 export interface IsLoadingState {

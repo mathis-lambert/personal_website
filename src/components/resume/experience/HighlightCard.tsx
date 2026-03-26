@@ -3,10 +3,12 @@ import { Star, Calendar, MapPin } from "lucide-react";
 import type { Experience } from "@/types.ts";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { type ResumeLocale } from "@/lib/resume/localization";
 
 interface HighlightCardProps {
   experience: Experience;
   delay?: number;
+  locale?: ResumeLocale;
 }
 
 export const HighlightCard: React.FC<HighlightCardProps> = ({

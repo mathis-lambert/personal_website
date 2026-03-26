@@ -25,91 +25,46 @@ import { Download, Loader2 } from "lucide-react";
 import { downloadResumePdf } from "@/api/resume";
 import { trackUiEvent } from "@/api/analytics";
 import { motion } from "framer-motion";
-
-const emptyResume: ResumeData = {
-  name: "",
-  contact: {
-    email: "",
-    phone: "",
-    linkedin: "",
-    github: "",
-    website: "",
-  },
-  personal_statement: "",
-  experiences: [],
-  education: [],
-  certifications: [],
-  technical_skills: {
-    languages: [],
-    programming: [],
-    ai_ml: [],
-    systems_and_infra: [],
-    web: [],
-  },
-  skills: [],
-  passions: [],
-};
-
-const normalizeResume = (value: ResumeData | null | undefined): ResumeData => {
-  if (!value) return emptyResume;
-  return {
-    ...emptyResume,
-    ...value,
-    contact: { ...emptyResume.contact, ...(value.contact ?? {}) },
-    experiences: Array.isArray(value.experiences) ? value.experiences : [],
-    education: Array.isArray(value.education) ? value.education : [],
-    certifications: Array.isArray(value.certifications)
-      ? value.certifications
-      : [],
-    technical_skills: {
-      ...emptyResume.technical_skills,
-      ...(value.technical_skills ?? {}),
-      languages: Array.isArray(value.technical_skills?.languages)
-        ? value.technical_skills!.languages
-        : [],
-      programming: Array.isArray(value.technical_skills?.programming)
-        ? value.technical_skills!.programming
-        : [],
-      ai_ml: Array.isArray(value.technical_skills?.ai_ml)
-        ? value.technical_skills!.ai_ml
-        : [],
-      systems_and_infra: Array.isArray(
-        value.technical_skills?.systems_and_infra,
-      )
-        ? value.technical_skills!.systems_and_infra
-        : [],
-      web: Array.isArray(value.technical_skills?.web)
-        ? value.technical_skills!.web
-        : [],
-    },
-    skills: Array.isArray(value.skills) ? value.skills : [],
-    passions: Array.isArray(value.passions) ? value.passions : [],
-  };
-};
+import {
+  resolveResumeContent,
+  resumeLabels,
+  type ResumeLocale,
+} from "@/lib/resume/localization";
+import { cn } from "@/lib/utils";
 
 export default function Resume({
   resumeData,
+  locale,
+  onLocaleChange,
+  localePending = false,
 }: {
   resumeData: ResumeData | null;
+  locale: ResumeLocale;
+  onLocaleChange: (locale: ResumeLocale) => void;
+  localePending?: boolean;
 }) {
   const resumeRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-  const data = normalizeResume(resumeData);
+  const data = resolveResumeContent(resumeData, locale);
+  const labels = resumeLabels[locale];
 
   const onExportPdf = async () => {
-    void trackUiEvent({ name: "resume_export_click" });
+    void trackUiEvent({
+      name: "resume_export_click",
+      properties: { locale },
+    });
     try {
       setDownloading(true);
-      await downloadResumePdf();
+      await downloadResumePdf({ locale });
       void trackUiEvent({
         name: "resume_export_click",
-        properties: { result: "success" },
+        properties: { locale, result: "success" },
       });
     } catch (e) {
       console.error("Failed to export resume PDF", e);
       void trackUiEvent({
         name: "resume_export_click",
-        properties: { result: "error" },
+        properties: { locale, result: "error" },
       });
     } finally {
       setDownloading(false);
@@ -123,21 +78,53 @@ export default function Resume({
           name={data.name ?? ""}
           personal_statement={data.personal_statement ?? ""}
           actions={
-            <Button
-              variant="outline"
-              className="group bg-white/50 dark:bg-black/50 hover:bg-white/70 dark:hover:bg-black/70 backdrop-blur border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200"
-              size="sm"
-              onClick={onExportPdf}
-              aria-busy={downloading}
-              disabled={downloading}
-            >
-              {downloading ? (
-                <Loader2 className="animate-spin text-cyan-600 dark:text-cyan-400" />
-              ) : (
-                <Download className="text-cyan-600 dark:text-cyan-400 transition-transform duration-200 group-hover:rotate-[-12deg]" />
-              )}
-              <span>{downloading ? "Exporting…" : "Export PDF"}</span>
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center rounded-full border border-slate-300/80 bg-white/70 p-1 text-xs text-slate-600 shadow-xs backdrop-blur dark:border-slate-700 dark:bg-black/40 dark:text-slate-300">
+                <span className="px-2 py-1 font-medium">{labels.language}</span>
+                <button
+                  type="button"
+                  className={cn(
+                    "rounded-full px-3 py-1 font-medium transition-colors",
+                    locale === "en"
+                      ? "bg-cyan-500 text-white"
+                      : "hover:bg-slate-100 dark:hover:bg-slate-800",
+                  )}
+                  onClick={() => onLocaleChange("en")}
+                  disabled={localePending || downloading}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "rounded-full px-3 py-1 font-medium transition-colors",
+                    locale === "fr"
+                      ? "bg-cyan-500 text-white"
+                      : "hover:bg-slate-100 dark:hover:bg-slate-800",
+                  )}
+                  onClick={() => onLocaleChange("fr")}
+                  disabled={localePending || downloading}
+                >
+                  FR
+                </button>
+              </div>
+
+              <Button
+                variant="outline"
+                className="group bg-white/50 dark:bg-black/50 hover:bg-white/70 dark:hover:bg-black/70 backdrop-blur border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200"
+                size="sm"
+                onClick={onExportPdf}
+                aria-busy={downloading}
+                disabled={downloading || localePending}
+              >
+                {downloading ? (
+                  <Loader2 className="animate-spin text-cyan-600 dark:text-cyan-400" />
+                ) : (
+                  <Download className="text-cyan-600 dark:text-cyan-400 transition-transform duration-200 group-hover:rotate-[-12deg]" />
+                )}
+                <span>{downloading ? labels.exporting : labels.exportPdf}</span>
+              </Button>
+            </div>
           }
         />
 
@@ -155,7 +142,7 @@ export default function Resume({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <main className="lg:col-span-2 space-y-6">
               <GlassCard className="p-4 md:p-6" delay={0.08}>
-                <ResumeSection icon={Cpu} title="Experience">
+                <ResumeSection icon={Cpu} title={labels.experience}>
                   {data.experiences
                     ?.filter((exp) => !exp.hide)
                     .map((exp, i) => {
@@ -163,7 +150,12 @@ export default function Resume({
                         ? HighlightCard
                         : ExperienceCard;
                       return (
-                        <Component key={i} experience={exp} delay={0.05 * i} />
+                        <Component
+                          key={i}
+                          experience={exp}
+                          delay={0.05 * i}
+                          locale={locale}
+                        />
                       );
                     })}
                 </ResumeSection>
@@ -171,11 +163,11 @@ export default function Resume({
 
               {/* Compact Technical Skills in one card */}
               <GlassCard className="p-6" delay={0.18}>
-                <ResumeSection icon={Code} title="Technical Skills">
+                <ResumeSection icon={Code} title={labels.technicalSkills}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-                        Programming
+                        {labels.programming}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {(data.technical_skills?.programming ?? []).map(
@@ -192,7 +184,7 @@ export default function Resume({
                     </div>
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-                        AI / ML
+                        {labels.aiMl}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {(data.technical_skills?.ai_ml ?? []).map((it, i) => (
@@ -208,7 +200,7 @@ export default function Resume({
 
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-                        Systems &amp; Infra
+                        {labels.systemsAndInfra}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {(data.technical_skills?.systems_and_infra ?? []).map(
@@ -226,7 +218,7 @@ export default function Resume({
 
                     <div>
                       <h4 className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
-                        Web
+                        {labels.web}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {(data.technical_skills?.web ?? []).map((it, i) => (
@@ -246,7 +238,7 @@ export default function Resume({
 
             <aside className="lg:col-span-1 space-y-6 lg:sticky lg:top-8 self-start">
               <GlassCard className="p-6" delay={0.24}>
-                <ResumeSection icon={Home} title="Contact">
+                <ResumeSection icon={Home} title={labels.contact}>
                   <div className="space-y-2 text-sm">
                     <a
                       href={`mailto:${data.contact.email}`}
@@ -291,7 +283,7 @@ export default function Resume({
               </GlassCard>
 
               <GlassCard className="p-6" delay={0.32}>
-                <ResumeSection icon={GraduationCap} title="Education">
+                <ResumeSection icon={GraduationCap} title={labels.education}>
                   {data.education.map((edu, i) => (
                     <div key={i} className="mb-3 last:mb-0">
                       <h3 className="font-semibold text-slate-800 dark:text-slate-100">
@@ -310,21 +302,21 @@ export default function Resume({
 
               <TagListSection
                 icon={Languages}
-                title="Languages"
+                title={labels.languages}
                 items={data.technical_skills?.languages ?? []}
                 colorClass="bg-emerald-400/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
                 delay={0.36}
               />
 
               <GlassCard className="p-6" delay={0.56}>
-                <ResumeSection icon={Briefcase} title="Certifications">
+                <ResumeSection icon={Briefcase} title={labels.certifications}>
                   <CertificationsCard certifications={data.certifications} />
                 </ResumeSection>
               </GlassCard>
 
               <TagListSection
                 icon={Sparkles}
-                title="Core Skills"
+                title={labels.coreSkills}
                 items={data.skills ?? []}
                 colorClass="bg-amber-400/10 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300"
                 delay={0.6}
@@ -332,7 +324,7 @@ export default function Resume({
 
               <TagListSection
                 icon={Heart}
-                title="Passions"
+                title={labels.passions}
                 items={data.passions ?? []}
                 colorClass="bg-rose-400/10 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300"
                 delay={0.64}
