@@ -1,6 +1,4 @@
 "use client";
-
-"use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ProjectCard from "@/components/projects/ProjectCard";
@@ -158,7 +156,12 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
   ]);
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[60vh]">
+    <section className="mx-auto min-h-[60vh] w-full max-w-7xl">
+      <motion.header initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="pb-10 pt-8 sm:pb-14 sm:pt-12">
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-primary">Selected builds · {projects.length} case {projects.length === 1 ? "study" : "studies"}</p>
+        <h1 className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-7xl">Things I&apos;ve made, broken, and made better.</h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">A growing collection of AI systems, developer tools, and product experiments—each with the decisions behind the build.</p>
+      </motion.header>
       {/* Filter Controls */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -237,7 +240,7 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3" // Responsive grid
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
           >
             {filteredAndSortedProjects.map((project, index) => (
               <ProjectCard

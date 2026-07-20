@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import AbstractGradientBackground from "@/components/ui/AbstractGradientBackground";
 import Navbar from "@/components/ui/Navbar";
 import ChatPanel from "@/components/chat/ChatPanel";
@@ -7,30 +7,6 @@ import FloatingChatInput from "@/components/chat/FloatingChatInput";
 import Footer from "@/components/ui/Footer";
 import { MaintenanceDialog } from "@/components/ui/MaintenanceDialog";
 import ScrollToTop from "@/components/ui/ScrollToTop";
-import Loader from "@/components/ui/Loader";
-
-const RouteLoaderOverlay = () => {
-  const [visible, setVisible] = useState(true);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    hideTimer.current = setTimeout(() => setVisible(false), 380);
-
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
-
-  if (!visible) return null;
-
-  return (
-    <Loader
-      message="Loading the experience..."
-      spinnerSize={10}
-      textSize="text-lg"
-    />
-  );
-};
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [maintenanceMode] = useState(
@@ -38,20 +14,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative isolate">
       <AbstractGradientBackground
-        numSpheres={8}
-        attractionStrength={0.000009}
-        minSphereRadius={200}
-        maxSphereRadiusFactor={0.5}
-        opacityRange={[0.4, 0.6]}
-        blurIntensity="blur-[125px]"
+        sphereColors={["#f6bd60", "#50b5a4", "#f28482", "#79a7d3"]}
+        numSpheres={4}
+        minSphereRadius={130}
+        maxSphereRadiusFactor={0.28}
+        baseVelocity={0.15}
+        opacityRange={[0.16, 0.3]}
+        blurIntensity="blur-[90px]"
       />
       <Navbar />
 
       <ScrollToTop />
 
-      <main className="mx-auto w-full min-h-screen max-w-5xl pt-20 md:pt-24 lg:pt-28 pb-10 px-4 lg:px-2">
+      <main className="mx-auto w-full min-h-screen max-w-7xl pt-24 md:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
 
@@ -61,7 +38,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       {maintenanceMode && <MaintenanceDialog />}
 
-      <RouteLoaderOverlay />
     </div>
   );
 };

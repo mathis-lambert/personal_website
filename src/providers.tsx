@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
+import { MotionConfig } from "framer-motion";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,11 +19,13 @@ export function AppProviders({ children }: { children: ReactNode }) {
         disableTransitionOnChange
         storageKey="next-ui-theme"
       >
-        <ChatProvider>
-          <PageViewTracker />
-          {children}
-          <Toaster />
-        </ChatProvider>
+        <MotionConfig reducedMotion="user">
+          <ChatProvider>
+            <PageViewTracker />
+            {children}
+            <Toaster />
+          </ChatProvider>
+        </MotionConfig>
       </ThemeProvider>
     </SessionProvider>
   );

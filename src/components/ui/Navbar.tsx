@@ -1,213 +1,175 @@
 "use client";
-import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
-import { AnimatePresence, motion, type Variants } from "framer-motion";
-import { useChat } from "@/hooks/useChat";
-import Image from "next/image";
 
-interface NavLink {
-  to: string;
-  text: string;
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
-}
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUpRight, Menu, MessageCircle, Moon, Sun, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+import { useTheme } from "@/components/theme-provider";
+import { useChat } from "@/hooks/useChat";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/projects", label: "Projects" },
+  { href: "/blog", label: "Notes" },
+  { href: "/resume", label: "Resume" },
+];
 
 const Navbar = () => {
-  const { isChatOpen, openChat, closeChat } = useChat();
+  const pathname = usePathname();
+  const { openChat } = useChat();
+  const { resolvedTheme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isMenuOpen]);
 
-  const handleChatToggle = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      if (isChatOpen) {
-        closeChat();
-      } else {
-        openChat();
-      }
-      setIsMenuOpen(false);
-      window.scrollTo(0, 0);
-    },
-    [isChatOpen, closeChat, openChat],
-  );
-
-  const navLinks = useMemo<NavLink[]>(
-    () => [
-      { to: "/", text: "Home", onClick: closeChat },
-      { to: "/projects", text: "Projects", onClick: closeChat },
-      { to: "/blog", text: "Blog", onClick: closeChat },
-      { to: "/resume", text: "Resume", onClick: closeChat },
-      { to: "#", text: "Chat", onClick: handleChatToggle },
-    ],
-    [handleChatToggle, closeChat],
-  );
-
-  const connectLink: NavLink = {
-    to: "https://www.linkedin.com/in/mathis-lambert/",
-    text: "Let's connect",
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
+  const startChat = useCallback(() => {
     setIsMenuOpen(false);
-  };
+    openChat();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [openChat]);
 
-  // Explicitly type variants with the 'Variants' type from framer-motion
-  const burgerVariants: Variants = {
-    topOpen: { rotate: 45, y: 8 },
-    topClosed: { rotate: 0, y: 0 },
-    middleOpen: { opacity: 0 },
-    middleClosed: { opacity: 1 },
-    bottomOpen: { rotate: -45, y: -8 },
-    bottomClosed: { rotate: 0, y: 0 },
-  };
-
-  const menuOverlayVariants: Variants = {
-    hidden: { opacity: 0, transition: { duration: 0.3, ease: "easeInOut" } },
-    visible: { opacity: 1, transition: { duration: 0.3, ease: "easeInOut" } },
-  };
-
-  const menuItemVariants: Variants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.1 + 0.3,
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    }),
-    exit: (i: number) => ({
-      opacity: 0,
-      y: -20,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.2,
-        ease: "easeIn",
-      },
-    }),
-  };
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <>
+    <header className="fixed inset-x-0 top-0 z-[1001] px-3 pt-3 sm:px-6 sm:pt-4">
       <motion.div
-        className="fixed top-0 left-0 w-full h-14 lg:h-20 z-[1001] lg:py-3"
-        initial={{ opacity: 0, y: -50 }}
+        initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        exit={{ opacity: 0, y: -50 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="paper-surface mx-auto flex h-16 max-w-6xl items-center justify-between rounded-[1.4rem] px-2.5 sm:px-3"
       >
-        <div className="absolute w-2/3 h-32 blur-3xl bg-gradient-to-t from-blue-300 to-blue-700 opacity-15 rounded-full left-1/2 transform -translate-x-1/2 -z-10 -translate-y-1/2 lg:mx-6" />
-        <div className="flex items-center justify-between h-full max-w-5xl mx-auto bg-white/10 border-b-white/50 lg:border-white/50 border-b-[1px] lg:border-[1px] shadow-lg backdrop-blur-md lg:rounded-full dark:bg-gray-800/10 dark:border-white/15 dark:backdrop-blur-lg px-2 py-2">
-          <Link
-            href="/"
-            className="flex items-center gap-2 flex-shrink-0 group"
-            onClick={closeMenu}
-          >
+        <Link
+          href="/"
+          onClick={() => setIsMenuOpen(false)}
+          className="group flex items-center gap-2.5 rounded-2xl p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Mathis Lambert, home"
+        >
+          <span className="relative">
             <Image
               src="/images/me.jpeg"
-              alt="Profile pic"
-              className="aspect-square inline-block bg-white rounded-full w-10 h-10 object-contain group-hover:transform group-hover:scale-105 transition-transform duration-300"
-              width={40}
-              height={40}
+              alt=""
+              width={42}
+              height={42}
+              priority
+              className="size-10 rounded-xl object-cover ring-1 ring-foreground/10 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
             />
-            <span className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-              Mathis
-            </span>
-          </Link>
+            <span className="absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-card bg-emerald-500" />
+          </span>
+          <span className="hidden leading-tight xs:block">
+            <span className="font-display block text-[1.05rem] font-semibold">Mathis Lambert</span>
+            <span className="block text-[0.64rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">AI · Systems · Web</span>
+          </span>
+        </Link>
 
-          <nav className="hidden lg:flex items-center space-x-1 mx-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.text}
-                href={link.to}
-                onClick={link.onClick}
-                className="relative text-gray-800 dark:text-white px-3 py-1.5 rounded-md hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/20 dark:hover:bg-gray-700/40 transition-all duration-300 ease-out whitespace-nowrap"
-              >
-                {link.text}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center space-x-4 lg:space-x-0">
+        <nav className="hidden items-center rounded-2xl bg-foreground/[0.045] p-1 lg:flex" aria-label="Primary navigation">
+          {navLinks.map((link) => (
             <Link
-              href={connectLink.to}
-              onClick={closeMenu}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-all duration-300 hover:scale-105 hover:shadow-md hover:shadow-blue-500/30 hover:-rotate-3 text-sm lg:text-base flex-shrink-0"
-              target="_blank"
-              rel="noopener noreferrer"
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              className={cn(
+                "relative rounded-xl px-3.5 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
+                isActive(link.href) && "bg-card text-foreground shadow-sm",
+              )}
             >
-              {connectLink.text}
+              {link.label}
+              {isActive(link.href) && (
+                <motion.span
+                  layoutId="active-navigation-dot"
+                  className="absolute -bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-primary"
+                />
+              )}
             </Link>
+          ))}
+        </nav>
 
-            <div className="lg:hidden">
-              <button
-                onClick={toggleMenu}
-                className="z-50 flex flex-col justify-around w-6 h-6 bg-transparent border-none cursor-pointer p-0 focus:outline-none"
-                aria-label="Toggle menu"
-              >
-                <motion.div
-                  className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
-                  variants={burgerVariants}
-                  animate={isMenuOpen ? "topOpen" : "topClosed"}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-                <motion.div
-                  className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
-                  variants={burgerVariants}
-                  animate={isMenuOpen ? "middleOpen" : "middleClosed"}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-                <motion.div
-                  className="w-6 h-0.5 bg-gray-800 dark:bg-white rounded-full origin-center"
-                  variants={burgerVariants}
-                  animate={isMenuOpen ? "bottomOpen" : "bottomClosed"}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                />
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            className="grid size-10 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Toggle color theme"
+          >
+            <Sun className="hidden size-4.5 dark:block" />
+            <Moon className="size-4.5 dark:hidden" />
+          </button>
+          <button
+            type="button"
+            onClick={startChat}
+            className="hidden items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-black text-primary-foreground shadow-[0_6px_0_color-mix(in_oklab,var(--foreground)_18%,transparent)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none sm:flex"
+          >
+            <MessageCircle className="size-4" /> Ask my AI
+          </button>
+          <Link
+            href="https://www.linkedin.com/in/mathis-lambert/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden size-10 place-items-center rounded-xl border border-foreground/10 bg-card transition-transform hover:-rotate-3 hover:scale-105 sm:grid"
+            aria-label="Connect with Mathis on LinkedIn"
+          >
+            <ArrowUpRight className="size-4" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center rounded-xl border border-foreground/10 bg-card lg:hidden"
+            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
       </motion.div>
 
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div
-            className="fixed inset-0 z-[1000] bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg flex flex-col items-center justify-center space-y-6"
-            variants={menuOverlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
+          <motion.nav
+            id="mobile-navigation"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="paper-surface mx-auto mt-2 max-w-6xl overflow-hidden rounded-[1.4rem] p-3 lg:hidden"
+            aria-label="Mobile navigation"
           >
-            {navLinks.map((link, index) => (
-              <motion.div
-                key={link.text}
-                custom={index}
-                variants={menuItemVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="w-full px-8 flex justify-center"
-              >
-                <Link
-                  href={link.to}
-                  onClick={(e) => {
-                    link.onClick?.(e);
-                    closeMenu();
-                    window.scrollTo(0, 0);
-                  }}
-                  className="block text-center text-3xl font-medium text-gray-800 dark:text-white px-6 py-3 rounded-lg transform transition-all duration-300 ease-out hover:bg-blue-500/10 dark:hover:bg-blue-400/10 hover:text-blue-600 dark:hover:text-blue-400 hover:-translate-y-1 hover:scale-105"
-                >
-                  {link.text}
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
+            <div className="grid gap-1">
+              {navLinks.map((link, index) => (
+                <motion.div key={link.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.04 }}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={cn(
+                      "font-display flex items-center justify-between rounded-2xl px-4 py-3 text-2xl font-semibold",
+                      isActive(link.href) ? "bg-secondary/70" : "hover:bg-foreground/[0.04]",
+                    )}
+                  >
+                    {link.label}<span className="text-sm font-sans text-muted-foreground">0{index + 1}</span>
+                  </Link>
+                </motion.div>
+              ))}
+              <button type="button" onClick={startChat} className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 font-black text-primary-foreground">
+                <MessageCircle className="size-4" /> Ask my AI
+              </button>
+            </div>
+          </motion.nav>
         )}
       </AnimatePresence>
-    </>
+    </header>
   );
 };
 

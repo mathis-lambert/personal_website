@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  openGraph: {
+    title: "Mathis Lambert | Software & AI Engineer",
+    description: "Practical AI, thoughtful systems, and the stories behind them.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

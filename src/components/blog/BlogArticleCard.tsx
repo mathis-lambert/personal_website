@@ -53,23 +53,22 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
             },
           });
         }}
-        className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/10 dark:focus-visible:ring-offset-black/30 rounded-3xl"
+        className="block h-full w-full rounded-[2rem] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         aria-label={`Read article: ${article.title}`}
       >
         <div
           className={cn(
-            `flex flex-col h-full rounded-3xl backdrop-blur-xl border border-white/40 relative shadow-md overflow-hidden`,
-            `transition-all duration-300 ease-in-out group-hover:scale-[1.01] group-hover:shadow-xl`,
-            `bg-white/30 dark:bg-gray-800/30 dark:text-gray-100 dark:border-white/10 dark:shadow-lg`,
+            "paper-surface relative flex h-full flex-col overflow-hidden rounded-[2rem]",
+            "transition-all duration-300 ease-out group-hover:-translate-y-1.5 group-hover:shadow-2xl",
           )}
         >
           {/* Cover image */}
-          <div className="relative w-full h-44 sm:h-56 overflow-hidden">
+          <div className="relative h-48 w-full overflow-hidden sm:h-56">
             <Image
-              src={imageSrc || "undefined"}
+              src={imageSrc || "/images/blog/agentic-ai-rag/thumb.png"}
               alt={article.title}
               loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               width={224}
               height={224}
             />
@@ -87,12 +86,12 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
           </div>
 
           {/* Content */}
-          <div className="p-4 sm:p-5 flex flex-col flex-grow">
+          <div className="flex flex-grow flex-col p-5 sm:p-6">
             <header className="mb-2">
-              <h3 className="text-lg sm:text-xl font-extrabold tracking-tight leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 line-clamp-2">
+              <h3 className="font-display line-clamp-2 text-2xl font-semibold leading-tight tracking-tight transition-colors duration-200 group-hover:text-primary sm:text-[1.7rem]">
                 {article.title}
               </h3>
-              <div className="mt-1 grid grid-cols-2 gap-1 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground sm:text-xs">
                 <span className="truncate" title={formattedDate}>
                   {formattedDate}
                 </span>
@@ -112,7 +111,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
               </div>
             </header>
 
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 flex-grow line-clamp-3">
+            <p className="mb-4 line-clamp-3 flex-grow text-sm leading-relaxed text-muted-foreground">
               {article.excerpt}
             </p>
 
@@ -121,7 +120,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
                 {article.tags.slice(0, 4).map((tag) => (
                   <span
                     key={tag}
-                    className="text-[11px] px-2 py-0.5 rounded-full bg-white/50 dark:bg-gray-700/50 border border-white/20 dark:border-white/10 backdrop-blur-sm"
+                    className="rounded-full border border-foreground/10 bg-secondary/45 px-2.5 py-1 text-[11px] font-bold"
                   >
                     {tag}
                   </span>
@@ -129,8 +128,8 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
               </div>
             )}
 
-            <footer className="mt-auto pt-2 border-t border-white/20 dark:border-white/15 flex items-center justify-between">
-              <span className="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center group-hover:underline">
+            <footer className="mt-auto flex items-center justify-between border-t border-foreground/10 pt-3">
+              <span className="flex items-center text-sm font-black text-primary">
                 Read more
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

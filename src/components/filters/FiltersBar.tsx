@@ -66,7 +66,7 @@ const FiltersBar: React.FC<FiltersBarPropsBase> = ({
   );
 
   return (
-    <div className="mb-8 flex flex-col gap-3">
+    <div className="paper-surface mb-8 flex flex-col gap-3 rounded-[1.75rem] p-3 sm:p-4">
       <div className="w-full">
         <SearchInput
           value={searchQuery}

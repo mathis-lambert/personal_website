@@ -1,6 +1,8 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 import BlogArticleCard from "@/components/blog/BlogArticleCard";
 import ProjectCard from "@/components/projects/ProjectCard";
@@ -46,7 +48,7 @@ export function HomePageContent({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-12"
+      className="space-y-4"
     >
       <motion.div variants={fadeUp}>
         <HeroSection />
@@ -58,13 +60,15 @@ export function HomePageContent({
 
       <motion.section
         variants={fadeUp}
-        className="max-w-7xl mx-auto py-10"
+        className="mx-auto py-16"
         aria-labelledby="featured-projects"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 id="featured-projects" className="text-2xl font-semibold">
-            Featured Projects
-          </h2>
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-primary">Selected work</p>
+            <h2 id="featured-projects" className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Projects with a pulse.</h2>
+          </div>
+          <Link href="/projects" className="group hidden items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-2 text-sm font-black transition-colors hover:bg-secondary/70 sm:flex">All projects <ArrowUpRight className="size-4 transition-transform group-hover:rotate-12" /></Link>
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {featuredProjects.map((p, i) => (
@@ -72,7 +76,7 @@ export function HomePageContent({
           ))}
         </div>
         {featuredProjects.length === 0 && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          <p className="rounded-3xl border border-dashed border-foreground/20 py-12 text-center text-sm text-muted-foreground">
             No projects available yet.
           </p>
         )}
@@ -80,13 +84,15 @@ export function HomePageContent({
 
       <motion.section
         variants={fadeUp}
-        className="max-w-7xl mx-auto pb-16"
+        className="mx-auto pb-20 pt-10"
         aria-labelledby="latest-articles"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 id="latest-articles" className="text-2xl font-semibold">
-            Latest Articles
-          </h2>
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-[#d95d45]">Field notes</p>
+            <h2 id="latest-articles" className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Ideas worth sharing.</h2>
+          </div>
+          <Link href="/blog" className="group hidden items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-2 text-sm font-black transition-colors hover:bg-secondary/70 sm:flex">Read the notes <ArrowUpRight className="size-4 transition-transform group-hover:rotate-12" /></Link>
         </div>
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {latestArticles.map((a, i) => (
@@ -98,7 +104,7 @@ export function HomePageContent({
           ))}
         </div>
         {latestArticles.length === 0 && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          <p className="rounded-3xl border border-dashed border-foreground/20 py-12 text-center text-sm text-muted-foreground">
             No articles available yet.
           </p>
         )}

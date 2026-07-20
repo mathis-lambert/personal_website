@@ -89,7 +89,12 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
   }, [articles, selectedTags, featuredOnly, debouncedSearchQuery, sortOrder]);
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 min-h-[60vh]">
+    <section className="mx-auto min-h-[60vh] w-full max-w-7xl">
+      <motion.header initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="pb-10 pt-8 sm:pb-14 sm:pt-12">
+        <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-[#d95d45]">Field notes · {articles.length} {articles.length === 1 ? "article" : "articles"}</p>
+        <h1 className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-7xl">Thinking out loud about systems and AI.</h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">Practical lessons, technical deep dives, and honest notes from building software that has to work outside a demo.</p>
+      </motion.header>
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -141,7 +146,7 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
           >
             {filteredAndSortedArticles.map((article, index) => (
               <BlogArticleCard

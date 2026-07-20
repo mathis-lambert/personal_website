@@ -8,7 +8,6 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -379,8 +378,7 @@ const DashboardPage: React.FC = () => {
               {!timeseries?.series.length ? (
                 <ChartEmptyState message="No data for this filter range." />
               ) : (
-                <ChartContainer className="h-[300px] w-full">
-                  <ResponsiveContainer>
+                <ChartContainer className="h-[300px] w-full" config={{}}>
                     <LineChart data={timeseries.series} margin={{ left: 8, right: 12 }}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                       <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={24} />
@@ -412,7 +410,6 @@ const DashboardPage: React.FC = () => {
                         dot={false}
                       />
                     </LineChart>
-                  </ResponsiveContainer>
                 </ChartContainer>
               )}
             </CardContent>
