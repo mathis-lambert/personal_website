@@ -5,8 +5,9 @@ import { ScrollableTimeline } from "@/components/ui/ScrollableTimeline";
 import WidgetTechnologyChip from "@/components/ui/WidgetTechnologyChip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { LocationMap } from "@/components/ui/LocationMap";
 import { useChat } from "@/hooks/useChat";
-import { ArrowRight, MapPin, MessageCircle, Navigation, Sparkles } from "lucide-react";
+import { ArrowRight, Bot, MessageCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { TimelineEntry } from "@/types";
 
@@ -42,20 +43,7 @@ const GlassCardsList = ({
       </div>
       <div className="grid auto-rows-[220px] grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[250px]">
       <GlassCardHero title="Location" px={0} pt={0} animationDelay={0.05} className="bg-[#79a7d3]/20">
-        <div className="relative flex h-full w-full items-end overflow-hidden bg-[radial-gradient(circle_at_30%_30%,rgba(121,167,211,0.35),transparent_55%)] p-5">
-          <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-          <div className="absolute right-[26%] top-[30%]">
-            <span className="absolute -inset-4 animate-ping rounded-full bg-[#e76f51]/25" />
-            <span className="relative grid size-12 place-items-center rounded-full bg-[#e76f51] text-white shadow-lg"><MapPin className="size-5" /></span>
-          </div>
-          <div className="relative flex w-full items-end justify-between gap-4">
-            <div>
-              <p className="font-display text-2xl font-semibold">Marseille</p>
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">South of France · 43.2965° N</p>
-            </div>
-            <Navigation className="size-5 text-primary" />
-          </div>
-        </div>
+        <LocationMap />
       </GlassCardHero>
 
       <GlassCardHero title="Favourite tools" px={0} size="medium" animationDelay={0.1} className="bg-[#f6bd60]/15">
@@ -92,21 +80,38 @@ const GlassCardsList = ({
         </ScrollArea>
       </GlassCardHero>
 
-      <GlassCardHero title="Interactive portfolio" size="small" animationDelay={0.3} className="bg-foreground text-background dark:bg-[#f6bd60] dark:text-[#263238]">
-        <div className="flex flex-col gap-5 sm:gap-6 pb-4 pr-1 h-full justify-between">
-          <Sparkles className="size-6 text-accent dark:text-[#d95d45]" />
-          <p className="text-sm sm:text-base opacity-85 leading-relaxed font-bold">
-            Skip the scrolling. Ask my AI persona about my work, skills, or experience.
-          </p>
+      <GlassCardHero title="Interactive portfolio" px={0} pt={0} size="small" animationDelay={0.3}>
+        <div className="relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#14373c] px-5 pb-5 pt-[4.25rem] text-[#fffaf0]">
+          <div className="pointer-events-none absolute -right-10 -top-12 size-40 rounded-full border-[28px] border-[#49a493]/25" />
+          <div className="pointer-events-none absolute -bottom-14 -left-10 size-36 rounded-full bg-[#ef6c4d]/20 blur-2xl" />
+
+          <div className="relative">
+            <div className="mb-3 flex items-center gap-2 text-[#ff8a65]">
+              <span className="grid size-8 place-items-center rounded-xl bg-[#ff8a65]/15">
+                <Bot className="size-4" />
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#a8ddd2]">
+                Online · knows this portfolio
+              </span>
+            </div>
+            <p className="font-display text-2xl font-semibold leading-[1.05]">
+              Ask the work itself.
+            </p>
+            <p className="mt-2 max-w-[28ch] text-sm font-bold leading-relaxed text-[#d8e8e4]">
+              Projects, AI systems, skills—get a direct answer and the right link.
+            </p>
+          </div>
+
           <Button
             onClick={openChat}
             aria-label="Start portfolio chat"
             size="lg"
-            className="w-fit !rounded-xl !bg-primary !text-primary-foreground transition-transform hover:-translate-y-0.5"
+            className="relative w-full !rounded-2xl !bg-[#fffaf0] !text-[#14373c] shadow-[0_10px_30px_rgba(0,0,0,0.18)] transition-transform hover:-translate-y-0.5 hover:!bg-white"
           >
-            Start chat
+            Ask my portfolio
             <MessageCircle className="size-4" />
           </Button>
+          <Sparkles className="pointer-events-none absolute right-5 top-[4.4rem] size-5 rotate-12 text-[#f6bd60]" />
         </div>
       </GlassCardHero>
       </div>

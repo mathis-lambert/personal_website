@@ -28,6 +28,7 @@
     "katex": "^0.16.11",
     "langchain": "^1.2.16",
     "lucide-react": "^0.554.0",
+    "maplibre-gl": "^5.24.0",
     "mermaid": "^11.10.1",
     "mongodb": "^6.12.0",
     "next": "^16.2.1",

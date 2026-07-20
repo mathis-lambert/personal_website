@@ -33,7 +33,7 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
     <motion.div
       className={
         `${size === "small" ? "col-span-1 xs:row-span-1" : size === "medium" ? "col-span-1 xs:col-span-2 row-span-1" : size === "large" ? "col-span-1 xs:col-span-3 row-span-1" : ""}` +
-        ` ${className}`
+        " rounded-[2rem]"
       }
       initial={{ opacity: 0, y: 24 }}
       animate={{
@@ -53,7 +53,7 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
       >
         {title && (
           <div
-            className="z-10 absolute left-3 top-3 rounded-full border border-foreground/10 bg-card/90 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] shadow-sm backdrop-blur-xl"
+            className="absolute left-3 top-3 z-20 rounded-full border border-foreground/10 bg-card/92 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur-xl"
           >
             <span>{title}</span>
           </div>

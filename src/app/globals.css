@@ -1,4 +1,5 @@
 @import "katex/dist/katex.min.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@fontsource/lato/index.css";
@@ -220,6 +221,89 @@ button {
     border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
     box-shadow: 0 20px 50px color-mix(in oklab, var(--foreground) 8%, transparent);
     backdrop-filter: blur(16px);
+  }
+
+  .location-map .maplibregl-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Lato, sans-serif;
+  }
+
+  .location-map .maplibregl-canvas {
+    cursor: grab;
+  }
+
+  .location-map .maplibregl-canvas:active {
+    cursor: grabbing;
+  }
+
+  .location-map .maplibregl-ctrl-group {
+    margin: 0.75rem 0.75rem 0 0;
+    overflow: hidden;
+    border: 1px solid rgb(20 55 60 / 12%);
+    border-radius: 0.85rem;
+    background: rgb(255 250 240 / 92%);
+    box-shadow: 0 8px 24px rgb(20 55 60 / 14%);
+    backdrop-filter: blur(10px);
+  }
+
+  .location-map .maplibregl-ctrl-group button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .location-map .maplibregl-ctrl-attrib {
+    border-radius: 0.6rem 0 0 0;
+    background: rgb(255 250 240 / 78%);
+    color: #14373c;
+    backdrop-filter: blur(8px);
+  }
+
+  .location-map-marker {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 0;
+    background: transparent;
+  }
+
+  .location-map-marker-core {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    place-items: center;
+    border: 3px solid #fffaf0;
+    border-radius: 9999px 9999px 9999px 0;
+    background: #ef6c4d;
+    box-shadow: 0 10px 24px rgb(20 55 60 / 28%);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    transform: rotate(-45deg);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .location-map-marker-label {
+    transform: rotate(45deg);
+  }
+
+  .location-map-marker:hover .location-map-marker-core,
+  .location-map-marker:focus-visible .location-map-marker-core {
+    box-shadow: 0 12px 32px rgb(239 108 77 / 45%);
+    transform: rotate(-45deg) translateY(-2px);
+  }
+
+  .location-map-popup .maplibregl-popup-content {
+    border: 1px solid rgb(20 55 60 / 12%);
+    border-radius: 0.9rem;
+    background: #fffaf0;
+    box-shadow: 0 12px 30px rgb(20 55 60 / 18%);
+    color: #14373c;
+    font-weight: 800;
   }
 }
 
