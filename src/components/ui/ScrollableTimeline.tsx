@@ -50,10 +50,10 @@ const defaultClassNames: Required<ClassNames> = {
   gradientBottom:
     "pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-card to-transparent",
   motionDiv:
-    "no-scrollbar h-full w-full overflow-y-auto overscroll-contain scroll-smooth touch-pan-y",
-  itemContainer: "relative flex flex-col py-12",
+    "no-scrollbar h-full w-full overflow-y-auto overscroll-contain pt-12 scroll-smooth touch-pan-y",
+  itemContainer: "relative flex flex-col",
   line:
-    "absolute bottom-8 left-6 top-8 w-px bg-[var(--accent-color)]/55",
+    "absolute inset-y-0 left-6 w-px bg-[var(--accent-color)]/55",
   item: "group/item relative w-full py-2 pl-14 pr-4",
   dotContainerWrapper:
     "absolute left-6 top-1/2 -translate-x-1/2 -translate-y-1/2",
@@ -112,7 +112,7 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
       className={styles.itemContainer}
       aria-hidden={copyIndex === 1 ? true : undefined}
     >
-      <div className={styles.line} />
+      <div className={styles.line} aria-hidden="true" />
       {mappedData.map((entry, index) => (
         <article
           key={`${copyIndex}-${entry.title}-${entry.company}-${index}`}
