@@ -222,6 +222,20 @@ button {
     box-shadow: 0 12px 34px color-mix(in oklab, var(--foreground) 7%, transparent);
   }
 
+  .portfolio-section-enter {
+    animation: portfolio-section-enter 540ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .portfolio-controls-enter {
+    animation: portfolio-controls-enter 520ms 70ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .portfolio-card-enter {
+    animation: portfolio-card-enter 620ms var(--card-delay, 0ms)
+      cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: 50% 100%;
+  }
+
   .location-map .maplibregl-map {
     position: absolute;
     inset: 0;
@@ -303,6 +317,37 @@ button {
     box-shadow: 0 12px 30px rgb(20 55 60 / 18%);
     color: #14373c;
     font-weight: 800;
+  }
+}
+
+@keyframes portfolio-section-enter {
+  from {
+    transform: translate3d(0, 18px, 0) scale(0.992);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes portfolio-controls-enter {
+  from {
+    transform: translate3d(0, 12px, 0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes portfolio-card-enter {
+  from {
+    transform: translate3d(0, 26px, 0) scale(0.975)
+      rotate(var(--card-tilt, 0deg));
+  }
+
+  to {
+    transform: none;
   }
 }
 

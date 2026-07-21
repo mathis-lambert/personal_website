@@ -156,13 +156,13 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
 
   return (
     <section className="mx-auto min-h-[60vh] w-full max-w-7xl">
-      <header className="pb-10 pt-8 sm:pb-14 sm:pt-12">
+      <header className="portfolio-section-enter pb-10 pt-8 sm:pb-14 sm:pt-12">
         <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-primary">Selected builds · {projects.length} case {projects.length === 1 ? "study" : "studies"}</p>
         <h1 className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-7xl">Things I&apos;ve made, broken, and made better.</h1>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">A growing collection of AI systems, developer tools, and product experiments—each with the decisions behind the build.</p>
       </header>
       {/* Filter Controls */}
-      <div>
+      <div className="portfolio-controls-enter">
         <FiltersBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -221,17 +221,34 @@ const ProjectsList: React.FC<ProjectsListProps> = ({ projects }) => {
 
       {/* Project Grid */}
       {filteredAndSortedProjects.length > 0 ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+        <div
+          key={[
+            selectedTechnologies.join(","),
+            selectedCategories.join(","),
+            selectedStatuses.join(","),
+            featuredOnly,
+            debouncedSearchQuery,
+            sortOrder,
+          ].join("|")}
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
+        >
           {filteredAndSortedProjects.map((project, index) => (
-            <ProjectCard
+            <div
               key={project._id}
-              project={project}
-              eagerImage={index < 6}
-            />
+              className="portfolio-card-enter"
+              style={
+                {
+                  "--card-delay": `${Math.min(index, 5) * 55}ms`,
+                  "--card-tilt": index % 2 === 0 ? "-0.35deg" : "0.35deg",
+                } as React.CSSProperties
+              }
+            >
+              <ProjectCard project={project} eagerImage={index < 6} />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
+        <div className="portfolio-card-enter py-16 text-center text-gray-500 dark:text-gray-400">
           <p className="mb-3 font-mono text-2xl">( ; ω ; )</p>
           <p className="text-lg font-semibold">
             No projects match your criteria.
