@@ -236,6 +236,16 @@ button {
     transform-origin: 50% 100%;
   }
 
+  .timeline-auto-scroll-track {
+    animation: timeline-auto-scroll var(--timeline-duration, 18s) linear infinite;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .timeline-auto-scroll:hover .timeline-auto-scroll-track,
+  .timeline-auto-scroll:focus-within .timeline-auto-scroll-track {
+    animation-play-state: paused;
+  }
+
   .location-map .maplibregl-map {
     position: absolute;
     inset: 0;
@@ -351,11 +361,22 @@ button {
   }
 }
 
+@keyframes timeline-auto-scroll {
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .timeline-auto-scroll-track {
+    animation: none !important;
+    transform: none !important;
   }
 }

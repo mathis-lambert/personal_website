@@ -36,6 +36,7 @@ export type ScrollableTimelineProps<T extends TimelineData = TimelineData> = {
   mobileBreakpoint?: number;
   scrollSpeed?: number;
   wheelSensitivity?: number;
+  ariaLabel?: string;
   accentColor?: string;
   showScrollHint?: boolean;
   showGradients?: boolean;
@@ -43,7 +44,7 @@ export type ScrollableTimelineProps<T extends TimelineData = TimelineData> = {
 };
 
 const defaultClassNames: Required<ClassNames> = {
-  root: "group relative h-full w-full overflow-hidden",
+  root: "timeline-auto-scroll group relative h-full w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent-color)]",
   gradientTop:
     "pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-card to-transparent",
   gradientBottom:
@@ -86,6 +87,8 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
     date: "date",
     description: "description",
   },
+  scrollSpeed = 1,
+  ariaLabel = "Timeline",
   accentColor = DEFAULT_ACCENT_COLOR,
   showScrollHint = true,
   showGradients = true,
@@ -98,11 +101,55 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
     date: String(item[keyMappings.date ?? "date"] ?? ""),
     description: String(item[keyMappings.description ?? "description"] ?? ""),
   }));
+  const shouldAutoScroll = mappedData.length > 1;
+  const durationSeconds = Math.max(
+    12,
+    (mappedData.length * 7.5) / Math.max(scrollSpeed, 0.25),
+  );
+
+  const renderEntries = (copyIndex: number) => (
+    <div
+      className={styles.itemContainer}
+      aria-hidden={copyIndex === 1 ? true : undefined}
+    >
+      <div className={styles.line} />
+      {mappedData.map((entry, index) => (
+        <article
+          key={`${copyIndex}-${entry.title}-${entry.company}-${index}`}
+          className={styles.item}
+        >
+          <div className={styles.dotContainerWrapper} aria-hidden="true">
+            <div className={styles.dotWrapper}>
+              <div className={styles.dotOuter} />
+              <div className={styles.dotInner} />
+            </div>
+          </div>
+          <div className={styles.dotConnector} aria-hidden="true" />
+          <div className={styles.contentWrapper}>
+            <h3 className={styles.title}>{entry.title}</h3>
+            <p className={styles.company}>{entry.company}</p>
+            <p className={styles.date}>{entry.date}</p>
+            {entry.description && (
+              <p className={styles.description}>{entry.description}</p>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 
   return (
     <div
       className={styles.root}
-      style={{ "--accent-color": accentColor } as CSSProperties}
+      style={
+        {
+          "--accent-color": accentColor,
+          "--timeline-duration": `${durationSeconds}s`,
+        } as CSSProperties
+      }
+      role="region"
+      aria-label={`${ariaLabel}. Auto-scrolls; hover or focus to pause.`}
+      tabIndex={0}
     >
       {showGradients && (
         <>
@@ -112,30 +159,11 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
       )}
 
       <div className={styles.motionDiv}>
-        <div className={styles.itemContainer}>
-          <div className={styles.line} />
-          {mappedData.map((entry, index) => (
-            <article
-              key={`${entry.title}-${entry.company}-${index}`}
-              className={styles.item}
-            >
-              <div className={styles.dotContainerWrapper} aria-hidden="true">
-                <div className={styles.dotWrapper}>
-                  <div className={styles.dotOuter} />
-                  <div className={styles.dotInner} />
-                </div>
-              </div>
-              <div className={styles.dotConnector} aria-hidden="true" />
-              <div className={styles.contentWrapper}>
-                <h3 className={styles.title}>{entry.title}</h3>
-                <p className={styles.company}>{entry.company}</p>
-                <p className={styles.date}>{entry.date}</p>
-                {entry.description && (
-                  <p className={styles.description}>{entry.description}</p>
-                )}
-              </div>
-            </article>
-          ))}
+        <div
+          className={shouldAutoScroll ? "timeline-auto-scroll-track" : ""}
+        >
+          {renderEntries(0)}
+          {shouldAutoScroll && renderEntries(1)}
         </div>
       </div>
 
@@ -156,7 +184,7 @@ export function ScrollableTimeline<T extends TimelineData = TimelineData>({
                 d="m8 10 4 4 4-4"
               />
             </svg>
-            <span>Scroll</span>
+            <span>Auto</span>
           </div>
         </div>
       )}

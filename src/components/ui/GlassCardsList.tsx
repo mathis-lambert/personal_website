@@ -53,6 +53,7 @@ const GlassCardsList = ({
       <GlassCardHero title="Experience" px={0} size="medium" className="bg-[#f28482]/15">
         <ScrollableTimeline
           data={experiences}
+          ariaLabel="Experience timeline"
           showGradients={false}
           accentColor={"#FF6F61"}
         />
@@ -61,6 +62,7 @@ const GlassCardsList = ({
       <GlassCardHero title="Studies" px={0} className="bg-[#50b5a4]/15">
         <ScrollableTimeline
           data={studies}
+          ariaLabel="Studies timeline"
           showGradients={false}
           accentColor={"#4A90E2"}
         />
