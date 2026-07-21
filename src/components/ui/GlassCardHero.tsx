@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "framer-motion";
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +8,6 @@ interface GlassCardProps {
   children: React.ReactNode;
   px?: number;
   pt?: number;
-  animationDelay?: number;
   className?: string;
 }
 
@@ -19,7 +17,6 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
   children,
   px = 1,
   pt = 3.5,
-  animationDelay = 0.5,
   className = "",
 }) => {
   // Styles dynamiques
@@ -30,19 +27,11 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
   };
 
   return (
-    <motion.div
+    <div
       className={
         `${size === "small" ? "col-span-1 xs:row-span-1" : size === "medium" ? "col-span-1 xs:col-span-2 row-span-1" : size === "large" ? "col-span-1 xs:col-span-3 row-span-1" : ""}` +
         " rounded-[2rem]"
       }
-      initial={{ opacity: 0, y: 24 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: animationDelay, duration: 0.45 },
-      }}
-      exit={{ opacity: 0, y: 12 }}
-      whileHover={{ y: -4 }}
     >
       <div
         className={cn(
@@ -60,7 +49,7 @@ const GlassCardHero: React.FC<GlassCardProps> = ({
         )}
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 };
 

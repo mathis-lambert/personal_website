@@ -1,6 +1,5 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
 import { MotionConfig } from "framer-motion";
 
@@ -11,22 +10,20 @@ import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <SessionProvider>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-        storageKey="next-ui-theme"
-      >
-        <MotionConfig reducedMotion="user">
-          <ChatProvider>
-            <PageViewTracker />
-            {children}
-            <Toaster />
-          </ChatProvider>
-        </MotionConfig>
-      </ThemeProvider>
-    </SessionProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      storageKey="next-ui-theme"
+    >
+      <MotionConfig reducedMotion="user">
+        <ChatProvider>
+          <PageViewTracker />
+          {children}
+          <Toaster />
+        </ChatProvider>
+      </MotionConfig>
+    </ThemeProvider>
   );
 }

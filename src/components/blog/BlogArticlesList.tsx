@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import BlogArticleCard from "./BlogArticleCard";
 import FiltersBar from "@/components/filters/FiltersBar";
 import type { Article } from "@/types";
@@ -90,16 +89,12 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
 
   return (
     <section className="mx-auto min-h-[60vh] w-full max-w-7xl">
-      <motion.header initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="pb-10 pt-8 sm:pb-14 sm:pt-12">
+      <header className="pb-10 pt-8 sm:pb-14 sm:pt-12">
         <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-[#d95d45]">Field notes · {articles.length} {articles.length === 1 ? "article" : "articles"}</p>
         <h1 className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.04em] sm:text-7xl">Thinking out loud about systems and AI.</h1>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">Practical lessons, technical deep dives, and honest notes from building software that has to work outside a demo.</p>
-      </motion.header>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
+      </header>
+      <div>
         <FiltersBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -134,44 +129,27 @@ const BlogArticlesList: React.FC<{ articles: Article[] }> = ({ articles }) => {
             { value: "featured", label: "Featured first" },
           ]}
         />
-      </motion.div>
+      </div>
 
-      <AnimatePresence mode="wait">
-        {filteredAndSortedArticles.length > 0 ? (
-          <motion.div
-            key={[selectedTags.join(","), debouncedSearchQuery, sortOrder].join(
-              "|",
-            )}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6"
-          >
-            {filteredAndSortedArticles.map((article, index) => (
-              <BlogArticleCard
-                key={article._id}
-                article={article}
-                animationDelay={index * 0.08}
-              />
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="no-results"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="text-center py-16 text-gray-500 dark:text-gray-400"
-          >
-            <p className="text-2xl mb-3 font-mono">( T _ T )</p>
-            <p className="text-lg">No articles found.</p>
-            <p className="mt-1 text-sm">
-              Try a different search term, tag, or sort order.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {filteredAndSortedArticles.length > 0 ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {filteredAndSortedArticles.map((article, index) => (
+            <BlogArticleCard
+              key={article._id}
+              article={article}
+              eagerImage={index < 6}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
+          <p className="mb-3 font-mono text-2xl">( T _ T )</p>
+          <p className="text-lg">No articles found.</p>
+          <p className="mt-1 text-sm">
+            Try a different search term, tag, or sort order.
+          </p>
+        </div>
+      )}
     </section>
   );
 };

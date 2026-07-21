@@ -47,7 +47,9 @@ const SvgIcon: React.FC<SvgIconProps> = ({
       alt={alt}
       title={title ?? alt}
       loading="lazy"
-      className={cn("select-none", className)}
+      unoptimized
+      className={cn("select-none object-contain", className)}
+      style={{ width: size, height: size }}
       draggable={false}
       onError={() => setErrored(true)}
     />

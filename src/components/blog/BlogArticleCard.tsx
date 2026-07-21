@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Article } from "@/types";
 import { Star } from "lucide-react";
@@ -10,12 +9,12 @@ import { trackUiEvent } from "@/api/analytics";
 
 interface BlogArticleCardProps {
   article: Article;
-  animationDelay?: number;
+  eagerImage?: boolean;
 }
 
 const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
   article,
-  animationDelay = 0.1,
+  eagerImage = false,
 }) => {
   const formattedDate = new Date(article.date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -31,16 +30,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
   const isFeatured = Boolean(article.isFeatured);
 
   return (
-    <motion.article
-      className="group w-full h-full"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: animationDelay, duration: 0.4, ease: "easeOut" },
-      }}
-      exit={{ opacity: 0, y: 30 }}
-    >
+    <article className="group h-full w-full">
       <Link
         href={`/blog/${article.slug || article._id}`}
         onClick={() => {
@@ -67,7 +57,8 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
             <Image
               src={imageSrc || "/images/blog/agentic-ai-rag/thumb.png"}
               alt={article.title}
-              loading="lazy"
+              loading={eagerImage ? "eager" : "lazy"}
+              fetchPriority={eagerImage ? "low" : "auto"}
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               width={224}
               height={224}
@@ -155,7 +146,7 @@ const BlogArticleCard: React.FC<BlogArticleCardProps> = ({
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 };
 

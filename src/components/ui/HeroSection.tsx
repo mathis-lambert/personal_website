@@ -73,7 +73,14 @@ export const HeroSection = () => {
           <Sparkles className="mb-1 size-4" /> Curiosity first
         </div>
         <div className="relative ml-auto aspect-[4/4.7] w-[88%] overflow-hidden rounded-[2.5rem] border-2 border-foreground/10 bg-[#79a7d3] p-3 shadow-[0_30px_80px_color-mix(in_oklab,var(--foreground)_18%,transparent)] sm:w-[82%]">
-          <Image src="/images/me.jpeg" alt="Mathis Lambert" fill priority sizes="(max-width: 1024px) 80vw, 34vw" className="object-cover object-center p-3 rounded-[2.7rem]" />
+          <Image
+            src="/images/mathis.jpg"
+            alt="Mathis Lambert"
+            fill
+            priority
+            sizes="(max-width: 1024px) 80vw, 34vw"
+            className="rounded-[2.7rem] object-cover object-[62%_center] p-3"
+          />
           <div className="absolute inset-x-6 bottom-6 rounded-2xl border border-white/30 bg-[#fffaf1]/90 p-4 text-[#263238] shadow-xl backdrop-blur-md">
             <p className="font-display text-2xl font-semibold">Engineer in motion</p>
             <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-[#4d646b]"><MapPin className="size-3.5 text-[#e76f51]" /> Marseille, France</p>

@@ -217,10 +217,9 @@ button {
   }
 
   .paper-surface {
-    background: color-mix(in oklab, var(--card) 88%, transparent);
+    background: color-mix(in oklab, var(--card) 97%, var(--background));
     border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-    box-shadow: 0 20px 50px color-mix(in oklab, var(--foreground) 8%, transparent);
-    backdrop-filter: blur(16px);
+    box-shadow: 0 12px 34px color-mix(in oklab, var(--foreground) 7%, transparent);
   }
 
   .location-map .maplibregl-map {

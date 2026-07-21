@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { SessionProvider, signIn, signOut, useSession } from "next-auth/react";
 import React, { createContext, useContext, useMemo } from "react";
 
 interface AdminAuthContextType {
@@ -22,7 +22,7 @@ export const useAdminAuth = (): AdminAuthContextType => {
   return ctx;
 };
 
-export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
+const AdminAuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { data: session, status } = useSession();
@@ -64,3 +64,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     </AdminAuthContext.Provider>
   );
 };
+
+export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <SessionProvider>
+    <AdminAuthProviderInner>{children}</AdminAuthProviderInner>
+  </SessionProvider>
+);

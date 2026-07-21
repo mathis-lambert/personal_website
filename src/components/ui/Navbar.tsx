@@ -60,12 +60,12 @@ const Navbar = () => {
         >
           <span className="relative">
             <Image
-              src="/images/me.jpeg"
+              src="/images/mathis.jpg"
               alt=""
               width={42}
               height={42}
               priority
-              className="size-10 rounded-xl object-cover ring-1 ring-foreground/10 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
+              className="size-10 rounded-xl object-cover object-[62%_center] ring-1 ring-foreground/10 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
             />
             <span className="absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-card bg-emerald-500" />
           </span>

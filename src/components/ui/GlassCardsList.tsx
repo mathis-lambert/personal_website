@@ -42,35 +42,31 @@ const GlassCardsList = ({
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">The tools, places, and experiences shaping how I think and build.</p>
       </div>
       <div className="grid auto-rows-[220px] grid-cols-1 gap-4 xs:grid-cols-2 lg:grid-cols-3 lg:auto-rows-[250px]">
-      <GlassCardHero title="Location" px={0} pt={0} animationDelay={0.05} className="bg-[#79a7d3]/20">
+      <GlassCardHero title="Location" px={0} pt={0} className="bg-[#79a7d3]/20">
         <LocationMap />
       </GlassCardHero>
 
-      <GlassCardHero title="Favourite tools" px={0} size="medium" animationDelay={0.1} className="bg-[#f6bd60]/15">
+      <GlassCardHero title="Favourite tools" px={0} size="medium" className="bg-[#f6bd60]/15">
         <ToolCarousel />
       </GlassCardHero>
 
-      <GlassCardHero title="Experience" px={0} size="medium" animationDelay={0.15} className="bg-[#f28482]/15">
+      <GlassCardHero title="Experience" px={0} size="medium" className="bg-[#f28482]/15">
         <ScrollableTimeline
           data={experiences}
           showGradients={false}
           accentColor={"#FF6F61"}
-          scrollSpeed={2}
-          wheelSensitivity={1}
         />
       </GlassCardHero>
 
-      <GlassCardHero title="Studies" px={0} animationDelay={0.2} className="bg-[#50b5a4]/15">
+      <GlassCardHero title="Studies" px={0} className="bg-[#50b5a4]/15">
         <ScrollableTimeline
           data={studies}
           showGradients={false}
           accentColor={"#4A90E2"}
-          scrollSpeed={2}
-          wheelSensitivity={1}
         />
       </GlassCardHero>
 
-      <GlassCardHero title="Top skills" px={1} size="small" animationDelay={0.25}>
+      <GlassCardHero title="Top skills" px={1} size="small">
         <ScrollArea className="h-48 thin-scrollbar pr-1 w-full">
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 gap-2 pr-1 pb-14 sm:pb-10 md:pb-8 lg:pb-6 ">
             {topSkills.map((tech) => (
@@ -80,7 +76,7 @@ const GlassCardsList = ({
         </ScrollArea>
       </GlassCardHero>
 
-      <GlassCardHero title="Interactive portfolio" px={0} pt={0} size="small" animationDelay={0.3}>
+      <GlassCardHero title="Interactive portfolio" px={0} pt={0} size="small">
         <div className="relative flex h-full w-full flex-col justify-between overflow-hidden bg-[#14373c] px-5 pb-5 pt-[4.25rem] text-[#fffaf0]">
           <div className="pointer-events-none absolute -right-10 -top-12 size-40 rounded-full border-[28px] border-[#49a493]/25" />
           <div className="pointer-events-none absolute -bottom-14 -left-10 size-36 rounded-full bg-[#ef6c4d]/20 blur-2xl" />

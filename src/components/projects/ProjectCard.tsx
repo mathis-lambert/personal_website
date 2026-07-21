@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Star } from "lucide-react";
 import { BsGithub } from "react-icons/bs";
@@ -12,12 +11,12 @@ import { trackUiEvent } from "@/api/analytics";
 
 interface ProjectCardProps {
   project: Project;
-  animationDelay?: number;
+  eagerImage?: boolean;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
-  animationDelay = 0.1,
+  eagerImage = false,
 }) => {
   const router = useRouter();
   const detailsPath = `/projects/${project.slug || project._id}`;
@@ -54,17 +53,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <motion.div
-      className="group w-full h-full"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transition: { delay: animationDelay, duration: 0.4, ease: "easeOut" },
-      }}
-      exit={{ opacity: 0, y: 30 }}
-      layout
-    >
+    <div className="group h-full w-full">
       <div
         role="button"
         tabIndex={0}
@@ -88,7 +77,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Image
               src={imageSrc || "/images/projects/personal-website/thumb.png"}
               alt={`Screenshot of ${project.title}`}
-              loading="lazy"
+              loading={eagerImage ? "eager" : "lazy"}
+              fetchPriority={eagerImage ? "low" : "auto"}
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               width={384}
               height={192}
@@ -208,7 +198,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
