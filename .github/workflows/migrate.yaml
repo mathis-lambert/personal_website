@@ -1,9 +1,6 @@
 name: Migrate
 
-# Manual only, on purpose. `migrations/README.md` is explicit that nothing runs
-# automatically on deploy — a collection rename is not a decision a container
-# restart should make. This workflow exists so applying one does not also
-# require an SSH session by hand; it does not make the trigger any less manual.
+# Manual dispatch only; never runs on deploy or on a tag push.
 on:
   workflow_dispatch:
     inputs:
@@ -99,9 +96,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            # Mongo has no port open to the internet — it is only reachable from
-            # containers on this network, which is why this has to run here and
-            # not from the Actions runner.
+            # Mongo is only reachable on this network, not from Actions runners.
             docker network create databases || true
 
             if [ -n '${{ secrets.GITHUB_TOKEN }}' ]; then
@@ -110,11 +105,16 @@ jobs:
 
             docker pull "$IMAGE"
 
-            case "$ACTION" in
-              status)  ARGS="--status" ;;
-              apply)   ARGS="--apply" ;;
-              *)       ARGS="" ;;
-            esac
+            # No case statement: appleboy/ssh-action breaks `;;` case arms.
+            ARGS=""
+
+            if [ "$ACTION" = "status" ]; then
+              ARGS="--status"
+            fi
+
+            if [ "$ACTION" = "apply" ]; then
+              ARGS="--apply"
+            fi
 
             # shellcheck disable=SC2086
             docker run --rm \
