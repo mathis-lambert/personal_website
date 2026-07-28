@@ -2,11 +2,7 @@ import type { ReactNode } from "react";
 
 import { Display, Eyebrow, Lead } from "@/components/ds";
 
-/**
- * The masthead every index page shares: kicker, display title, standfirst.
- * Projects and notes used to declare their own — same intent, different
- * spacing, different eyebrow colour.
- */
+/** The masthead every index page shares: kicker, display title, standfirst. */
 export function ListHeader({
   eyebrow,
   icon,

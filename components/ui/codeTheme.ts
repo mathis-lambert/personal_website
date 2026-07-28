@@ -1,12 +1,8 @@
 import type { CSSProperties } from "react";
 
 /**
- * A warm syntax theme for code blocks.
- *
- * The previous setup used Prism's `oneDark`, whose slate-and-violet tokens
- * fought the warm palette everywhere they appeared. These hues sit in the same
- * 20–120 range as the rest of the system, so a code block reads as an inked
- * slab of the same document.
+ * A warm syntax theme for code blocks, in the same hue range as the rest of
+ * the system.
  *
  * Values are literal because `react-syntax-highlighter` inlines them as style
  * objects and cannot resolve CSS custom properties.

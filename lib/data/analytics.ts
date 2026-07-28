@@ -1,13 +1,7 @@
 import { getUiEventsCollection, type UiEventDocument } from "@/lib/db/collections";
 import { redactValue } from "@/lib/analytics/redaction";
 
-/**
- * Recording a UI event. Reading them back is `lib/data/insights.ts`.
- *
- * This file also held five aggregations: request volume, latency percentiles,
- * endpoints by throughput, an error feed and a combined activity stream. They
- * served the APM-shaped dashboard, which no longer exists.
- */
+/** Recording a UI event. Reading them back is `lib/data/insights.ts`. */
 type UiEventInput = {
   name: string;
   path?: string;

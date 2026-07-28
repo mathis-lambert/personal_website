@@ -6,12 +6,8 @@ import { useInView } from "@/hooks/useInView";
 import { cn } from "@/lib/utils";
 
 /**
- * The site's only entrance animation.
- *
- * Deliberately CSS-driven and one-shot: the previous version remounted whole
- * grids to replay Framer Motion keyframes, which re-decoded every image and
- * dropped focus on each keystroke. Here the observer disconnects after the
- * first intersection and nothing re-renders afterwards.
+ * The site's only entrance animation. CSS-driven and one-shot: the observer
+ * disconnects after the first intersection, nothing re-renders afterwards.
  */
 export function Reveal({
   children,

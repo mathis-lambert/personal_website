@@ -62,12 +62,9 @@ function CodeBlock({ code, language }: { code: string; language: string }) {
 }
 
 /**
- * Markdown rendering.
- *
- * Element styling lives in `.prose-paper` in globals.css, so this file only
- * handles the three things that genuinely need React: syntax-highlighted code,
- * Mermaid diagrams, and next/image. It used to override every tag inline with
- * its own blues and greys, which is why note bodies never matched the site.
+ * Markdown rendering. Element styling lives in `.prose-paper` in globals.css;
+ * this file only handles what genuinely needs React: syntax-highlighted code,
+ * Mermaid diagrams, and next/image.
  */
 const MarkdownView: React.FC<MarkdownViewProps> = ({
   content,

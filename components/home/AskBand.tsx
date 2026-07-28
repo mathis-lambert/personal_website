@@ -12,13 +12,8 @@ const prompts = [
 ];
 
 /**
- * The one inverted band on the page. It breaks the rhythm of paper surfaces
- * exactly once, which is what makes it read as an invitation rather than as
- * another card.
- *
- * There is no image here. A cut-out portrait used to float in the top corner,
- * cropped by the band's own `overflow: hidden` — a decoration that was both
- * ugly and broken. The colour and the type carry the block instead.
+ * The one inverted band on the page, breaking the paper rhythm exactly once.
+ * No image: the colour and the type carry it.
  */
 export function AskBand() {
   const { openChat, sendMessage } = useChat();

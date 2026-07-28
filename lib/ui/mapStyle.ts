@@ -1,13 +1,9 @@
 import type { StyleSpecification } from "maplibre-gl";
 
 /**
- * A hand-written MapLibre style in the site palette.
- *
- * The previous version loaded OpenFreeMap's off-the-shelf "liberty" style and
- * pushed a CSS `filter: saturate() brightness()` over the canvas for dark mode.
- * That is not a dark map: it dims a light one, so labels go grey-on-grey and the
- * whole tile turns muddy. Styling the vector layers directly gives a real day
- * and night pair, drawn from the same tokens as the rest of the page.
+ * A hand-written MapLibre style in the site palette: real day and night
+ * variants, drawn from the same tokens as the rest of the page, rather than a
+ * CSS filter dimming a light map.
  *
  * Tiles are OpenMapTiles schema, served free by OpenFreeMap (no key needed).
  */

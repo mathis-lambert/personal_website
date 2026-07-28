@@ -61,13 +61,7 @@ function Chip({
   );
 }
 
-/**
- * Filter controls for the index pages.
- *
- * One row of controls at every breakpoint — the old version duplicated the
- * whole control set behind `sm:hidden` / `hidden sm:flex`, which meant two
- * sources of truth for the same UI. Flex wrap does the job instead.
- */
+/** Filter controls for the index pages. One row, wrapping at every breakpoint. */
 const FiltersBar: React.FC<FiltersBarProps> = ({
   searchQuery,
   onSearchChange,

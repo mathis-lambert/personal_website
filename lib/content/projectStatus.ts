@@ -3,13 +3,8 @@ import { Archive, CheckCircle2, CircleDot, type LucideIcon } from "lucide-react"
 import type { ProjectStatus } from "@/types";
 
 /**
- * The one project-status table. There were three, and they disagreed.
- *
- * `label` is the status itself, for wherever the status is the subject: filters,
- * admin. `kicker` is what a card calls a project in that status, which is
- * editorial voice rather than state. Both wordings are deliberate; keeping them
- * in one place is what stops them drifting apart again.
- *
+ * The one project-status table. `label` is the status itself (filters, admin);
+ * `kicker` is what a card calls a project in that status (editorial voice).
  * `icon` is the component, not an element, so this module stays free of JSX.
  */
 export const PROJECT_STATUSES = {

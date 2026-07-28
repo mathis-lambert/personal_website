@@ -2,11 +2,7 @@ import { Meta } from "@/components/ds";
 import { cn } from "@/lib/utils";
 import type { Certification } from "@/types";
 
-/**
- * Certification status reads through opacity of the one accent, not four
- * unrelated hues — and it no longer pulses: an `animate-ping` per row meant a
- * sidebar with five permanently animating dots.
- */
+/** Certification status reads through opacity of the one accent, not four hues. */
 const statusStyle: Record<string, string> = {
   issued: "bg-brand",
   in_progress: "bg-brand/55",

@@ -17,8 +17,7 @@ development/mongodb/data
 development/mongodb/logs
 resume_test.pdf
 
-# Repository meta. `COPY . .` used to copy `src/` only; now that the app is at
-# the root, these would ride along into the image for no reason.
+# Repository meta: not needed inside the image.
 Dockerfile
 compose.dev.yaml
 compose.prod.yaml

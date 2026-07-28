@@ -6,15 +6,9 @@ import {
 import type { AdminInsights, InsightsGranularity } from "@/types";
 
 /**
- * What the site owner needs to know, as opposed to what the server happens to
- * record.
- *
- * The previous dashboard reported request counts, error rates and p50/p95
- * latency per endpoint. On a personal site with no on-call rotation that answers
- * a question nobody is asking, and it crowded out the ones that matter: did
- * anyone come, what did they read, did they get in touch, and what did they ask
- * the assistant. Those come from `ui_events` and the chat log, not from the
- * request log, which is why almost none of this existed before.
+ * What the site owner needs to know: who came, what they read, did they get
+ * in touch, what did they ask the assistant. Mostly from `ui_events` and the
+ * chat log, not the request log.
  *
  * Infrastructure health is still here, reduced to the three numbers worth
  * glancing at.

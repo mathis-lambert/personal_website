@@ -18,12 +18,8 @@ const navLinks = [
 ];
 
 /**
- * A floating glass bar.
- *
- * It sits inside the page rather than spanning it, so the blur has colour to
- * pick up from the ambient field behind it — that is what makes the material
- * read as glass instead of as a grey panel. There is one breakpoint (`md`);
- * an earlier version had four and left a gap with no navigation at all.
+ * A floating glass bar, inset from the page edges so the blur picks up colour
+ * from the ambient field behind it. One breakpoint (`md`).
  */
 const Navbar = () => {
   const pathname = usePathname();
@@ -117,9 +113,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Kept mounted and inert when closed: an unmounted panel cannot
-            animate shut, and this one used to appear with no transition at
-            all. Rows stagger in behind the sheet as it unfolds. */}
+        {/* Kept mounted and inert when closed so it can animate shut. */}
         <div className="sheet md:hidden" data-open={menuOpen}>
           <div>
             <nav

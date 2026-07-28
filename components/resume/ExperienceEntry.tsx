@@ -7,13 +7,8 @@ import { cn } from "@/lib/utils";
 import type { Experience } from "@/types";
 
 /**
- * One role.
- *
- * Badges carry the hierarchy — period, location, whether it's current — and a
- * hairline separates rows. Wrapping each entry in its own raised card, as an
- * earlier pass did, put a white slab on a near-white page: heavy, and no more
- * legible for it. The one role marked `highlight` gets a wash of the section
- * ink instead, which distinguishes it without adding chrome.
+ * One role. Badges carry the hierarchy; a hairline separates rows. The role
+ * marked `highlight` gets a wash of the section ink instead of a card.
  */
 export function ExperienceEntry({
   experience,

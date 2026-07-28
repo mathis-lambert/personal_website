@@ -727,10 +727,7 @@
     background-size: 100% 2px;
   }
 
-  /* The link's own motion is the letter lift, the same one the headings use.
-     A previous version slid two stacked copies of the label past each other
-     inside a clipped box; it fought the descenders and read as a glitch. All
-     that is left here is the rule, which grows from the leading edge. */
+  /* Motion is the letter lift the headings use; only the rule lives here. */
   .link-slide {
     position: relative;
     color: var(--ink-muted);

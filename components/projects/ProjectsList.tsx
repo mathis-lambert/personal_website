@@ -145,9 +145,7 @@ const ProjectsList: React.FC<{ projects: Project[] }> = ({ projects }) => {
         sortOptions={SORT_OPTIONS}
       />
 
-      {/* No `key` on the grid: the previous version remounted every card on
-          each keystroke to replay an entrance animation, which re-decoded all
-          the cover images and dropped focus out of the search field. */}
+      {/* No `key` on the grid, so re-filtering doesn't remount every card. */}
       {visible.length > 0 ? (
         <CardGrid className="pb-24">
           {visible.map((project, index) => (

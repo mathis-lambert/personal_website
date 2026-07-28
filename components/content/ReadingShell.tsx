@@ -15,12 +15,8 @@ import {
 import Breadcrumb from "@/components/ui/breadcrumb";
 
 /**
- * The shared reading layout for a single project or note.
- *
- * Both detail pages used to wrap their whole body in a translucent glass panel
- * with its own greys — long-form text inside a card inside a blurred backdrop.
- * Here the body sits directly on the paper at a fixed reading measure, which is
- * the only layout that actually serves reading.
+ * The shared reading layout for a single project or note: body text directly
+ * on the paper, at a fixed reading measure.
  */
 export function ReadingShell({
   breadcrumb,

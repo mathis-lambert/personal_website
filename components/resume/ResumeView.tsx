@@ -37,15 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ResumeData } from "@/types";
 
-/**
- * A CV section: icon tile, title, count, then content. No container.
- *
- * These used to sit in boxes — a black slab with a blue radial glow for the
- * masthead, a big soft grey panel for the reference column. Neither separated
- * anything: they were large shapes on a near-white page, and the grey one made
- * the tags inside look like litter. Sections are set apart by space and a rule,
- * which is how a printed CV does it.
- */
+/** A CV section: icon tile, title, count, then content. No container. */
 function Block({
   title,
   icon,

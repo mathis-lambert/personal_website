@@ -48,14 +48,8 @@ const RANGES = [
 ] as const;
 
 /**
- * The conversation log.
- *
- * A transcript is a conversation, so it is laid out as one: turns in sequence,
- * the visitor on the left and the assistant answering under it. The previous
- * version put "User Input" and "Assistant Output" in two labelled `<pre>` blocks
- * per turn, which is a debugger's view of a chat and unreadable at any length.
- * Model, duration and errors move to the margin, where they are available
- * without interrupting the reading.
+ * The conversation log: turns in sequence, visitor on the left. Model,
+ * duration and errors sit in the margin, out of the way of reading.
  */
 const DiscussionsPage: React.FC = () => {
   const { token } = useAdminAuth();

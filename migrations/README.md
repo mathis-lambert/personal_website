@@ -88,9 +88,8 @@ versioning started, `articles` collection and all. `001-baseline` loads it into 
 empty database, then later migrations move it forward, which is the same path
 production took.
 
-Do not edit it to match today's schema. The migrations that follow were written
-against the old shape, and a "tidied up" baseline is a baseline they no longer
-apply to.
+Do not edit it to match today's schema; the migrations that follow depend on it
+matching what they were written against.
 
 Refresh it from production with:
 

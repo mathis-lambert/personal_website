@@ -3,10 +3,7 @@ import { Loader2 } from "lucide-react";
 import { Eyebrow } from "@/components/ds";
 import { cn } from "@/lib/utils";
 
-/**
- * Full-page loading state. Plain paper: it used to stack three radial
- * gradients behind a blurred card, which is a lot of machinery for a spinner.
- */
+/** Full-page loading state. Plain paper. */
 export function PageLoader({
   message = "Loading…",
   className,

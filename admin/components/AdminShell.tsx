@@ -101,10 +101,7 @@ function Rail({ onNavigate }: { onNavigate?: () => void }) {
  * colour inside a screen tracks where you are: blue while reading the audience,
  * coral while publishing, green in the CV.
  *
- * It is responsive rather than gated. The previous shell put a full-screen
- * "must be used on a laptop" panel over anything under 768px, which meant no
- * fixing a typo from a phone. Wide screens get the rail, narrow ones get the
- * same navigation in a sheet.
+ * Responsive: a rail on wide screens, the same nav in a sheet on narrow ones.
  */
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/admin";

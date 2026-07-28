@@ -13,10 +13,6 @@ const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
 /**
  * `fetch` that gives up: a timeout that also honours the caller's own `signal`,
  * plus optional bearer auth.
- *
- * The module-level "unauthorized handler" that used to retry 401s is gone.
- * Nothing ever registered one, so it only ever fired the same failing request a
- * second time.
  */
 export async function fetchWithTimeout(
   input: RequestInfo | URL,

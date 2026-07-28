@@ -2,10 +2,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * The one chip. Deliberately monochrome: tags used to carry a different hue
- * per category, which made every card look like a different website.
- */
+/** The one chip. Deliberately monochrome. */
 export function Tag({
   children,
   className,

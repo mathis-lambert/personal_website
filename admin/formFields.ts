@@ -1,10 +1,7 @@
 /**
  * Reading a submitted admin form.
  *
- * Replaces seventy-odd hand-written `String(fd.get("title") || "")` reads and
- * two copies of a CSV splitter. Two screens used to trim on update but not on
- * create, so the same form produced different data depending on the button.
- * Everything is trimmed once, here.
+ * Reads a submitted form's fields with consistent trimming and coercion.
  */
 export const readForm = (form: HTMLFormElement) => {
   const data = new FormData(form);

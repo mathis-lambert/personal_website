@@ -7,16 +7,11 @@ import Conversation from "@/components/chat/Conversation";
 import { Eyebrow, Page } from "@/components/ds";
 import { useChat } from "@/hooks/useChat";
 
-/**
- * Full-screen reading surface for the conversation. It's paper, not a tinted
- * glass sheet: the previous overlay layered a slate-to-sky gradient over a
- * 24px blur, which turned the whole site blue for the duration of a chat.
- */
+/** Full-screen reading surface for the conversation: paper, not tinted glass. */
 const ChatPanel: React.FC = () => {
   const { isChatOpen, closeChat, openChat, toggleChat } = useChat();
 
-  // Lock the page behind the panel. Only this component touches body overflow
-  // now — the navbar used to fight it for control of the same property.
+  // Lock the page behind the panel while it's open.
   useEffect(() => {
     if (!isChatOpen) return;
     const previous = document.body.style.overflow;

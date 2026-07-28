@@ -17,11 +17,7 @@ import { cn } from "@/lib/utils";
 const MIN_HEIGHT = 44;
 const MAX_HEIGHT = 200;
 
-/**
- * The persistent ask bar. Paper surface, brand send button — it used to be a
- * translucent white pill with a sky-blue button and a red destructive close,
- * three colours that appeared nowhere else on the site.
- */
+/** The persistent ask bar: paper surface, brand send button. */
 const FloatingChatInput: React.FC<{ placeholder?: string }> = ({
   placeholder = "Ask me anything",
 }) => {
@@ -95,11 +91,8 @@ const FloatingChatInput: React.FC<{ placeholder?: string }> = ({
     }
   };
 
-  // Two separate reasons the composer used to disappear once the chat opened:
-  // the panel sat at a higher z-index and painted over it, and the footer
-  // observer kept it hidden if you happened to open the chat near the bottom of
-  // a page. While the chat is open the composer is the only way to reply, so it
-  // outranks both.
+  // While the chat is open the composer is the only way to reply, so it
+  // outranks the panel's z-index and the footer visibility observer.
   const hidden = nearFooter && !isChatOpen;
 
   return (

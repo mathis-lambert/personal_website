@@ -1,12 +1,7 @@
 import { CardGrid, Page } from "@/components/ds";
 import { cn } from "@/lib/utils";
 
-/**
- * Loading placeholders.
- *
- * One file, one shimmer treatment, so the loading state cannot advertise a
- * design the loaded page no longer uses.
- */
+/** Loading placeholders: one file, one shimmer treatment. */
 
 const bar = "rounded-2 bg-paper-sink";
 

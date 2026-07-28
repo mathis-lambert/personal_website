@@ -21,10 +21,7 @@ import { cn } from "@/lib/utils";
 /**
  * One labelled control, bound to a value.
  *
- * The CV editors used bare inputs with a placeholder standing in for a label,
- * so once you typed the box no longer said what it was. Every control here keeps
- * its label, and the whole set is laid out on one grid so the sections stop
- * looking like six different forms.
+ * A labelled control, plus a shared layout grid.
  */
 export function Bound({
   label,

@@ -50,14 +50,8 @@ const bucketLabel = (bucket: string, granularity: string) => {
 };
 
 /**
- * What happened on the site.
- *
- * This screen used to be an APM console: request volume, error rate, p50 and p95
- * latency, endpoints ranked by throughput. For a portfolio with a handful of
- * visitors and no error budget, none of that is a decision anyone makes. It
- * answers the four questions the owner actually has, in that order: did anyone
- * come, what did they read, did they reach out, is anything broken.
- * Infrastructure is one line at the bottom.
+ * What happened on the site: who came, what they opened, what they asked,
+ * whether anything is broken. Infrastructure is one line at the bottom.
  */
 const DashboardPage: React.FC = () => {
   const { token } = useAdminAuth();

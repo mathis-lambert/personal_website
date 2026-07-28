@@ -8,10 +8,7 @@ interface FeaturedToggleProps {
   label?: string;
 }
 
-/**
- * A switch in the shared control shell. The state reads through the brand
- * accent — the old version invented a yellow that existed nowhere else.
- */
+/** A switch in the shared control shell; state reads through the brand accent. */
 const FeaturedToggle: React.FC<FeaturedToggleProps> = ({
   checked,
   onChange,
