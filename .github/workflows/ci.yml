@@ -16,9 +16,6 @@ jobs:
   next:
     name: Next.js — Lint & Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +25,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: src/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci

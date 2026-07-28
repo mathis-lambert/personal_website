@@ -1,0 +1,640 @@
+{
+  "source": "personal_website",
+  "collections": {
+    "projects": [
+      {
+        "slug": "icloud-ignore-utility",
+        "subtitle": "Little Bash/ZSH utility to avoid syncing some directories with iCloud on MacOS",
+        "description": "redaction in-progress 🚧",
+        "content": "redaction in-progress 🚧 🚧 🚧 ",
+        "categories": [
+          "Utility",
+          "MacOS"
+        ],
+        "status": "completed",
+        "isFeatured": false,
+        "links": {},
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/icloud_ignore.png",
+          "imageUrl": "https://cdn.mathislambert.fr/assets/icloud_ignore.png"
+        },
+        "title": "iCloud Ignore Utility",
+        "date": "2025-09-08",
+        "technologies": [
+          "Go",
+          "HomeBrew"
+        ],
+        "createdAt": "2025-11-25T16:07:36.003Z",
+        "updatedAt": "2026-02-07T14:11:26.926Z"
+      },
+      {
+        "slug": "personal-website",
+        "subtitle": "React frontend, FastAPI backend, Agentic AI and RAG",
+        "description": "Personal site built with React + TS with a FastAPI backend. It uses LLMs and a vector store for semantic search and interactive browsing.",
+        "content": "I started this website in **February 2025** because I wanted one place that could do two things at the same time: present my work publicly (projects, articles, resume), and stay flexible enough to be a real experimentation space. I treat it like a living lab: I can try new UI patterns, content formats, and small “product” ideas, but the result still needs to run reliably in production.\n\nThe first version (done around **August 2025**) was a split setup with a **Vite + React** frontend and a **FastAPI** backend. It worked, but it was heavier than it needed to be for a personal project. I eventually migrated to a single-service architecture built with **Next.js (App Router)** and a component stack around **Tailwind** and **shadcn/Radix**, mainly to reduce maintenance overhead and simplify deployment.\n\n## What it is today\n\nThe current codebase is a monolithic Next.js app: public pages, API routes, and an admin area live in the same service. Content (projects, blog posts, experiences/studies, resume) is stored in **MongoDB**, and the UI renders it dynamically. The blog supports a technical writing style with Markdown features like syntax highlighting, math rendering, and Mermaid diagrams—useful for articles that include real engineering notes.\n\nI also built a credentials-protected `/admin` area using **NextAuth** (JWT session strategy). The goal is simple: avoid editing JSON files or redeploying just to update a project description, publish an article, or adjust my resume. For a personal website, “content ops” matters more than it sounds.\n\n## The built-in assistant\n\nThe site includes an assistant (Nexia) that behaves as “me” answering questions about my projects and background. Technically, the chat UI calls `/api/agent`, which streams responses back to the client (SSE). On the server side, the route acts as a proxy to an external ML API (`ML_API_BASE_URL`) and is designed around tool-calling and retrieval patterns, so answers can be grounded in my own content instead of guessing.\n\n## Deployment and monitoring\n\nThis project is meant to be shipped like a real service. It’s Dockerized (multi-stage build, Next.js standalone output) and deployed behind **Traefik** on my self-hosted infrastructure. The CI/CD is fully automated: tagged releases build and push an image to GHCR and then deploy to my personal server (Raspberry Pi), which I describe here: https://mathislambert.fr/projects/my-raspi-server.\n\nOperationally, I log website activity and key events (including agent usage and resume exports) into MongoDB, and I monitor the container stack through Grafana for administration and debugging.\n\n## What I learned (and why I’d do it this way again)\n\nThe main lesson is that “simple to maintain” is a feature. Splitting frontend and backend gave me flexibility early on, but the migration to Next.js made iteration faster and deployments more boring—in a good way. It let me keep the project experimental (UI/UX ideas, AI features) while still treating it like a production service with repeatable builds, observability, and a clean content workflow.",
+        "categories": [
+          "Website",
+          "Fullstack",
+          "AI"
+        ],
+        "status": "completed",
+        "isFeatured": true,
+        "links": {
+          "live": "https://mathislambert.fr",
+          "repo": "https://github.com/mathis-lambert/personal_website"
+        },
+        "media": {
+          "thumbnailUrl": "/images/projects/personal-website/thumb.png",
+          "imageUrl": "/images/projects/personal-website/thumb.png"
+        },
+        "title": "My Personal Website",
+        "date": "2025-08-25",
+        "technologies": [
+          "Vite",
+          "React",
+          "TypeScript",
+          "MongoDB",
+          "Qdrant",
+          "OpenRouter",
+          "gpt-oss-120B",
+          "FastAPI",
+          "Python",
+          "LLMs",
+          "Embeddings",
+          "Framer Motion"
+        ],
+        "createdAt": "2025-11-25T16:08:10.101Z",
+        "updatedAt": "2026-02-03T21:42:11.502Z"
+      },
+      {
+        "slug": "my-personal-api",
+        "subtitle": "The core of all my services, AI powered and ready to use",
+        "description": "Redaction in-progress 🚧",
+        "content": "Redaction in-progress 🚧",
+        "categories": [
+          "API",
+          "Gateway",
+          "AI"
+        ],
+        "status": "completed",
+        "isFeatured": false,
+        "links": {},
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/api_bg.png",
+          "imageUrl": "https://cdn.mathislambert.fr/assets/api_bg.png"
+        },
+        "title": "Personal API",
+        "date": "2025-08-01",
+        "technologies": [
+          "Python",
+          "FastAPI",
+          "OpenRouterAI",
+          "Qdrant",
+          "MongoDB"
+        ],
+        "createdAt": "2025-11-25T16:08:40.013Z",
+        "updatedAt": "2025-11-25T16:08:40.013Z"
+      },
+      {
+        "slug": "iot-microbit-v2-weather-sensors",
+        "subtitle": "Retrieve multiple Microbit sensors data throughout a specific network protocol to monitor data on grafana dashboard",
+        "description": "redaction in-progress 🚧",
+        "content": "redaction in-progress 🚧\n\n\n### Photo terminal\n\n![Terminal](https://cdn.mathislambert.fr/assets/Microbit_IoT_Terminal.webp)\n\n### Photo Grafana\n\n\n![Grafana](https://cdn.mathislambert.fr/assets/Microbit_IoT_Grafana.webp)\n\n### Photo capteurs\n\n\n![Sensor](https://cdn.mathislambert.fr/assets/Microbit_IoT_Sensor.webp)",
+        "categories": [
+          "Internet of Things",
+          "Weather sensors",
+          "Micro:Bit"
+        ],
+        "status": "completed",
+        "isFeatured": false,
+        "links": {
+          "repo": "https://github.com/mathis-lambert/iot_microbit_sensors"
+        },
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/Microbit_IoT.webp",
+          "imageUrl": "https://cdn.mathislambert.fr/assets/Microbit_IoT.webp"
+        },
+        "title": "IoT Micro:Bit v2 - Weather Sensors",
+        "date": "2025-05-10",
+        "technologies": [
+          "C++",
+          "Python",
+          "Sockets",
+          "Radio",
+          "Microbit::v2"
+        ],
+        "createdAt": "2025-11-25T16:09:14.383Z",
+        "updatedAt": "2025-11-25T16:09:14.383Z"
+      },
+      {
+        "slug": "my-raspi-server",
+        "subtitle": "My own private server hosted and maintained by myself on my network infrastructure.",
+        "description": "In-Progress 🚧🏗️",
+        "content": "Project redaction in progress 🚧",
+        "categories": [
+          "self-hosting",
+          "AdminSYS",
+          "Linux",
+          "Server"
+        ],
+        "status": "completed",
+        "isFeatured": true,
+        "links": {},
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/server_image.webp",
+          "imageUrl": "https://cdn.mathislambert.fr/assets/server_image.webp"
+        },
+        "title": "Raspberry Pi Server",
+        "date": "2025-03-15",
+        "technologies": [
+          "Ubuntu",
+          "Traefik",
+          "HaProxy",
+          "Docker",
+          "GitHub Actions"
+        ],
+        "createdAt": "2025-11-25T16:09:41.297Z",
+        "updatedAt": "2025-11-25T16:09:41.297Z"
+      },
+      {
+        "slug": "vision2rig-yolo-unity",
+        "subtitle": "Real-time object detection powering Unity interactions through a Python–YOLO bridge",
+        "description": "Python wrapper connecting YOLOv8 detections to Unity in real-time. Enables interactive environments where object recognition drives Unity animations, rigs, and gameplay logic.",
+        "content": "I spent my third year of the BUT MMI program tinkering with a problem that has been stuck in my head for a while: how can I map real dancers onto avatars in a virtual stage without drowning in middleware or vendor lock‑in? The dance gala in Toulon was coming up with a Paris 2024 Olympic Games theme, and I wanted something more vibrant than canned motion capture. This project documents how I wired Ultralytics’ YOLOv8 pose model straight into Unity, so that performers could walk on stage and see their motion bloom into stylised athletes in real time.\n\n## Why I built it\n\nFor the AR/VR interaction course, most student demos revolved around hand‑crafted animations or controller inputs. I wanted live bodies. Cameras already feed rich pose data to machine‑learning models; the missing bit was translating those skeletons into the language Unity understands. Instead of buying a licence for a commercial bridge, I wrote my own Python wrapper with a UDP protocol to stream keypoints to the game engine. That gave me full control over filtering, tracking, and how many bodies we could support simultaneously during the gala.\n\n## Architecture at a glance\n\n```mermaid\nflowchart LR\nCam[Webcam / Video Source] --> |Frames| Py[Python Runner]\nsubgraph \"Python\"\n    Py --> |YOLOv8 Pose| Det[Detector]\n    Det --> |Keypoints JSON| UDP[UDP Socket]\n    Det --> |Optional filters & plots| Plot[Signal Tools]\nend\nsubgraph \"Unity\"\n    UDP --> |Skeleton packets| UnityApp[Unity Scene]\n    UnityApp --> |Avatar rigs| Stage[Virtual Stage]\nend\n```\n\n* **Capture & inference.** OpenCV captures frames and resizes them before forwarding them to the YOLO detector.\n* **Pose parsing.** I normalise the keypoints, build a per‑person payload, and optionally run a smoothing filter.\n* **Networking.** A lightweight UDP client sends JSON over localhost to the Unity listener.\n* **Visualisation.** Unity scenes read the stream and drive articulation rigs representing each detected performer.\n\n## Python tooling\n\nThe command‑line entry point (`pywui`) needed to be flexible enough for rehearsals and showtime. It accepts arguments for the video source, model, detection mode, plotting, logging, GPU usage, and whether to filter the signal. I added dedicated switches for the BOTSort tracker when persistence was necessary. The script auto‑selects the correct OpenCV backend depending on whether it runs on Windows or a Unix system so we could develop on our laptops and deploy from the theatre booth without friction.\n\nAt runtime the main loop reads a frame, halves its resolution to keep latency low, and routes it through the YOLO stack. Results go straight into the UDP socket as JSON, while an optional window displays the detections for debugging. When Unity sends any messages back—useful while tuning avatars—the same socket reads them without blocking the send loop.\n\n## Pose processing & filtering\n\nThe `Yolo` wrapper class hides most of the Ultralytics boilerplate. It initialises the model, binds it to CPU or GPU, and tracks per‑person histories so I can run temporal filters when needed. Depending on the rehearsal, I could run the raw `predict` mode or enable `track` with BOTSort for more stable IDs when dancers crossed paths.\n\nParsing the network output required more than just collecting keypoints. I use the normalised coordinates (`xyn`) so Unity receives values independent of the camera resolution, derive helper joints like shoulder and hip midpoints, and flag whether each skeleton is valid enough to drive an avatar. Each packet therefore contains wrists, elbows, knees, ankles, facial points, and a synthetic `inter_leg_position` to stabilise the avatar’s root.\n\nWhen the stage lighting or camera jitter created noisy coordinates, I leaned on a simple moving average. The wrapper keeps a rolling window per dancer, spawns a thread to compute the filtered output, and stores both raw and filtered histories. The plotting utility can compare both streams live or save a PNG after a rehearsal so we can check how much lag the filter introduced.\n\nUtility helpers—distance, angles, body side detection, head inclination—live in `utils.py`. They came in handy for experimental gestures, like triggering effects when a dancer tilted their head or leaned left. Even when those features didn’t make it to the gala, they’re ready for future iterations.\n\n## UDP bridge with Unity\n\nFor networking I adapted Siliconifier’s open-source UDP helper. It creates a bidirectional socket, handles background receive threads, and gracefully reports issues when Unity hasn’t connected yet. The simplicity of UDP let me broadcast updates every frame without negotiating connections; if a packet drops, the next one arrives a few milliseconds later.\n\nOn the Unity side (not shown in this repo) I mapped the JSON payload to Mecanim rigs. Each detected person spawns a prefab with a labelled set of joints. As soon as a new ID appears, Unity instantiates a new skeleton, and when a dancer walks off stage, I reuse the slot. During the gala we projected multiple avatars styled after Olympic disciplines—gymnastics, fencing, athletics—and their motion stayed tethered to the live performers thanks to this stream.\n\n## Lessons from the gala\n\n* **Latency budgets matter.** Halving the frame size and trimming the payload kept round‑trip latency under ~120 ms on modest hardware, which was acceptable for the dancers.\n* **Robustness beats cleverness.** UDP is unreliable on paper, but in practice it was the least intrusive option for the theatre network. I added plenty of logging hooks so we could diagnose issues during rehearsals.\n* **Human factors count.** The filtering window is tweakable because every dancer moves differently; choreographers appreciated being able to trade responsiveness for stability per routine.\n\n## Roadmap\n\nThe show proved the concept, but there are still ideas on my list:\n\n1. Replace the moving average with a Butterworth or Kalman filter to better handle quick spins.\n2. Package the Python side into a Docker image so technicians can launch it with one command before performances.\n3. Extend the Unity integration with inverse kinematics to drive full-body avatars instead of partial rigs.\n4. Use the helper metrics (angles, head tilt) to trigger VFX cues tied to choreography.\n\n## Closing thoughts\n\nBuilding this pipeline was my way of blending creative coding with live performance. From the first OpenCV frame to seeing a virtual gymnast mimic a dancer in Toulon, the project reminded me why I love working at the intersection of media and technology. Now that the core bridge is solid, I can keep iterating—new models, richer avatars, more immersive stages.",
+        "categories": [
+          "Computer Vision",
+          "Game Development",
+          "Real-Time Systems",
+          "AI Integration"
+        ],
+        "status": "completed",
+        "isFeatured": true,
+        "links": {
+          "repo": "https://github.com/mathis-lambert/Python-Yolo-Wrapper-for-Unity-interactions"
+        },
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/rig.png"
+        },
+        "title": "Vision2Rig: YOLO to Unity",
+        "date": "2024-04-21",
+        "technologies": [
+          "Python",
+          "YOLOv8",
+          "Unity",
+          "C#",
+          "Socket Communication"
+        ],
+        "createdAt": "2025-11-25T16:10:08.092Z",
+        "updatedAt": "2025-11-25T16:10:08.092Z"
+      },
+      {
+        "subtitle": "Centralized platform for emergency operations and incident coordination",
+        "description": "A centralized web platform designed to manage, coordinate, and monitor emergency and fire-rescue operations, providing real-time visibility on incidents, resources, and decision-making workflows for operational command teams.",
+        "content": "🚧 building",
+        "categories": [
+          "web",
+          "iot",
+          "back"
+        ],
+        "status": "completed",
+        "isFeatured": false,
+        "links": {
+          "live": "https://sdmis.mathislambert.fr",
+          "repo": "https://github.com/orgs/CPE-4IRC/repositories",
+          "docs": "https://github.com/CPE-4IRC/documentation"
+        },
+        "media": {
+          "thumbnailUrl": "https://cdn.mathislambert.fr/assets/sdmis.png"
+        },
+        "slug": "emergency-operations-center",
+        "title": "Emergency Operations Center",
+        "date": "2026-01-17",
+        "technologies": [
+          "NextJS",
+          "FastAPI",
+          "MapGL",
+          "micro:bit",
+          "RabbitMQ",
+          "Keycloak"
+        ],
+        "createdAt": "2026-02-03T09:54:31.093Z",
+        "updatedAt": "2026-02-07T13:44:33.538Z"
+      }
+    ],
+    "articles": [
+      {
+        "slug": "agentic-ai-rag-applications",
+        "author": "Mathis Lambert",
+        "categories": [
+          "AI Engineering",
+          "Backend",
+          "Architecture"
+        ],
+        "isFeatured": true,
+        "links": {
+          "canonical": "/blog/agentic-ai-rag-applications"
+        },
+        "media": {
+          "thumbnailUrl": "/images/blog/agentic-ai-rag/thumb.png",
+          "imageUrl": "/images/blog/agentic-ai-rag/hero.png"
+        },
+        "title": "Agentic AI + RAG: systems that think, read, and act",
+        "excerpt": "How to design agentic systems that use tools and Retrieval-Augmented Generation to deliver reliable, useful automation—end to end, with the nuts and bolts that matter.",
+        "content": "Most apps that \"use AI\" still behave like calculators: you ask, they answer. Agentic AI flips the flow. An agent senses a situation, forms a plan, calls tools and services, reads the right context, and iterates until a goal is met. Add RAG, and the agent gains a working memory of your corpus so it answers from facts, not vibes. ([NVIDIA Blog](https://blogs.nvidia.com/blog/what-is-agentic-ai/))\n\n> **TL;DR**: Pair a planning loop with typed tool calls, a retrieval stack that you can measure, and strict safety boundaries. Ship small goals first, then grow autonomy.\n\n---\n\n### 1) What makes an AI \"agentic\"?\n\nAn agentic system wraps a language model with four capabilities:\n\n1. **Perception**: read user input, events, and documents.\n2. **Planning**: break a goal into steps, choose tools, and order them.\n3. **Action**: invoke typed tools and external systems; observe results.\n4. **Learning**: write useful facts to memory and adjust the next step.\n\nThis is different from a chat UI. It is a control loop that keeps running until a termination condition is met or a human says stop. In practice, the loop is implemented as a task graph or state machine rather than a single monolithic prompt. ([NVIDIA Blog](https://blogs.nvidia.com/blog/what-is-agentic-ai/), [LangChain Blog](https://blog.langchain.com/langgraph-multi-agent-workflows/))\n\n```mermaid \n ---\nconfig:\n theme: dark\n layout: dagre\n---\nflowchart LR\n  A[Goal / Trigger] --> B[Planner]\n  B --> C{Choose Tool}\n  C -->|Search| R[Retriever]\n  C -->|API| T[Typed Function]\n  R --> G[Grounded Context]\n  T --> O[Observation]\n  G --> S[Solver LLM]\n  O --> S\n  S --> B\n  S -->|Stop / Output| P[Product]\n```\n\n#### Why now\nFrontier models handle language, but tools and structured environments deliver reliability. You can run the planner with a small controller model and reserve big models for hard parts. This reduces cost and latency while increasing predictability. ([arXiv](https://arxiv.org/pdf/2506.02153))\n\n---\n\n### 2) Tool use: the agent’s hands\n\nAgents act via **typed functions**. The model emits a JSON call that matches a schema; your runtime executes it and streams back the result for the next reasoning step.\n\n**Design rules**\n\n- **Schema first**: name, description, parameters with types and enums. Treat it like a public API.\n- **Idempotence**: make calls safe to retry; include `request_id` inputs and detect duplicates.\n- **Tight scopes**: one tool per capability; avoid \"doEverything()\".\n- **Observability**: log inputs, outputs, latency, and errors; attach the log to the agent’s next turn.\n\n> Function calling exists so models return structured calls reliably, not free-text that you must parse. Use it. ([OpenAI](https://openai.com/index/function-calling-and-other-api-updates/), [OpenAI Platform](https://platform.openai.com/docs/guides/function-calling))\n\n**Minimal tool schema**\n```json\n{\n  \"type\": \"function\",\n  \"name\": \"search_tickets\",\n  \"description\": \"Search support tickets by query and status.\",\n  \"parameters\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"query\": {\"type\": \"string\"},\n      \"status\": {\"type\": \"string\", \"enum\": [\"open\", \"closed\", \"all\"]},\n      \"limit\": {\"type\": \"integer\", \"minimum\": 1, \"maximum\": 100}\n    },\n    \"required\": [\"query\"],\n    \"additionalProperties\": false\n  },\n  \"strict\": true\n}\n```\n\n---\n\n### 3) Orchestration: from loops to graphs\n\nReal tasks branch, fail, and retry. Model it explicitly:\n\n- **Finite-state machines** for straight pipelines.\n- **Graphs** for multi-agent or tool-rich flows where nodes can run in parallel and pass state.\n\nGraph frameworks make step boundaries explicit, persist state, and let you recover mid-run. You can encode policies like \"after three tool errors, escalate to human\" or \"if retrieval confidence is low, re-plan.\" ([LangChain Blog](https://blog.langchain.com/langgraph-multi-agent-workflows/), [IBM](https://www.ibm.com/think/tutorials/build-agentic-workflows-langgraph-granite))\n\n---\n\n### 4) Retrieval-Augmented Generation (RAG): the agent’s library\n\nRAG adds a fast, measurable knowledge path:\n\n1. **Chunking**: split documents into self-contained pieces.\n2. **Embedding**: map chunks to vectors for semantic search.\n3. **Retrieval**: fetch candidates with vector search or hybrid search.\n4. **Re-ranking**: use a cross-encoder to order candidates.\n5. **Grounded generation**: answer with citations to the retrieved text.\n\nThis structure is now the de facto pattern. It reduces hallucinations and lets you control freshness and access. ([arXiv](https://arxiv.org/html/2507.18910v1), [Microsoft Learn](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview))\n\n#### Practical choices that matter\n\n- **Chunking**: prefer semantic or heading-aware splits; overlap 10–20% to preserve context windows.\n- **Hybrid retrieval**: combine vector and BM25 for misspellings and rare terms.\n- **Re-ranking**: re-score the top-k with a cross-encoder; move the best 5–20 into the prompt.\n- **Query rewriting**: expand or decompose the user query before retrieval.\n- **Freshness**: index docs continuously and version the index to enable rollbacks.\n\nRe-ranking is the workhorse for quality jumps in enterprise RAG because it fixes coarse vector recall with a precise pairwise scorer. ([arXiv](https://arxiv.org/html/2507.18910v1), [ragflow.io](https://ragflow.io/blog/the-rise-and-evolution-of-rag-in-2024-a-year-in-review))\n\n#### A compact RAG call the agent can reuse\n```ts\ninterface RetrievalRequest {\n  query: string\n  topK?: number // 50 for recall, then re-rank\n  filters?: Record<string, string | number | boolean>\n}\n\ninterface RetrievedDoc {\n  id: string\n  text: string\n  source: string\n  score: number\n}\n\n// 1) dense+BM25 -> 2) re-rank -> 3) pack\n```\n\n---\n\n### 5) Making agents and RAG work together\n\n**Loop sketch**\n```pseudo\nwhile not done:\n  plan = planner(state)\n  if plan.needs_context:\n    ctx = retrieve(plan.query)\n    state.context = ctx\n  result = act(plan.tool, plan.args)\n  observe(result)\n  done = goal_check(state)\n```\n\n**Key integration points**\n\n- Let the **planner** ask for retrieval explicitly. This keeps tool calls and context under budget.\n- Cache retrieval results by `(query_hash, filters, corpus_version)`.\n- When confidence is low, branch: *re-retrieve → re-rank → decompose question*. Handle this as graph nodes, not prompt hacks. ([LangChain Blog](https://blog.langchain.com/langgraph-multi-agent-workflows/))\n\n---\n\n### 6) Reliability, safety, and guardrails\n\nAgentic systems can chain mistakes. Bound the blast radius:\n\n- **Zero trust for tools**: narrow scopes, per-tool credentials, allow-lists, rate limits.\n- **Prompt-injection defense**: never execute instructions found in retrieved content; treat corpus as untrusted input.\n- **Human-in-the-loop**: require approvals for state-changing actions.\n- **Policy as code**: encode stop conditions and approvals in the graph, not in prose prompts.\n\nThese are classical security controls adapted to agents. The solutions are mostly operational discipline plus visibility, not exotic research. ([TechRadar](https://www.techradar.com/pro/agentic-ais-security-risks-are-challenging-but-the-solutions-are-surprisingly-simple))\n\n---\n\n### 7) Measurement: what to track and why\n\nYou cannot improve what you cannot see. Track:\n\n- **Retrieval**: context precision/recall, MRR/NDCG, coverage by document type.\n- **Answer quality**: faithfulness to sources, grounded citation rate, factuality audits.\n- **Run health**: tool error rates, retries, mean/percentile latencies, token and cash budgets.\n\nRecent surveys catalogue RAG-specific metrics and datasets; borrow their checklists when you build your eval harness. ([arXiv](https://arxiv.org/html/2504.14891v1))\n\n---\n\n### 8) Latency and cost engineering\n\n- Use a **small controller model** for planning and tool selection; invoke larger models only for hard generations.\n- Pre-warm connections to critical tools. Parallelize independent nodes.\n- **Shard the index** by business unit; route queries to the smallest viable corpus.\n- Memoize deterministic steps and paginate long traces to storage. ([arXiv](https://arxiv.org/pdf/2506.02153))\n\n---\n\n### 9) Where agents + RAG already fit\n\n- **Customer support**: triage → retrieve policy → propose action → file ticket updates.\n- **Internal ops**: reconcile data across systems, draft change requests, open PRs with diffs.\n- **Research assistants**: map a question into sub-questions, retrieve, and produce a brief with links.\n\nLarge players are publicly investing in agents for multi-step, high-reliability workflows, not just chat. Expect the stack around planning, tools, and sims to mature fast. ([The Verge](https://www.theverge.com/decoder-podcast-with-nilay-patel/761830/amazon-david-luan-agi-lab-adept-ai-interview))\n\n---\n\n### 10) A starter blueprint you can implement this week\n\n1. **Define goals** as typed events: `\"answer_question\"`, `\"draft_update\"`, `\"file_change\"`.\n2. **Register tools** with strict JSON schemas and idempotent behavior.\n3. **Stand up RAG** with hybrid retrieval and re-ranking. Version the index.\n4. **Build a graph**: nodes for `plan`, `retrieve`, `act`, `review`, `stop`. Persist state per run.\n5. **Add guardrails**: approval gates for state changes; redact secrets from logs.\n6. **Instrument**: structured logs per node, per-tool SLAs, and weekly eval runs.\n\nIf you do just these, you’ll have a dependable agent that thinks, reads, and acts—on your terms.\n",
+        "date": "2025-08-25",
+        "tags": [
+          "Agentic AI",
+          "RAG",
+          "Tool Use",
+          "Retrieval",
+          "Planning",
+          "Evaluation",
+          "Security"
+        ],
+        "metrics": {
+          "views": 0,
+          "likes": 0,
+          "shares": 0
+        },
+        "createdAt": "2025-11-25T16:14:39.081Z",
+        "updatedAt": "2025-11-25T16:14:39.081Z"
+      }
+    ],
+    "experiences": [
+      {
+        "title": "AI/R&D Engineer (Work-study Student)",
+        "company": "Free Pro",
+        "date": "Sept. 2024 - Present",
+        "description": "Design and implement advanced LLM-based workflows for customer-care automation using state-of-the-art models (Qwen, Llama, Gemma, etc.), building agentic AI pipelines with tool calling, RAG, embeddings, ReAct planning, and guardrails to ensure factual, policy-compliant outputs, while deploying and optimizing large-scale AI models on specialized GPU clusters (NVIDIA H100, L40S) with vLLM and LlamaCPP, contributing to full-stack development from React/TypeScript frontends and NestJS/FastAPI backends to AI microservices and Python SDKs, managing data infrastructure with Postgres, MongoDB, and Qdrant for knowledge-base orchestration and retrieval, and maintaining GitLab/Docker CI/CD pipelines along with Linux sysadmin and network tasks across dev, pre-prod, and prod environments.",
+        "order": 0,
+        "createdAt": "2025-11-25T16:14:06.302Z",
+        "updatedAt": "2025-11-25T16:14:06.302Z"
+      },
+      {
+        "title": "Web Developer & Web Designer",
+        "company": "LEXTAN",
+        "date": "June 2022 - Aug. 2022",
+        "description": "Complete redesign of the \"company\" website: UI/UX, development from scratch, and responsive integration. Delivered custom web solutions for Vivatech and JDL Expo.",
+        "order": 1,
+        "createdAt": "2025-11-25T16:14:06.302Z",
+        "updatedAt": "2025-11-25T16:14:06.302Z"
+      },
+      {
+        "title": "Video Game Developer - Summer Camp",
+        "company": "ISART DIGITAL Paris",
+        "date": "June 2018 - July 2018",
+        "description": "Two-week game development internship using Unity. Designed and developed a complete game, including gameplay mechanics and visual integration. Strengthened skills in logic, creativity, and software development.",
+        "order": 2,
+        "createdAt": "2025-11-25T16:14:06.302Z",
+        "updatedAt": "2025-11-25T16:14:06.302Z"
+      },
+      {
+        "title": "Co-founder – IZZY Project (Student Startup)",
+        "company": "PÉPITE Provence",
+        "date": "March 2018 - April 2018",
+        "description": "2nd Prize – Jury Award at the Start’up Competition in Chicago. Developed an intelligent fatigue detection system for long-haul truck drivers, aligned with the UN Sustainable Development Goals.",
+        "order": 3,
+        "createdAt": "2025-11-25T16:14:06.302Z",
+        "updatedAt": "2025-11-25T16:14:06.302Z"
+      }
+    ],
+    "studies": [
+      {
+        "title": "Engineering - Computer Science – CPE Lyon",
+        "company": "CPE Lyon",
+        "date": "Sept. 2024 - Present",
+        "description": "Engineering degree in computer science with a major in Machine Learning and Artificial Intelligence. Courses focused on language models, performance optimization, and industrial AI applications.",
+        "order": 0,
+        "createdAt": "2025-11-25T16:13:18.205Z",
+        "updatedAt": "2025-11-25T16:13:18.205Z"
+      },
+      {
+        "title": "Bachelor Multimedia & Internet Technologies (MMI) – Computer Science Specialization",
+        "company": "IUT MMI - Toulon (83)",
+        "date": "Sept. 2021 - Aug. 2024",
+        "description": "Multidisciplinary program in multimedia and computer science, with a specialization in web and mobile development. Hands-on projects in design, development, and digital project management.",
+        "order": 1,
+        "createdAt": "2025-11-25T16:13:18.205Z",
+        "updatedAt": "2025-11-25T16:13:18.205Z"
+      }
+    ],
+    "resume": [
+      {
+        "name": "Mathis Lambert",
+        "contact": {
+          "email": "mathislambert.dev@gmail.com",
+          "phone": "0651050167",
+          "linkedin": "mathis-lambert",
+          "github": "mathis-lambert",
+          "website": "https://mathislambert.fr"
+        },
+        "personal_statement": "Engineering student at CPE Lyon, currently in an integrated work-study program at Free Pro, building advanced LLM workflows, agentic pipelines, and GPU-optimized deployments. Skilled in full-stack development, distributed systems, and HPC infrastructures, I bridge research and production to deliver scalable AI solutions. Seeking a 3-month Applied AI Engineering internship for Summer 2026 to deploy, optimize, and integrate AI models in real-world use cases.",
+        "skills": [
+          "Technical communication",
+          "Cross-team collaboration",
+          "Time management",
+          "Tool adaptability",
+          "Technical writing"
+        ],
+        "passions": [
+          "Video Games",
+          "Handball",
+          "Motorbiking",
+          "Mechanics",
+          "Hardware Tinkering"
+        ],
+        "createdAt": "2025-11-25T16:10:30.194Z",
+        "updatedAt": "2026-03-26T16:01:17.335Z",
+        "technical_skills": {
+          "languages": [
+            "French (native)",
+            "English (professional)"
+          ],
+          "programming": [
+            "Python",
+            "JavaScript/TypeScript",
+            "Java",
+            "C",
+            "PHP"
+          ],
+          "ai_ml": [
+            "Model serving",
+            "Computer Vision",
+            "Vector stores",
+            "MCPs",
+            "Datasets",
+            "LangChain/LangGraph",
+            "PyTorch",
+            "Transformers"
+          ],
+          "systems_and_infra": [
+            "Linux",
+            "Docker",
+            "HPC Clusters",
+            "S3 storage",
+            "CI/CD",
+            "Git",
+            "Kubernetes",
+            "SQL"
+          ],
+          "web": [
+            "React",
+            "MongoDB",
+            "REST APIs",
+            "Websockets",
+            "FastAPI",
+            "Security"
+          ]
+        },
+        "experiences": [
+          {
+            "role": "R&D Engineer",
+            "position": "Work-study program",
+            "company": "Free Pro",
+            "period": "Apr 2023 - Present",
+            "location": "Marseille, France",
+            "current": true,
+            "highlight": true,
+            "hide": false,
+            "description": [
+              "Design and deploy LLM workflows that automate customer care, cutting workload by 5–10%.",
+              "Build agentic AI pipelines with tool-calling, retrieval, and safety enforcement with langchain and langgraph.",
+              "Deploy and optimize open-source LLMs on specialized GPU clusters (NVIDIA H100, L40S) with vLLM and LlamaCPP.",
+              "Develop full-stack platforms (React, FastAPI, microservices) and manage data infrastructure (Postgres, MongoDB, Qdrant).",
+              "Operate CI/CD pipelines (Docker, GitLab) and administer Linux/HPC environments.",
+              "Pioneered deployment of AI workloads on Scaleway’s first H100 GPU cluster in collaboration with Nvidia.",
+              "Engineered Raspberry Pi–based OCR and object detection systems with DepthAI and YOLOv8 for live screen monitoring."
+            ],
+            "logo": "https://cdn.mathislambert.fr/assets/freepro.png"
+          },
+          {
+            "role": "Web Developer & Webdesigner",
+            "position": "Internship",
+            "company": "LEXTAN",
+            "period": "Jun 2022 - Aug 2022",
+            "location": "Marseille, France",
+            "current": false,
+            "highlight": false,
+            "hide": false,
+            "description": [
+              "Led the complete, from-scratch redesign and development of the corporate website.",
+              "Developed tailored web solutions for major events like Vivatech and JDL Expo 2022."
+            ],
+            "logo": "https://cdn.mathislambert.fr/assets/lextan_logo.jpg"
+          },
+          {
+            "role": "Co-Founder, IZZY – 2nd Place International Startup Lycée",
+            "position": "Competition",
+            "company": "PÉPITE Provence & UN 2030 Goals",
+            "period": "Mar 2018 - Apr 2018",
+            "location": "Chicago, USA",
+            "current": false,
+            "highlight": false,
+            "hide": false,
+            "description": [
+              "Pitched an innovative and intelligent system to combat driver fatigue for long-haul truck drivers.",
+              "Represented France in Chicago after winning regional finals (30+ teams).",
+              "Achieved 2nd place internationally and awarded $500 seed funding.",
+              "Collaborated with STMicroelectronics’ innovation team to develop a working prototype with STM32 Logic Boards."
+            ],
+            "logo": "https://cdn.mathislambert.fr/assets/prepite.png"
+          }
+        ],
+        "education": [
+          {
+            "institution": "CPE Lyon",
+            "degree": "Engineering Degree (MSc) - Computer Science & Communication Networks",
+            "location": "",
+            "description": "Applied Mathematics, AI/ML, Software Engineering, Distributed Systems",
+            "period": "2024 - 2027"
+          },
+          {
+            "institution": "University of Toulon",
+            "degree": "Bachelor’s Degree (BSc) - Multimedia & Internet Technologies",
+            "location": "",
+            "description": "Graduated with Honors · Software Development & Interactive Systems",
+            "period": "2021 - 2024"
+          }
+        ],
+        "certifications": [
+          {
+            "provider": "Columbia University (NYC)",
+            "title": "Learning AI Through Visualization",
+            "issued_date": "Sept 2025",
+            "status": "stopped"
+          },
+          {
+            "provider": "freeCodeCamp",
+            "title": "Backend Development and APIs",
+            "issued_date": "Jan 2023",
+            "status": "issued"
+          },
+          {
+            "provider": "freeCodeCamp",
+            "title": "JavaScript Algorithms and Data Structures",
+            "issued_date": "Nov 2022",
+            "status": "issued"
+          }
+        ],
+        "translations": {
+          "fr": {
+            "name": "Mathis Lambert",
+            "contact": {
+              "email": "mathislambert.dev@gmail.com",
+              "phone": "0651050167",
+              "linkedin": "mathis-lambert",
+              "github": "mathis-lambert",
+              "website": "https://mathislambert.fr"
+            },
+            "personal_statement": "Étudiant ingénieur à CPE Lyon, actuellement en alternance chez Free Pro, où je conçois des workflows LLM avancés, des pipelines agentiques et des déploiements sur GPU. Compétent en développement full-stack, systèmes distribués et infrastructures HPC, je fais le lien entre recherche et production pour délivrer des solutions IA scalables.",
+            "skills": [
+              "Communication technique",
+              "Collaboration inter-équipes",
+              "Gestion du temps",
+              "Adaptabilité aux outils",
+              "Rédaction technique"
+            ],
+            "passions": [
+              "Jeux vidéo",
+              "Handball",
+              "Moto",
+              "Mécanique",
+              "Hardware"
+            ],
+            "technical_skills": {
+              "languages": [
+                "Français (langue maternelle)",
+                "Anglais (niveau professionnel)"
+              ],
+              "programming": [
+                "Python",
+                "JavaScript/TypeScript",
+                "Java",
+                "C",
+                "PHP"
+              ],
+              "ai_ml": [
+                "Serving de modèles",
+                "Vision par ordinateur",
+                "Bases vectorielles",
+                "MCP",
+                "Jeux de données",
+                "LangChain/LangGraph",
+                "PyTorch",
+                "Transformers"
+              ],
+              "systems_and_infra": [
+                "Linux",
+                "Docker",
+                "Clusters HPC",
+                "Stockage S3",
+                "CI/CD",
+                "Git",
+                "Kubernetes",
+                "SQL"
+              ],
+              "web": [
+                "React",
+                "MongoDB",
+                "APIs REST",
+                "WebSockets",
+                "FastAPI",
+                "Sécurité"
+              ]
+            },
+            "experiences": [
+              {
+                "role": "Ingénieur R&D",
+                "position": "Alternance",
+                "company": "Free Pro",
+                "period": "Avr 2023 - Présent",
+                "location": "Marseille, France",
+                "current": true,
+                "highlight": true,
+                "hide": false,
+                "description": [
+                  "Conception et déploiement de workflows LLM automatisant le support client, réduisant la charge de travail de 5 à 10 %. ",
+                  "Développement de pipelines IA agentiques avec appels d’outils, retrieval et mécanismes de sécurité via LangChain et LangGraph.",
+                  "Déploiement et optimisation de LLM open source sur clusters GPU spécialisés (NVIDIA H100, L40S) avec vLLM et LlamaCPP.",
+                  "Développement de plateformes full-stack (React, FastAPI, microservices) et gestion d’infrastructures de données (Postgres, MongoDB, Qdrant).",
+                  "Mise en place et exploitation de pipelines CI/CD (Docker, GitLab) et administration d’environnements Linux/HPC.",
+                  "Participation au déploiement des premières charges IA sur le cluster GPU H100 de Scaleway en collaboration avec Nvidia.",
+                  "Conception de systèmes OCR et détection d’objets sur Raspberry Pi avec DepthAI et YOLOv8 pour du monitoring en temps réel."
+                ],
+                "logo": "https://cdn.mathislambert.fr/assets/freepro.png"
+              },
+              {
+                "role": "Développeur Web & Webdesigner",
+                "position": "Stage",
+                "company": "LEXTAN",
+                "period": "Juin 2022 - Août 2022",
+                "location": "Marseille, France",
+                "current": false,
+                "highlight": false,
+                "hide": false,
+                "description": [
+                  "Refonte complète et développement from scratch du site web de l’entreprise.",
+                  "Développement de solutions web sur mesure pour des événements majeurs comme Vivatech et JDL Expo 2022."
+                ],
+                "logo": "https://cdn.mathislambert.fr/assets/lextan_logo.jpg"
+              },
+              {
+                "role": "Co-fondateur, IZZY – 2e place internationale Startup Lycée",
+                "position": "Compétition",
+                "company": "PÉPITE Provence & Objectifs ONU 2030",
+                "period": "Mars 2018 - Avr 2018",
+                "location": "Chicago, États-Unis",
+                "current": false,
+                "highlight": false,
+                "hide": false,
+                "description": [
+                  "Présentation d’un système intelligent innovant pour lutter contre la fatigue des conducteurs routiers.",
+                  "Représentation de la France à Chicago après victoire aux phases régionales (30+ équipes).",
+                  "Obtention de la 2e place internationale et d’un financement de 500 $.",
+                  "Collaboration avec l’équipe innovation de STMicroelectronics pour développer un prototype fonctionnel sur cartes STM32."
+                ],
+                "logo": "https://cdn.mathislambert.fr/assets/prepite.png"
+              }
+            ],
+            "education": [
+              {
+                "institution": "CPE Lyon",
+                "degree": "Diplôme d’ingénieur (Master) - Informatique & Réseaux de Communication",
+                "location": "",
+                "description": "Mathématiques appliquées, IA/ML, génie logiciel, systèmes distribués",
+                "period": "2024 - 2027"
+              },
+              {
+                "institution": "Université de Toulon",
+                "degree": "Bachelor - Métiers du Multimédia et de l’Internet",
+                "location": "",
+                "description": "Diplômé avec mention · Développement logiciel & systèmes interactifs",
+                "period": "2021 - 2024"
+              }
+            ],
+            "certifications": [
+              {
+                "provider": "Columbia University (NYC)",
+                "title": "Apprendre l’IA par la visualisation",
+                "issued_date": "Sept 2025",
+                "status": "en cours"
+              },
+              {
+                "provider": "freeCodeCamp",
+                "title": "Développement Backend et APIs",
+                "issued_date": "Janv 2023",
+                "status": "obtenu"
+              },
+              {
+                "provider": "freeCodeCamp",
+                "title": "Algorithmes JavaScript et structures de données",
+                "issued_date": "Nov 2022",
+                "status": "obtenu"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

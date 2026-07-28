@@ -1,0 +1,1140 @@
+{
+  "projects": {
+    "documents": 7,
+    "fields": {
+      "categories": {
+        "types": [
+          "array"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "categories[]": {
+        "types": [
+          "string"
+        ],
+        "in": 22,
+        "required": false
+      },
+      "content": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "createdAt": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "date": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "description": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "isFeatured": {
+        "types": [
+          "boolean"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "links": {
+        "types": [
+          "object"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "links.docs": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": false
+      },
+      "links.live": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "links.repo": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": false
+      },
+      "media": {
+        "types": [
+          "object"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "media.imageUrl": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "media.thumbnailUrl": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "slug": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "status": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "subtitle": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "technologies": {
+        "types": [
+          "array"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "technologies[]": {
+        "types": [
+          "string"
+        ],
+        "in": 40,
+        "required": false
+      },
+      "title": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      },
+      "updatedAt": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": true
+      }
+    }
+  },
+  "articles": {
+    "documents": 1,
+    "fields": {
+      "author": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "categories": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "categories[]": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "content": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "createdAt": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "date": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "excerpt": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "isFeatured": {
+        "types": [
+          "boolean"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "links": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "links.canonical": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "media": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "media.imageUrl": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "media.thumbnailUrl": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "metrics": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "metrics.likes": {
+        "types": [
+          "number"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "metrics.shares": {
+        "types": [
+          "number"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "metrics.views": {
+        "types": [
+          "number"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "slug": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "tags": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "tags[]": {
+        "types": [
+          "string"
+        ],
+        "in": 7,
+        "required": false
+      },
+      "title": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "updatedAt": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      }
+    }
+  },
+  "experiences": {
+    "documents": 4,
+    "fields": {
+      "company": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "createdAt": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "date": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "description": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "order": {
+        "types": [
+          "number"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "title": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      },
+      "updatedAt": {
+        "types": [
+          "string"
+        ],
+        "in": 4,
+        "required": true
+      }
+    }
+  },
+  "studies": {
+    "documents": 2,
+    "fields": {
+      "company": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "createdAt": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "date": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "description": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "order": {
+        "types": [
+          "number"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "title": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      },
+      "updatedAt": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": true
+      }
+    }
+  },
+  "resume": {
+    "documents": 1,
+    "fields": {
+      "certifications": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "certifications[]": {
+        "types": [
+          "object"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "certifications[].issued_date": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "certifications[].provider": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "certifications[].status": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "certifications[].title": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "contact": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "contact.email": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "contact.github": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "contact.linkedin": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "contact.phone": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "contact.website": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "createdAt": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "education": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "education[]": {
+        "types": [
+          "object"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "education[].degree": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "education[].description": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "education[].institution": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "education[].location": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "education[].period": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "experiences": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "experiences[]": {
+        "types": [
+          "object"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].company": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].current": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].description": {
+        "types": [
+          "array"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].description[]": {
+        "types": [
+          "string"
+        ],
+        "in": 13,
+        "required": false
+      },
+      "experiences[].hide": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].highlight": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].location": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].logo": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].period": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].position": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "experiences[].role": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "name": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "passions": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "passions[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "personal_statement": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "skills": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "skills[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "technical_skills": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.ai_ml": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.ai_ml[]": {
+        "types": [
+          "string"
+        ],
+        "in": 8,
+        "required": false
+      },
+      "technical_skills.languages": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.languages[]": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "technical_skills.programming": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.programming[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "technical_skills.systems_and_infra": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.systems_and_infra[]": {
+        "types": [
+          "string"
+        ],
+        "in": 8,
+        "required": false
+      },
+      "technical_skills.web": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "technical_skills.web[]": {
+        "types": [
+          "string"
+        ],
+        "in": 6,
+        "required": false
+      },
+      "translations": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.certifications": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.certifications[]": {
+        "types": [
+          "object"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.certifications[].issued_date": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.certifications[].provider": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.certifications[].status": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.certifications[].title": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.contact": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.contact.email": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.contact.github": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.contact.linkedin": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.contact.phone": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.contact.website": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.education": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.education[]": {
+        "types": [
+          "object"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.education[].degree": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.education[].description": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.education[].institution": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.education[].location": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.education[].period": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.experiences": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.experiences[]": {
+        "types": [
+          "object"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].company": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].current": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].description": {
+        "types": [
+          "array"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].description[]": {
+        "types": [
+          "string"
+        ],
+        "in": 13,
+        "required": false
+      },
+      "translations.fr.experiences[].hide": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].highlight": {
+        "types": [
+          "boolean"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].location": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].logo": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].period": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].position": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.experiences[].role": {
+        "types": [
+          "string"
+        ],
+        "in": 3,
+        "required": false
+      },
+      "translations.fr.name": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.passions": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.passions[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "translations.fr.personal_statement": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.skills": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.skills[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "translations.fr.technical_skills": {
+        "types": [
+          "object"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.ai_ml": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.ai_ml[]": {
+        "types": [
+          "string"
+        ],
+        "in": 8,
+        "required": false
+      },
+      "translations.fr.technical_skills.languages": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.languages[]": {
+        "types": [
+          "string"
+        ],
+        "in": 2,
+        "required": false
+      },
+      "translations.fr.technical_skills.programming": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.programming[]": {
+        "types": [
+          "string"
+        ],
+        "in": 5,
+        "required": false
+      },
+      "translations.fr.technical_skills.systems_and_infra": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.systems_and_infra[]": {
+        "types": [
+          "string"
+        ],
+        "in": 8,
+        "required": false
+      },
+      "translations.fr.technical_skills.web": {
+        "types": [
+          "array"
+        ],
+        "in": 1,
+        "required": true
+      },
+      "translations.fr.technical_skills.web[]": {
+        "types": [
+          "string"
+        ],
+        "in": 6,
+        "required": false
+      },
+      "updatedAt": {
+        "types": [
+          "string"
+        ],
+        "in": 1,
+        "required": true
+      }
+    }
+  }
+}

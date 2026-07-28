@@ -1,0 +1,1446 @@
+@import "katex/dist/katex.min.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
+@import "tailwindcss";
+@import "@fontsource/lato/index.css";
+@import "@fontsource/lato/400.css";
+@import "@fontsource/lato/700.css";
+
+/* Display and mono faces are self-hosted from `public/fonts` rather than
+   @import-ed out of node_modules. Two reasons: a missing node package makes
+   PostCSS fail the whole stylesheet, which takes the entire site down for the
+   sake of a decorative dependency; and declaring @font-face here means we pick
+   exactly which file loads. Only the weight axis exists in these builds — the
+   opsz and wdth axes ship as separate, mutually exclusive files — so nothing
+   below sets variation settings that the loaded font cannot honour. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2")
+    format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("/fonts/martian-mono-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("/fonts/martian-mono-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   MISTRAL — design foundation
+   --------------------------------------------------------------------------
+   Marseille, read through an engineer's instruments.
+
+   The ground is deliberately neutral — near-white by day, near-black by night,
+   almost no chroma — so that colour on the page is always an ink and never a
+   tint of the paper.
+
+   Five Mediterranean inks exist: azure, turquoise, saffron, coral, mauve. The
+   drifting background field uses three of them; page sections use only two,
+   azure and coral, alternating. That restraint is deliberate — five different
+   accents down one page read as five unrelated designs. A section sets its ink
+   once with `data-ink` and everything inside re-tints: eyebrow, rule, tags,
+   links, card CTA.
+
+   Type does the other half of the work. Bricolage Grotesque is characterful
+   and slightly wonky, engineered but not neutral. Every piece of data — dates,
+   counters, labels, coordinates — is set in Martian Mono, because the subject
+   is someone who reads numbers off dashboards for a living.
+
+   Layers: primitives → semantics → ink themes → bridge → utilities → recipes
+   ========================================================================== */
+
+/* ── Primitives & semantics ────────────────────────────────────────────── */
+
+:root {
+  /* Ground. Neutral on purpose: it must not compete with the inks. */
+  --paper: oklch(0.977 0.003 85);
+  --paper-lift: oklch(1 0 0);
+  --paper-sink: oklch(0.947 0.004 85);
+  --paper-invert: oklch(0.205 0.012 265);
+
+  --ink: oklch(0.205 0.012 265);
+  --ink-muted: oklch(0.455 0.011 265);
+  --ink-faint: oklch(0.615 0.009 265);
+  --ink-invert: oklch(0.982 0.003 85);
+
+  /* The five inks. One per section, never mixed inside one. */
+  --ink-azure: oklch(0.535 0.17 252);
+  --ink-turquoise: oklch(0.585 0.125 188);
+  --ink-saffron: oklch(0.7 0.155 62);
+  --ink-coral: oklch(0.585 0.2 18);
+  --ink-mauve: oklch(0.53 0.19 315);
+
+  /* `--brand` is a slot, not a colour: sections rebind it (see ink themes). */
+  --brand: var(--ink-azure);
+  --brand-ink: oklch(0.99 0.002 85);
+  --brand-wash: color-mix(in oklab, var(--brand) 11%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--brand) 30%, transparent);
+
+  --line: oklch(0.205 0.012 265 / 0.14);
+  --line-strong: oklch(0.205 0.012 265 / 0.26);
+
+  --danger: oklch(0.545 0.185 25);
+  --danger-ink: oklch(0.985 0.004 240);
+
+  /* Depth. Two steps, neutral. */
+  --shadow-1:
+    0 1px 2px oklch(0.205 0.012 265 / 0.05),
+    0 6px 18px -8px oklch(0.205 0.012 265 / 0.1);
+  --shadow-2:
+    0 2px 4px oklch(0.205 0.012 265 / 0.06),
+    0 20px 44px -16px oklch(0.205 0.012 265 / 0.17);
+
+  --grain-blend: multiply;
+  --grain-opacity: 0.26;
+
+  /* Glass, used only for the floating nav and the composer. A material this
+     loud earns its keep by being rare. */
+  --glass-bg: oklch(1 0 0 / 0.6);
+  --glass-border: oklch(1 0 0 / 0.7);
+  --glass-blur: 20px;
+
+  color-scheme: light;
+}
+
+.dark {
+  --paper: oklch(0.165 0.006 265);
+  --paper-lift: oklch(0.213 0.008 265);
+  --paper-sink: oklch(0.132 0.005 265);
+  --paper-invert: oklch(0.962 0.003 85);
+
+  --ink: oklch(0.962 0.003 85);
+  --ink-muted: oklch(0.73 0.008 265);
+  --ink-faint: oklch(0.57 0.008 265);
+  --ink-invert: oklch(0.165 0.006 265);
+
+  /* Lifted so they hold their identity against a dark ground. */
+  --ink-azure: oklch(0.7 0.15 254);
+  --ink-turquoise: oklch(0.75 0.12 188);
+  --ink-saffron: oklch(0.8 0.145 66);
+  --ink-coral: oklch(0.7 0.175 20);
+  --ink-mauve: oklch(0.7 0.16 315);
+
+  --brand: var(--ink-azure);
+  --brand-ink: oklch(0.15 0.006 265);
+  --brand-wash: color-mix(in oklab, var(--brand) 16%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--brand) 36%, transparent);
+
+  --line: oklch(0.962 0.003 85 / 0.14);
+  --line-strong: oklch(0.962 0.003 85 / 0.28);
+
+  --danger: oklch(0.665 0.17 25);
+  --danger-ink: oklch(0.155 0.026 253);
+
+  --shadow-1:
+    0 1px 2px oklch(0 0 0 / 0.32), 0 6px 18px -8px oklch(0 0 0 / 0.48);
+  --shadow-2:
+    0 2px 4px oklch(0 0 0 / 0.36), 0 20px 44px -16px oklch(0 0 0 / 0.62);
+
+  --grain-blend: soft-light;
+  --grain-opacity: 0.2;
+
+  --glass-bg: oklch(0.23 0.008 265 / 0.6);
+  --glass-border: oklch(1 0 0 / 0.12);
+
+  color-scheme: dark;
+}
+
+/* ── Ink themes ────────────────────────────────────────────────────────── */
+/* Put `data-ink="saffron"` on a section and everything inside it that reads
+   from `--brand` re-tints: eyebrow chips, rules, tags, link underlines, the
+   card CTA. One attribute, whole-section identity. */
+
+/* Each theme must restate the derived tokens, not just `--brand`.
+   A custom property whose value contains `var()` is substituted where it is
+   *declared*, so `--brand-wash: color-mix(..., var(--brand), ...)` written once
+   in `:root` freezes to the root ink. Before this, every wash, quiet border,
+   brand tag and icon disc on the site rendered azure no matter which section it
+   sat in — two thirds of the colour system was silently stuck on blue. */
+[data-ink="azure"] {
+  --brand: var(--ink-azure);
+  --brand-wash: color-mix(in oklab, var(--ink-azure) 11%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-azure) 30%, transparent);
+}
+[data-ink="turquoise"] {
+  --brand: var(--ink-turquoise);
+  --brand-wash: color-mix(in oklab, var(--ink-turquoise) 12%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-turquoise) 32%, transparent);
+}
+[data-ink="saffron"] {
+  --brand: var(--ink-saffron);
+  --brand-wash: color-mix(in oklab, var(--ink-saffron) 14%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-saffron) 34%, transparent);
+  /* Saffron is light enough that type on top of it must be ink, not paper. */
+  --brand-ink: oklch(0.205 0.012 265);
+}
+[data-ink="coral"] {
+  --brand: var(--ink-coral);
+  --brand-wash: color-mix(in oklab, var(--ink-coral) 11%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-coral) 30%, transparent);
+}
+[data-ink="mauve"] {
+  --brand: var(--ink-mauve);
+  --brand-wash: color-mix(in oklab, var(--ink-mauve) 11%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-mauve) 30%, transparent);
+}
+
+.dark [data-ink="azure"] {
+  --brand-wash: color-mix(in oklab, var(--ink-azure) 16%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-azure) 36%, transparent);
+}
+.dark [data-ink="turquoise"] {
+  --brand-wash: color-mix(in oklab, var(--ink-turquoise) 16%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-turquoise) 36%, transparent);
+}
+.dark [data-ink="saffron"] {
+  --brand-wash: color-mix(in oklab, var(--ink-saffron) 18%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-saffron) 38%, transparent);
+}
+.dark [data-ink="coral"] {
+  --brand-wash: color-mix(in oklab, var(--ink-coral) 16%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-coral) 36%, transparent);
+}
+.dark [data-ink="mauve"] {
+  --brand-wash: color-mix(in oklab, var(--ink-mauve) 16%, transparent);
+  --brand-quiet: color-mix(in oklab, var(--ink-mauve) 36%, transparent);
+}
+
+:root {
+  --r-1: 0.375rem;
+  --r-2: 0.625rem;
+  --r-3: 1rem;
+  --r-4: 1.5rem;
+  --r-5: 2.25rem;
+  --r-stone: 1.5rem 2.25rem 1.5rem 2.25rem;
+  --r-stone-flip: 2.25rem 1.5rem 2.25rem 1.5rem;
+  --r-stone-inner: 0.875rem 1.625rem 0.875rem 1.625rem;
+
+  --ease: cubic-bezier(0.2, 0.85, 0.25, 1);
+  /* Slight overshoot. Used where something should feel picked up rather than
+     moved: the letter lift, and every button that rises under the cursor. */
+  --ease-out-back: cubic-bezier(0.22, 1.4, 0.36, 1);
+  --t-1: 140ms;
+  --t-2: 260ms;
+  --t-3: 560ms;
+
+  --z-raise: 10;
+  --z-sticky: 100;
+  --z-nav: 200;
+  --z-float: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  --page: 78rem;
+  --page-narrow: 46rem;
+  --gutter: clamp(1.25rem, 4vw, 2.75rem);
+  --measure: 64ch;
+}
+
+/* ── Bridge to shadcn/radix token names ───────────────────────────────── */
+
+:root,
+.dark {
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper-lift);
+  --card-foreground: var(--ink);
+  --popover: var(--paper-lift);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-ink);
+  --secondary: var(--paper-sink);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-sink);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--paper-sink);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--danger-ink);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand);
+  --radius: var(--r-3);
+
+  /* Charts read straight off the five inks, in a fixed order. */
+  --chart-1: var(--ink-azure);
+  --chart-2: var(--ink-turquoise);
+  --chart-3: var(--ink-saffron);
+  --chart-4: var(--ink-coral);
+  --chart-5: var(--ink-mauve);
+
+  --sidebar: var(--paper-lift);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-ink);
+  --sidebar-accent: var(--paper-sink);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
+}
+
+/* ── Tailwind theme ────────────────────────────────────────────────────── */
+
+@theme inline {
+  --breakpoint-xs: 30rem;
+  --breakpoint-3xl: 110rem;
+
+  --font-sans: Lato, ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: var(--paper);
+  --color-paper-lift: var(--paper-lift);
+  --color-paper-sink: var(--paper-sink);
+  --color-paper-invert: var(--paper-invert);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-invert: var(--ink-invert);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-wash: var(--brand-wash);
+  --color-brand-quiet: var(--brand-quiet);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-azure: var(--ink-azure);
+  --color-turquoise: var(--ink-turquoise);
+  --color-saffron: var(--ink-saffron);
+  --color-coral: var(--ink-coral);
+  --color-mauve: var(--ink-mauve);
+
+  --radius-1: var(--r-1);
+  --radius-2: var(--r-2);
+  --radius-3: var(--r-3);
+  --radius-4: var(--r-4);
+  --radius-5: var(--r-5);
+  --radius-stone: var(--r-stone);
+  --radius-stone-inner: var(--r-stone-inner);
+
+  --shadow-lift-1: var(--shadow-1);
+  --shadow-lift-2: var(--shadow-2);
+
+  --ease-paper: var(--ease);
+
+  --radius-sm: var(--r-1);
+  --radius-md: var(--r-2);
+  --radius-lg: var(--r-3);
+  --radius-xl: var(--r-4);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    border-color: var(--line);
+  }
+
+  /* Clip on both the root and the body: the ambient layer's blobs extend past
+     the viewport by design, and clipping only one of the two still leaves a
+     horizontal scrollbar on narrow screens. */
+  html {
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    display: flex;
+    min-height: 100dvh;
+    max-width: 100%;
+    flex-direction: column;
+    overflow-x: clip;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--brand-quiet);
+    color: var(--ink);
+  }
+
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+    background-color: var(--line-strong);
+  }
+}
+
+/* ── Recipes ───────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* Layout ------------------------------------------------------------- */
+
+  .page {
+    width: 100%;
+    max-width: var(--page);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .page-narrow {
+    width: 100%;
+    max-width: var(--page-narrow);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .measure {
+    max-width: var(--measure);
+  }
+
+  /* Surfaces ----------------------------------------------------------- */
+
+  .surface {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: var(--r-stone);
+    background-color: var(--paper-lift);
+    box-shadow: var(--shadow-1);
+  }
+
+  .surface-flip {
+    border-radius: var(--r-stone-flip);
+  }
+
+  .surface-quiet {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: var(--r-stone);
+    background-color: var(--paper-lift);
+  }
+
+  .well {
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    background-color: var(--paper-sink);
+  }
+
+  .surface-invert {
+    border-radius: var(--r-stone);
+    background-color: var(--paper-invert);
+    color: var(--ink-invert);
+  }
+
+  /* Liquid glass. Deliberately rare: the floating nav and the composer, and
+     nothing else. Saturation is boosted so the colour behind it shows through
+     rather than turning to grey mush. */
+  .glass {
+    background-color: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      var(--shadow-2),
+      inset 0 1px 0 oklch(1 0 0 / 0.4);
+  }
+
+  .lift {
+    transition:
+      transform var(--t-2) var(--ease),
+      box-shadow var(--t-2) var(--ease),
+      border-color var(--t-1) var(--ease);
+  }
+  .lift:hover,
+  .group:hover .lift {
+    transform: translateY(-3px);
+    border-color: var(--brand-quiet);
+    box-shadow: var(--shadow-2);
+  }
+  .lift:active,
+  .group:active .lift {
+    transform: translateY(-1px);
+  }
+
+  /* Typography --------------------------------------------------------- */
+
+  /* Hierarchy comes from size, weight and tracking. The build of Bricolage we
+     ship carries only the weight axis, so display sizes are tightened with
+     `letter-spacing` rather than by narrowing the face — setting `wdth` here
+     would be a no-op that reads as intent in the source and does nothing on
+     screen. Weight stays at 600 throughout: the size jump does the work. */
+  .t-display,
+  .t-h1,
+  .t-h2,
+  .t-h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .t-display {
+    font-size: clamp(2.35rem, 5vw, 4.2rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
+
+  .t-h1 {
+    font-size: clamp(2.1rem, 4.4vw, 3.3rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.028em;
+  }
+
+  .t-h2 {
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.022em;
+  }
+
+  .t-h3 {
+    font-size: clamp(1.15rem, 1.7vw, 1.35rem);
+    font-weight: 600;
+    line-height: 1.22;
+    letter-spacing: -0.012em;
+  }
+
+  .t-lead {
+    max-width: var(--measure);
+    font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+    line-height: 1.62;
+    color: var(--ink-muted);
+  }
+
+  .t-body {
+    font-size: 1rem;
+    line-height: 1.68;
+    color: var(--ink-muted);
+  }
+
+  /* Labels and data are mono. This is the instrumentation move: the subject
+     reads numbers off dashboards, so the site sets its numbers the same way. */
+  .t-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .t-eyebrow-brand {
+    color: var(--brand);
+  }
+
+  .t-meta {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    color: var(--ink-faint);
+  }
+
+  /* Marks & rules ------------------------------------------------------ */
+
+  .mark-brand {
+    position: relative;
+    color: var(--brand);
+    white-space: nowrap;
+  }
+  .mark-brand::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.02em;
+    height: 0.055em;
+    border-radius: 9999px;
+    background: var(--brand);
+  }
+
+  /* A drawn rule that takes the section's ink. */
+  .rule {
+    height: 5px;
+    border: 0;
+    background-repeat: repeat-x;
+    background-size: 22px 5px;
+    background-position: 0 50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='5' viewBox='0 0 22 5'%3E%3Cpath d='M0 3.1c2.6-2 4.7-2.2 7.2-.6 2.6 1.6 4.4 1.7 6.6.2 2.3-1.5 4.5-1.6 8.2.4' fill='none' stroke='%23000' stroke-opacity='.2' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+  .dark .rule {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='5' viewBox='0 0 22 5'%3E%3Cpath d='M0 3.1c2.6-2 4.7-2.2 7.2-.6 2.6 1.6 4.4 1.7 6.6.2 2.3-1.5 4.5-1.6 8.2.4' fill='none' stroke='%23fff' stroke-opacity='.24' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  .hairline {
+    height: 1px;
+    border: 0;
+    background: var(--line);
+  }
+
+  /* Tags --------------------------------------------------------------- */
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 9999px;
+    background-color: var(--paper-sink);
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .tag-brand {
+    border-color: var(--brand-quiet);
+    background-color: var(--brand-wash);
+    color: var(--brand);
+  }
+
+  .tag-solid {
+    border-color: transparent;
+    background-color: var(--paper-invert);
+    color: var(--ink-invert);
+  }
+
+  /* Links -------------------------------------------------------------- */
+
+  .link {
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(var(--brand), var(--brand));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 1px;
+    transition: background-size var(--t-2) var(--ease);
+  }
+  .link:hover {
+    background-size: 100% 2px;
+  }
+
+  /* The link's own motion is the letter lift, the same one the headings use.
+     A previous version slid two stacked copies of the label past each other
+     inside a clipped box; it fought the descenders and read as a glitch. All
+     that is left here is the rule, which grows from the leading edge. */
+  .link-slide {
+    position: relative;
+    color: var(--ink-muted);
+    transition: color var(--t-1) var(--ease);
+  }
+
+  .link-slide::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.3rem;
+    height: 1.5px;
+    border-radius: 9999px;
+    background: var(--brand);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--t-2) var(--ease);
+  }
+
+  .link-slide:hover,
+  .link-slide:focus-visible,
+  .link-slide[data-active="true"] {
+    color: var(--ink);
+  }
+
+  .link-slide:hover::after,
+  .link-slide:focus-visible::after,
+  .link-slide[data-active="true"]::after {
+    transform: scaleX(1);
+  }
+
+  /* Media -------------------------------------------------------------- */
+
+  .frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--r-4);
+    background-color: var(--paper-sink);
+  }
+  .frame > img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform var(--t-3) var(--ease);
+  }
+  .group:hover .frame > img {
+    transform: scale(1.035);
+  }
+  /* A wash of the section's ink over every cover, so a screenshot joins the
+     palette instead of arguing with it. */
+  .frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--brand) 22%, transparent),
+      transparent 62%
+    );
+    mix-blend-mode: multiply;
+  }
+  .dark .frame::after {
+    mix-blend-mode: screen;
+    opacity: 0.45;
+  }
+
+  .arch {
+    border-radius: 50% 50% var(--r-4) var(--r-4) / 34% 34% var(--r-4)
+      var(--r-4);
+  }
+
+  .offset-print {
+    position: relative;
+  }
+  .offset-print::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    translate: 0.75rem 0.75rem;
+    border: 1.5px solid var(--brand-quiet);
+    border-radius: inherit;
+    transition: translate var(--t-3) var(--ease);
+  }
+  .group:hover .offset-print::before,
+  .offset-print:hover::before {
+    translate: 0.35rem 0.35rem;
+  }
+
+  /* Ambient field ------------------------------------------------------ */
+
+  /* Absolute, not fixed: the wash belongs to the section that renders it, so
+     it cannot follow the reader down the page or bleed through the glass
+     navbar. It clips its own blobs, which keeps them from adding horizontal
+     scroll on narrow screens. */
+  /* The page background. Fixed to the viewport, so it has no edge that can be
+     caught in frame — every version anchored inside the page container showed
+     its own rectangle, because that container is narrower than the window.
+     `overflow: clip` contains the blobs, which are deliberately larger than
+     the screen. No mask: with nothing to hide, masking only removed colour. */
+  .ambient {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: clip;
+  }
+
+  .ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: var(--blob-opacity, 0.5);
+    will-change: transform;
+    animation: drift var(--blob-duration, 60s) var(--blob-delay, 0s) ease-in-out
+      infinite alternate;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(var(--blob-x, 4vw), var(--blob-y, -4vh), 0)
+        scale(var(--blob-scale, 1.14));
+    }
+  }
+
+  .float {
+    animation: float var(--float-duration, 7s) var(--float-delay, 0s)
+      ease-in-out infinite alternate;
+  }
+
+  @keyframes float {
+    to {
+      transform: translateY(var(--float-distance, -10px));
+    }
+  }
+
+  /* Sheets & overlays --------------------------------------------------- */
+
+  /* A panel that unfolds. Animating `grid-template-rows` from 0fr to 1fr is the
+     one way to transition to a content-driven height without hard-coding it, so
+     the mobile menu opens instead of appearing. It stays mounted and inert when
+     closed, which is also what lets it animate shut. */
+  .sheet {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.5rem);
+    transition:
+      grid-template-rows var(--t-2) var(--ease),
+      opacity var(--t-2) var(--ease),
+      transform var(--t-2) var(--ease),
+      visibility 0s linear var(--t-2);
+  }
+
+  .sheet > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .sheet[data-open="true"] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      grid-template-rows var(--t-2) var(--ease),
+      opacity var(--t-2) var(--ease),
+      transform var(--t-2) var(--ease),
+      visibility 0s;
+  }
+
+  /* A full-screen surface that fades and settles rather than cutting in. */
+  .overlay {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.995);
+    transition:
+      opacity var(--t-2) var(--ease),
+      transform var(--t-2) var(--ease),
+      visibility 0s linear var(--t-2);
+  }
+
+  .overlay[data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity var(--t-2) var(--ease),
+      transform var(--t-2) var(--ease),
+      visibility 0s;
+  }
+
+  /* Mark ---------------------------------------------------------------- */
+
+  /* The underline draws itself once, left to right, after the headline has
+     finished arriving — the one flourish on the page that is purely a flourish,
+     so it gets to be the thing you notice. */
+  .mark-draw::after {
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: mark-draw 620ms var(--ease) var(--mark-delay, 700ms) forwards;
+  }
+
+  @keyframes mark-draw {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* Wordmark ----------------------------------------------------------- */
+
+  /* The letters hop through in a wave on hover.
+     `animation` rather than `transition`, because a bounce needs a keyframe in
+     the middle, and because attaching the animation only while hovered means it
+     replays on every pass instead of firing once and never again. The per-letter
+     `--i` staggers the start, which is what makes it read as a wave travelling
+     across the name rather than the whole word jumping. */
+  .wordmark-letter {
+    display: inline-block;
+  }
+
+  .group:hover .wordmark-letter,
+  .group:focus-visible .wordmark-letter {
+    animation: letter-hop 480ms var(--ease) both;
+    animation-delay: calc(var(--i) * 30ms);
+  }
+
+  @keyframes letter-hop {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    36% {
+      transform: translateY(-0.34em) rotate(-6deg);
+    }
+    66% {
+      transform: translateY(0.07em) rotate(3deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  /* Letter lift --------------------------------------------------------- */
+
+  /* Driven by `--lift`, a 0..1 value the pointer handler writes per letter.
+     The transition is what makes it feel physical rather than tracked: the
+     cursor sets a target and the letter travels to it, so a fast sweep leaves a
+     wake behind the pointer instead of a rigid spike under it. */
+  .lift-letter {
+    display: inline-block;
+    transform: translate3d(0, calc(var(--lift, 0) * var(--rise, 0.34em) * -1), 0);
+    transition: transform 320ms var(--ease-out-back);
+  }
+
+  /* Squiggle ----------------------------------------------------------- */
+
+  /* A drawn rule. `pathLength="1"` on the path normalises its length, so the
+     dash values below are plain fractions of the whole regardless of how wide
+     the container is; `non-scaling-stroke` keeps the line one weight even though
+     the SVG is stretched horizontally to fill. */
+  .squiggle path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .squiggle[data-shown="true"] path {
+    animation: squiggle-draw 1200ms var(--ease) var(--squiggle-delay, 0ms)
+      forwards;
+  }
+
+  @keyframes squiggle-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (scripting: none) {
+    .squiggle path {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Token stream ------------------------------------------------------- */
+
+  /* The signature. The headline arrives the way the subject's own systems
+     produce text: in chunks, left to right. One
+     orchestrated page-load moment, then it never runs again. */
+  .stream-token {
+    display: inline-block;
+    opacity: 0;
+    animation: token-in 320ms var(--ease) both;
+    animation-delay: var(--token-delay, 0ms);
+  }
+
+  @keyframes token-in {
+    from {
+      opacity: 0;
+      filter: blur(4px);
+      transform: translateY(0.14em);
+    }
+    to {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+
+  /* Grain -------------------------------------------------------------- */
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-raise);
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    mix-blend-mode: var(--grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  /* Motion ------------------------------------------------------------- */
+
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+    transition:
+      opacity var(--t-2) var(--ease),
+      transform var(--t-2) var(--ease);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (scripting: none) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ── Prose ─────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .prose-paper {
+    max-width: var(--measure);
+    color: var(--ink-muted);
+    font-size: 1.0625rem;
+    line-height: 1.72;
+  }
+
+  .prose-paper > * + * {
+    margin-top: 1.15em;
+  }
+
+  .prose-paper h2,
+  .prose-paper h3,
+  .prose-paper h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 2.1em;
+    margin-bottom: 0.55em;
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+  .prose-paper h2 {
+    font-size: 1.6em;
+    line-height: 1.14;
+  }
+  .prose-paper h3 {
+    font-size: 1.28em;
+    line-height: 1.24;
+  }
+  .prose-paper h4 {
+    font-size: 1.08em;
+  }
+
+  .prose-paper strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .prose-paper a {
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(var(--brand), var(--brand));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 1px;
+    transition: background-size var(--t-2) var(--ease);
+  }
+  .prose-paper a:hover {
+    background-size: 100% 2px;
+  }
+
+  .prose-paper ul,
+  .prose-paper ol {
+    padding-left: 1.35em;
+  }
+  .prose-paper ul {
+    list-style: none;
+    padding-left: 1.1em;
+  }
+  .prose-paper ul > li {
+    position: relative;
+  }
+  .prose-paper ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.1em;
+    top: 0.66em;
+    width: 0.34em;
+    height: 0.34em;
+    border-radius: 9999px;
+    background: var(--brand);
+  }
+  .prose-paper ol {
+    list-style: decimal;
+  }
+  .prose-paper li + li {
+    margin-top: 0.4em;
+  }
+  .prose-paper li::marker {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--brand);
+  }
+
+  .prose-paper blockquote {
+    margin-inline: 0;
+    padding: 0.2em 0 0.2em 1.15em;
+    border-left: 2px solid var(--brand);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 1.15em;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .prose-paper code {
+    padding: 0.15em 0.4em;
+    border: 1px solid var(--line);
+    border-radius: var(--r-1);
+    background: var(--paper-sink);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+  }
+
+  .prose-paper pre {
+    overflow-x: auto;
+    padding: 1.15rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    background: var(--paper-sink);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .prose-paper pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+  }
+
+  .prose-paper img,
+  .prose-paper video {
+    border-radius: var(--r-4);
+    border: 1px solid var(--line);
+  }
+
+  .prose-paper hr {
+    height: 5px;
+    border: 0;
+    margin-block: 2.4em;
+    background-repeat: repeat-x;
+    background-size: 22px 5px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='5' viewBox='0 0 22 5'%3E%3Cpath d='M0 3.1c2.6-2 4.7-2.2 7.2-.6 2.6 1.6 4.4 1.7 6.6.2 2.3-1.5 4.5-1.6 8.2.4' fill='none' stroke='%23000' stroke-opacity='.2' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+  .dark .prose-paper hr {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='5' viewBox='0 0 22 5'%3E%3Cpath d='M0 3.1c2.6-2 4.7-2.2 7.2-.6 2.6 1.6 4.4 1.7 6.6.2 2.3-1.5 4.5-1.6 8.2.4' fill='none' stroke='%23fff' stroke-opacity='.24' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  .prose-paper table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .prose-paper th,
+  .prose-paper td {
+    padding: 0.6em 0.75em;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  .prose-paper th {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+}
+
+/* ── Utilities ─────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .r-stone {
+    border-radius: var(--r-stone);
+  }
+  .r-stone-flip {
+    border-radius: var(--r-stone-flip);
+  }
+  .r-stone-inner {
+    border-radius: var(--r-stone-inner);
+  }
+  .r-stone-inset-top {
+    border-radius: 0.875rem 1.625rem var(--r-2) var(--r-2);
+  }
+}
+
+/* ── Third-party skins ─────────────────────────────────────────────────── */
+
+.map-frame .maplibregl-map {
+  position: absolute;
+  inset: 0;
+  font-family: var(--font-sans);
+}
+
+.map-frame .maplibregl-canvas {
+  cursor: grab;
+}
+.map-frame .maplibregl-canvas:active {
+  cursor: grabbing;
+}
+
+.map-frame .maplibregl-ctrl-group {
+  overflow: hidden;
+  margin: 0.75rem 0.75rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--paper-lift);
+  box-shadow: var(--shadow-1);
+}
+
+.map-frame .maplibregl-ctrl-group button {
+  width: 1.875rem;
+  height: 1.875rem;
+  background: transparent;
+}
+.map-frame .maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--line);
+}
+.map-frame .maplibregl-ctrl-icon {
+  filter: var(--map-icon-filter, none);
+}
+.dark .map-frame {
+  --map-icon-filter: invert(1);
+}
+
+.map-frame .maplibregl-ctrl-attrib {
+  border-radius: var(--r-1) 0 0 0;
+  background: color-mix(in oklab, var(--paper-lift) 82%, transparent);
+  color: var(--ink-muted);
+  font-size: 0.625rem;
+}
+.map-frame .maplibregl-ctrl-attrib a {
+  color: var(--ink-muted);
+}
+
+/* No canvas filter: day and night are two real MapLibre styles built from the
+   palette in lib/ui/mapStyle.ts. */
+
+.map-pin {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+}
+
+.map-pin-core {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  border: 2px solid var(--paper-lift);
+  border-radius: 9999px;
+  background: var(--brand);
+  box-shadow: 0 4px 14px oklch(0 0 0 / 0.28);
+  transition: transform var(--t-2) var(--ease);
+}
+
+.map-pin:hover .map-pin-core,
+.map-pin:focus-visible .map-pin-core {
+  transform: scale(1.15);
+}
+
+.map-pin-halo {
+  position: absolute;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  background: var(--brand);
+  opacity: 0.45;
+  animation: halo 2.8s var(--ease) infinite;
+}
+
+@keyframes halo {
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.katex {
+  color: var(--ink);
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .map-pin-halo {
+    animation: none;
+    opacity: 0;
+  }
+
+  .lift:hover,
+  .group:hover .lift,
+  .group:hover .frame > img {
+    transform: none;
+  }
+
+  .offset-print::before {
+    transition: none;
+  }
+
+  .ambient-blob,
+  .float {
+    animation: none !important;
+  }
+
+  /* The stream arrives complete rather than token by token. */
+  .stream-token {
+    opacity: 1;
+    animation: none;
+  }
+
+  .sheet,
+  .sheet[data-open="true"],
+  .overlay,
+  .overlay[data-open="true"] {
+    transition: none;
+  }
+
+  .mark-draw::after {
+    transform: none;
+    animation: none;
+  }
+
+  /* The wave and the drawn rule are both pure flourish: the name simply sits
+     still, and the rule is simply there. */
+  .group:hover .wordmark-letter,
+  .group:focus-visible .wordmark-letter {
+    animation: none;
+  }
+
+  .lift-letter {
+    transform: none;
+    transition: none;
+  }
+
+  /* Buttons stay put; the colour change alone carries the hover. */
+  .group\/action:hover,
+  button:hover,
+  a:hover {
+    transform: none !important;
+  }
+
+
+
+  .squiggle path,
+  .squiggle[data-shown="true"] path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
