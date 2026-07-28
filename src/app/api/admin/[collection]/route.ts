@@ -2,12 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { withApiAnalytics } from "@/lib/analytics/server";
 import {
-  createProjectOrArticle,
+  createProjectOrNote,
   type AdminCollectionName,
 } from "@/lib/data/content";
 import { requireAdminSession } from "@/lib/auth/helpers";
 
-const creatable = new Set<AdminCollectionName>(["projects", "articles"]);
+const creatable = new Set<AdminCollectionName>(["projects", "notes"]);
 
 const postHandler = async (
   req: NextRequest,
@@ -20,13 +20,13 @@ const postHandler = async (
   }
   if (!creatable.has(collection as AdminCollectionName)) {
     return NextResponse.json(
-      { detail: "Only projects or articles can be created" },
+      { detail: "Only projects or notes can be created" },
       { status: 400 },
     );
   }
   const body = (await req.json()) as Record<string, unknown>;
-  const { _id, item } = await createProjectOrArticle(
-    collection as Extract<AdminCollectionName, "projects" | "articles">,
+  const { _id, item } = await createProjectOrNote(
+    collection as Extract<AdminCollectionName, "projects" | "notes">,
     body,
   );
   return NextResponse.json({ ok: true, _id, item });

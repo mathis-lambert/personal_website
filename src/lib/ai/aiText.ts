@@ -25,7 +25,7 @@ export const getText = (value: unknown): string => {
   return "";
 };
 
-export const findLastAssistantMessage = (
+const findLastAssistantMessage = (
   messages: unknown[],
 ): unknown | null => {
   for (let i = messages.length - 1; i >= 0; i -= 1) {

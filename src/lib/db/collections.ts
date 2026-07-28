@@ -6,7 +6,7 @@ import type {
   ObjectId,
 } from "mongodb";
 
-import type { Article, Project, ResumeData, TimelineEntry } from "@/types";
+import type { Note, Project, ResumeData, TimelineEntry } from "@/types";
 import type { AgentMessage, AgentUsage } from "@/types/agent";
 
 import { getMongoDb } from "./client";
@@ -19,7 +19,7 @@ type BaseDocument = Document & {
 
 export type ProjectDocument = Omit<Project, "_id"> & BaseDocument;
 
-export type ArticleDocument = Omit<Article, "_id"> & BaseDocument;
+export type NoteDocument = Omit<Note, "_id"> & BaseDocument;
 
 export type TimelineDocument = TimelineEntry &
   BaseDocument & {
@@ -112,7 +112,7 @@ export type ChatConversationTurnDocument = BaseDocument & {
 
 export const COLLECTION_NAMES = {
   projects: "projects",
-  articles: "articles",
+  notes: "notes",
   experiences: "experiences",
   studies: "studies",
   resume: "resume",
@@ -180,7 +180,7 @@ const ensureIndexes = async () => {
     await Promise.all(
       [
         COLLECTION_NAMES.projects,
-        COLLECTION_NAMES.articles,
+        COLLECTION_NAMES.notes,
         COLLECTION_NAMES.experiences,
         COLLECTION_NAMES.studies,
         COLLECTION_NAMES.resume,
@@ -207,7 +207,7 @@ const ensureIndexes = async () => {
         ],
       ],
       [
-        COLLECTION_NAMES.articles,
+        COLLECTION_NAMES.notes,
         [
           { key: { slug: 1 }, unique: true, sparse: true },
           { key: { date: -1 } },
@@ -305,8 +305,8 @@ const getCollection = async <T extends Document>(
 export const getProjectsCollection = () =>
   getCollection<ProjectDocument>(COLLECTION_NAMES.projects);
 
-export const getArticlesCollection = () =>
-  getCollection<ArticleDocument>(COLLECTION_NAMES.articles);
+export const getNotesCollection = () =>
+  getCollection<NoteDocument>(COLLECTION_NAMES.notes);
 
 export const getExperiencesCollection = () =>
   getCollection<TimelineDocument>(COLLECTION_NAMES.experiences);

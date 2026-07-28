@@ -7,8 +7,8 @@ type UiEventName =
   | "chat_submit"
   | "project_open"
   | "project_external_open"
-  | "article_open"
-  | "article_share"
+  | "note_open"
+  | "note_share"
   | "resume_export_click";
 
 type TrackEventPayload = {

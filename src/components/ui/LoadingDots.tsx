@@ -1,17 +1,18 @@
-import React from "react";
+import type React from "react";
 
-interface LoadingDotsProps {
-  className?: string;
-}
+import { cn } from "@/lib/utils";
 
-const LoadingDots: React.FC<LoadingDotsProps> = ({ className = "" }) => {
-  return (
-    <div className={`flex space-x-1 ${className}`}>
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-    </div>
-  );
-};
+/** Three ink dots. Used only while the assistant's first token is pending. */
+const LoadingDots: React.FC<{ className?: string }> = ({ className }) => (
+  <div
+    className={cn("flex gap-1.5", className)}
+    role="status"
+    aria-label="Thinking"
+  >
+    <span className="size-1.5 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.3s]" />
+    <span className="size-1.5 animate-bounce rounded-full bg-ink-faint [animation-delay:-0.15s]" />
+    <span className="size-1.5 animate-bounce rounded-full bg-ink-faint" />
+  </div>
+);
 
 export default LoadingDots;

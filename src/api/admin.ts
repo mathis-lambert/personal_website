@@ -3,52 +3,59 @@ import type {
   AdminConversationDetailResponse,
   AdminConversationsListResponse,
   AdminConversationTurnsResponse,
-  AdminAnalyticsActivityResponse,
-  AdminAnalyticsEndpointsResponse,
-  AdminAnalyticsErrorsResponse,
-  AdminAnalyticsOverviewResponse,
-  AdminAnalyticsTimeseriesResponse,
   AdminCollectionName,
+  AdminInsights,
   AdminListCollectionName,
-  AnalyticsGranularity,
-  ApiActorType,
-  Article,
+  Note,
   Project,
   ResumeData,
 } from "@/types";
 import type {
-  AdminCreateArticleInput,
+  AdminCreateNoteInput,
   AdminCreateProjectInput,
-  AdminUpdateArticleInput,
+  AdminUpdateNoteInput,
   AdminUpdateProjectInput,
   AdminUpdateResumeInput,
 } from "@/admin/types";
-import type { TimelineData } from "@/components/ui/ScrollableTimeline";
+import type { TimelineEntry as TimelineData } from "@/types";
 
-export async function getCollections(token?: string): Promise<string[]> {
-  const res = await fetchWithTimeout(`/api/admin/collections`, {
-    timeoutMs: 8000,
-    authToken: token,
-  });
-  if (!res.ok) throw new Error(`Failed to list collections: ${res.status}`);
-  const data = await res.json();
-  const names = Array.isArray(data?.collections)
-    ? (data.collections as { name: string }[]).map((c) => c.name)
-    : [];
-  return names;
-}
+/** Options every read shares: who is asking, and how to cancel. */
+export type ReadOptions = { token?: string; signal?: AbortSignal };
+
+/**
+ * One GET, one error message, one place to add a header.
+ *
+ * Ten read functions each opened their own `fetchWithTimeout`, checked `res.ok`,
+ * threw a message built the same way and cast the body. None of them accepted an
+ * `AbortSignal`, so a screen that changed its filters twice in a second had two
+ * responses racing to set the same state.
+ */
+const readJson = async <T>(
+  url: string,
+  what: string,
+  { token, signal }: ReadOptions = {},
+  timeoutMs = 12_000,
+): Promise<T> => {
+  const res = await fetchWithTimeout(url, { timeoutMs, authToken: token, signal });
+  if (!res.ok) throw new Error(`Failed to fetch ${what}: ${res.status}`);
+  return (await res.json()) as T;
+};
+
+/** Append a query string only when there is one. */
+const withQuery = (path: string, qs: URLSearchParams) =>
+  qs.size ? `${path}?${qs}` : path;
 
 export async function getCollectionData<T = unknown>(
   collection: AdminCollectionName,
-  token?: string,
+  options?: ReadOptions,
 ): Promise<T> {
-  const res = await fetchWithTimeout(`/api/admin/data/${collection}`, {
-    timeoutMs: 10000,
-    authToken: token,
-  });
-  if (!res.ok) throw new Error(`Failed to read ${collection}: ${res.status}`);
-  const data = await res.json();
-  return data?.data as T;
+  const body = await readJson<{ data?: T }>(
+    `/api/admin/data/${collection}`,
+    collection,
+    options,
+    10_000,
+  );
+  return body?.data as T;
 }
 
 export async function replaceCollection(
@@ -73,15 +80,15 @@ export async function createItem(
   token?: string,
 ): Promise<{ ok: boolean; _id: string; item: Project }>;
 export async function createItem(
-  collection: "articles",
-  item: AdminCreateArticleInput,
+  collection: "notes",
+  item: AdminCreateNoteInput,
   token?: string,
-): Promise<{ ok: boolean; _id: string; item: Article }>;
+): Promise<{ ok: boolean; _id: string; item: Note }>;
 export async function createItem(
-  collection: Extract<AdminCollectionName, "projects" | "articles">,
-  item: AdminCreateProjectInput | AdminCreateArticleInput,
+  collection: Extract<AdminCollectionName, "projects" | "notes">,
+  item: AdminCreateProjectInput | AdminCreateNoteInput,
   token?: string,
-): Promise<{ ok: boolean; _id: string; item: Project | Article }> {
+): Promise<{ ok: boolean; _id: string; item: Project | Note }> {
   const res = await fetchWithTimeout(`/api/admin/${collection}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -94,7 +101,7 @@ export async function createItem(
   return (await res.json()) as {
     ok: boolean;
     _id: string;
-    item: Project | Article;
+    item: Project | Note;
   };
 }
 
@@ -111,11 +118,11 @@ export async function updateItem(
   token?: string,
 ): Promise<{ ok: boolean; item: ResumeData }>;
 export async function updateItem(
-  collection: "articles",
+  collection: "notes",
   id: string,
-  patch: AdminUpdateArticleInput,
+  patch: AdminUpdateNoteInput,
   token?: string,
-): Promise<{ ok: boolean; item: Article }>;
+): Promise<{ ok: boolean; item: Note }>;
 export async function updateItem(
   collection: "experiences",
   id: string,
@@ -168,123 +175,18 @@ export async function deleteItem(
     throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
 }
 
-type AnalyticsCommonParams = {
-  start?: string;
-  end?: string;
-  route?: string;
-  method?: string;
-  actorType?: ApiActorType;
-};
-
-const withCommonAnalyticsParams = (
-  params: AnalyticsCommonParams,
-): URLSearchParams => {
-  const qs = new URLSearchParams();
-  if (params.start) qs.set("start", params.start);
-  if (params.end) qs.set("end", params.end);
-  if (params.route) qs.set("route", params.route);
-  if (params.method) qs.set("method", params.method.toUpperCase());
-  if (params.actorType) qs.set("actor_type", params.actorType);
-  return qs;
-};
-
-export async function getAnalyticsOverview(
-  params: AnalyticsCommonParams,
-  token?: string,
-): Promise<AdminAnalyticsOverviewResponse> {
-  const qs = withCommonAnalyticsParams(params);
-  const url = `/api/admin/analytics/overview${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch analytics overview: ${res.status}`);
-  return (await res.json()) as AdminAnalyticsOverviewResponse;
-}
-
-export async function getAnalyticsTimeseries(
-  params: AnalyticsCommonParams & {
-    granularity?: AnalyticsGranularity;
-  },
-  token?: string,
-): Promise<AdminAnalyticsTimeseriesResponse> {
-  const qs = withCommonAnalyticsParams(params);
-  if (params.granularity) qs.set("granularity", params.granularity);
-
-  const url = `/api/admin/analytics/timeseries${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch analytics timeseries: ${res.status}`);
-  return (await res.json()) as AdminAnalyticsTimeseriesResponse;
-}
-
-export async function getAnalyticsEndpoints(
-  params: AnalyticsCommonParams & { limit?: number },
-  token?: string,
-): Promise<AdminAnalyticsEndpointsResponse> {
-  const qs = withCommonAnalyticsParams(params);
-  if (params.limit != null) qs.set("limit", String(params.limit));
-
-  const url = `/api/admin/analytics/endpoints${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch endpoint analytics: ${res.status}`);
-  return (await res.json()) as AdminAnalyticsEndpointsResponse;
-}
-
-export async function getAnalyticsErrors(
-  params: AnalyticsCommonParams & {
-    statusMin?: number;
-    statusMax?: number;
-    limit?: number;
-    skip?: number;
-  },
-  token?: string,
-): Promise<AdminAnalyticsErrorsResponse> {
-  const qs = withCommonAnalyticsParams(params);
-  if (params.statusMin != null) qs.set("status_min", String(params.statusMin));
-  if (params.statusMax != null) qs.set("status_max", String(params.statusMax));
-  if (params.limit != null) qs.set("limit", String(params.limit));
-  if (params.skip != null) qs.set("skip", String(params.skip));
-
-  const url = `/api/admin/analytics/errors${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch analytics errors: ${res.status}`);
-  return (await res.json()) as AdminAnalyticsErrorsResponse;
-}
-
-export async function getAnalyticsActivity(
-  params: AnalyticsCommonParams & {
-    type?: "api" | "ui" | "all";
-    limit?: number;
-    skip?: number;
-  },
-  token?: string,
-): Promise<AdminAnalyticsActivityResponse> {
-  const qs = withCommonAnalyticsParams(params);
-  if (params.type) qs.set("type", params.type);
-  if (params.limit != null) qs.set("limit", String(params.limit));
-  if (params.skip != null) qs.set("skip", String(params.skip));
-
-  const url = `/api/admin/analytics/activity${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch analytics activity: ${res.status}`);
-  return (await res.json()) as AdminAnalyticsActivityResponse;
+/** Everything the Overview screen shows, in one request. */
+export async function getInsights(
+  range: { start: string; end: string },
+  options?: ReadOptions,
+): Promise<AdminInsights> {
+  const qs = new URLSearchParams({ start: range.start, end: range.end });
+  return readJson<AdminInsights>(
+    withQuery("/api/admin/insights", qs),
+    "insights",
+    options,
+    15_000,
+  );
 }
 
 export async function getConversations(
@@ -297,7 +199,7 @@ export async function getConversations(
     limit?: number;
     skip?: number;
   },
-  token?: string,
+  options?: ReadOptions,
 ): Promise<AdminConversationsListResponse> {
   const qs = new URLSearchParams();
   if (params.start) qs.set("start", params.start);
@@ -308,52 +210,44 @@ export async function getConversations(
   if (params.limit != null) qs.set("limit", String(params.limit));
   if (params.skip != null) qs.set("skip", String(params.skip));
 
-  const url = `/api/admin/analytics/conversations${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 15000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to fetch conversations: ${res.status}`);
-  return (await res.json()) as AdminConversationsListResponse;
+  return readJson<AdminConversationsListResponse>(
+    withQuery("/api/admin/analytics/conversations", qs),
+    "conversations",
+    options,
+    15_000,
+  );
 }
 
 export async function getConversationDetail(
   conversationId: string,
-  token?: string,
+  options?: ReadOptions,
 ): Promise<AdminConversationDetailResponse> {
-  const res = await fetchWithTimeout(
+  return readJson<AdminConversationDetailResponse>(
     `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}`,
-    {
-      timeoutMs: 10000,
-      authToken: token,
-    },
+    `conversation ${conversationId}`,
+    options,
+    10_000,
   );
-  if (!res.ok)
-    throw new Error(`Failed to fetch conversation ${conversationId}: ${res.status}`);
-  return (await res.json()) as AdminConversationDetailResponse;
 }
 
 export async function getConversationTurns(
   conversationId: string,
   params: { q?: string; limit?: number; skip?: number },
-  token?: string,
+  options?: ReadOptions,
 ): Promise<AdminConversationTurnsResponse> {
   const qs = new URLSearchParams();
   if (params.q) qs.set("q", params.q);
   if (params.limit != null) qs.set("limit", String(params.limit));
   if (params.skip != null) qs.set("skip", String(params.skip));
 
-  const url = `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}/turns${qs.toString() ? `?${qs.toString()}` : ""}`;
-  const res = await fetchWithTimeout(url, {
-    timeoutMs: 12000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(
-      `Failed to fetch conversation turns ${conversationId}: ${res.status}`,
-    );
-  return (await res.json()) as AdminConversationTurnsResponse;
+  return readJson<AdminConversationTurnsResponse>(
+    withQuery(
+      `/api/admin/analytics/conversations/${encodeURIComponent(conversationId)}/turns`,
+      qs,
+    ),
+    `conversation turns ${conversationId}`,
+    options,
+  );
 }
 
 export async function deleteConversation(

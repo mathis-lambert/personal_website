@@ -23,7 +23,7 @@ const getMongoConfig = () => {
   return { uri, dbName };
 };
 
-export const getMongoClient = async (): Promise<MongoClient> => {
+const getMongoClient = async (): Promise<MongoClient> => {
   if (!globalForMongo._mongoClientPromise) {
     const { uri } = getMongoConfig();
     const client = new MongoClient(uri, {

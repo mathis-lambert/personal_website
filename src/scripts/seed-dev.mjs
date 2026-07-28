@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 
 const COLLECTIONS = {
   projects: "projects",
-  articles: "articles",
+  notes: "notes",
   experiences: "experiences",
   studies: "studies",
   resume: "resume",
@@ -137,9 +137,9 @@ It combines request metrics, UI events, and redacted conversation traces into a 
   },
 ];
 
-const articles = [
+const notes = [
   {
-    seedKey: "dev-article-reliable-ai-product",
+    seedKey: "dev-note-reliable-ai-product",
     devSeed: true,
     slug: "dev-from-prototype-to-reliable-ai-product",
     title: "From Prototype to Reliable AI Product",
@@ -163,13 +163,13 @@ Model metrics matter, but product signals matter too. Track whether people find 
     categories: ["Engineering"],
     isFeatured: true,
     media: {
-      thumbnailUrl: "/images/blog/agentic-ai-rag/thumb.png",
-      imageUrl: "/images/blog/agentic-ai-rag/hero.png",
+      thumbnailUrl: "/images/notes/agentic-ai-rag/thumb.png",
+      imageUrl: "/images/notes/agentic-ai-rag/hero.png",
     },
     metrics: { views: 842, likes: 56, shares: 12 },
   },
   {
-    seedKey: "dev-article-serving-llms",
+    seedKey: "dev-note-serving-llms",
     devSeed: true,
     slug: "dev-serving-llms-on-gpus",
     title: "What I Learned Serving LLMs on GPUs",
@@ -199,7 +199,7 @@ Health checks, bounded queues, clear timeouts, and useful metrics usually create
     metrics: { views: 614, likes: 39, shares: 9 },
   },
   {
-    seedKey: "dev-article-explorable-portfolio",
+    seedKey: "dev-note-explorable-portfolio",
     devSeed: true,
     slug: "dev-designing-an-explorable-portfolio",
     title: "Designing a Portfolio People Want to Explore",
@@ -237,7 +237,7 @@ const experiences = [
     order: 0,
     title: "AI Engineer Apprentice",
     company: "Free Pro",
-    date: "2025 — Present",
+    date: "2025 – Present",
     description:
       "Building dependable AI services, evaluation workflows, and GPU-backed infrastructure for production use cases.",
   },
@@ -247,7 +247,7 @@ const experiences = [
     order: 1,
     title: "Data & Software Engineer",
     company: "Applied AI team",
-    date: "2024 — 2025",
+    date: "2024 – 2025",
     description:
       "Shipped data pipelines and internal tools that made experimentation faster and operational results easier to understand.",
   },
@@ -257,7 +257,7 @@ const experiences = [
     order: 2,
     title: "Independent Product Builder",
     company: "Personal projects",
-    date: "2022 — Present",
+    date: "2022 – Present",
     description:
       "Designing and shipping focused web products at the intersection of software engineering, AI, and playful interaction.",
   },
@@ -270,7 +270,7 @@ const studies = [
     order: 0,
     title: "Computer Science & AI Engineering",
     company: "CPE Lyon",
-    date: "2023 — 2026",
+    date: "2023 – 2026",
     description:
       "Engineering curriculum focused on software systems, data, machine learning, cloud infrastructure, and product delivery.",
   },
@@ -303,7 +303,7 @@ const resume = {
     {
       role: "AI Engineer Apprentice",
       company: "Free Pro",
-      period: "2025 — Present",
+      period: "2025 – Present",
       location: "Lyon, France",
       current: true,
       highlight: true,
@@ -316,7 +316,7 @@ const resume = {
     {
       role: "Data & Software Engineer",
       company: "Applied AI team",
-      period: "2024 — 2025",
+      period: "2024 – 2025",
       location: "France",
       description: [
         "Delivered maintainable data pipelines and internal web tools.",
@@ -327,10 +327,10 @@ const resume = {
   education: [
     {
       institution: "CPE Lyon",
-      degree: "Engineering degree — Computer Science & AI",
+      degree: "Engineering degree in Computer Science & AI",
       location: "Lyon, France",
       description: "Software engineering, data systems, machine learning, and cloud infrastructure.",
-      period: "2023 — 2026",
+      period: "2023 – 2026",
     },
   ],
   certifications: [
@@ -349,7 +349,7 @@ const resume = {
     },
   ],
   technical_skills: {
-    languages: ["French — native", "English — professional"],
+    languages: ["French (native)", "English (professional)"],
     programming: ["Python", "TypeScript", "Go", "SQL"],
     ai_ml: ["PyTorch", "LangChain", "RAG", "LLM evaluation", "vLLM"],
     systems_and_infra: ["Docker", "Linux", "Kubernetes", "CI/CD", "MongoDB"],
@@ -370,7 +370,7 @@ const resume = {
         {
           role: "Ingénieur IA en alternance",
           company: "Free Pro",
-          period: "2025 — Aujourd’hui",
+          period: "2025 – Aujourd’hui",
           location: "Lyon, France",
           current: true,
           highlight: true,
@@ -383,7 +383,7 @@ const resume = {
         {
           role: "Ingénieur data & logiciel",
           company: "Équipe IA appliquée",
-          period: "2024 — 2025",
+          period: "2024 – 2025",
           location: "France",
           description: [
             "Livraison de pipelines data maintenables et d’outils web internes.",
@@ -394,10 +394,10 @@ const resume = {
       education: [
         {
           institution: "CPE Lyon",
-          degree: "Diplôme d’ingénieur — Informatique & IA",
+          degree: "Diplôme d’ingénieur en Informatique & IA",
           location: "Lyon, France",
           description: "Génie logiciel, systèmes de données, machine learning et cloud.",
-          period: "2023 — 2026",
+          period: "2023 – 2026",
         },
       ],
       skills: [
@@ -459,7 +459,7 @@ const cleanSeedData = async (db) => {
 const seedDatabase = async (db) => {
   await Promise.all([
     upsertSeedEntries(db.collection(COLLECTIONS.projects), projects),
-    upsertSeedEntries(db.collection(COLLECTIONS.articles), articles),
+    upsertSeedEntries(db.collection(COLLECTIONS.notes), notes),
     upsertSeedEntries(db.collection(COLLECTIONS.experiences), experiences),
     upsertSeedEntries(db.collection(COLLECTIONS.studies), studies),
   ]);

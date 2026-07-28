@@ -1,7 +1,5 @@
-"use client";
-
-import ProjectsListSkeleton from "@/components/projects/ProjectsListSkeleton";
+import { ListSkeleton } from "@/components/content/Skeletons";
 
 export default function ProjectsLoading() {
-  return <ProjectsListSkeleton />;
+  return <ListSkeleton />;
 }

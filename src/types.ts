@@ -1,6 +1,3 @@
-import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-
 export interface Contact {
   email: string;
   phone: string;
@@ -64,22 +61,6 @@ export interface ResumeTranslations {
 
 export interface ResumeData extends ResumeContent {
   translations?: ResumeTranslations;
-}
-
-export interface IsLoadingState {
-  summary: boolean;
-  experience: boolean;
-  coverLetter: boolean;
-  funFact: boolean;
-  pdf: boolean;
-}
-
-export interface SectionProps {
-  icon: LucideIcon;
-  title: string;
-  children: ReactNode;
-  actions?: ReactNode;
-  delay?: number;
 }
 
 export interface TimelineEntry {
@@ -162,26 +143,26 @@ export interface AiContext {
   tags: string[];
 }
 
-// ---------------- Blog / Articles DTO ----------------
+// ---------------- Notes DTO ----------------
 
-export interface ArticleLinks {
+export interface NoteLinks {
   canonical?: string; // canonical URL
   discussion?: string; // link to discussion/thread
 }
 
-export interface ArticleMedia {
+export interface NoteMedia {
   thumbnailUrl?: string;
   imageUrl?: string;
   gallery?: string[];
 }
 
-export interface ArticleMetrics {
+export interface NoteMetrics {
   views?: number;
   likes?: number;
   shares?: number;
 }
 
-export interface Article {
+export interface Note {
   _id: string;
   slug?: string;
   title: string;
@@ -193,112 +174,14 @@ export interface Article {
   tags: string[];
   categories?: string[];
   isFeatured?: boolean;
-  links?: ArticleLinks;
-  media?: ArticleMedia;
-  metrics?: ArticleMetrics;
+  links?: NoteLinks;
+  media?: NoteMedia;
+  metrics?: NoteMetrics;
 }
 
 export type AnalyticsGranularity = "hour" | "day" | "month";
 
 export type ApiActorType = "public" | "admin" | "system";
-
-export interface AnalyticsRange {
-  start: string;
-  end: string;
-  granularity?: AnalyticsGranularity;
-}
-
-export interface AnalyticsKpiSummary {
-  totalRequests: number;
-  errorRequests: number;
-  errorRate: number;
-  avgLatencyMs: number;
-  p95LatencyMs: number;
-  uniqueRoutes: number;
-  uniqueVisitors: number;
-  uiEvents: number;
-}
-
-export interface AdminAnalyticsOverviewResponse {
-  ok: boolean;
-  range: AnalyticsRange;
-  summary: AnalyticsKpiSummary;
-}
-
-export interface AnalyticsTimeseriesPoint {
-  bucket: string;
-  requests: number;
-  errors: number;
-  uiEvents: number;
-}
-
-export interface AdminAnalyticsTimeseriesResponse {
-  ok: boolean;
-  range: AnalyticsRange;
-  series: AnalyticsTimeseriesPoint[];
-}
-
-export interface EndpointAnalyticsItem {
-  route: string;
-  method: string;
-  count: number;
-  errorRate: number;
-  avgLatencyMs: number;
-  p50LatencyMs: number;
-  p95LatencyMs: number;
-  lastSeenAt: string;
-}
-
-export interface AdminAnalyticsEndpointsResponse {
-  ok: boolean;
-  range: AnalyticsRange;
-  items: EndpointAnalyticsItem[];
-}
-
-export interface ApiErrorEvent {
-  timestamp: string;
-  route: string;
-  path: string;
-  method: string;
-  status: number;
-  durationMs: number;
-  actorType: ApiActorType;
-  message?: string;
-}
-
-export interface AdminAnalyticsErrorsResponse {
-  ok: boolean;
-  total: number;
-  items: ApiErrorEvent[];
-}
-
-export interface ApiActivityItem {
-  kind: "api_request";
-  timestamp: string;
-  route: string;
-  path: string;
-  method: string;
-  status: number;
-  durationMs: number;
-  actorType: ApiActorType;
-}
-
-export interface UiActivityItem {
-  kind: "ui_event";
-  timestamp: string;
-  name: string;
-  path?: string;
-  actorType: Exclude<ApiActorType, "system">;
-  sessionId?: string;
-}
-
-export type AnalyticsActivityItem = ApiActivityItem | UiActivityItem;
-
-export interface AdminAnalyticsActivityResponse {
-  ok: boolean;
-  total: number;
-  items: AnalyticsActivityItem[];
-}
 
 export type ChatConversationStatus = "active" | "errored";
 export type ChatTurnStatus = "pending" | "completed" | "failed";
@@ -363,9 +246,56 @@ export interface AdminConversationTurnsResponse {
   items: ChatConversationTurnItem[];
 }
 
+// ---------------- Admin insights ----------------
+
+export type InsightsGranularity = "hour" | "day" | "month";
+
+/** A headline number and the same number over the preceding period. */
+export interface InsightMetric {
+  value: number;
+  previous: number;
+}
+
+export interface AdminInsights {
+  range: { start: string; end: string; granularity: InsightsGranularity };
+  kpis: {
+    visitors: InsightMetric;
+    pageViews: InsightMetric;
+    conversations: InsightMetric;
+    resumeDownloads: InsightMetric;
+  };
+  traffic: { bucket: string; visitors: number; views: number }[];
+  content: {
+    kind: "project" | "note";
+    slug: string;
+    title: string;
+    opens: number;
+  }[];
+  pages: { path: string; views: number; visitors: number }[];
+  referrers: { source: string; visits: number }[];
+  engagement: {
+    chatOpened: number;
+    chatSubmitted: number;
+    outboundClicks: number;
+    shares: number;
+  };
+  questions: {
+    conversationId: string;
+    at: string;
+    question: string;
+    failed: boolean;
+  }[];
+  health: {
+    requests: number;
+    errors: number;
+    errorRate: number;
+    slowest: { route: string; p95: number }[];
+  };
+}
+
 export type AdminCollectionName =
   | "projects"
-  | "articles"
+  | "notes"
   | "experiences"
   | "studies"
   | "resume";

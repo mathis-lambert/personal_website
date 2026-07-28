@@ -1,6 +1,4 @@
-"use client";
-
-import ResumeSkeleton from "@/components/resume/ResumeSkeleton";
+import { ResumeSkeleton } from "@/components/content/Skeletons";
 
 export default function ResumeLoading() {
   return <ResumeSkeleton />;

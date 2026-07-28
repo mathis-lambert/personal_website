@@ -22,7 +22,7 @@ const getClientIp = (req: NextRequest): string | undefined => {
   return ip || undefined;
 };
 
-export const inferActorType = (
+const inferActorType = (
   path: string,
 ): "public" | "admin" | "system" => {
   if (path.startsWith("/api/admin")) return "admin";

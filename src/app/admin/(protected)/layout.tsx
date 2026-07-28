@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import AdminLayout from "@/admin/AdminLayout";
+import { AdminShell } from "@/admin/components/AdminShell";
 import { authOptions } from "@/lib/auth/options";
 
 export default async function ProtectedAdminLayout({
@@ -15,5 +15,5 @@ export default async function ProtectedAdminLayout({
     redirect("/admin/login");
   }
 
-  return <AdminLayout>{children}</AdminLayout>;
+  return <AdminShell>{children}</AdminShell>;
 }

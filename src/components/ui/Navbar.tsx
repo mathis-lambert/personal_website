@@ -1,174 +1,173 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Menu, MessageCircle, Moon, Sun, X } from "lucide-react";
-import Image from "next/image";
+import { Menu, MessageCircle, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { Action, IconAction, LiftText, Wordmark } from "@/components/ds";
 import { useTheme } from "@/components/theme-provider";
 import { useChat } from "@/hooks/useChat";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/projects", label: "Projects" },
-  { href: "/blog", label: "Notes" },
+  { href: "/projects", label: "Work" },
+  { href: "/notes", label: "Notes" },
   { href: "/resume", label: "Resume" },
 ];
 
+/**
+ * A floating glass bar.
+ *
+ * It sits inside the page rather than spanning it, so the blur has colour to
+ * pick up from the ambient field behind it — that is what makes the material
+ * read as glass instead of as a grey panel. There is one breakpoint (`md`);
+ * an earlier version had four and left a gap with no navigation at all.
+ */
 const Navbar = () => {
   const pathname = usePathname();
   const { openChat } = useChat();
   const { resolvedTheme, setTheme } = useTheme();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? "hidden" : "";
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMenuOpen(false);
+    if (!menuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
     };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [isMenuOpen]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   const startChat = useCallback(() => {
-    setIsMenuOpen(false);
+    setMenuOpen(false);
     openChat();
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [openChat]);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[1001] px-3 pt-3 sm:px-6 sm:pt-4">
-      <motion.div
-        initial={{ opacity: 0, y: -18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="paper-surface mx-auto flex h-16 max-w-6xl items-center justify-between rounded-[1.4rem] px-2.5 sm:px-3"
-      >
-        <Link
-          href="/"
-          onClick={() => setIsMenuOpen(false)}
-          className="group flex items-center gap-2.5 rounded-2xl p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Mathis Lambert, home"
-        >
-          <span className="relative">
-            <Image
-              src="/images/mathis.jpg"
-              alt=""
-              width={42}
-              height={42}
-              priority
-              className="size-10 rounded-xl object-cover object-[62%_center] ring-1 ring-foreground/10 transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
-            />
-            <span className="absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-card bg-emerald-500" />
-          </span>
-          <span className="hidden leading-tight xs:block">
-            <span className="font-display block text-[1.05rem] font-semibold">Mathis Lambert</span>
-            <span className="block text-[0.64rem] font-bold uppercase tracking-[0.16em] text-muted-foreground">AI · Systems · Web</span>
-          </span>
-        </Link>
-
-        <nav className="hidden items-center rounded-2xl bg-foreground/[0.045] p-1 lg:flex" aria-label="Primary navigation">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={isActive(link.href) ? "page" : undefined}
-              className={cn(
-                "relative rounded-xl px-3.5 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
-                isActive(link.href) && "bg-card text-foreground shadow-sm",
-              )}
-            >
-              {link.label}
-              {isActive(link.href) && (
-                <motion.span
-                  layoutId="active-navigation-dot"
-                  className="absolute -bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-primary"
-                />
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="grid size-10 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Toggle color theme"
-          >
-            <Sun className="hidden size-4.5 dark:block" />
-            <Moon className="size-4.5 dark:hidden" />
-          </button>
-          <button
-            type="button"
-            onClick={startChat}
-            className="hidden items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-black text-primary-foreground shadow-[0_6px_0_color-mix(in_oklab,var(--foreground)_18%,transparent)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none sm:flex"
-          >
-            <MessageCircle className="size-4" /> Ask my AI
-          </button>
+    <header className="sticky top-0 z-[200] pt-3 sm:pt-4">
+      <div className="page">
+        <div className="glass flex h-16 items-center justify-between gap-3 rounded-full pl-4 pr-2.5 sm:pl-5 sm:pr-3">
           <Link
-            href="https://www.linkedin.com/in/mathis-lambert/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden size-10 place-items-center rounded-xl border border-foreground/10 bg-card transition-transform hover:-rotate-3 hover:scale-105 sm:grid"
-            aria-label="Connect with Mathis on LinkedIn"
+            href="/"
+            className="group flex items-center gap-2.5 no-underline"
+            aria-label="Mathis Lambert, home"
           >
-            <ArrowUpRight className="size-4" />
+            <Wordmark
+              name="Mathis Lambert"
+              accent="."
+              className="font-display text-[1.0625rem] font-semibold leading-none tracking-[-0.025em] text-ink"
+            />
           </Link>
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen((open) => !open)}
-            className="grid size-10 place-items-center rounded-xl border border-foreground/10 bg-card lg:hidden"
-            aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-          >
-            {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
-        </div>
-      </motion.div>
 
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.nav
-            id="mobile-navigation"
-            initial={{ opacity: 0, y: -10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            className="paper-surface mx-auto mt-2 max-w-6xl overflow-hidden rounded-[1.4rem] p-3 lg:hidden"
-            aria-label="Mobile navigation"
+          <nav
+            className="hidden items-center gap-6 md:flex"
+            aria-label="Primary"
           >
-            <div className="grid gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-active={isActive(link.href)}
+                aria-current={isActive(link.href) ? "page" : undefined}
+                className="link-slide text-sm font-bold no-underline"
+              >
+                <LiftText rise={0.22} reach={44}>
+                  {link.label}
+                </LiftText>
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-1.5">
+            <IconAction
+              tone="ghost"
+              label="Toggle colour theme"
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+            >
+              <Sun className="hidden dark:block" />
+              <Moon className="dark:hidden" />
+            </IconAction>
+
+            <Action
+              tone="ink"
+              size="sm"
+              onClick={startChat}
+              className="hidden md:inline-flex"
+            >
+              <MessageCircle /> Ask my AI
+            </Action>
+
+            <IconAction
+              tone="ghost"
+              label={menuOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="md:hidden"
+            >
+              {menuOpen ? <X /> : <Menu />}
+            </IconAction>
+          </div>
+        </div>
+
+        {/* Kept mounted and inert when closed: an unmounted panel cannot
+            animate shut, and this one used to appear with no transition at
+            all. Rows stagger in behind the sheet as it unfolds. */}
+        <div className="sheet md:hidden" data-open={menuOpen}>
+          <div>
+            <nav
+              id="mobile-nav"
+              aria-label="Primary"
+              aria-hidden={!menuOpen}
+              className="glass mt-2 rounded-4 p-2"
+            >
               {navLinks.map((link, index) => (
-                <motion.div key={link.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.04 }}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={cn(
-                      "font-display flex items-center justify-between rounded-2xl px-4 py-3 text-2xl font-semibold",
-                      isActive(link.href) ? "bg-secondary/70" : "hover:bg-foreground/[0.04]",
-                    )}
-                  >
-                    {link.label}<span className="text-sm font-sans text-muted-foreground">0{index + 1}</span>
-                  </Link>
-                </motion.div>
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                  tabIndex={menuOpen ? undefined : -1}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    transitionDelay: menuOpen ? `${70 + index * 45}ms` : "0ms",
+                  }}
+                  className={cn(
+                    "t-h3 flex items-baseline justify-between rounded-3 px-3 py-3 no-underline",
+                    "transition-[opacity,transform] duration-200 ease-(--ease-paper)",
+                    menuOpen
+                      ? "translate-x-0 opacity-100"
+                      : "-translate-x-2 opacity-0",
+                    isActive(link.href)
+                      ? "bg-brand-wash text-brand"
+                      : "text-ink hover:bg-paper-sink",
+                  )}
+                >
+                  {link.label}
+                  <span className="t-meta">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </Link>
               ))}
-              <button type="button" onClick={startChat} className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 font-black text-primary-foreground">
-                <MessageCircle className="size-4" /> Ask my AI
-              </button>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+              <Action
+                tone="ink"
+                size="lg"
+                onClick={startChat}
+                tabIndex={menuOpen ? undefined : -1}
+                className="mt-2 w-full"
+              >
+                <MessageCircle /> Ask my AI
+              </Action>
+            </nav>
+          </div>
+        </div>
+      </div>
     </header>
   );
 };

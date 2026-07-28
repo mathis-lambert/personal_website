@@ -1,574 +1,400 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  ArrowUpRight,
+  FileText,
+  FolderKanban,
+  MessageSquareText,
+  RefreshCw,
+} from "lucide-react";
 import Link from "next/link";
-import { RefreshCw } from "lucide-react";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import React, { useMemo, useState } from "react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
 import {
-  getCollectionData,
-  getAnalyticsActivity,
-  getAnalyticsEndpoints,
-  getAnalyticsErrors,
-  getAnalyticsOverview,
-  getAnalyticsTimeseries,
-} from "@/api/admin";
-import type {
-  AdminAnalyticsActivityResponse,
-  AdminAnalyticsEndpointsResponse,
-  AdminAnalyticsErrorsResponse,
-  AdminAnalyticsOverviewResponse,
-  AdminAnalyticsTimeseriesResponse,
-  AnalyticsGranularity,
-  Article,
-  Project,
-} from "@/types";
-import type { TimelineData } from "@/components/ui/ScrollableTimeline";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  Empty,
+  ErrorNote,
+  LoadingRows,
+  PageHeader,
+  Panel,
+} from "@/admin/components/primitives";
+import { StatStrip, type Stat } from "@/admin/components/StatStrip";
+import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
+import { useAdminData } from "@/admin/useAdminData";
+import { getInsights } from "@/api/admin";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   ChartContainer,
-  ChartEmptyState,
+  ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatDate, formatDurationMs, formatPercent } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-type Preset = "7d" | "30d" | "90d" | "custom";
+const RANGES = [
+  { label: "7d", days: 7 },
+  { label: "30d", days: 30 },
+  { label: "90d", days: 90 },
+] as const;
 
-const clamp = (value: number, min: number, max: number) => {
-  return Math.max(min, Math.min(max, value));
+const CHART_CONFIG = {
+  views: { label: "Page views", color: "var(--ink-azure)" },
+  visitors: { label: "Visitors", color: "var(--ink-coral)" },
 };
 
-const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`;
+/** Bucket keys are ISO prefixes; show only the part that varies across a range. */
+const bucketLabel = (bucket: string, granularity: string) => {
+  if (granularity === "hour") return `${bucket.slice(11, 13)}:00`;
+  if (granularity === "month") return bucket;
+  return formatDate(`${bucket}T00:00:00.000Z`, "short").replace(/ \d{4}$/, "");
+};
 
-const formatMs = (value: number) => `${Math.round(value)} ms`;
-
+/**
+ * What happened on the site.
+ *
+ * This screen used to be an APM console: request volume, error rate, p50 and p95
+ * latency, endpoints ranked by throughput. For a portfolio with a handful of
+ * visitors and no error budget, none of that is a decision anyone makes. It
+ * answers the four questions the owner actually has, in that order: did anyone
+ * come, what did they read, did they reach out, is anything broken.
+ * Infrastructure is one line at the bottom.
+ */
 const DashboardPage: React.FC = () => {
   const { token } = useAdminAuth();
+  const [days, setDays] = useState<number>(30);
 
-  const [contentCounts, setContentCounts] = useState<Record<string, number>>({});
-  const [loadingCounts, setLoadingCounts] = useState(true);
-  const [countsError, setCountsError] = useState<string | null>(null);
+  const load = useMemo(() => {
+    if (!token) return null;
+    const end = new Date();
+    const start = new Date(end.getTime() - days * 86_400_000);
+    return (signal: AbortSignal) =>
+      getInsights(
+        { start: start.toISOString(), end: end.toISOString() },
+        { token, signal },
+      );
+  }, [token, days]);
 
-  const [preset, setPreset] = useState<Preset>("7d");
-  const [customStart, setCustomStart] = useState("");
-  const [customEnd, setCustomEnd] = useState("");
-  const [routeFilter, setRouteFilter] = useState("");
-  const [methodFilter, setMethodFilter] = useState("");
-  const [actorType, setActorType] = useState<"" | "public" | "admin">("");
+  const { data, error, loading, reload } = useAdminData(load);
 
-  const [overview, setOverview] =
-    useState<AdminAnalyticsOverviewResponse | null>(null);
-  const [timeseries, setTimeseries] =
-    useState<AdminAnalyticsTimeseriesResponse | null>(null);
-  const [endpoints, setEndpoints] =
-    useState<AdminAnalyticsEndpointsResponse | null>(null);
-  const [errors, setErrors] = useState<AdminAnalyticsErrorsResponse | null>(null);
-  const [activity, setActivity] =
-    useState<AdminAnalyticsActivityResponse | null>(null);
+  const stats: Stat[] = useMemo(() => {
+    if (!data) return [];
+    const views = data.traffic.map((point) => point.views);
+    const visitors = data.traffic.map((point) => point.visitors);
+    return [
+      {
+        label: "Visitors",
+        metric: data.kpis.visitors,
+        ink: "azure",
+        series: visitors,
+      },
+      {
+        label: "Page views",
+        metric: data.kpis.pageViews,
+        ink: "azure",
+        series: views,
+      },
+      {
+        label: "Conversations",
+        metric: data.kpis.conversations,
+        ink: "coral",
+        series: [],
+      },
+      {
+        label: "Resume downloads",
+        metric: data.kpis.resumeDownloads,
+        ink: "turquoise",
+        series: [],
+      },
+    ];
+  }, [data]);
 
-  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
-  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const chartData = useMemo(
+    () =>
+      data?.traffic.map((point) => ({
+        ...point,
+        label: bucketLabel(point.bucket, data.range.granularity),
+      })) ?? [],
+    [data],
+  );
 
-  useEffect(() => {
-    let canceled = false;
-
-    const loadCounts = async () => {
-      if (!token) return;
-      setLoadingCounts(true);
-      setCountsError(null);
-      try {
-        const [projects, articles, experiences, studies] = await Promise.all([
-          getCollectionData<Project[]>("projects", token),
-          getCollectionData<Article[]>("articles", token),
-          getCollectionData<TimelineData[]>("experiences", token),
-          getCollectionData<TimelineData[]>("studies", token),
-        ]);
-        if (canceled) return;
-        setContentCounts({
-          projects: Array.isArray(projects) ? projects.length : 0,
-          articles: Array.isArray(articles) ? articles.length : 0,
-          experiences: Array.isArray(experiences) ? experiences.length : 0,
-          studies: Array.isArray(studies) ? studies.length : 0,
-        });
-      } catch (error) {
-        if (!canceled) {
-          setCountsError((error as Error).message || "Failed to load content counts");
-        }
-      } finally {
-        if (!canceled) {
-          setLoadingCounts(false);
-        }
-      }
-    };
-
-    void loadCounts();
-
-    return () => {
-      canceled = true;
-    };
-  }, [token]);
-
-  const { startIso, endIso, granularity } = useMemo(() => {
-    const now = new Date();
-    let start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    let end = new Date(now);
-
-    if (preset === "30d") {
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    } else if (preset === "90d") {
-      start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    } else if (preset === "custom") {
-      if (customStart) {
-        start = new Date(`${customStart}T00:00:00.000Z`);
-      }
-      if (customEnd) {
-        end = new Date(`${customEnd}T23:59:59.999Z`);
-      }
-    }
-
-    const diffDays = clamp((end.getTime() - start.getTime()) / 86400000, 0, 3650);
-
-    let resolvedGranularity: AnalyticsGranularity = "day";
-    if (diffDays <= 3) resolvedGranularity = "hour";
-    if (diffDays > 180) resolvedGranularity = "month";
-
-    return {
-      startIso: start.toISOString(),
-      endIso: end.toISOString(),
-      granularity: resolvedGranularity,
-    };
-  }, [preset, customStart, customEnd]);
-
-  useEffect(() => {
-    let canceled = false;
-
-    const loadAnalytics = async () => {
-      if (!token) return;
-      setLoadingAnalytics(true);
-      setAnalyticsError(null);
-
-      try {
-        const common = {
-          start: startIso,
-          end: endIso,
-          route: routeFilter || undefined,
-          method: methodFilter || undefined,
-          actorType: actorType || undefined,
-        };
-
-        const [overviewData, timeseriesData, endpointsData, errorsData, activityData] =
-          await Promise.all([
-            getAnalyticsOverview(common, token),
-            getAnalyticsTimeseries({ ...common, granularity }, token),
-            getAnalyticsEndpoints({ ...common, limit: 20 }, token),
-            getAnalyticsErrors({ ...common, limit: 30 }, token),
-            getAnalyticsActivity({ ...common, type: "all", limit: 80 }, token),
-          ]);
-
-        if (canceled) return;
-
-        setOverview(overviewData);
-        setTimeseries(timeseriesData);
-        setEndpoints(endpointsData);
-        setErrors(errorsData);
-        setActivity(activityData);
-      } catch (error) {
-        if (!canceled) {
-          setAnalyticsError((error as Error).message || "Failed to load analytics");
-        }
-      } finally {
-        if (!canceled) {
-          setLoadingAnalytics(false);
-        }
-      }
-    };
-
-    void loadAnalytics();
-
-    return () => {
-      canceled = true;
-    };
-  }, [
-    token,
-    startIso,
-    endIso,
-    granularity,
-    routeFilter,
-    methodFilter,
-    actorType,
-    refreshKey,
-  ]);
-
-  const summary = overview?.summary;
+  const askRate = data?.engagement.chatOpened
+    ? data.engagement.chatSubmitted / data.engagement.chatOpened
+    : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <Button asChild size="sm" variant="secondary">
-          <Link href="/admin/discussions">Open Discussions Explorer</Link>
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base">Analytics Filters</CardTitle>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setRefreshKey(Date.now())}
-          >
-            <RefreshCw className="mr-1 size-4" /> Refresh
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {(["7d", "30d", "90d", "custom"] as Preset[]).map((value) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={preset === value ? "default" : "secondary"}
-                onClick={() => setPreset(value)}
-              >
-                {value === "custom" ? "Custom" : `Last ${value.replace("d", " days")}`}
-              </Button>
-            ))}
-          </div>
-
-          {preset === "custom" && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Input
-                type="date"
-                value={customStart}
-                onChange={(e) => setCustomStart(e.target.value)}
-                className="w-[12rem]"
-              />
-              <Input
-                type="date"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                className="w-[12rem]"
-              />
-            </div>
-          )}
-
-          <div className="grid gap-2 md:grid-cols-3">
-            <Input
-              placeholder="Filter route (exact)"
-              value={routeFilter}
-              onChange={(e) => setRouteFilter(e.target.value)}
-            />
-            <select
-              value={methodFilter}
-              onChange={(e) => setMethodFilter(e.target.value)}
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+    <>
+      <PageHeader
+        title="Overview"
+        description="Who visited, what they opened, and what they asked."
+        actions={
+          <>
+            <div
+              role="group"
+              aria-label="Date range"
+              className="inline-flex rounded-full border border-line p-1"
             >
-              <option value="">All methods</option>
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-              <option value="PUT">PUT</option>
-              <option value="PATCH">PATCH</option>
-              <option value="DELETE">DELETE</option>
-            </select>
-            <select
-              value={actorType}
-              onChange={(e) => setActorType(e.target.value as "" | "public" | "admin")}
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-            >
-              <option value="">All actors</option>
-              <option value="public">Public</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            Range uses {granularity} granularity ({startIso} → {endIso})
-          </p>
-        </CardContent>
-      </Card>
-
-      {loadingCounts ? (
-        <div>Loading content stats…</div>
-      ) : countsError ? (
-        <div className="text-red-600">{countsError}</div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Object.entries(contentCounts).map(([key, value]) => (
-            <div key={key} className="rounded-lg border bg-card p-4">
-              <div className="text-sm capitalize text-muted-foreground">{key}</div>
-              <div className="text-2xl font-semibold tabular-nums">{value}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {loadingAnalytics ? (
-        <div>Loading analytics…</div>
-      ) : analyticsError ? (
-        <div className="text-red-600">{analyticsError}</div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Total requests</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {summary?.totalRequests ?? 0}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Error rate</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {formatPercent(summary?.errorRate ?? 0)}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">P95 latency</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {formatMs(summary?.p95LatencyMs ?? 0)}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">UI events</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {summary?.uiEvents ?? 0}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Unique routes</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {summary?.uniqueRoutes ?? 0}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Unique visitors</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {summary?.uniqueVisitors ?? 0}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Average latency</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {formatMs(summary?.avgLatencyMs ?? 0)}
-              </div>
-            </div>
-            <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Error requests</div>
-              <div className="text-2xl font-semibold tabular-nums">
-                {summary?.errorRequests ?? 0}
-              </div>
-            </div>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Traffic and Errors Over Time</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!timeseries?.series.length ? (
-                <ChartEmptyState message="No data for this filter range." />
-              ) : (
-                <ChartContainer className="h-[300px] w-full" config={{}}>
-                    <LineChart data={timeseries.series} margin={{ left: 8, right: 12 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis dataKey="bucket" tickLine={false} axisLine={false} minTickGap={24} />
-                      <YAxis tickLine={false} axisLine={false} allowDecimals={false} width={40} />
-                      <Tooltip content={<ChartTooltipContent />} />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                      <Line
-                        type="monotone"
-                        dataKey="requests"
-                        name="Requests"
-                        stroke="var(--chart-1)"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="errors"
-                        name="Errors"
-                        stroke="var(--chart-3)"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="uiEvents"
-                        name="UI events"
-                        stroke="var(--chart-2)"
-                        strokeWidth={2}
-                        dot={false}
-                      />
-                    </LineChart>
-                </ChartContainer>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Top Endpoints</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="px-2 py-2 text-left font-normal">Route</th>
-                    <th className="px-2 py-2 text-left font-normal">Method</th>
-                    <th className="px-2 py-2 text-right font-normal">Count</th>
-                    <th className="px-2 py-2 text-right font-normal">Error rate</th>
-                    <th className="px-2 py-2 text-right font-normal">P50</th>
-                    <th className="px-2 py-2 text-right font-normal">P95</th>
-                    <th className="px-2 py-2 text-right font-normal">Last seen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {endpoints?.items.length ? (
-                    endpoints.items.map((item) => (
-                      <tr key={`${item.route}:${item.method}`} className="border-b last:border-0">
-                        <td className="px-2 py-2">{item.route}</td>
-                        <td className="px-2 py-2">{item.method}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">{item.count}</td>
-                        <td className="px-2 py-2 text-right tabular-nums">
-                          {formatPercent(item.errorRate)}
-                        </td>
-                        <td className="px-2 py-2 text-right tabular-nums">
-                          {formatMs(item.p50LatencyMs)}
-                        </td>
-                        <td className="px-2 py-2 text-right tabular-nums">
-                          {formatMs(item.p95LatencyMs)}
-                        </td>
-                        <td className="px-2 py-2 text-right tabular-nums">
-                          {new Date(item.lastSeenAt).toISOString().replace("T", " ").slice(0, 19)}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="px-2 py-3" colSpan={7}>
-                        No endpoint data for current filters.
-                      </td>
-                    </tr>
+              {RANGES.map((range) => (
+                <button
+                  key={range.label}
+                  type="button"
+                  onClick={() => setDays(range.days)}
+                  aria-pressed={days === range.days}
+                  className={cn(
+                    "rounded-full px-3 py-1 font-mono text-[0.7rem] font-semibold uppercase tracking-wider transition-colors",
+                    days === range.days
+                      ? "bg-ink text-ink-invert"
+                      : "text-ink-muted hover:text-ink",
                   )}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={reload}
+              disabled={loading}
+            >
+              <RefreshCw className={cn(loading && "animate-spin")} />
+              Refresh
+            </Button>
+          </>
+        }
+      />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Recent Errors</CardTitle>
-              </CardHeader>
-              <CardContent className="max-h-[420px] overflow-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-muted-foreground">
-                      <th className="px-2 py-2 text-left font-normal">Time (UTC)</th>
-                      <th className="px-2 py-2 text-left font-normal">Route</th>
-                      <th className="px-2 py-2 text-right font-normal">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {errors?.items.length ? (
-                      errors.items.map((item, idx) => (
-                        <tr key={`${item.timestamp}-${idx}`} className="border-b last:border-0">
-                          <td className="px-2 py-2 tabular-nums">
-                            {new Date(item.timestamp).toISOString().replace("T", " ").slice(0, 19)}
-                          </td>
-                          <td className="px-2 py-2">
-                            <div className="font-medium">{item.route}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {item.method} • {item.actorType} • {item.durationMs} ms
-                            </div>
-                            {item.message && (
-                              <div className="mt-1 text-xs text-red-600 line-clamp-2">{item.message}</div>
-                            )}
-                          </td>
-                          <td className="px-2 py-2 text-right tabular-nums">{item.status}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td className="px-2 py-3" colSpan={3}>
-                          No errors in this range.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
+      {error ? <ErrorNote message={error} /> : null}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Recent Activity Feed</CardTitle>
-              </CardHeader>
-              <CardContent className="max-h-[420px] overflow-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-muted-foreground">
-                      <th className="px-2 py-2 text-left font-normal">Time (UTC)</th>
-                      <th className="px-2 py-2 text-left font-normal">Type</th>
-                      <th className="px-2 py-2 text-left font-normal">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activity?.items.length ? (
-                      activity.items.map((item, idx) => (
-                        <tr key={`${item.timestamp}-${idx}`} className="border-b last:border-0">
-                          <td className="px-2 py-2 tabular-nums whitespace-nowrap">
-                            {new Date(item.timestamp).toISOString().replace("T", " ").slice(0, 19)}
-                          </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
-                            {item.kind === "api_request" ? "API" : "UI"}
-                          </td>
-                          <td className="px-2 py-2">
-                            {item.kind === "api_request" ? (
-                              <>
-                                <div className="font-medium">
-                                  {item.method} {item.route}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  status {item.status} • {item.durationMs} ms • {item.actorType}
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="font-medium">{item.name}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {item.path || "n/a"} • {item.actorType}
-                                </div>
-                              </>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td className="px-2 py-3" colSpan={3}>
-                          No activity in this range.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
+      {loading && !data ? (
+        <LoadingRows rows={6} />
+      ) : data ? (
+        <div className="flex flex-col gap-9">
+          <StatStrip stats={stats} />
+
+          <Panel title="Traffic" hint={`by ${data.range.granularity}`}>
+            {chartData.every((point) => point.views === 0) ? (
+              <Empty
+                title="No visits in this range."
+                hint="Try a longer range, or check back once the site has had traffic."
+              />
+            ) : (
+              <ChartContainer
+                config={CHART_CONFIG}
+                className="h-[280px] w-full"
+              >
+                <AreaChart
+                  data={chartData}
+                  margin={{ left: 4, right: 8, top: 8 }}
+                >
+                  <defs>
+                    <linearGradient id="fill-views" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor="var(--ink-azure)"
+                        stopOpacity={0.28}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="var(--ink-azure)"
+                        stopOpacity={0.02}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="var(--line)" />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={28}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    width={32}
+                    allowDecimals={false}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="views"
+                    stroke="var(--ink-azure)"
+                    strokeWidth={2}
+                    fill="url(#fill-views)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="visitors"
+                    stroke="var(--ink-coral)"
+                    strokeWidth={2}
+                    fill="none"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            )}
+          </Panel>
+
+          <div className="grid gap-9 lg:grid-cols-2">
+            <Panel title="Most opened" hint="projects and notes">
+              {data.content.length === 0 ? (
+                <Empty
+                  title="Nothing opened yet."
+                  hint="Counts appear once a visitor opens a project or a note."
+                />
+              ) : (
+                <ol className="divide-y divide-line">
+                  {data.content.map((item) => (
+                    <li
+                      key={`${item.kind}-${item.slug}`}
+                      className="flex items-center gap-3 py-2.5"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="text-ink-faint [&_svg]:size-3.5"
+                      >
+                        {item.kind === "project" ? (
+                          <FolderKanban />
+                        ) : (
+                          <FileText />
+                        )}
+                      </span>
+                      <Link
+                        href={`/${item.kind === "project" ? "projects" : "notes"}/${item.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group min-w-0 flex-1 truncate text-sm font-bold text-ink no-underline hover:text-brand"
+                      >
+                        {item.title}
+                        <ArrowUpRight className="ml-1 inline size-3 text-ink-faint transition-colors group-hover:text-brand" />
+                      </Link>
+                      <span className="t-meta shrink-0 tabular-nums text-ink">
+                        {item.opens}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </Panel>
+
+            <Panel
+              title="What people asked"
+              hint={`${Math.round(askRate * 100)}% of opens became a question`}
+              actions={
+                <Link
+                  href="/admin/discussions"
+                  className="t-meta text-brand no-underline hover:underline"
+                >
+                  All
+                </Link>
+              }
+            >
+              {data.questions.length === 0 ? (
+                <Empty
+                  title="No questions yet."
+                  hint="Anything a visitor types into the site assistant shows up here."
+                />
+              ) : (
+                <ul className="divide-y divide-line">
+                  {data.questions.map((item) => (
+                    <li
+                      key={`${item.conversationId}-${item.at}`}
+                      className="py-2.5"
+                    >
+                      <p className="text-sm leading-snug text-ink">
+                        {item.question}
+                      </p>
+                      <p className="t-meta mt-1 text-ink-faint">
+                        {formatDate(item.at, "short")}
+                        {item.failed ? (
+                          <span className="ml-2 text-destructive">failed</span>
+                        ) : null}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
+
+            <Panel title="Pages" hint="views · visitors">
+              <ol className="divide-y divide-line">
+                {data.pages.map((page) => (
+                  <li key={page.path} className="flex items-center gap-3 py-2.5">
+                    <span className="min-w-0 flex-1 truncate font-mono text-[0.75rem] text-ink">
+                      {page.path}
+                    </span>
+                    <span className="t-meta shrink-0 tabular-nums text-ink">
+                      {page.views}
+                    </span>
+                    <span className="t-meta w-8 shrink-0 text-right tabular-nums text-ink-faint">
+                      {page.visitors}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </Panel>
+
+            <Panel title="Referrers">
+              {data.referrers.length === 0 ? (
+                <Empty
+                  title="No referrers recorded."
+                  hint="Visitors arriving from a link elsewhere will be listed here."
+                />
+              ) : (
+                <ol className="divide-y divide-line">
+                  {data.referrers.map((referrer) => (
+                    <li
+                      key={referrer.source}
+                      className="flex items-center gap-3 py-2.5"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                        {referrer.source}
+                      </span>
+                      <span className="t-meta shrink-0 tabular-nums text-ink">
+                        {referrer.visits}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </Panel>
           </div>
-        </>
-      )}
-    </div>
+
+          {/* Infrastructure, deliberately last and deliberately one line. It only
+              earns attention when the error count stops being zero. */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-4">
+            <span className="t-eyebrow text-ink-faint">Health</span>
+            <span className="t-meta text-ink">
+              {data.health.requests.toLocaleString("en-GB")} requests
+            </span>
+            <span
+              className={cn(
+                "t-meta",
+                data.health.errors > 0 ? "text-destructive" : "text-ink-muted",
+              )}
+            >
+              {data.health.errors} errors
+              {data.health.errors > 0
+                ? ` · ${formatPercent(data.health.errorRate)}`
+                : ""}
+            </span>
+            {data.health.slowest[0] ? (
+              <span className="t-meta text-ink-muted">
+                slowest {data.health.slowest[0].route}{" "}
+                {formatDurationMs(data.health.slowest[0].p95)} p95
+              </span>
+            ) : null}
+            <Link
+              href="/admin/discussions"
+              className="t-meta ml-auto inline-flex items-center gap-1 text-brand no-underline hover:underline"
+            >
+              <MessageSquareText className="size-3" />
+              Conversation log
+            </Link>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 };
 

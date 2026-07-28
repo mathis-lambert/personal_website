@@ -1,45 +1,45 @@
-"use client";
-import { useState } from "react";
-import AbstractGradientBackground from "@/components/ui/AbstractGradientBackground";
-import Navbar from "@/components/ui/Navbar";
+import type { ReactNode } from "react";
+
 import ChatPanel from "@/components/chat/ChatPanel";
+import { AmbientField } from "@/components/ds";
 import FloatingChatInput from "@/components/chat/FloatingChatInput";
 import Footer from "@/components/ui/Footer";
 import { MaintenanceDialog } from "@/components/ui/MaintenanceDialog";
+import Navbar from "@/components/ui/Navbar";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  const [maintenanceMode] = useState(
-    process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true",
-  );
+const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
 
-  return (
-    <div className="min-h-screen relative isolate">
-      <AbstractGradientBackground
-        sphereColors={["#f6bd60", "#50b5a4", "#f28482", "#79a7d3"]}
-        numSpheres={4}
-        minSphereRadius={130}
-        maxSphereRadiusFactor={0.28}
-        baseVelocity={0.15}
-        opacityRange={[0.16, 0.3]}
-        blurIntensity="blur-[90px]"
-      />
-      <Navbar />
+const Layout = ({ children }: { children: ReactNode }) => (
+  <div className="flex min-h-dvh flex-1 flex-col">
+    {/* Drifting colour under the page, paper texture over it. Both purely
+        decorative and never interactive. */}
+    <AmbientField />
+    <div className="grain" aria-hidden="true" />
 
-      <ScrollToTop />
+    <a
+      href="#main"
+      className="sr-only rounded-full bg-ink px-4 py-2 text-sm font-bold text-ink-invert focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[600]"
+    >
+      Skip to content
+    </a>
 
-      <main className="mx-auto w-full min-h-screen max-w-7xl pt-24 md:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
+    <ScrollToTop />
+    <Navbar />
 
-      <ChatPanel />
-      <FloatingChatInput />
-      <Footer />
+    {/* The composer is fixed to the bottom of the viewport, so the page needs
+        room to scroll clear of it or its last line is permanently covered. */}
+    <main id="main" className="flex-1 pb-20">
+      {children}
+    </main>
 
-      {maintenanceMode && <MaintenanceDialog />}
+    <Footer />
 
-    </div>
-  );
-};
+    <ChatPanel />
+    <FloatingChatInput />
+
+    {maintenanceMode ? <MaintenanceDialog /> : null}
+  </div>
+);
 
 export default Layout;

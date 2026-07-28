@@ -1,57 +1,52 @@
-import type { Certification } from "@/types.ts";
+import { Meta } from "@/components/ds";
+import { cn } from "@/lib/utils";
+import type { Certification } from "@/types";
 
-interface CertificationsCardProps {
-  certifications: Certification[] | undefined;
-}
-
-const CERT_STATUS_COLORS: Record<
-  string,
-  { dot: string; ping: string; label: string }
-> = {
-  issued: { dot: "bg-emerald-500", ping: "bg-emerald-400", label: "Issued" },
-  in_progress: {
-    dot: "bg-cyan-500",
-    ping: "bg-cyan-400",
-    label: "In Progress",
-  },
-  starting: { dot: "bg-amber-500", ping: "bg-amber-400", label: "Starting" },
-  stopped: {
-    dot: "bg-slate-400 dark:bg-slate-500",
-    ping: "bg-slate-300",
-    label: "Stopped",
-  },
+/**
+ * Certification status reads through opacity of the one accent, not four
+ * unrelated hues — and it no longer pulses: an `animate-ping` per row meant a
+ * sidebar with five permanently animating dots.
+ */
+const statusStyle: Record<string, string> = {
+  issued: "bg-brand",
+  in_progress: "bg-brand/55",
+  starting: "bg-brand/30",
+  stopped: "bg-line-strong",
 };
 
-export const CertificationsCard: React.FC<CertificationsCardProps> = ({
-  certifications,
-}) => (
-  <>
-    {certifications?.map((cert, i) => {
-      const key = cert.status?.toLowerCase().replace(" ", "_") ?? "stopped";
-      const colors = CERT_STATUS_COLORS[key] ?? CERT_STATUS_COLORS.stopped;
+export const CertificationsCard: React.FC<{
+  certifications: Certification[] | undefined;
+}> = ({ certifications }) => {
+  if (!certifications || certifications.length === 0) return null;
 
-      return (
-        <div key={i} className="mb-3 last:mb-0">
-          <h3 className="font-semibold text-slate-800 dark:text-slate-100">
-            {cert.title}
-          </h3>
-          <p className="text-cyan-600 dark:text-cyan-400 text-sm">
-            {cert.provider}
-          </p>
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-            <span className="relative inline-flex h-2.5 w-2.5">
+  return (
+    <ul className="flex flex-col gap-5">
+      {certifications.map((cert, index) => {
+        const key =
+          cert.status?.toLowerCase().replace(/\s+/g, "_") ?? "stopped";
+
+        return (
+          <li key={index}>
+            <p className="text-[0.9375rem] font-bold leading-snug text-ink">
+              {cert.title}
+            </p>
+            <p className="mt-0.5 text-sm text-ink-muted">{cert.provider}</p>
+            <Meta as="p" className="mt-1.5 inline-flex items-center gap-2">
               <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping ${colors.ping}`}
+                aria-hidden="true"
+                className={cn(
+                  "size-1.5 rounded-full",
+                  statusStyle[key] ?? statusStyle.stopped,
+                )}
               />
-              <span
-                className={`relative inline-flex h-2.5 w-2.5 rounded-full ${colors.dot}`}
-              />
-            </span>
-            <span className="capitalize">{cert.status}</span>
-            {cert.issued_date ? <span>• {cert.issued_date}</span> : null}
-          </div>
-        </div>
-      );
-    })}
-  </>
-);
+              <span className="capitalize">
+                {cert.status?.replace(/_/g, " ")}
+              </span>
+              {cert.issued_date ? <span>· {cert.issued_date}</span> : null}
+            </Meta>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};

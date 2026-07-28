@@ -1,44 +1,24 @@
-"use client";
-import Link from "next/link";
-import { TriangleAlert } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Action, Eyebrow, Lead, Page, Title } from "@/components/ds";
 
 export default function NotFoundPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background px-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <TriangleAlert className="h-16 w-16 text-destructive" />
-          </div>
-          <CardTitle className="text-3xl font-bold">
-            404 - Page Non Trouvée
-          </CardTitle>
-          <CardDescription>
-            Oups ! La page que vous cherchez semble s&apos;être égarée.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p>
-            Il se peut que le lien soit incorrect, obsolète, ou que la page ait
-            été déplacée.
-          </p>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button asChild>
-            <Link href="/">Retour à l&apos;accueil</Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <Page narrow className="grid min-h-dvh place-items-center py-24">
+      <div className="text-center">
+        <Eyebrow brand className="mb-5 justify-center">
+          404
+        </Eyebrow>
+        <Title level={1}>This page went missing.</Title>
+        <Lead className="mx-auto mt-6">
+          The link may be out of date, or the page may have moved. The work is
+          all still here.
+        </Lead>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Action href="/" tone="ink">
+            Back home
+          </Action>
+          <Action href="/projects">Browse the projects</Action>
+        </div>
+      </div>
+    </Page>
   );
 }

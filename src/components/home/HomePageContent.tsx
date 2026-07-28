@@ -1,86 +1,110 @@
-"use client";
+import { ArrowRight, FolderOpen, PenLine } from "lucide-react";
 
-import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
-
-import BlogArticleCard from "@/components/blog/BlogArticleCard";
+import NoteCard from "@/components/notes/NoteCard";
+import {
+  ActionLink,
+  CardGrid,
+  EmptyState,
+  Page,
+  Reveal,
+  Section,
+  SectionHeader,
+} from "@/components/ds";
+import { AskBand } from "@/components/home/AskBand";
+import { Path } from "@/components/home/Path";
+import { Workshop } from "@/components/home/Workshop";
 import ProjectCard from "@/components/projects/ProjectCard";
-import GlassCardsList from "@/components/ui/GlassCardsList";
 import { HeroSection } from "@/components/ui/HeroSection";
-import type { Article, Project, TimelineEntry } from "@/types";
+import type { Note, Project, TimelineEntry } from "@/types";
 
 type HomePageContentProps = {
   featuredProjects: Project[];
-  latestArticles: Article[];
+  latestNotes: Note[];
   experiences: TimelineEntry[];
   studies: TimelineEntry[];
 };
 
+const seeAll = (label: string, href: string) => (
+  <ActionLink href={href}>
+    {label}
+    <ArrowRight className="size-4 transition-transform duration-200 ease-(--ease-paper) group-hover/link:translate-x-1" />
+  </ActionLink>
+);
+
+/**
+ * Home, ordered by what a visitor came for.
+ *
+ * The work now sits directly under the hero. Previously the biography came
+ * first and three sections had to be scrolled before a single project appeared,
+ * which is backwards for a portfolio: the CV answers "is he credible", but only
+ * after the work has made someone want to ask.
+ *
+ * Each section carries one of the five inks via `data-ink`, so colour tracks
+ * section identity instead of decorating.
+ */
 export function HomePageContent({
   featuredProjects,
-  latestArticles,
+  latestNotes,
   experiences,
   studies,
 }: HomePageContentProps) {
   return (
-    <div className="space-y-4">
-      <div>
-        <HeroSection />
-      </div>
+    <>
+      <HeroSection />
 
-      <div>
-        <GlassCardsList experiences={experiences} studies={studies} />
-      </div>
+      <Page as="div" data-ink="coral">
+        <Section labelledBy="featured-projects">
+          <SectionHeader
+            eyebrow="Selected work"
+            icon={<FolderOpen />}
+            title="Things I've made, broken, and made better."
+            titleId="featured-projects"
+            deck="Each one is written up with the decisions behind it, not just the screenshots."
+            action={seeAll("All projects", "/projects")}
+          />
+          {featuredProjects.length > 0 ? (
+            <CardGrid>
+              {featuredProjects.map((project, index) => (
+                <Reveal key={project._id} delay={Math.min(index, 3) * 80}>
+                  <ProjectCard project={project} priority={index === 0} />
+                </Reveal>
+              ))}
+            </CardGrid>
+          ) : (
+            <EmptyState title="Nothing published yet." />
+          )}
+        </Section>
+      </Page>
 
-      <section
-        className="mx-auto py-16"
-        aria-labelledby="featured-projects"
-      >
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-primary">Selected work</p>
-            <h2 id="featured-projects" className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Projects with a pulse.</h2>
-          </div>
-          <Link href="/projects" className="group hidden items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-2 text-sm font-black transition-colors hover:bg-secondary/70 sm:flex">All projects <ArrowUpRight className="size-4 transition-transform group-hover:rotate-12" /></Link>
-        </div>
-        <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {featuredProjects.map((project) => (
-            <ProjectCard key={project._id} project={project} eagerImage />
-          ))}
-        </div>
-        {featuredProjects.length === 0 && (
-          <p className="rounded-3xl border border-dashed border-foreground/20 py-12 text-center text-sm text-muted-foreground">
-            No projects available yet.
-          </p>
-        )}
-      </section>
+      <Path experiences={experiences} studies={studies} />
 
-      <section
-        className="mx-auto pb-20 pt-10"
-        aria-labelledby="latest-articles"
-      >
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-[#d95d45]">Field notes</p>
-            <h2 id="latest-articles" className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">Ideas worth sharing.</h2>
-          </div>
-          <Link href="/blog" className="group hidden items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-2 text-sm font-black transition-colors hover:bg-secondary/70 sm:flex">Read the notes <ArrowUpRight className="size-4 transition-transform group-hover:rotate-12" /></Link>
-        </div>
-        <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {latestArticles.map((article) => (
-            <BlogArticleCard
-              key={article._id}
-              article={article}
-              eagerImage
-            />
-          ))}
-        </div>
-        {latestArticles.length === 0 && (
-          <p className="rounded-3xl border border-dashed border-foreground/20 py-12 text-center text-sm text-muted-foreground">
-            No articles available yet.
-          </p>
-        )}
-      </section>
-    </div>
+      <Workshop />
+
+      <Page as="div" data-ink="azure">
+        <Section labelledBy="latest-notes">
+          <SectionHeader
+            eyebrow="Field notes"
+            icon={<PenLine />}
+            title="Thinking out loud, mostly about systems."
+            titleId="latest-notes"
+            deck="What I learned the hard way, written down before I forget it."
+            action={seeAll("All notes", "/notes")}
+          />
+          {latestNotes.length > 0 ? (
+            <CardGrid>
+              {latestNotes.map((note, index) => (
+                <Reveal key={note._id} delay={Math.min(index, 3) * 80}>
+                  <NoteCard note={note} />
+                </Reveal>
+              ))}
+            </CardGrid>
+          ) : (
+            <EmptyState title="No notes yet." />
+          )}
+        </Section>
+      </Page>
+
+      <AskBand />
+    </>
   );
 }

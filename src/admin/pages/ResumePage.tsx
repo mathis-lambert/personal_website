@@ -1,6 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  ErrorNote,
+  LoadingRows,
+  PageHeader,
+} from "@/admin/components/primitives";
+import { FieldSections, type FieldSpec } from "@/admin/components/fields";
+import { Bound, RepeatableList } from "@/admin/components/RepeatableList";
+import { readForm } from "@/admin/formFields";
 import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
+import { useAdminData } from "@/admin/useAdminData";
 import { getCollectionData, updateItem } from "@/api/admin";
 import type {
   ResumeData,
@@ -11,14 +20,134 @@ import type {
   Education,
   Certification,
 } from "@/types";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { toast } from "sonner";
+
+const asArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? value : []);
+
+/** Every optional field filled in, so the form inputs are never uncontrolled. */
+const normalizeResume = (raw: ResumeData | ResumeData[]): ResumeData => {
+  const obj = Array.isArray(raw) ? raw[0] : raw;
+  const contact: Contact = {
+    email: obj?.contact?.email ?? "",
+    phone: obj?.contact?.phone ?? "",
+    linkedin: obj?.contact?.linkedin ?? "",
+    github: obj?.contact?.github ?? "",
+    website: obj?.contact?.website ?? "",
+  };
+  const technical_skills: TechnicalSkills = {
+    languages: asArray(obj?.technical_skills?.languages),
+    programming: asArray(obj?.technical_skills?.programming),
+    ai_ml: asArray(obj?.technical_skills?.ai_ml),
+    systems_and_infra: asArray(obj?.technical_skills?.systems_and_infra),
+    web: asArray(obj?.technical_skills?.web),
+  };
+
+  return {
+    name: obj?.name ?? "",
+    contact,
+    personal_statement: obj?.personal_statement ?? "",
+    experiences: asArray<Experience>(obj?.experiences),
+    education: asArray<Education>(obj?.education),
+    certifications: asArray<Certification>(obj?.certifications),
+    technical_skills,
+    skills: asArray<string>(obj?.skills),
+    passions: asArray<string>(obj?.passions),
+    translations: obj?.translations ?? {},
+  };
+};
+
+
+const PROFILE_FIELDS: FieldSpec[] = [
+  { name: "name", label: "Full name", type: "text", required: true, section: "Identity" },
+  {
+    name: "personal_statement",
+    label: "Personal statement",
+    type: "textarea",
+    hint: "The paragraph under your name on the CV and in the PDF.",
+    section: "Identity",
+  },
+  { name: "email", label: "Email", type: "text", half: true, section: "Contact" },
+  { name: "phone", label: "Phone", type: "text", half: true, section: "Contact" },
+  { name: "linkedin", label: "LinkedIn", type: "text", half: true, hint: "Handle only, not the full URL.", section: "Contact" },
+  { name: "github", label: "GitHub", type: "text", half: true, hint: "Handle only.", section: "Contact" },
+  { name: "website", label: "Website", type: "text", half: true, section: "Contact" },
+  { name: "skills", label: "Core skills", type: "list", hint: "Comma separated.", section: "Interests" },
+  { name: "passions", label: "Passions", type: "list", hint: "Comma separated.", section: "Interests" },
+];
+
+const SKILL_FIELDS: FieldSpec[] = [
+  { name: "programming", label: "Programming", type: "list", hint: "Comma separated.", section: "Technical skills" },
+  { name: "ai_ml", label: "AI and ML", type: "list", hint: "Comma separated.", section: "Technical skills" },
+  { name: "systems_and_infra", label: "Systems and infrastructure", type: "list", hint: "Comma separated.", section: "Technical skills" },
+  { name: "web", label: "Web", type: "list", hint: "Comma separated.", section: "Technical skills" },
+  { name: "languages", label: "Languages", type: "list", hint: "Comma separated.", section: "Technical skills" },
+];
+
+const CERT_STATUS = [
+  { value: "issued", label: "Issued" },
+  { value: "in progress", label: "In progress" },
+  { value: "starting", label: "Starting" },
+  { value: "stopped", label: "Stopped" },
+];
+
+type ResumeList = "experiences" | "education" | "certifications";
+
+/**
+ * A list on the loaded resume, edited in place.
+ *
+ * The loaded resume is the only store; mirroring these into their own state
+ * meant a second source of truth re-synced by an effect on every load. The
+ * signature matches `useState` so the editors below read unchanged.
+ */
+function useResumeList<K extends ResumeList>(
+  key: K,
+  data: ResumeData | null,
+  set: (update: (current: ResumeData | null) => ResumeData) => void,
+) {
+  type Item = NonNullable<ResumeData[K]>;
+
+  const value = (data?.[key] ?? []) as Item;
+
+  const update = useCallback(
+    (next: Item | ((current: Item) => Item)) =>
+      set((current) => {
+        const base = (current ?? normalizeResume({} as ResumeData)) as ResumeData;
+        const list = (base[key] ?? []) as Item;
+        return {
+          ...base,
+          [key]: typeof next === "function" ? next(list) : next,
+        };
+      }),
+    [key, set],
+  );
+
+  return [value, update] as const;
+}
 
 const ResumePage: React.FC = () => {
   const { token } = useAdminAuth();
-  const [data, setData] = useState<ResumeData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
+
+  const load = useMemo(
+    () =>
+      token
+        ? async (signal: AbortSignal) =>
+            normalizeResume(
+              await getCollectionData<ResumeData>("resume", { token, signal }),
+            )
+        : null,
+    [token],
+  );
+  const { data, error, loading, set } = useAdminData(load);
+  const setData = set;
+
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingTech, setSavingTech] = useState(false);
   const [savingExp, setSavingExp] = useState(false);
@@ -26,114 +155,40 @@ const ResumePage: React.FC = () => {
   const [savingCerts, setSavingCerts] = useState(false);
   const [savingFrench, setSavingFrench] = useState(false);
 
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [education, setEducation] = useState<Education[]>([]);
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [frenchContentJson, setFrenchContentJson] = useState("{}");
+  const [experiences, setExperiences] = useResumeList("experiences", data, set);
+  const [education, setEducation] = useResumeList("education", data, set);
+  const [certifications, setCertifications] = useResumeList(
+    "certifications",
+    data,
+    set,
+  );
 
-  useEffect(() => {
-    let canceled = false;
-    async function load() {
-      if (!token) return;
-      setLoading(true);
-      setErr(null);
-      try {
-        const raw = await getCollectionData<ResumeData>("resume", token);
-        const obj = Array.isArray(raw) ? raw[0] : raw;
-        const contact: Contact = {
-          email: obj?.contact?.email ?? "",
-          phone: obj?.contact?.phone ?? "",
-          linkedin: obj?.contact?.linkedin ?? "",
-          github: obj?.contact?.github ?? "",
-          website: obj?.contact?.website ?? "",
-        };
-        const technical_skills: TechnicalSkills = {
-          languages: Array.isArray(obj?.technical_skills?.languages)
-            ? obj.technical_skills.languages
-            : [],
-          programming: Array.isArray(obj?.technical_skills?.programming)
-            ? obj.technical_skills.programming
-            : [],
-          ai_ml: Array.isArray(obj?.technical_skills?.ai_ml)
-            ? obj.technical_skills.ai_ml
-            : [],
-          systems_and_infra: Array.isArray(
-            obj?.technical_skills?.systems_and_infra,
-          )
-            ? obj.technical_skills.systems_and_infra
-            : [],
-          web: Array.isArray(obj?.technical_skills?.web)
-            ? obj.technical_skills.web
-            : [],
-        };
-        const experiences: Experience[] = Array.isArray(obj?.experiences)
-          ? obj.experiences
-          : [];
-        const education: Education[] = Array.isArray(obj?.education)
-          ? obj.education
-          : [];
-        const certifications: Certification[] = Array.isArray(
-          obj?.certifications,
-        )
-          ? obj.certifications
-          : [];
-        if (!canceled)
-          setData({
-            name: obj?.name ?? "",
-            contact,
-            personal_statement: obj?.personal_statement ?? "",
-            experiences,
-            education,
-            certifications,
-            technical_skills,
-            skills: Array.isArray(obj?.skills) ? obj.skills : [],
-            passions: Array.isArray(obj?.passions) ? obj.passions : [],
-            translations: obj?.translations ?? {},
-          });
-      } catch (e) {
-        if (!canceled) setErr((e as Error)?.message ?? "Failed to load");
-      } finally {
-        if (!canceled) setLoading(false);
-      }
-    }
-    void load();
-    return () => {
-      canceled = true;
-    };
-  }, [token]);
-
-  useEffect(() => {
-    if (data) {
-      setExperiences(data.experiences || []);
-      setEducation(data.education || []);
-      setCertifications(data.certifications || []);
-      setFrenchContentJson(
-        JSON.stringify(data.translations?.fr ?? {}, null, 2),
-      );
-    }
-  }, [data]);
+  /**
+   * The French translation is edited as raw text, which is not valid JSON while
+   * it is being typed, so it needs its own state. `null` means untouched: the
+   * textarea then shows whatever the loaded resume holds, with no effect needed
+   * to seed it.
+   */
+  const [frenchDraft, setFrenchDraft] = useState<string | null>(null);
+  const frenchContentJson =
+    frenchDraft ?? JSON.stringify(data?.translations?.fr ?? {}, null, 2);
+  const setFrenchContentJson = setFrenchDraft;
 
   const saveProfile = async (form: HTMLFormElement) => {
     if (!token) return;
-    const fd = new FormData(form);
+    const fields = readForm(form);
     const patch: Partial<ResumeData> = {
-      name: String(fd.get("name") || ""),
+      name: fields.text("name"),
       contact: {
-        email: String(fd.get("email") || ""),
-        phone: String(fd.get("phone") || ""),
-        linkedin: String(fd.get("linkedin") || ""),
-        github: String(fd.get("github") || ""),
-        website: String(fd.get("website") || ""),
+        email: fields.text("email"),
+        phone: fields.text("phone"),
+        linkedin: fields.text("linkedin"),
+        github: fields.text("github"),
+        website: fields.text("website"),
       },
-      personal_statement: String(fd.get("personal_statement") || ""),
-      skills: String(fd.get("skills") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      passions: String(fd.get("passions") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      personal_statement: fields.text("personal_statement"),
+      skills: fields.list("skills"),
+      passions: fields.list("passions"),
     };
     setSavingProfile(true);
     try {
@@ -210,28 +265,13 @@ const ResumePage: React.FC = () => {
 
   const saveTechnicalSkills = async (form: HTMLFormElement) => {
     if (!token) return;
-    const fd = new FormData(form);
+    const fields = readForm(form);
     const technical_skills: TechnicalSkills = {
-      languages: String(fd.get("languages") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      programming: String(fd.get("programming") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      ai_ml: String(fd.get("ai_ml") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      systems_and_infra: String(fd.get("systems_and_infra") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      web: String(fd.get("web") || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      languages: fields.list("languages"),
+      programming: fields.list("programming"),
+      ai_ml: fields.list("ai_ml"),
+      systems_and_infra: fields.list("systems_and_infra"),
+      web: fields.list("web"),
     };
     setSavingTech(true);
     try {
@@ -242,16 +282,12 @@ const ResumePage: React.FC = () => {
         token,
       );
       const merged = (res?.item || {}) as ResumeData;
-      setData((prev) =>
-        prev
-          ? {
-              ...prev,
-              technical_skills:
-                (merged?.technical_skills as TechnicalSkills) ??
-                technical_skills,
-            }
-          : null,
-      );
+      setData((prev) => ({
+        ...normalizeResume(prev ?? ({} as ResumeData)),
+        ...prev,
+        technical_skills:
+          (merged?.technical_skills as TechnicalSkills) ?? technical_skills,
+      }));
       toast.success("Technical skills saved");
     } catch (e) {
       toast.error((e as Error)?.message ?? "Save failed");
@@ -280,14 +316,11 @@ const ResumePage: React.FC = () => {
       };
       const res = await updateItem("resume", "main", { translations }, token);
       const merged = (res?.item || {}) as ResumeData;
-      setData((prev) =>
-        prev
-          ? {
-              ...prev,
-              translations: merged?.translations ?? translations,
-            }
-          : null,
-      );
+      setData((prev) => ({
+        ...normalizeResume(prev ?? ({} as ResumeData)),
+        ...prev,
+        translations: merged?.translations ?? translations,
+      }));
       setFrenchContentJson(
         JSON.stringify(merged?.translations?.fr ?? parsed, null, 2),
       );
@@ -320,7 +353,6 @@ const ResumePage: React.FC = () => {
       const next = Array.isArray(merged?.experiences)
         ? (merged.experiences as Experience[])
         : sanitized;
-      setData((prev) => (prev ? { ...prev, experiences: next } : prev));
       setExperiences(next);
       toast.success("Experiences saved");
     } catch (e) {
@@ -339,7 +371,6 @@ const ResumePage: React.FC = () => {
       const next = Array.isArray(merged?.education)
         ? (merged.education as Education[])
         : education;
-      setData((prev) => (prev ? { ...prev, education: next } : prev));
       setEducation(next);
       toast.success("Education saved");
     } catch (e) {
@@ -368,7 +399,6 @@ const ResumePage: React.FC = () => {
       const next = Array.isArray(merged?.certifications)
         ? (merged.certifications as Certification[])
         : payload;
-      setData((prev) => (prev ? { ...prev, certifications: next } : prev));
       setCertifications(next);
       toast.success("Certifications saved");
     } catch (e) {
@@ -379,666 +409,236 @@ const ResumePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Resume</h1>
-      {loading ? (
-        <div>Loading…</div>
-      ) : err ? (
-        <div className="text-red-600">{err}</div>
+    <>
+      <PageHeader
+        title="Resume"
+        description="The CV behind the resume page and the PDF export. Each section saves on its own."
+      />
+
+      {error ? <ErrorNote message={error} /> : null}
+
+      {loading && !data ? (
+        <LoadingRows rows={6} />
       ) : data ? (
-        <>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void saveProfile(e.currentTarget);
-            }}
-            className="space-y-4"
-          >
-            <div className="border rounded-lg p-4 bg-card">
-              <div className="font-medium mb-3">Identity</div>
-              <input
-                name="name"
-                defaultValue={data.name}
-                placeholder="Full name"
-                className="border rounded-md px-3 py-2 bg-background w-full"
-                required
+        <Tabs defaultValue="profile">
+          <TabsList className="mb-6 flex-wrap">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="work">Experience</TabsTrigger>
+            <TabsTrigger value="study">Education</TabsTrigger>
+            <TabsTrigger value="certs">Certifications</TabsTrigger>
+            <TabsTrigger value="french">Français</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                void saveProfile(event.currentTarget);
+              }}
+              className="flex flex-col gap-8"
+            >
+              <FieldSections
+                fields={PROFILE_FIELDS}
+                values={{
+                  name: data.name,
+                  personal_statement: data.personal_statement,
+                  email: data.contact.email,
+                  phone: data.contact.phone,
+                  linkedin: data.contact.linkedin,
+                  github: data.contact.github,
+                  website: data.contact.website,
+                  skills: data.skills,
+                  passions: data.passions,
+                }}
               />
-            </div>
-
-            <div className="border rounded-lg p-4 bg-card">
-              <div className="font-medium mb-3">Contact</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  name="email"
-                  defaultValue={data.contact?.email || ""}
-                  placeholder="Email"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="phone"
-                  defaultValue={data.contact?.phone || ""}
-                  placeholder="Phone"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="linkedin"
-                  defaultValue={data.contact?.linkedin || ""}
-                  placeholder="LinkedIn"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="github"
-                  defaultValue={data.contact?.github || ""}
-                  placeholder="GitHub"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="website"
-                  defaultValue={data.contact?.website || ""}
-                  placeholder="Website"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
+              <div className="flex justify-end border-t border-line pt-4">
+                <Button type="submit" size="sm" disabled={savingProfile}>
+                  <Save /> {savingProfile ? "Saving…" : "Save profile"}
+                </Button>
               </div>
-            </div>
+            </form>
+          </TabsContent>
 
-            <div className="border rounded-lg p-4 bg-card">
-              <div className="font-medium mb-3">Personal Statement</div>
-              <textarea
-                name="personal_statement"
-                defaultValue={data.personal_statement || ""}
-                placeholder="A brief personal statement or summary"
-                className="border rounded-md px-3 py-2 bg-background w-full h-24"
+          <TabsContent value="skills">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                void saveTechnicalSkills(event.currentTarget);
+              }}
+              className="flex flex-col gap-8"
+            >
+              <FieldSections
+                fields={SKILL_FIELDS}
+                values={{ ...data.technical_skills }}
               />
-            </div>
+              <div className="flex justify-end border-t border-line pt-4">
+                <Button type="submit" size="sm" disabled={savingTech}>
+                  <Save /> {savingTech ? "Saving…" : "Save skills"}
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
 
-            <div className="border rounded-lg p-4 bg-card">
-              <div className="font-medium mb-3">Skills & Passions</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  name="skills"
-                  defaultValue={(data.skills || []).join(", ")}
-                  placeholder="Skills (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="passions"
-                  defaultValue={(data.passions || []).join(", ")}
-                  placeholder="Passions (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
+          <TabsContent value="work">
+            <RepeatableList
+              items={experiences}
+              onChange={setExperiences}
+              onSave={() => void saveExperiences()}
+              saving={savingExp}
+              addLabel="Add role"
+              emptyTitle="No roles on the CV."
+              summary={(item) =>
+                [item.role, item.company].filter(Boolean).join(" · ")
+              }
+              blank={() => ({
+                role: "",
+                position: "",
+                company: "",
+                period: "",
+                location: "",
+                current: false,
+                highlight: false,
+                hide: false,
+                description: [],
+              })}
+            >
+              {(item, update) => (
+                <>
+                  <Bound label="Role" value={item.role} onChange={(role) => update({ role })} />
+                  <Bound label="Company" value={item.company} onChange={(company) => update({ company })} />
+                  <Bound label="Position" value={item.position ?? ""} onChange={(position) => update({ position })} hint="Optional qualifier shown after the company." />
+                  <Bound label="Period" value={item.period} onChange={(period) => update({ period })} placeholder="Sept. 2024 – Present" />
+                  <Bound label="Location" value={item.location} onChange={(location) => update({ location })} />
+                  <Bound label="Logo URL" value={item.logo ?? ""} onChange={(logo) => update({ logo })} />
+                  <Bound
+                    className="sm:col-span-2"
+                    label="Responsibilities"
+                    type="lines"
+                    rows={5}
+                    hint="One bullet per line."
+                    value={item.description.join("\n")}
+                    onChange={(text) =>
+                      update({
+                        description: String(text)
+                          .split("\n")
+                          .map((line) => line.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                  />
+                  <Bound label="Current role" type="switch" value={Boolean(item.current)} onChange={(current) => update({ current })} />
+                  <Bound label="Highlight on the CV" type="switch" value={Boolean(item.highlight)} onChange={(highlight) => update({ highlight })} />
+                  <Bound label="Hide" type="switch" hint="Keeps the record but leaves it off the CV." value={Boolean(item.hide)} onChange={(hide) => update({ hide })} />
+                </>
+              )}
+            </RepeatableList>
+          </TabsContent>
+
+          <TabsContent value="study">
+            <RepeatableList
+              items={education}
+              onChange={setEducation}
+              onSave={() => void saveEducation()}
+              saving={savingEdu}
+              addLabel="Add programme"
+              emptyTitle="No education on the CV."
+              summary={(item) =>
+                [item.degree, item.institution].filter(Boolean).join(" · ")
+              }
+              blank={() => ({
+                institution: "",
+                degree: "",
+                location: "",
+                description: "",
+                period: "",
+              })}
+            >
+              {(item, update) => (
+                <>
+                  <Bound label="Institution" value={item.institution} onChange={(institution) => update({ institution })} />
+                  <Bound label="Degree" value={item.degree} onChange={(degree) => update({ degree })} />
+                  <Bound label="Period" value={item.period} onChange={(period) => update({ period })} placeholder="Sept. 2024 – Present" />
+                  <Bound label="Location" value={item.location ?? ""} onChange={(location) => update({ location })} />
+                  <Bound className="sm:col-span-2" label="Summary" type="textarea" rows={3} value={item.description ?? ""} onChange={(description) => update({ description })} />
+                </>
+              )}
+            </RepeatableList>
+          </TabsContent>
+
+          <TabsContent value="certs">
+            <RepeatableList
+              items={certifications}
+              onChange={setCertifications}
+              onSave={() => void saveCertifications()}
+              saving={savingCerts}
+              addLabel="Add certification"
+              emptyTitle="No certifications listed."
+              summary={(item) =>
+                [item.title, item.provider].filter(Boolean).join(" · ")
+              }
+              blank={() => ({
+                provider: "",
+                title: "",
+                issued_date: null,
+                status: "issued" as const,
+                description: "",
+              })}
+            >
+              {(item, update) => (
+                <>
+                  <Bound label="Title" value={item.title} onChange={(title) => update({ title })} />
+                  <Bound label="Provider" value={item.provider} onChange={(provider) => update({ provider })} />
+                  <Bound
+                    label="Status"
+                    type="select"
+                    value={item.status}
+                    onChange={(status) => update({ status: status as Certification["status"] })}
+                    options={CERT_STATUS}
+                  />
+                  <Bound
+                    label="Issued"
+                    type="date"
+                    value={item.issued_date?.slice(0, 10) ?? ""}
+                    onChange={(issued_date) =>
+                      update({ issued_date: String(issued_date) || null })
+                    }
+                  />
+                  <Bound className="sm:col-span-2" label="Summary" type="textarea" rows={2} value={item.description ?? ""} onChange={(description) => update({ description })} />
+                </>
+              )}
+            </RepeatableList>
+          </TabsContent>
+
+          <TabsContent value="french">
+            <div className="flex flex-col gap-4">
+              <p className="measure text-sm text-ink-muted">
+                A partial override for the French CV. Anything left out falls
+                back to the English version, so only include the fields that
+                actually differ. Same shape as the resume itself.
+              </p>
+              <Bound
+                label="French overrides"
+                type="lines"
+                rows={18}
+                value={frenchContentJson}
+                onChange={(next) => setFrenchContentJson(String(next))}
+              />
+              <div className="flex justify-end border-t border-line pt-4">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={savingFrench}
+                  onClick={() => void saveFrenchVersion()}
+                >
+                  <Save /> {savingFrench ? "Saving…" : "Save French version"}
+                </Button>
               </div>
             </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-              >
-                {savingProfile ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <Save size={16} /> Save
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-          <div className="border rounded-lg p-4 bg-card space-y-4">
-            <div className="font-medium">French version</div>
-            <p className="text-sm text-muted-foreground">
-              Partial JSON override for the French CV. Any field missing here
-              falls back to the English version. Use the same shape as the
-              resume payload.
-            </p>
-            <textarea
-              className="w-full min-h-[320px] border rounded-md px-3 py-2 bg-background font-mono text-sm"
-              value={frenchContentJson}
-              onChange={(e) => setFrenchContentJson(e.target.value)}
-              spellCheck={false}
-            />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={savingFrench}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-                onClick={() => void saveFrenchVersion()}
-              >
-                {savingFrench ? (
-                  "Saving..."
-                ) : (
-                  <>
-                    <Save size={16} /> Save French Version
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void saveTechnicalSkills(e.currentTarget);
-            }}
-            className="space-y-4"
-          >
-            <div className="border rounded-lg p-4 bg-card">
-              <div className="font-medium mb-3">Technical Skills</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  name="languages"
-                  defaultValue={(data?.technical_skills?.languages || []).join(
-                    ", ",
-                  )}
-                  placeholder="Languages (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="programming"
-                  defaultValue={(
-                    data?.technical_skills?.programming || []
-                  ).join(", ")}
-                  placeholder="Programming (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="ai_ml"
-                  defaultValue={(data?.technical_skills?.ai_ml || []).join(
-                    ", ",
-                  )}
-                  placeholder="AI/ML (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="systems_and_infra"
-                  defaultValue={(
-                    data?.technical_skills?.systems_and_infra || []
-                  ).join(", ")}
-                  placeholder="Systems & Infra (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-                <input
-                  name="web"
-                  defaultValue={(data?.technical_skills?.web || []).join(", ")}
-                  placeholder="Web (comma)"
-                  className="border rounded-md px-3 py-2 bg-background"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={savingTech}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-              >
-                {savingTech ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <Save size={16} /> Save Technical Skills
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-          <div className="border rounded-lg p-4 bg-card space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">Experiences</div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() =>
-                  setExperiences((prev) => [
-                    ...prev,
-                    {
-                      role: "",
-                      position: "",
-                      company: "",
-                      period: "",
-                      location: "",
-                      current: false,
-                      highlight: false,
-                      hide: false,
-                      description: [],
-                    },
-                  ])
-                }
-              >
-                <Plus size={16} /> Add experience
-              </button>
-            </div>
-            <div className="space-y-6">
-              {experiences.map((exp, idx) => (
-                <div
-                  key={idx}
-                  className="border rounded-md p-3 bg-background space-y-3"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      placeholder="Role"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.role}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, role: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Position"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.position}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, position: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Company"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.company}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, company: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Logo"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.logo}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, logo: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Period"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.period}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, period: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Location"
-                      className="border rounded-md px-3 py-2"
-                      value={exp.location}
-                      onChange={(e) =>
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, location: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={!!exp.current}
-                        onChange={(e) =>
-                          setExperiences((prev) =>
-                            prev.map((x, i) =>
-                              i === idx
-                                ? { ...x, current: e.target.checked }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                      <span>Current</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={!!exp.highlight}
-                        onChange={(e) =>
-                          setExperiences((prev) =>
-                            prev.map((x, i) =>
-                              i === idx
-                                ? { ...x, highlight: e.target.checked }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                      <span>Highlight</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={!!exp.hide}
-                        onChange={(e) =>
-                          setExperiences((prev) =>
-                            prev.map((x, i) =>
-                              i === idx ? { ...x, hide: e.target.checked } : x,
-                            ),
-                          )
-                        }
-                      />
-                      <span>Hide</span>
-                    </label>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">
-                      Description (one per line)
-                    </div>
-                    <textarea
-                      className="w-full border rounded-md px-3 py-2 min-h-[100px]"
-                      value={(exp.description || []).join("\n")}
-                      onChange={(e) => {
-                        const lines = e.target.value.split("\n");
-                        setExperiences((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, description: lines } : x,
-                          ),
-                        );
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() =>
-                        setExperiences((prev) =>
-                          prev.filter((_, i) => i !== idx),
-                        )
-                      }
-                    >
-                      <Trash2 size={16} /> Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={savingExp}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-                onClick={() => void saveExperiences()}
-              >
-                {savingExp ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <Save size={16} /> Save Experiences
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-          <div className="border rounded-lg p-4 bg-card space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">Education</div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() =>
-                  setEducation((prev) => [
-                    ...prev,
-                    {
-                      institution: "",
-                      degree: "",
-                      location: "",
-                      description: "",
-                      period: "",
-                    },
-                  ])
-                }
-              >
-                <Plus size={16} /> Add education
-              </button>
-            </div>
-            <div className="space-y-6">
-              {education.map((edu, idx) => (
-                <div
-                  key={idx}
-                  className="border rounded-md p-3 bg-background space-y-3"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      placeholder="Institution"
-                      className="border rounded-md px-3 py-2"
-                      value={edu.institution}
-                      onChange={(e) =>
-                        setEducation((prev) =>
-                          prev.map((x, i) =>
-                            i === idx
-                              ? { ...x, institution: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Degree"
-                      className="border rounded-md px-3 py-2"
-                      value={edu.degree}
-                      onChange={(e) =>
-                        setEducation((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, degree: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Period"
-                      className="border rounded-md px-3 py-2"
-                      value={edu.period}
-                      onChange={(e) =>
-                        setEducation((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, period: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Location (optional)"
-                      className="border rounded-md px-3 py-2"
-                      value={edu.location}
-                      onChange={(e) =>
-                        setEducation((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, location: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">
-                      Description (optional)
-                    </div>
-                    <textarea
-                      className="w-full border rounded-md px-3 py-2 min-h-[80px]"
-                      value={edu.description || ""}
-                      onChange={(e) =>
-                        setEducation((prev) =>
-                          prev.map((x, i) =>
-                            i === idx
-                              ? { ...x, description: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() =>
-                        setEducation((prev) => prev.filter((_, i) => i !== idx))
-                      }
-                    >
-                      <Trash2 size={16} /> Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={savingEdu}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-                onClick={() => void saveEducation()}
-              >
-                {savingEdu ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <Save size={16} /> Save Education
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-          <div className="border rounded-lg p-4 bg-card space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="font-medium">Certifications</div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
-                onClick={() =>
-                  setCertifications((prev) => [
-                    ...prev,
-                    {
-                      provider: "",
-                      title: "",
-                      issued_date: null,
-                      status: "issued",
-                    },
-                  ])
-                }
-              >
-                <Plus size={16} /> Add certification
-              </button>
-            </div>
-            <div className="space-y-6">
-              {certifications.map((cert, idx) => (
-                <div
-                  key={idx}
-                  className="border rounded-md p-3 bg-background space-y-3"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      placeholder="Provider"
-                      className="border rounded-md px-3 py-2"
-                      value={cert.provider}
-                      onChange={(e) =>
-                        setCertifications((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, provider: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Title"
-                      className="border rounded-md px-3 py-2"
-                      value={cert.title}
-                      onChange={(e) =>
-                        setCertifications((prev) =>
-                          prev.map((x, i) =>
-                            i === idx ? { ...x, title: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                    <input
-                      placeholder="Issued date (e.g. Jan 2023)"
-                      className="border rounded-md px-3 py-2"
-                      value={cert.issued_date ?? ""}
-                      onChange={(e) =>
-                        setCertifications((prev) =>
-                          prev.map((x, i) =>
-                            i === idx
-                              ? { ...x, issued_date: e.target.value || null }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                    <select
-                      className="border rounded-md px-3 py-2 bg-background"
-                      value={cert.status}
-                      onChange={(e) =>
-                        setCertifications((prev) =>
-                          prev.map((x, i) =>
-                            i === idx
-                              ? {
-                                  ...x,
-                                  status: e.target
-                                    .value as Certification["status"],
-                                }
-                              : x,
-                          ),
-                        )
-                      }
-                    >
-                      <option value="issued">issued</option>
-                      <option value="in progress">in progress</option>
-                      <option value="stopped">stopped</option>
-                      <option value="starting">starting</option>
-                    </select>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-2 text-red-600 border rounded-md px-3 py-2 hover:bg-red-500/10"
-                      onClick={() =>
-                        setCertifications((prev) =>
-                          prev.filter((_, i) => i !== idx),
-                        )
-                      }
-                    >
-                      <Trash2 size={16} /> Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                disabled={savingCerts}
-                className="inline-flex items-center gap-2 rounded-md border px-3 py-2 bg-primary text-primary-foreground disabled:opacity-60 hover:opacity-90"
-                onClick={() => void saveCertifications()}
-              >
-                {savingCerts ? (
-                  "Saving…"
-                ) : (
-                  <>
-                    <Save size={16} /> Save Certifications
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </>
+          </TabsContent>
+        </Tabs>
       ) : null}
-    </div>
+    </>
   );
 };
 

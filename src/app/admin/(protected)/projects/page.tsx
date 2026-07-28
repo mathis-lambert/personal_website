@@ -1,9 +1,8 @@
-import ProjectsPage from "@/admin/pages/ProjectsPage";
+import { CollectionScreen } from "@/admin/components/CollectionScreen";
+import { projectsConfig } from "@/admin/collections";
 
-export const metadata = {
-  title: "Admin · Projects",
-};
+export const metadata = { title: "Admin · Uprojects" };
 
-export default function AdminProjects() {
-  return <ProjectsPage />;
+export default function Page() {
+  return <CollectionScreen config={projectsConfig} />;
 }

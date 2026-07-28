@@ -1,118 +1,52 @@
-export type UnauthorizedHandler = () => Promise<void> | void;
-
-let unauthorizedHandler: UnauthorizedHandler | null = null;
-let unauthorizedInFlight: Promise<void> | null = null;
-let lastUnauthorizedAt = 0;
-const UNAUTHORIZED_THROTTLE_MS = 2000;
-
-export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
-  unauthorizedHandler = handler;
-}
-
 export type FetchWithTimeoutInit = RequestInit & {
   timeoutMs?: number;
   authToken?: string;
 };
 
+const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
+  if (!headers) return {};
+  if (headers instanceof Headers) return Object.fromEntries(headers.entries());
+  if (Array.isArray(headers)) return Object.fromEntries(headers);
+  return { ...headers };
+};
+
+/**
+ * `fetch` that gives up: a timeout that also honours the caller's own `signal`,
+ * plus optional bearer auth.
+ *
+ * The module-level "unauthorized handler" that used to retry 401s is gone.
+ * Nothing ever registered one, so it only ever fired the same failing request a
+ * second time.
+ */
 export async function fetchWithTimeout(
   input: RequestInfo | URL,
   init?: FetchWithTimeoutInit,
 ): Promise<Response> {
-  const timeoutMs = init?.timeoutMs ?? 10000;
-  const parentSignal = init?.signal;
-  const controller = new AbortController();
+  const { timeoutMs = 10_000, signal, headers, authToken, ...rest } = init ?? {};
 
+  const controller = new AbortController();
   const onParentAbort = () => controller.abort();
-  if (parentSignal) {
-    if (parentSignal.aborted) onParentAbort();
-    else parentSignal.addEventListener("abort", onParentAbort);
+  if (signal) {
+    if (signal.aborted) onParentAbort();
+    else signal.addEventListener("abort", onParentAbort);
   }
 
   const timeoutId = setTimeout(() => {
-    try {
-      controller.abort(new DOMException("Timeout", "AbortError"));
-    } catch {
-      controller.abort();
-    }
+    controller.abort(new DOMException("Timeout", "AbortError"));
   }, timeoutMs);
 
-  const normalizeHeaders = (h?: HeadersInit): Record<string, string> => {
-    const out: Record<string, string> = {};
-    if (!h) return out;
-    if (h instanceof Headers) {
-      h.forEach((v, k) => {
-        out[k] = v;
-      });
-      return out;
-    }
-    if (Array.isArray(h)) {
-      for (const [k, v] of h) out[k] = v;
-      return out;
-    }
-    return { ...(h as Record<string, string>) };
-  };
-
-  const buildHeaders = (
-    headers?: HeadersInit,
-    authToken?: string,
-  ): HeadersInit => {
-    const base = normalizeHeaders(headers);
-    const merged: Record<string, string> = { ...base };
-    if (authToken) {
-      merged.Authorization = `Bearer ${authToken}`;
-    }
-    return merged;
-  };
-
-  const triggerUnauthorized = async (): Promise<void> => {
-    // Coalesce concurrent unauthorized handling and throttle attempts
-    if (unauthorizedInFlight) return unauthorizedInFlight;
-    if (!unauthorizedHandler) return; // Nothing to do
-    const now = Date.now();
-    if (now - lastUnauthorizedAt < UNAUTHORIZED_THROTTLE_MS) return;
-    lastUnauthorizedAt = now;
-    const p = Promise.resolve()
-      .then(() => unauthorizedHandler?.())
-      .then(() => undefined);
-    unauthorizedInFlight = p.finally(() => {
-      unauthorizedInFlight = null;
-    });
-    return unauthorizedInFlight;
-  };
-
   try {
-    const {
-      timeoutMs: _ignoredTimeout,
-      signal: _ignoredSignal,
-      headers,
-      authToken,
-      ...rest
-    } = init ?? {};
-    void _ignoredTimeout;
-    void _ignoredSignal;
+    const merged = normalizeHeaders(headers);
+    if (authToken) merged.Authorization = `Bearer ${authToken}`;
 
-    const doFetch = async (): Promise<Response> =>
-      await fetch(input, {
-        ...(rest as RequestInit),
-        headers: buildHeaders(headers, authToken),
-        signal: controller.signal,
-        credentials: "include",
-      });
-
-    // First attempt
-    const res = await doFetch();
-    if (res.status !== 401 || authToken) return res;
-
-    // 401 without bearer token: try to re-establish session via handler, then retry once
-    await triggerUnauthorized();
-    return await doFetch();
+    return await fetch(input, {
+      ...rest,
+      headers: merged,
+      signal: controller.signal,
+      credentials: "include",
+    });
   } finally {
     clearTimeout(timeoutId);
-    if (parentSignal) parentSignal.removeEventListener("abort", onParentAbort);
+    if (signal) signal.removeEventListener("abort", onParentAbort);
   }
-}
-
-export function sanitizeUrl(url?: string): string | undefined {
-  if (!url) return url;
-  return url.replace(/:\s*\/\//, "://");
 }

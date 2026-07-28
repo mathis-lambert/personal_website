@@ -24,5 +24,3 @@ export const useChat = (): ChatContextType => {
   }
   return context;
 };
-
-export default useChat;

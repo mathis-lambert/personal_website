@@ -1,403 +1,381 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Trash2 } from "lucide-react";
+import { AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import {
+  Empty,
+  ErrorNote,
+  LoadingRows,
+  PageHeader,
+} from "@/admin/components/primitives";
 import { useAdminAuth } from "@/admin/providers/AdminAuthProvider";
+import { useAdminData } from "@/admin/useAdminData";
 import {
   deleteConversation,
   getConversationDetail,
   getConversations,
   getConversationTurns,
 } from "@/api/admin";
-import type {
-  AdminConversationDetailResponse,
-  AdminConversationsListResponse,
-  AdminConversationTurnsResponse,
-} from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatDurationMs, formatTimestamp } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-const formatUtc = (value?: string): string => {
-  if (!value) return "n/a";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "n/a";
-  return date.toISOString().replace("T", " ").slice(0, 19);
-};
+const RANGES = [
+  { label: "24h", hours: 24 },
+  { label: "7d", hours: 24 * 7 },
+  { label: "30d", hours: 24 * 30 },
+] as const;
 
-type Preset = "24h" | "7d" | "30d" | "custom";
-
+/**
+ * The conversation log.
+ *
+ * A transcript is a conversation, so it is laid out as one: turns in sequence,
+ * the visitor on the left and the assistant answering under it. The previous
+ * version put "User Input" and "Assistant Output" in two labelled `<pre>` blocks
+ * per turn, which is a debugger's view of a chat and unreadable at any length.
+ * Model, duration and errors move to the margin, where they are available
+ * without interrupting the reading.
+ */
 const DiscussionsPage: React.FC = () => {
   const { token } = useAdminAuth();
 
-  const [preset, setPreset] = useState<Preset>("7d");
-  const [customStart, setCustomStart] = useState("");
-  const [customEnd, setCustomEnd] = useState("");
+  const [hours, setHours] = useState<number>(24 * 7);
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"" | "active" | "errored">("");
+  const [status, setStatus] = useState<"all" | "active" | "errored">("all");
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const [listData, setListData] =
-    useState<AdminConversationsListResponse | null>(null);
-  const [detailData, setDetailData] =
-    useState<AdminConversationDetailResponse | null>(null);
-  const [turnsData, setTurnsData] =
-    useState<AdminConversationTurnsResponse | null>(null);
+  const loadList = useMemo(() => {
+    if (!token) return null;
+    const end = new Date();
+    const start = new Date(end.getTime() - hours * 3_600_000);
+    return (signal: AbortSignal) =>
+      getConversations(
+        {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          status: status === "all" ? undefined : status,
+          q: query || undefined,
+          limit: 100,
+        },
+        { token, signal },
+      );
+  }, [token, hours, status, query]);
 
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
-    null,
+  const {
+    data: listData,
+    error: listError,
+    loading: loadingList,
+    reload: reloadList,
+  } = useAdminData(loadList);
+
+  const conversations = useMemo(() => listData?.items ?? [], [listData]);
+
+  /** Keep the pick while it is still in the list, otherwise take the first. */
+  const selectedId =
+    pickedId && conversations.some((item) => item.conversationId === pickedId)
+      ? pickedId
+      : (conversations[0]?.conversationId ?? null);
+
+  const loadTranscript = useMemo(
+    () =>
+      token && selectedId
+        ? async (signal: AbortSignal) => {
+            const options = { token, signal };
+            const [detail, turns] = await Promise.all([
+              getConversationDetail(selectedId, options),
+              getConversationTurns(selectedId, { limit: 250 }, options),
+            ]);
+            return { detail: detail.item, turns: turns.items };
+          }
+        : null,
+    [token, selectedId],
   );
 
-  const [loadingList, setLoadingList] = useState(false);
-  const [loadingTurns, setLoadingTurns] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const {
+    data: transcript,
+    error: transcriptError,
+    loading: loadingTurns,
+  } = useAdminData(loadTranscript);
 
-  const { startIso, endIso } = useMemo(() => {
-    const now = new Date();
-    const end = new Date(now);
-    let start = new Date(now.getTime() - 7 * 86400000);
-
-    if (preset === "24h") {
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    } else if (preset === "30d") {
-      start = new Date(now.getTime() - 30 * 86400000);
-    } else if (preset === "custom") {
-      if (customStart) start = new Date(`${customStart}T00:00:00.000Z`);
-      if (customEnd) end.setTime(new Date(`${customEnd}T23:59:59.999Z`).getTime());
-    }
-
-    return {
-      startIso: start.toISOString(),
-      endIso: end.toISOString(),
-    };
-  }, [preset, customStart, customEnd]);
-
-  useEffect(() => {
-    let canceled = false;
-    if (!token) return;
-
-    const load = async () => {
-      setLoadingList(true);
-      setError(null);
-      try {
-        const data = await getConversations(
-          {
-            start: startIso,
-            end: endIso,
-            status: status || undefined,
-            q: query || undefined,
-            limit: 100,
-            skip: 0,
-          },
-          token,
-        );
-
-        if (canceled) return;
-
-        setListData(data);
-
-        setSelectedConversationId((prev) => {
-          if (prev && data.items.some((item) => item.conversationId === prev)) {
-            return prev;
-          }
-          return data.items[0]?.conversationId ?? null;
-        });
-      } catch (loadError) {
-        if (!canceled) {
-          setError((loadError as Error).message || "Failed to load discussions");
-        }
-      } finally {
-        if (!canceled) {
-          setLoadingList(false);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      canceled = true;
-    };
-  }, [token, startIso, endIso, status, query, refreshKey]);
-
-  useEffect(() => {
-    let canceled = false;
-    if (!token || !selectedConversationId) {
-      setDetailData(null);
-      setTurnsData(null);
-      return;
-    }
-
-    const loadTurns = async () => {
-      setLoadingTurns(true);
-      setError(null);
-      try {
-        const [detail, turns] = await Promise.all([
-          getConversationDetail(selectedConversationId, token),
-          getConversationTurns(
-            selectedConversationId,
-            {
-              limit: 250,
-              skip: 0,
-            },
-            token,
-          ),
-        ]);
-
-        if (canceled) return;
-
-        setDetailData(detail);
-        setTurnsData(turns);
-      } catch (loadError) {
-        if (!canceled) {
-          setError(
-            (loadError as Error).message ||
-              "Failed to load discussion transcript",
-          );
-        }
-      } finally {
-        if (!canceled) {
-          setLoadingTurns(false);
-        }
-      }
-    };
-
-    void loadTurns();
-
-    return () => {
-      canceled = true;
-    };
-  }, [token, selectedConversationId]);
-
-  const selected = detailData?.item;
-
-  const handleDeleteConversation = async () => {
-    if (!selectedConversationId || !token) return;
-    const confirmed = window.confirm(
-      "Delete this conversation and all turns? This cannot be undone.",
-    );
-    if (!confirmed) return;
-
+  const remove = async () => {
+    if (!token || !selectedId) return;
+    setDeleting(true);
     try {
-      await deleteConversation(selectedConversationId, token);
-      setRefreshKey(Date.now());
-    } catch (deleteError) {
-      setError((deleteError as Error).message || "Failed to delete conversation");
+      await deleteConversation(selectedId, token);
+      toast.success("Conversation deleted");
+      setPickedId(null);
+      setConfirmDelete(false);
+      reloadList();
+    } catch (error) {
+      toast.error((error as Error)?.message ?? "Delete failed");
+    } finally {
+      setDeleting(false);
     }
   };
 
+  const error = listError ?? transcriptError;
+  const selected = transcript?.detail;
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Discussions</h1>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base">Transcript Filters</CardTitle>
+    <>
+      <PageHeader
+        title="Conversations"
+        description="Every exchange visitors had with the site assistant."
+        count={listData?.total}
+        actions={
           <Button
-            size="sm"
             variant="outline"
-            onClick={() => setRefreshKey(Date.now())}
+            size="sm"
+            onClick={reloadList}
+            disabled={loadingList}
           >
-            <RefreshCw className="mr-1 size-4" /> Refresh
+            <RefreshCw className={cn(loadingList && "animate-spin")} />
+            Refresh
           </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {(["24h", "7d", "30d", "custom"] as Preset[]).map((value) => (
-              <Button
-                key={value}
-                size="sm"
-                variant={preset === value ? "default" : "secondary"}
-                onClick={() => setPreset(value)}
-              >
-                {value === "custom" ? "Custom" : value}
-              </Button>
-            ))}
-          </div>
+        }
+      />
 
-          {preset === "custom" && (
-            <div className="flex flex-wrap gap-2">
-              <Input
-                type="date"
-                value={customStart}
-                onChange={(e) => setCustomStart(e.target.value)}
-                className="w-[12rem]"
-              />
-              <Input
-                type="date"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                className="w-[12rem]"
-              />
-            </div>
-          )}
+      {error ? <ErrorNote message={error} /> : null}
 
-          <div className="grid gap-2 md:grid-cols-2">
-            <Input
-              placeholder="Search in prompts and answers"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as "" | "active" | "errored")}
-              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <div
+          role="group"
+          aria-label="Date range"
+          className="inline-flex rounded-full border border-line p-1"
+        >
+          {RANGES.map((range) => (
+            <button
+              key={range.label}
+              type="button"
+              onClick={() => setHours(range.hours)}
+              aria-pressed={hours === range.hours}
+              className={cn(
+                "rounded-full px-3 py-1 font-mono text-[0.7rem] font-semibold uppercase tracking-wider transition-colors",
+                hours === range.hours
+                  ? "bg-ink text-ink-invert"
+                  : "text-ink-muted hover:text-ink",
+              )}
             >
-              <option value="">All statuses</option>
-              <option value="active">Active</option>
-              <option value="errored">Errored</option>
-            </select>
-          </div>
-        </CardContent>
-      </Card>
+              {range.label}
+            </button>
+          ))}
+        </div>
 
-      {error && <div className="text-red-600">{error}</div>}
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search what was said"
+          aria-label="Search conversations"
+          className="max-w-xs"
+        />
 
-      <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-        <Card className="h-[70vh] overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-base">
-              Conversations ({listData?.total ?? 0})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[calc(70vh-80px)] overflow-auto p-0">
-            {loadingList ? (
-              <div className="px-4 py-3 text-sm text-muted-foreground">Loading…</div>
-            ) : listData?.items.length ? (
-              <ul className="divide-y">
-                {listData.items.map((item) => (
-                  <li key={item.conversationId}>
-                    <button
-                      onClick={() => setSelectedConversationId(item.conversationId)}
-                      className={`w-full text-left px-4 py-3 transition-colors ${
-                        selectedConversationId === item.conversationId
-                          ? "bg-muted"
-                          : "hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {item.status}
-                        </span>
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {formatUtc(item.lastMessageAt)}
-                        </span>
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-sm font-medium">
-                        {item.lastUserMessage || "(no user message)"}
-                      </p>
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                        {item.lastAssistantMessage || "(no assistant message)"}
-                      </p>
-                      <div className="mt-2 text-[11px] text-muted-foreground">
-                        {item.turnCount} turns · {item.successfulTurns} success · {item.failedTurns} failed
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="px-4 py-3 text-sm text-muted-foreground">
-                No discussions in current filters.
+        <Select
+          value={status}
+          onValueChange={(value) =>
+            setStatus(value as "all" | "active" | "errored")
+          }
+        >
+          <SelectTrigger className="w-40" aria-label="Filter by status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All conversations</SelectItem>
+            <SelectItem value="active">Completed</SelectItem>
+            <SelectItem value="errored">Errored</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid min-h-0 gap-6 xl:grid-cols-[24rem_minmax(0,1fr)]">
+        <div className="min-w-0 rounded-3 border border-line">
+          <div className="max-h-[34rem] overflow-y-auto">
+            {loadingList && !listData ? (
+              <div className="p-4">
+                <LoadingRows rows={5} />
               </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="h-[70vh] overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Transcript</CardTitle>
-            <Button
-              size="sm"
-              variant="destructive"
-              disabled={!selectedConversationId}
-              onClick={() => void handleDeleteConversation()}
-            >
-              <Trash2 className="mr-1 size-4" /> Delete
-            </Button>
-          </CardHeader>
-          <CardContent className="h-[calc(70vh-80px)] overflow-auto space-y-4">
-            {!selectedConversationId ? (
-              <div className="text-sm text-muted-foreground">
-                Select a conversation to inspect the full thread.
+            ) : conversations.length === 0 ? (
+              <div className="p-4">
+                <Empty
+                  title="No conversations here."
+                  hint="Widen the range, or clear the search."
+                />
               </div>
-            ) : loadingTurns ? (
-              <div className="text-sm text-muted-foreground">Loading transcript…</div>
             ) : (
-              <>
-                {selected && (
-                  <div className="rounded-lg border bg-muted/20 px-3 py-2 text-sm">
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span>ID: {selected.conversationId}</span>
-                      <span>Status: {selected.status}</span>
-                      <span>Session: {selected.sessionId || "n/a"}</span>
-                      <span>Location: {selected.location || "n/a"}</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Started {formatUtc(selected.startedAt)} · Last {formatUtc(selected.lastMessageAt)}
-                    </div>
-                    {selected.lastError && (
-                      <div className="mt-2 text-xs text-red-600">Last error: {selected.lastError}</div>
-                    )}
-                  </div>
-                )}
-
-                {turnsData?.items.length ? (
-                  <div className="space-y-3">
-                    {turnsData.items.map((turn) => (
-                      <article
-                        key={turn.turnId}
-                        className="rounded-xl border p-3 bg-card/70 backdrop-blur"
+              <ul className="divide-y divide-line">
+                {conversations.map((item) => {
+                  const active = item.conversationId === selectedId;
+                  return (
+                    <li key={item.conversationId}>
+                      <button
+                        type="button"
+                        onClick={() => setPickedId(item.conversationId)}
+                        aria-current={active ? "true" : undefined}
+                        className={cn(
+                          "w-full px-4 py-3 text-left transition-colors",
+                          active
+                            ? "bg-brand-wash"
+                            : "hover:bg-paper-sink",
+                        )}
                       >
-                        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>
-                            Turn #{turn.turnIndex} · {turn.status} · {turn.streamed ? "stream" : "sync"}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="t-meta text-ink-faint">
+                            {item.turnCount} turn
+                            {item.turnCount === 1 ? "" : "s"}
                           </span>
-                          <span>{formatUtc(turn.createdAt)}</span>
-                        </header>
-
-                        <div className="mt-3 space-y-3">
-                          <section>
-                            <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
-                              User Input
-                            </h3>
-                            <pre className="rounded-md border bg-muted/30 p-2 text-xs whitespace-pre-wrap break-words font-mono">
-                              {turn.lastUserMessage || "(empty)"}
-                            </pre>
-                          </section>
-
-                          <section>
-                            <h3 className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
-                              Assistant Output
-                            </h3>
-                            <pre className="rounded-md border bg-cyan-500/5 p-2 text-xs whitespace-pre-wrap break-words font-mono">
-                              {turn.assistantMessage || "(no output)"}
-                            </pre>
-                          </section>
+                          <span className="t-meta text-ink-faint">
+                            {formatTimestamp(item.lastMessageAt).slice(0, 16)}
+                          </span>
                         </div>
+                        <p className="mt-1.5 line-clamp-2 text-sm font-bold leading-snug text-ink">
+                          {item.lastUserMessage || "No question recorded"}
+                        </p>
+                        {item.failedTurns > 0 ? (
+                          <span className="t-meta mt-1.5 inline-flex items-center gap-1 text-destructive">
+                            <AlertTriangle className="size-3" />
+                            {item.failedTurns} failed
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
 
-                        <footer className="mt-2 text-[11px] text-muted-foreground">
+        <div className="min-w-0">
+          {!selectedId ? (
+            <Empty
+              title="Nothing selected."
+              hint="Pick a conversation on the left to read the whole thread."
+            />
+          ) : (
+            <div className="flex min-w-0 flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "t-meta",
+                      selected?.status === "errored" &&
+                        "border-destructive/40 text-destructive",
+                    )}
+                  >
+                    {selected?.status ?? "loading"}
+                  </Badge>
+                  {selected?.location ? (
+                    <span className="t-meta text-ink-faint">
+                      from {selected.location}
+                    </span>
+                  ) : null}
+                  {selected?.startedAt ? (
+                    <span className="t-meta text-ink-faint">
+                      {formatTimestamp(selected.startedAt)}
+                    </span>
+                  ) : null}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmDelete(true)}
+                  className="text-ink-muted hover:text-destructive"
+                >
+                  <Trash2 /> Delete
+                </Button>
+              </div>
+
+              {selected?.lastError ? (
+                <ErrorNote message={selected.lastError} />
+              ) : null}
+
+              {loadingTurns && !transcript ? (
+                <LoadingRows rows={4} />
+              ) : transcript?.turns.length ? (
+                <ol className="flex flex-col gap-6">
+                  {transcript.turns.map((turn) => (
+                    <li key={turn.turnId} className="flex flex-col gap-2.5">
+                      <p className="ml-auto max-w-[85%] rounded-4 rounded-br-1 bg-ink px-4 py-2.5 text-sm leading-relaxed text-ink-invert">
+                        {turn.lastUserMessage || "(empty)"}
+                      </p>
+
+                      <div className="max-w-[92%]">
+                        <p className="whitespace-pre-wrap rounded-4 rounded-bl-1 border border-line bg-paper-lift px-4 py-2.5 text-sm leading-relaxed text-ink">
+                          {turn.assistantMessage || "(no answer)"}
+                        </p>
+                        <p className="t-meta mt-1.5 px-1 text-ink-faint">
                           {turn.model || "unknown model"}
                           {typeof turn.durationMs === "number"
-                            ? ` · ${turn.durationMs} ms`
+                            ? ` · ${formatDurationMs(turn.durationMs)}`
                             : ""}
-                          {turn.errorMessage ? ` · ${turn.errorMessage}` : ""}
-                        </footer>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    No turns found for this conversation.
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+                          {turn.errorMessage ? (
+                            <span className="text-destructive">
+                              {" "}
+                              · {turn.errorMessage}
+                            </span>
+                          ) : null}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <Empty title="No turns recorded for this conversation." />
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The whole thread and every turn in it are removed. There is no
+              undo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Keep it</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                void remove();
+              }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 import { searchVectorStore } from "@/lib/ai/client";
 import { safeJsonStringify, toJsonable } from "@/lib/ai/json";
 import {
-  getArticlesCollection,
+  getNotesCollection,
   getExperiencesCollection,
   getProjectsCollection,
   getResumeCollection,
@@ -120,12 +120,12 @@ export const buildSelfTools = () => {
     },
   });
 
-  const getSelfArticles = createTool({
-    name: "get_self_articles",
-    description: "Returns a lightweight list of Mathis articles.",
+  const getSelfNotes = createTool({
+    name: "get_self_notes",
+    description: "Returns a lightweight list of Mathis notes.",
     schema: z.object({}).strict(),
     handler: async () => {
-      const collection = await getArticlesCollection();
+      const collection = await getNotesCollection();
       const docs = await collection
         .find(
           {},
@@ -149,12 +149,12 @@ export const buildSelfTools = () => {
     },
   });
 
-  const getSelfArticlesBySlug = createTool({
-    name: "get_self_articles_by_slug",
-    description: "Fetches details for a specific article by slug.",
+  const getSelfNotesBySlug = createTool({
+    name: "get_self_notes_by_slug",
+    description: "Fetches details for a specific note by slug.",
     schema: z.object({ slug: z.string().min(1) }).strict(),
     handler: async ({ slug }) => {
-      const collection = await getArticlesCollection();
+      const collection = await getNotesCollection();
       const objectId = parseObjectId(slug);
       const doc = await collection.findOne(
         objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
@@ -177,7 +177,7 @@ export const buildSelfTools = () => {
       if (!doc) {
         return {
           error:
-            "Wrong slug, you might have mistyped it. Please use get_self_articles to get the list of all articles.",
+            "Wrong slug, you might have mistyped it. Please use get_self_notes to get the list of all notes.",
         };
       }
 
@@ -232,8 +232,8 @@ export const buildSelfTools = () => {
     getSelfInfo,
     getSelfProjects,
     getSelfProjectsBySlug,
-    getSelfArticles,
-    getSelfArticlesBySlug,
+    getSelfNotes,
+    getSelfNotesBySlug,
     getSelfExperiences,
     getSelfCertifications,
     getSelfResume,

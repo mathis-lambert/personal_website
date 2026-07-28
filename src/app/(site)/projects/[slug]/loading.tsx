@@ -1,7 +1,5 @@
-"use client";
-
-import ProjectView from "@/components/projects/ProjectView";
+import { DetailSkeleton } from "@/components/content/Skeletons";
 
 export default function ProjectLoading() {
-  return <ProjectView project={null} isLoading />;
+  return <DetailSkeleton />;
 }

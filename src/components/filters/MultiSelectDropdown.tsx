@@ -1,15 +1,16 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import type React from "react";
+
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export type MultiSelectItem = { value: string; label: string };
 
@@ -18,69 +19,72 @@ interface MultiSelectDropdownProps {
   items: MultiSelectItem[];
   selectedValues: string[];
   onChange: (next: string[]) => void;
-  contentClassName?: string;
 }
 
+/**
+ * Multi-select in the shared control shell. Uses the same height, radius and
+ * border as the search field and the sort select, so the filter row reads as
+ * one instrument instead of three.
+ */
 const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   label,
   items,
   selectedValues,
   onChange,
-  contentClassName,
 }) => {
   const count = selectedValues.length;
-  const triggerText = count > 0 ? `${label} (${count})` : label;
+  const active = count > 0;
 
-  const isSelected = (v: string) => selectedValues.includes(v);
-  const toggleValue = (v: string, checked: boolean) => {
-    if (checked) {
-      if (!isSelected(v)) onChange([...selectedValues, v]);
-    } else {
-      if (isSelected(v)) onChange(selectedValues.filter((x) => x !== v));
-    }
-  };
+  const toggle = (value: string, checked: boolean) =>
+    onChange(
+      checked
+        ? [...selectedValues.filter((item) => item !== value), value]
+        : selectedValues.filter((item) => item !== value),
+    );
 
-  const clearAll = () => onChange([]);
+  if (items.length === 0) return null;
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          className="h-9 rounded-full px-3 text-sm whitespace-nowrap border-white/30 dark:border-white/10 bg-gray-400/10 dark:bg-gray-800/30 hover:bg-white/30 hover:border-white/40 dark:hover:bg-gray-700/40 text-gray-700 dark:text-gray-300"
-        >
-          {triggerText}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className={contentClassName ? contentClassName : "w-56"}
+      <DropdownMenuTrigger
+        className={cn(
+          "inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm font-bold outline-none transition-colors duration-200 ease-(--ease-paper)",
+          active
+            ? "border-brand-quiet bg-brand-wash text-brand"
+            : "border-line bg-paper text-ink-muted hover:border-line-strong hover:text-ink",
+        )}
       >
-        <div className="flex items-center justify-between px-2 py-1">
-          <DropdownMenuLabel className="p-0 text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {label}
-          </DropdownMenuLabel>
-          {count > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs text-gray-700 dark:text-gray-200 hover:bg-white/30 dark:hover:bg-gray-700/40"
-              onClick={clearAll}
+        {label}
+        {active ? (
+          <span className="grid size-5 place-items-center rounded-full bg-brand text-[0.6875rem] text-brand-ink">
+            {count}
+          </span>
+        ) : null}
+        <ChevronDown className="size-4 opacity-60" />
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="start" className="max-h-80 w-60 overflow-y-auto">
+        {active ? (
+          <>
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              className="w-full px-2 py-1.5 text-left text-[0.8125rem] font-bold text-brand"
             >
-              Clear
-            </Button>
-          )}
-        </div>
-        <DropdownMenuSeparator />
-        {items.map((it) => (
+              Clear {label.toLowerCase()}
+            </button>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
+
+        {items.map((item) => (
           <DropdownMenuCheckboxItem
-            key={it.value}
-            checked={isSelected(it.value)}
-            onCheckedChange={(checked) =>
-              toggleValue(it.value, Boolean(checked))
-            }
-            onSelect={(e) => e.preventDefault()}
+            key={item.value}
+            checked={selectedValues.includes(item.value)}
+            onCheckedChange={(checked) => toggle(item.value, Boolean(checked))}
+            onSelect={(event) => event.preventDefault()}
           >
-            {it.label}
+            {item.label}
           </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>

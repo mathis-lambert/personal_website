@@ -1,18 +1,47 @@
 "use client";
 
-import type { Map as MapLibreMap } from "maplibre-gl";
 import { MapPin } from "lucide-react";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 
-const MARSEILLE: [number, number] = [5.3698, 43.2965];
-const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+import { useTheme } from "@/components/theme-provider";
+import { buildMapStyle } from "@/lib/ui/mapStyle";
 
+const MARSEILLE: [number, number] = [5.3698, 43.2965];
+
+/**
+ * The frame is a bounding box, not a centre and a zoom.
+ *
+ * A fixed centre only frames correctly at one aspect ratio. The card is wide on
+ * a desktop and narrow on a phone, and at the same zoom the narrow one cropped
+ * the south-east away — taking Marseille, the only thing the map is for, off
+ * screen. Fitting a box makes the framing a consequence of the container
+ * instead: whatever its shape, everything in the box stays visible.
+ *
+ * The box is mainland France, stretched south and east so the pin sits inside
+ * the frame rather than against its corner.
+ */
+const FRAME: [[number, number], [number, number]] = [
+  [-6.1, 40.4],
+  [11.3, 51.4],
+];
+
+/**
+ * Lazily mounted map, styled from the site palette in both themes.
+ *
+ * The style is rebuilt and swapped when the theme changes, rather than dimming a
+ * light map with a CSS filter — that approach left labels grey-on-grey and the
+ * tiles muddy. Swapping the style keeps the camera, so the view does not jump.
+ */
 export function LocationMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const resizeRef = useRef<ResizeObserver | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
     "loading",
   );
+  const { resolvedTheme } = useTheme();
+  const mode = resolvedTheme === "dark" ? "dark" : "light";
 
   useEffect(() => {
     const container = containerRef.current;
@@ -20,7 +49,7 @@ export function LocationMap() {
 
     let cancelled = false;
 
-    const initialiseMap = async () => {
+    const initialise = async () => {
       if (cancelled || mapRef.current) return;
 
       try {
@@ -29,57 +58,46 @@ export function LocationMap() {
 
         const map = new maplibregl.Map({
           container,
-          style: MAP_STYLE,
-          center: MARSEILLE,
-          zoom: 10.8,
-          pitch: 36,
-          bearing: -12,
+          style: buildMapStyle(mode),
+          bounds: FRAME,
+          fitBoundsOptions: { padding: 16, animate: false },
           attributionControl: false,
-          scrollZoom: false,
-          maxZoom: 16,
-          minZoom: 7,
+          // Every interaction off: this is a static illustration, and a map you
+          // can drag but not zoom is worse than one you cannot touch at all.
+          interactive: false,
         });
 
         mapRef.current = map;
         map.addControl(
-          new maplibregl.NavigationControl({
-            showCompass: false,
-            visualizePitch: false,
+          new maplibregl.AttributionControl({
+            compact: true,
+            customAttribution:
+              '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OSM</a>',
           }),
-          "top-right",
-        );
-        map.addControl(
-          new maplibregl.AttributionControl({ compact: true }),
           "bottom-right",
         );
 
-        const markerElement = document.createElement("button");
-        markerElement.type = "button";
-        markerElement.className = "location-map-marker";
-        markerElement.setAttribute("aria-label", "Mathis is based in Marseille");
-        const markerCore = document.createElement("span");
-        markerCore.className = "location-map-marker-core";
-        const markerLabel = document.createElement("span");
-        markerLabel.className = "location-map-marker-label";
-        markerLabel.textContent = "ML";
-        markerCore.append(markerLabel);
-        markerElement.append(markerCore);
+        const pin = document.createElement("div");
+        pin.className = "map-pin";
+        pin.innerHTML =
+          '<span class="map-pin-halo"></span><span class="map-pin-core"></span>';
 
-        const popup = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: true,
-          offset: 22,
-          className: "location-map-popup",
-        }).setText("Based in Marseille");
-
-        new maplibregl.Marker({ element: markerElement, anchor: "bottom" })
+        new maplibregl.Marker({ element: pin, anchor: "center" })
           .setLngLat(MARSEILLE)
-          .setPopup(popup)
           .addTo(map);
 
         map.once("load", () => {
           if (!cancelled) setStatus("ready");
         });
+
+        // Re-fit on resize. MapLibre does not reflow on its own, and without
+        // this a phone rotated to landscape keeps the portrait framing.
+        const observer = new ResizeObserver(() => {
+          map.resize();
+          map.fitBounds(FRAME, { padding: 16, animate: false });
+        });
+        observer.observe(container);
+        resizeRef.current = observer;
       } catch {
         if (!cancelled) setStatus("unavailable");
       }
@@ -89,7 +107,7 @@ export function LocationMap() {
       ([entry]) => {
         if (entry?.isIntersecting) {
           observer.disconnect();
-          void initialiseMap();
+          void initialise();
         }
       },
       { rootMargin: "320px" },
@@ -100,41 +118,41 @@ export function LocationMap() {
     return () => {
       cancelled = true;
       observer.disconnect();
+      resizeRef.current?.disconnect();
+      resizeRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
+    // `mode` is read on first paint only; theme changes are handled below so a
+    // toggle never tears down and refetches the map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.setStyle(buildMapStyle(mode));
+  }, [mode]);
+
   return (
-    <div className="location-map relative h-full w-full overflow-hidden bg-[#cfe0df]">
+    <div className="map-frame absolute inset-0 bg-paper-sink">
       <div
         ref={containerRef}
         className="absolute inset-0"
-        role="region"
-        aria-label="Interactive map centered on Marseille, France"
+        role="img"
+        aria-label="Map centred on Marseille, France"
       />
 
-      {status !== "ready" && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_42%_38%,rgba(255,255,255,0.85),rgba(197,219,219,0.88))]">
-          <div className="flex flex-col items-center gap-2 text-[#14373c]">
-            <span className="grid size-11 place-items-center rounded-full bg-[#ef6c4d] text-white shadow-lg">
-              <MapPin className="size-5" />
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.16em]">
+      {status !== "ready" ? (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-paper-sink">
+          <div className="flex flex-col items-center gap-2.5 text-ink-faint">
+            <MapPin className="size-5" />
+            <span className="t-eyebrow">
               {status === "unavailable" ? "Map unavailable" : "Loading map"}
             </span>
           </div>
         </div>
-      )}
-
-      <div className="pointer-events-none absolute bottom-3 left-3 z-10 max-w-[72%] rounded-2xl border border-white/70 bg-[#fffaf0]/92 px-4 py-3 text-[#14373c] shadow-lg backdrop-blur-md">
-        <p className="font-display text-xl font-semibold leading-none">
-          Marseille
-        </p>
-        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.13em] text-[#49646a]">
-          South of France · drag to explore
-        </p>
-      </div>
+      ) : null}
     </div>
   );
 }
