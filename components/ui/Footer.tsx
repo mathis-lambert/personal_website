@@ -7,7 +7,16 @@ import { toast } from "sonner";
 
 import { Eyebrow, Page, Title } from "@/components/ds";
 
-const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "2.3.0";
+/**
+ * In production this is the release tag (`v3.0.1`), set from `github.ref_name`
+ * in `cd.yaml`; the local fallback below has no prefix. Stripping a leading
+ * "v" before the template adds its own is what keeps both cases rendering as
+ * `v3.0.1` instead of the prod one rendering as `vv3.0.1`.
+ */
+const appVersion = (process.env.NEXT_PUBLIC_APP_VERSION || "2.3.0").replace(
+  /^v/i,
+  "",
+);
 const email = "mathislambert.dev@gmail.com";
 
 const columns = [
