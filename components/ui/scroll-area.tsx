@@ -5,9 +5,19 @@ import { ScrollArea as ScrollAreaPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * The ref goes to the Viewport, not the Root.
+ *
+ * The Root is not the scrolling element; the Viewport is. `Conversation` calls
+ * `scrollTo()` through this ref after every streamed token, so a ref landing on
+ * the Root silently stops the chat from following the newest message. Stock
+ * shadcn spreads `ref` onto the Root through `...props`, which is why this file
+ * is customised — do not regenerate it with the CLI without re-applying this.
+ */
 function ScrollArea({
   className,
   children,
+  ref,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
   return (
@@ -17,8 +27,9 @@ function ScrollArea({
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
+        ref={ref}
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
+        className="size-full overflow-y-auto rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>

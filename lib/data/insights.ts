@@ -229,21 +229,33 @@ export async function getInsights(input: {
       })),
     );
 
+  /**
+   * Distinct sessions per source, from page views only.
+   *
+   * Every event carries `document.referrer`, so counting all of them measured
+   * interactions rather than arrivals: one visitor who loaded a page, opened a
+   * project and asked the assistant counted three times against the same
+   * source. Grouping on (referrer, session) and counting the pairs makes the
+   * number what the panel claims it is.
+   */
   const referrers = await events
-    .aggregate<{ _id: string | null; visits: number }>([
-      { $match: { ...inRange, referrer: { $ne: null } } },
-      { $group: { _id: "$referrer", visits: { $sum: 1 } } },
+    .aggregate<{ _id: { referrer: string | null; session: string | null } }>([
+      { $match: { ...inRange, name: "page_view", referrer: { $ne: null } } },
+      { $group: { _id: { referrer: "$referrer", session: "$sessionId" } } },
     ])
     .toArray()
     .then((rows) => {
-      const bySource = new Map<string, number>();
+      const bySource = new Map<string, Set<string>>();
       for (const row of rows) {
-        const source = referrerSource(row._id) ?? "Direct";
-        bySource.set(source, (bySource.get(source) ?? 0) + row.visits);
+        const source = referrerSource(row._id.referrer) ?? "Direct";
+        const sessions = bySource.get(source) ?? new Set<string>();
+        // A missing sessionId is still one arrival; key it by the row itself.
+        sessions.add(row._id.session ?? `anon:${sessions.size}`);
+        bySource.set(source, sessions);
       }
       return [...bySource.entries()]
-        .map(([source, visits]) => ({ source, visits }))
-        .sort((a, b) => b.visits - a.visits)
+        .map(([source, sessions]) => ({ source, visitors: sessions.size }))
+        .sort((a, b) => b.visitors - a.visitors)
         .slice(0, 8);
     });
 

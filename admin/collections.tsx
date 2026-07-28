@@ -106,8 +106,12 @@ export const projectsConfig: CollectionConfig<Project> = {
     { name: "client", label: "Client", type: "text", half: true, section: "Classification" },
     { name: "link_live", label: "Live URL", type: "url", half: true, section: "Links and media" },
     { name: "link_repo", label: "Repository URL", type: "url", half: true, section: "Links and media" },
+    { name: "link_docs", label: "Documentation URL", type: "url", half: true, section: "Links and media" },
+    { name: "link_video", label: "Demo video URL", type: "url", half: true, section: "Links and media" },
     { name: "media_thumbnailUrl", label: "Card image", type: "url", half: true, section: "Links and media" },
     { name: "media_imageUrl", label: "Header image", type: "url", half: true, section: "Links and media" },
+    { name: "media_videoUrl", label: "Embedded video", type: "url", half: true, section: "Links and media" },
+    { name: "media_gallery", label: "Gallery", type: "list", hint: "Comma separated image URLs.", section: "Links and media" },
     {
       name: "content",
       label: "Write-up",
@@ -123,8 +127,12 @@ export const projectsConfig: CollectionConfig<Project> = {
     endDate: project.endDate?.slice(0, 10),
     link_live: project.links?.live,
     link_repo: project.links?.repo,
+    link_docs: project.links?.docs,
+    link_video: project.links?.video,
     media_thumbnailUrl: project.media?.thumbnailUrl,
     media_imageUrl: project.media?.imageUrl,
+    media_videoUrl: project.media?.videoUrl,
+    media_gallery: project.media?.gallery,
   }),
   toPayload: (fields) => ({
     title: fields.text("title"),
@@ -141,13 +149,23 @@ export const projectsConfig: CollectionConfig<Project> = {
     isFeatured: fields.flag("isFeatured"),
     role: fields.optional("role"),
     client: fields.optional("client"),
+    /**
+     * Every subfield, not just the interesting ones. `updateItem` applies these
+     * with `$set`, which replaces the whole nested object, so a `links` payload
+     * missing `docs` deletes the stored documentation link. Anything the editor
+     * does not show, saving destroys.
+     */
     links: {
       live: fields.optional("link_live"),
       repo: fields.optional("link_repo"),
+      docs: fields.optional("link_docs"),
+      video: fields.optional("link_video"),
     },
     media: {
       thumbnailUrl: fields.optional("media_thumbnailUrl"),
       imageUrl: fields.optional("media_imageUrl"),
+      videoUrl: fields.optional("media_videoUrl"),
+      gallery: fields.list("media_gallery"),
     },
   }),
   create: (payload, token) =>
@@ -224,6 +242,7 @@ export const notesConfig: CollectionConfig<Note> = {
     { name: "link_discussion", label: "Discussion URL", type: "url", half: true, section: "Links and media" },
     { name: "media_thumbnailUrl", label: "Card image", type: "url", half: true, section: "Links and media" },
     { name: "media_imageUrl", label: "Header image", type: "url", half: true, section: "Links and media" },
+    { name: "media_gallery", label: "Gallery", type: "list", hint: "Comma separated image URLs.", section: "Links and media" },
     {
       name: "content",
       label: "Body",
@@ -239,6 +258,7 @@ export const notesConfig: CollectionConfig<Note> = {
     link_discussion: note.links?.discussion,
     media_thumbnailUrl: note.media?.thumbnailUrl,
     media_imageUrl: note.media?.imageUrl,
+    media_gallery: note.media?.gallery,
   }),
   toPayload: (fields) => ({
     title: fields.text("title"),
@@ -255,9 +275,11 @@ export const notesConfig: CollectionConfig<Note> = {
       canonical: fields.optional("link_canonical"),
       discussion: fields.optional("link_discussion"),
     },
+    // Same `$set` hazard as projects: list every subfield or lose it.
     media: {
       thumbnailUrl: fields.optional("media_thumbnailUrl"),
       imageUrl: fields.optional("media_imageUrl"),
+      gallery: fields.list("media_gallery"),
     },
   }),
   create: (payload, token) =>

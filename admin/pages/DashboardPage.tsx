@@ -334,7 +334,7 @@ const DashboardPage: React.FC = () => {
               </ol>
             </Panel>
 
-            <Panel title="Referrers">
+            <Panel title="Referrers" hint="visitors">
               {data.referrers.length === 0 ? (
                 <Empty
                   title="No referrers recorded."
@@ -351,7 +351,7 @@ const DashboardPage: React.FC = () => {
                         {referrer.source}
                       </span>
                       <span className="t-meta shrink-0 tabular-nums text-ink">
-                        {referrer.visits}
+                        {referrer.visitors}
                       </span>
                     </li>
                   ))}

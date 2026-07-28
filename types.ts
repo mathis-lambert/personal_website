@@ -272,7 +272,7 @@ export interface AdminInsights {
     opens: number;
   }[];
   pages: { path: string; views: number; visitors: number }[];
-  referrers: { source: string; visits: number }[];
+  referrers: { source: string; visitors: number }[];
   engagement: {
     chatOpened: number;
     chatSubmitted: number;
