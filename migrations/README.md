@@ -14,7 +14,7 @@ migrations/
     schema.json        every field path, its types, how many documents have it
 ```
 
-## Running
+## Running locally
 
 ```bash
 npm run migrate:status          # what has run, what hasn't
@@ -22,17 +22,37 @@ npm run migrate                 # dry run: prints every change, writes nothing
 npm run migrate -- --apply      # writes
 ```
 
-Against production, set the credentials in the shell rather than relying on
-`.env`, and take a dump first:
+This reads `.env`, so it only ever reaches whatever `MONGODB_URI` points at —
+usually the local dev database.
+
+## Running against production
+
+Production Mongo has no port open to the internet; it is only reachable from
+containers already on the server's `databases` Docker network. Nothing else can
+reach it, including a GitHub-hosted Actions runner, which is why this can't be
+"just" an `npm run migrate` step in the deploy job.
+
+**Actions → Migrate → Run workflow** builds a `migrator` image (the `migrator`
+target in `Dockerfile`: full source, no built app) and runs it as a one-off
+container on the server, on that network. Choose an action from the dropdown:
+
+- `status` — what has run, what hasn't.
+- `dry-run` (default) — every pending change, written nowhere.
+- `apply` — writes.
+
+Read the dry-run output in the workflow log before ever choosing `apply`.
+
+Nothing runs automatically on deploy or on a tag push, and this workflow does
+not change that — `workflow_dispatch` only fires when someone deliberately runs
+it. A collection rename is not a decision a container restart, or a release
+tag, should make.
+
+Take a dump before `apply`, from the server, since that is the only place with
+a route to Mongo:
 
 ```bash
-mongodump --uri="$PROD_URI" --out "dump-$(date +%F)"
-MONGODB_URI="$PROD_URI" MONGODB_DB=... node migrations/run.mjs
-MONGODB_URI="$PROD_URI" MONGODB_DB=... node migrations/run.mjs --apply
+mongodump --uri="$MONGODB_URI" --out "dump-$(date +%F)"
 ```
-
-Nothing runs automatically on deploy. That is deliberate: a collection rename is
-not a decision a container restart should make.
 
 ## The ledger
 

@@ -13,6 +13,17 @@ ENV NODE_ENV=development
 COPY . .
 CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
 
+# A one-off image for running `migrations/`. The `runner` stage below ships only
+# `.next/standalone` — traced from what the app itself imports at request time,
+# which never includes a migration script — so it has no `migrations/` directory
+# and no general-purpose `node_modules` to run one with. This stage reuses `deps`
+# (full `npm ci`, so the `mongodb` driver is present) and copies the full source,
+# the same shape as `dev` above.
+FROM deps AS migrator
+ENV NODE_ENV=production
+COPY . .
+CMD ["node", "migrations/run.mjs"]
+
 FROM deps AS builder
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ML_BASE_URL

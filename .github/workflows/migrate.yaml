@@ -1,0 +1,127 @@
+name: Migrate
+
+# Manual only, on purpose. `migrations/README.md` is explicit that nothing runs
+# automatically on deploy — a collection rename is not a decision a container
+# restart should make. This workflow exists so applying one does not also
+# require an SSH session by hand; it does not make the trigger any less manual.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: >-
+          status: show what has run. dry-run: report pending changes, write
+          nothing. apply: write them.
+        type: choice
+        options: [status, dry-run, apply]
+        default: dry-run
+      ref:
+        description: "Git ref to build the migrator image from (branch, tag, SHA). Defaults to the ref this was dispatched from."
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  # Queue rather than cancel: a migration that gets killed mid-write is worse
+  # than one that waits its turn.
+  group: migrate-prod
+  cancel-in-progress: false
+
+jobs:
+  build_migrator:
+    name: Build migrator image (arm64)
+    runs-on: ubuntu-24.04-arm
+    environment:
+      name: PROD
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image tag
+        id: meta
+        run: |
+          echo "tags=ghcr.io/${{ github.repository_owner }}/personal-website-migrator:${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push (migrator)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: migrator
+          platforms: linux/arm64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=migrator
+          cache-to: type=gha,mode=max,scope=migrator
+
+  run_migration:
+    name: Run on the server
+    needs: [build_migrator]
+    runs-on: ubuntu-latest
+    environment:
+      name: PROD
+      url: https://mathislambert.fr
+    steps:
+      - name: Run via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE: ${{ needs.build_migrator.outputs.image }}
+          ACTION: ${{ inputs.action }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
+        with:
+          host: ${{ secrets.ML_DEPLOY_HOST }}
+          username: ${{ secrets.ML_DEPLOY_USER }}
+          key: ${{ secrets.ML_DEPLOY_KEY }}
+          port: ${{ secrets.ML_DEPLOY_PORT }}
+          script_stop: true
+          envs: IMAGE,ACTION,MONGODB_URI,MONGODB_DB
+          script: |
+            set -euo pipefail
+
+            # Mongo has no port open to the internet — it is only reachable from
+            # containers on this network, which is why this has to run here and
+            # not from the Actions runner.
+            docker network create databases || true
+
+            if [ -n '${{ secrets.GITHUB_TOKEN }}' ]; then
+              printf '%s' '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+            fi
+
+            docker pull "$IMAGE"
+
+            case "$ACTION" in
+              status)  ARGS="--status" ;;
+              apply)   ARGS="--apply" ;;
+              *)       ARGS="" ;;
+            esac
+
+            # shellcheck disable=SC2086
+            docker run --rm \
+              --network databases \
+              -e MONGODB_URI="$MONGODB_URI" \
+              -e MONGODB_DB="$MONGODB_DB" \
+              "$IMAGE" \
+              node migrations/run.mjs $ARGS
+
+            docker image rm "$IMAGE" || true
