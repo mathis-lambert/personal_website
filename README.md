@@ -33,11 +33,11 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 
 ## Run locally
 
-- Node: `cd src && npm ci && npm run dev` (expects Mongo reachable at `MONGODB_URI`, defaults to `mongodb://localhost:27017/personal_website`).
-- Populate local MongoDB with sample projects, articles, timeline entries, and a resume: `cd src && npm run seed:dev`. The command is idempotent and refuses non-local hosts by default.
-- Remove only the generated development content: `cd src && npm run seed:dev -- --clean`.
-- Route instrumentation check: `cd src && npm run check:api-analytics`.
-- Docker with live reload + Mongo: `docker compose -f development/docker-compose.yml up --build` (bind-mounts `src/` into the dev container).
+- Node: `npm ci && npm run dev` (expects Mongo reachable at `MONGODB_URI`, defaults to `mongodb://localhost:27017/personal_website`).
+- Populate local MongoDB with sample projects, articles, timeline entries, and a resume: `npm run seed:dev`. The command is idempotent and refuses non-local hosts by default.
+- Remove only the generated development content: `npm run seed:dev -- --clean`.
+- Route instrumentation check: `npm run check:api-analytics`.
+- Docker with live reload + Mongo: `docker compose -f development/docker-compose.yml up --build` (bind-mounts the repository root into the dev container).
 - Prod-like image locally: `docker compose -f compose.dev.yaml up --build` (reads build args from `.env`).
 
 ## Deploy
