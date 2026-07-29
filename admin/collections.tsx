@@ -321,6 +321,14 @@ const timelineConfig = (
         </p>
       ),
     },
+    {
+      header: "Visibility",
+      cell: (entry) => (
+        <Badge variant="outline" className="t-meta">
+          {entry.hide ? "Hidden" : "Visible"}
+        </Badge>
+      ),
+    },
     { header: "Period", meta: true, cell: (entry) => entry.date },
   ],
   fields: [
@@ -334,6 +342,12 @@ const timelineConfig = (
       hint: "Free text, as it should read on the page: “Sept. 2024 – Present”.",
     },
     { name: "description", label: "Summary", type: "textarea", hint: "What you were responsible for. Two or three sentences beats one long one." },
+    {
+      name: "hide",
+      label: "Hide from the public site",
+      type: "switch",
+      hint: "Keeps this entry in the admin without showing it to visitors.",
+    },
   ],
   toValues: (entry) => ({ ...entry }),
   toPayload: (fields) => ({
@@ -341,6 +355,7 @@ const timelineConfig = (
     company: fields.text("company"),
     date: fields.text("date"),
     description: fields.text("description"),
+    hide: fields.flag("hide"),
   }),
   create: async (payload, token, current) => {
     const item = payload as unknown as TimelineEntry;
@@ -362,6 +377,29 @@ const timelineConfig = (
       current.filter((_, index) => index !== Number(id)),
       token,
     ),
+  reorder: async (id, direction, token, current) => {
+    const from = Number(id);
+    const to = from + direction;
+    if (!Number.isInteger(from) || to < 0 || to >= current.length) {
+      return current;
+    }
+    const reordered = [...current];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(to, 0, moved);
+    await replaceCollection(kind, reordered, token);
+    return reordered;
+  },
+  visibility: {
+    isHidden: (entry) => Boolean(entry.hide),
+    setHidden: async (id, hidden, token, current) => {
+      const index = Number(id);
+      const updated = current.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, hide: hidden } : entry,
+      );
+      await replaceCollection(kind, updated, token);
+      return updated;
+    },
+  },
 });
 
 /**

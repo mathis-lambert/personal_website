@@ -192,10 +192,16 @@ export const buildSelfTools = () => {
     handler: async () => {
       const [experiences, studies] = await Promise.all([
         getExperiencesCollection().then((collection) =>
-          collection.find({}, { projection: { _id: 0 } }).toArray(),
+          collection
+            .find({ hide: { $ne: true } }, { projection: { _id: 0 } })
+            .sort({ order: 1, date: -1, _id: 1 })
+            .toArray(),
         ),
         getStudiesCollection().then((collection) =>
-          collection.find({}, { projection: { _id: 0 } }).toArray(),
+          collection
+            .find({ hide: { $ne: true } }, { projection: { _id: 0 } })
+            .sort({ order: 1, date: -1, _id: 1 })
+            .toArray(),
         ),
       ]);
 

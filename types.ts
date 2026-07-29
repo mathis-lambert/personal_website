@@ -68,6 +68,7 @@ export interface TimelineEntry {
   company: string;
   date: string;
   description: string;
+  hide?: boolean;
 }
 
 // --- Interfaces (assuming these are defined elsewhere or keep them here) ---

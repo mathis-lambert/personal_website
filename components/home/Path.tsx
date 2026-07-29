@@ -93,6 +93,9 @@ export function Path({
   experiences: TimelineEntry[];
   studies: TimelineEntry[];
 }) {
+  const visibleExperiences = experiences.filter((entry) => !entry.hide);
+  const visibleStudies = studies.filter((entry) => !entry.hide);
+
   return (
     <Page as="div" data-ink="azure">
       <Section id="path" labelledBy="path-title">
@@ -119,13 +122,13 @@ export function Path({
             heading="Experience"
             icon={<Briefcase />}
             ink="azure"
-            entries={experiences}
+            entries={visibleExperiences}
           />
           <Group
             heading="Studies"
             icon={<GraduationCap />}
             ink="turquoise"
-            entries={studies}
+            entries={visibleStudies}
           />
         </div>
       </Section>
