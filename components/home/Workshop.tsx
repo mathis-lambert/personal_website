@@ -1,6 +1,13 @@
 "use client";
 
-import { Boxes, Cpu, Hammer, MapPin, Palette } from "lucide-react";
+import {
+  Boxes,
+  Cpu,
+  Hammer,
+  MapPin,
+  Palette,
+  TerminalSquare,
+} from "lucide-react";
 
 import {
   Eyebrow,
@@ -13,18 +20,52 @@ import {
 import { LocationMap } from "@/components/ui/LocationMap";
 import SvgIcon from "@/components/ui/SvgIcon";
 import { LOGOS } from "@/components/ui/logos";
+import { ToolQuip } from "@/components/home/ToolQuip";
 
 /**
  * Tools I actually reach for, grouped by what they're for. Grouping is the
  * point: a flat marquee of 21 logos told you nothing except that logos exist.
  */
-type Tool = { name: string; logo: string; dark?: string };
+type Tool = {
+  name: string;
+  logo: string;
+  dark?: string;
+  /** Hovering cycles through these, streamed in one at a time. */
+  quips?: string[];
+};
 
 const toolGroups: {
   heading: string;
   icon: React.ReactNode;
   tools: Tool[];
 }[] = [
+  {
+    heading: "Coding",
+    icon: <TerminalSquare />,
+    tools: [
+      {
+        name: "Claude Code",
+        logo: LOGOS.claude,
+        quips: [
+          "wrote this list",
+          "and this quip",
+          "we don't talk about the git history",
+          "yes, it reviewed itself",
+        ],
+      },
+      {
+        name: "Codex",
+        logo: LOGOS.openaiLight,
+        dark: LOGOS.openaiDark,
+        quips: [
+          "second opinion",
+          "for when the first one lies",
+          "tests, allegedly",
+          "it's 2026",
+        ],
+      },
+    ],
+  },
   {
     heading: "Models & serving",
     icon: <Cpu />,
@@ -85,9 +126,10 @@ export function Workshop() {
                   </Eyebrow>
                   <ul className="flex flex-col gap-2.5">
                     {group.tools.map((tool) => (
-                      <li
+                      <ToolQuip
                         key={tool.name}
-                        className="group/tool flex items-center gap-3"
+                        name={tool.name}
+                        quips={tool.quips ?? []}
                       >
                         {/* Logos sit in a neutral well so their brand colours
                             read as artwork rather than as UI accents. */}
@@ -99,10 +141,7 @@ export function Workshop() {
                             size={18}
                           />
                         </span>
-                        <span className="text-sm font-bold text-ink">
-                          {tool.name}
-                        </span>
-                      </li>
+                      </ToolQuip>
                     ))}
                   </ul>
                 </div>

@@ -26,6 +26,7 @@ export const LOGOS = {
   openaiLight: "/svgs/logos/openai-light.svg",
   openaiDark: "/svgs/logos/openai-dark.svg",
   huggingface: "/svgs/logos/huggingface.svg",
+  claude: "/svgs/logos/claude.svg",
 } as const;
 
 export type LogoKey = keyof typeof LOGOS;

@@ -39,7 +39,7 @@ export function TokenStream({
   className?: string;
   step?: number;
   startDelay?: number;
-  as?: "h1" | "h2" | "p" | "div";
+  as?: "h1" | "h2" | "p" | "div" | "span";
   id?: string;
 }) {
   // Count first, so the marked word knows when the whole headline has landed:

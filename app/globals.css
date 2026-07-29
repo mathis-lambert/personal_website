@@ -251,9 +251,15 @@
   /* Slight overshoot. Used where something should feel picked up rather than
      moved: the letter lift, and every button that rises under the cursor. */
   --ease-out-back: cubic-bezier(0.22, 1.4, 0.36, 1);
+  /* Decelerating, no overshoot: for things settling into place. */
+  --ease-out-soft: cubic-bezier(0.16, 0.84, 0.28, 1);
   --t-1: 140ms;
   --t-2: 260ms;
   --t-3: 560ms;
+  /* Entrances. Slower than a state change, because it is content arriving. */
+  --t-4: 620ms;
+  /* Menus and panels: a control responding, so quicker than content. */
+  --t-menu: 340ms;
 
   --z-raise: 10;
   --z-sticky: 100;
@@ -878,15 +884,25 @@
     visibility: hidden;
     transform: translateY(-0.5rem);
     transition:
-      grid-template-rows var(--t-2) var(--ease),
-      opacity var(--t-2) var(--ease),
-      transform var(--t-2) var(--ease),
-      visibility 0s linear var(--t-2);
+      grid-template-rows var(--t-menu) var(--ease-out-soft),
+      opacity var(--t-menu) var(--ease-out-soft),
+      transform var(--t-menu) var(--ease-out-soft),
+      visibility 0s linear var(--t-menu);
   }
 
   .sheet > * {
     overflow: hidden;
     min-height: 0;
+  }
+
+  /* No blur in the sheet. backdrop-filter cannot animate with a parent's
+     opacity, and animating the blur value itself repaints the whole backdrop
+     every frame, which flickers on a phone. An opaque panel costs nothing and
+     the unfold carries the motion on its own. */
+  .sheet .glass {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--paper-lift);
   }
 
   .sheet[data-open="true"] {
@@ -895,9 +911,9 @@
     visibility: visible;
     transform: none;
     transition:
-      grid-template-rows var(--t-2) var(--ease),
-      opacity var(--t-2) var(--ease),
-      transform var(--t-2) var(--ease),
+      grid-template-rows var(--t-menu) var(--ease-out-soft),
+      opacity var(--t-menu) var(--ease-out-soft),
+      transform var(--t-menu) var(--ease-out-soft),
       visibility 0s;
   }
 
@@ -1053,10 +1069,10 @@
 
   .reveal {
     opacity: 0;
-    transform: translate3d(0, 8px, 0);
+    transform: translate3d(0, 14px, 0);
     transition:
-      opacity var(--t-2) var(--ease),
-      transform var(--t-2) var(--ease);
+      opacity var(--t-4) var(--ease-out-soft),
+      transform var(--t-4) var(--ease-out-soft);
     transition-delay: var(--reveal-delay, 0ms);
   }
   .reveal[data-shown="true"] {

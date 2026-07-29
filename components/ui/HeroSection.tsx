@@ -84,10 +84,12 @@ export const HeroSection = () => {
           {/* The name is the stable, human thing, so it gets the pointer lift.
               The line describing him is the one the machine writes, so it gets
               the token stream. */}
-          <h1 id="hero-title" className="t-display">
-            <LiftText>Mathis Lambert</LiftText>
-            <span className="text-coral">.</span>
-          </h1>
+          <Reveal delay={60}>
+            <h1 id="hero-title" className="t-display">
+              <LiftText>Mathis Lambert</LiftText>
+              <span className="text-coral">.</span>
+            </h1>
+          </Reveal>
 
           <TokenStream
             as="p"
