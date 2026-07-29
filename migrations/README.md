@@ -9,6 +9,7 @@ migrations/
   lib.mjs              connection + shared helpers
   001-baseline.mjs      loads the versioned snapshot into an empty database
   002-notes-rename.mjs  articles -> notes
+  003-timeline-visibility.mjs  initializes missing experience and study hide flags
   baseline/
     data.json          every content document, _id stripped
     schema.json        every field path, its types, how many documents have it

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
   SheetContent,
@@ -85,6 +86,21 @@ export type CollectionConfig<T> = {
     current: T[],
   ) => Promise<{ item: T }>;
   remove: (id: string, token: string, current: T[]) => Promise<unknown>;
+  reorder?: (
+    id: string,
+    direction: -1 | 1,
+    token: string,
+    current: T[],
+  ) => Promise<T[]>;
+  visibility?: {
+    isHidden: (item: T) => boolean;
+    setHidden: (
+      id: string,
+      hidden: boolean,
+      token: string,
+      current: T[],
+    ) => Promise<T[]>;
+  };
   /** How a record identifies itself in a list and a delete confirmation. */
   identify: (item: T, index: number) => { id: string; label: string };
 };
@@ -126,6 +142,7 @@ export function CollectionScreen<T>({ config }: { config: CollectionConfig<T> })
   } | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [updatingRow, setUpdatingRow] = useState<string | null>(null);
 
   /** Identity is resolved against the loaded order before any sorting. */
   const rows = useMemo(
@@ -190,6 +207,34 @@ export function CollectionScreen<T>({ config }: { config: CollectionConfig<T> })
     }
   };
 
+  const reorder = async (id: string, direction: -1 | 1) => {
+    if (!token || !config.reorder) return;
+    setUpdatingRow(id);
+    try {
+      set(await config.reorder(id, direction, token, items));
+      toast.success("Order saved");
+    } catch (reorderError) {
+      toast.error((reorderError as Error)?.message ?? "Reorder failed");
+    } finally {
+      setUpdatingRow(null);
+    }
+  };
+
+  const setHidden = async (id: string, hidden: boolean) => {
+    if (!token || !config.visibility) return;
+    setUpdatingRow(id);
+    try {
+      set(await config.visibility.setHidden(id, hidden, token, items));
+      toast.success(hidden ? `${config.noun} hidden` : `${config.noun} visible`);
+    } catch (visibilityError) {
+      toast.error(
+        (visibilityError as Error)?.message ?? "Visibility update failed",
+      );
+    } finally {
+      setUpdatingRow(null);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -250,7 +295,12 @@ export function CollectionScreen<T>({ config }: { config: CollectionConfig<T> })
                     {column.header}
                   </TableHead>
                 ))}
-                <TableHead className="w-20 text-right">
+                {config.visibility ? (
+                  <TableHead className="t-eyebrow w-24 text-center text-ink-faint">
+                    Visible
+                  </TableHead>
+                ) : null}
+                <TableHead className="w-32 text-right">
                   <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
@@ -270,8 +320,45 @@ export function CollectionScreen<T>({ config }: { config: CollectionConfig<T> })
                         {column.cell(item)}
                       </TableCell>
                     ))}
+                    {config.visibility ? (
+                      <TableCell className="text-center">
+                        <Switch
+                          checked={!config.visibility.isHidden(item)}
+                          disabled={updatingRow !== null}
+                          aria-label={`Show ${label} on the public site`}
+                          onCheckedChange={(checked) =>
+                            void setHidden(id, !checked)
+                          }
+                        />
+                      </TableCell>
+                    ) : null}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-0.5">
+                        {config.reorder ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Move ${label} up`}
+                              disabled={updatingRow !== null || Number(id) === 0}
+                              onClick={() => void reorder(id, -1)}
+                            >
+                              <ChevronUp />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Move ${label} down`}
+                              disabled={
+                                updatingRow !== null ||
+                                Number(id) === items.length - 1
+                              }
+                              onClick={() => void reorder(id, 1)}
+                            >
+                              <ChevronDown />
+                            </Button>
+                          </>
+                        ) : null}
                         <Button
                           variant="ghost"
                           size="icon"
