@@ -1,9 +1,4 @@
-/**
- * Turning values into display strings.
- *
- * The locale, the UTC pin and the set of date shapes are policy. Kept here so a
- * card and the page it links to cannot format the same date differently.
- */
+/** Date policy, in one place, so a card and its detail page always agree. */
 
 const DATE_STYLES = {
   /** Card meta rows: 12 Mar 2025 */
@@ -37,11 +32,8 @@ export const formatDate = (
 };
 
 /**
- * Admin tables: `2026-07-27 19:14:03`.
- *
- * Sortable as text, unambiguous across zones, and deliberately not localised:
- * these are log timestamps being read by one person who wants to correlate them
- * with a server, not a date being read by a visitor.
+ * Admin tables: `2026-07-27 19:14:03`. Deliberately not localised — these are
+ * log timestamps to correlate with a server, not dates for a visitor.
  */
 export const formatTimestamp = (value?: string | Date): string => {
   if (!value) return "n/a";

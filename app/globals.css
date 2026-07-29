@@ -18,9 +18,10 @@
   font-weight: 200 800;
   font-display: swap;
   src: url("/fonts/bricolage-grotesque-latin-wght-normal.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Bricolage Grotesque";
@@ -29,9 +30,10 @@
   font-display: swap;
   src: url("/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2")
     format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
-    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
@@ -40,9 +42,10 @@
   font-weight: 100 800;
   font-display: swap;
   src: url("/fonts/martian-mono-latin-wght-normal.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Martian Mono";
@@ -50,9 +53,10 @@
   font-weight: 100 800;
   font-display: swap;
   src: url("/fonts/martian-mono-latin-ext-wght-normal.woff2") format("woff2");
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
-    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
-    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -550,6 +554,18 @@
       inset 0 1px 0 oklch(1 0 0 / 0.4);
   }
 
+  /* Every button, ours and shadcn's. `translate`, not `transform`: Tailwind v4
+     emits that property for `-translate-y-*`. The springy curve is for the
+     movement alone — an overshot colour extrapolates past its target instead of
+     springing back, which reads as a flash. */
+  .action-motion {
+    transition-property:
+      translate, background-color, border-color, color, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function:
+      var(--ease-out-back), var(--ease), var(--ease), var(--ease), var(--ease);
+  }
+
   .lift {
     transition:
       transform var(--t-2) var(--ease),
@@ -799,8 +815,7 @@
   }
 
   .arch {
-    border-radius: 50% 50% var(--r-4) var(--r-4) / 34% 34% var(--r-4)
-      var(--r-4);
+    border-radius: 50% 50% var(--r-4) var(--r-4) / 34% 34% var(--r-4) var(--r-4);
   }
 
   .offset-print {
@@ -880,6 +895,9 @@
   .sheet {
     display: grid;
     grid-template-rows: 0fr;
+    /* Wider than the page so the clip below has room for the panel's shadow;
+       `.sheet-pad` insets the panel back to page width. */
+    margin-inline: calc(var(--gutter) * -1);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-0.5rem);
@@ -893,6 +911,13 @@
   .sheet > * {
     overflow: hidden;
     min-height: 0;
+  }
+
+  /* Not on `.sheet > *`: that one is the grid item, and its border box would
+     floor at its own padding instead of collapsing to 0fr. 1.75rem clears the
+     26px `--shadow-2` reaches below. */
+  .sheet-pad {
+    padding: 0 var(--gutter) 1.75rem;
   }
 
   /* No blur in the sheet. backdrop-filter cannot animate with a parent's
@@ -995,7 +1020,11 @@
      wake behind the pointer instead of a rigid spike under it. */
   .lift-letter {
     display: inline-block;
-    transform: translate3d(0, calc(var(--lift, 0) * var(--rise, 0.34em) * -1), 0);
+    transform: translate3d(
+      0,
+      calc(var(--lift, 0) * var(--rise, 0.34em) * -1),
+      0
+    );
     transition: transform 320ms var(--ease-out-back);
   }
 
@@ -1335,14 +1364,21 @@
   --map-icon-filter: invert(1);
 }
 
+/* A round info button collapsed, a pill expanded. */
 .map-frame .maplibregl-ctrl-attrib {
-  border-radius: var(--r-1) 0 0 0;
-  background: color-mix(in oklab, var(--paper-lift) 82%, transparent);
+  margin: 0 0.625rem 0.625rem 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--paper-lift) 85%, transparent);
   color: var(--ink-muted);
   font-size: 0.625rem;
 }
 .map-frame .maplibregl-ctrl-attrib a {
   color: var(--ink-muted);
+}
+.map-frame .maplibregl-ctrl-attrib-button {
+  background-color: transparent;
+  filter: var(--map-icon-filter, none);
 }
 
 /* No canvas filter: day and night are two real MapLibre styles built from the
@@ -1469,8 +1505,6 @@
   a:hover {
     transform: none !important;
   }
-
-
 
   .squiggle path,
   .squiggle[data-shown="true"] path {

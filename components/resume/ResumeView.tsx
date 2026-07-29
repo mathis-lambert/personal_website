@@ -34,6 +34,7 @@ import {
   resumeLabels,
   type ResumeLocale,
 } from "@/lib/resume/localization";
+import { externalLinkProps } from "@/lib/ui/links";
 import { cn } from "@/lib/utils";
 import type { ResumeData } from "@/types";
 
@@ -201,7 +202,11 @@ export default function ResumeView({
               aria-busy={downloading}
               disabled={downloading || localePending}
             >
-              {downloading ? <Loader2 className="animate-spin" /> : <Download />}
+              {downloading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Download />
+              )}
               PDF
             </Action>
           </div>
@@ -219,9 +224,7 @@ export default function ResumeView({
               <li key={contact.href}>
                 <a
                   href={contact.href}
-                  {...(contact.href.startsWith("http")
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : null)}
+                  {...externalLinkProps(contact.href)}
                   className="inline-flex items-center gap-2 text-[0.875rem] font-bold text-ink-muted no-underline transition-colors duration-200 hover:text-brand"
                 >
                   <span className="text-brand">{contact.icon}</span>
@@ -319,7 +322,12 @@ export default function ResumeView({
           ) : null}
 
           {(skills?.languages?.length ?? 0) > 0 ? (
-            <Block title={labels.languages} icon={<Languages />} ink="azure" delay={200}>
+            <Block
+              title={labels.languages}
+              icon={<Languages />}
+              ink="azure"
+              delay={200}
+            >
               <div className="border-t border-line pt-5">
                 <TagList items={skills?.languages ?? []} />
               </div>
@@ -328,7 +336,12 @@ export default function ResumeView({
 
           {(data.skills?.length ?? 0) > 0 ||
           (data.passions?.length ?? 0) > 0 ? (
-            <Block title={labels.interests} icon={<Heart />} ink="azure" delay={240}>
+            <Block
+              title={labels.interests}
+              icon={<Heart />}
+              ink="azure"
+              delay={240}
+            >
               <div className="flex flex-col gap-5 border-t border-line pt-5">
                 <Group label={labels.coreSkills} items={data.skills ?? []} />
                 <Group label={labels.passions} items={data.passions ?? []} />

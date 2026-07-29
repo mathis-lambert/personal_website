@@ -39,7 +39,10 @@ export function useLetterLift<T extends HTMLElement>(reach: number = REACH) {
     );
     metrics.current = letters.current.map((letter) => {
       const rect = letter.getBoundingClientRect();
-      return { center: rect.left + rect.width / 2, top: rect.top + rect.height / 2 };
+      return {
+        center: rect.left + rect.width / 2,
+        top: rect.top + rect.height / 2,
+      };
     });
   }, []);
 
@@ -115,13 +118,11 @@ export function useLetterLift<T extends HTMLElement>(reach: number = REACH) {
 }
 
 /**
- * Split a string into per-letter spans that `useLetterLift` can drive.
- *
- * Words stay in a non-breaking box so a line can never break mid-word, and
- * spaces are emitted as hard spaces because a lone space in an inline-block
- * collapses to nothing.
+ * Per-letter spans for `useLetterLift`. Words stay in a non-breaking box so a
+ * line can't break mid-word, and spaces are hard spaces because a lone space in
+ * an inline-block collapses to nothing.
  */
-export function liftLetters(
+function liftLetters(
   text: string,
   keyPrefix: string,
   rise: number = RISE,

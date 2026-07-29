@@ -106,7 +106,7 @@ const FloatingChatInput: React.FC<{ placeholder?: string }> = ({
       <div className="pointer-events-auto flex w-full max-w-xl items-end gap-2">
         <form
           onSubmit={onSubmit}
-          className="relative flex-1 rounded-full border border-line bg-paper-lift/95 p-1.5 shadow-lift-2 backdrop-blur-md transition-colors duration-200 ease-(--ease-paper) focus-within:border-brand-quiet"
+          className="glass relative flex-1 rounded-full p-1.5 transition-colors duration-200 ease-(--ease-paper) focus-within:border-brand-quiet"
         >
           <textarea
             ref={textAreaRef}
@@ -143,7 +143,7 @@ const FloatingChatInput: React.FC<{ placeholder?: string }> = ({
               setMessage("");
             }}
             aria-label="Close chat"
-            className="grid size-14 shrink-0 place-items-center rounded-full border border-line bg-paper-lift/95 text-ink-muted shadow-lift-2 backdrop-blur-md transition-colors duration-200 ease-(--ease-paper) hover:text-ink"
+            className="glass grid size-14 shrink-0 place-items-center rounded-full text-ink-muted transition-colors duration-200 ease-(--ease-paper) hover:text-ink"
           >
             <X className="size-4.5" />
           </button>

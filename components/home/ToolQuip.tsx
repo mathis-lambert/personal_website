@@ -5,14 +5,8 @@ import { useCallback, useRef, useState } from "react";
 import { TokenStream } from "@/components/ds";
 
 /**
- * A coding tool that answers back.
- *
- * The joke is the mechanism, not just the words: hovering makes the tool
- * generate its own line, streamed token by token in the same animation the
- * hero headline uses. An AI tool caught improvising an excuse for itself.
- *
- * Each hover advances to the next line, so it rewards a second and third pass
- * rather than repeating.
+ * A coding tool that answers back: hovering streams out its own line, token by
+ * token. Each hover advances to the next one rather than repeating.
  */
 export function ToolQuip({
   name,
@@ -47,8 +41,7 @@ export function ToolQuip({
       <span className="min-w-0 flex-1">
         <span className="text-sm font-bold text-ink">{name}</span>
 
-        {/* Keyed on the run so a fresh hover restarts the stream rather than
-            re-using the finished animation. */}
+        {/* Keyed on the run so a fresh hover restarts the stream. */}
         {quip ? (
           <TokenStream
             key={quip.run}

@@ -8,20 +8,11 @@
 
 export { CardGrid, EmptyState, Page, Section, SectionHeader } from "./Page";
 export { Surface } from "./Surface";
-export {
-  Display,
-  Eyebrow,
-  Lead,
-  MarkBrand,
-  Meta,
-  Prose,
-  Rule,
-  Title,
-} from "./Text";
+export { Display, Eyebrow, Lead, Meta, Prose, Rule, Title } from "./Text";
 export { Tag, TagList } from "./Tag";
 export { Action, ActionLink, IconAction } from "./Action";
 export { Reveal } from "./Reveal";
-export { LiftText, useLetterLift, liftLetters } from "./LiftText";
+export { LiftText } from "./LiftText";
 export { Squiggle } from "./Squiggle";
 export { Wordmark } from "./Wordmark";
 export { AmbientField } from "./AmbientField";

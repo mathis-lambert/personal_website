@@ -1,24 +1,15 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
+import { externalLinkProps } from "@/lib/ui/links";
 import { cn } from "@/lib/utils";
 
 type ActionTone = "ink" | "brand" | "quiet" | "ghost";
 type ActionSize = "sm" | "md" | "lg";
 
-/**
- * Every tone rises on hover and settles on press.
- *
- * The transition names `translate`, not `transform`: Tailwind v4 emits the
- * `translate` property for `-translate-y-*`, so a transition list built around
- * `transform` leaves the movement uneased and the button teleports.
- *
- * The overshoot curve is the point. A button that travels linearly reads as a
- * state change; one that overshoots slightly reads as an object being lifted.
- */
+/** Every tone rises on hover and settles on press — see `.action-motion`. */
 const base =
-  "group/action inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-bold leading-none no-underline " +
-  "transition-[translate,background-color,border-color,color,box-shadow] duration-200 ease-(--ease-out-back) " +
+  "group/action action-motion inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-bold leading-none no-underline " +
   "hover:-translate-y-0.5 active:translate-y-0 active:duration-75 " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-paper " +
   "disabled:pointer-events-none disabled:opacity-45 disabled:hover:translate-y-0 [&_svg]:shrink-0";
@@ -40,8 +31,6 @@ const sizes: Record<ActionSize, string> = {
   md: "h-11 px-5 text-sm [&_svg]:size-4",
   lg: "h-13 px-6 text-[0.9375rem] [&_svg]:size-4",
 };
-
-const isExternalHref = (href: string) => /^(https?:)?\/\/|^mailto:|^tel:/.test(href);
 
 type Shared = {
   children: ReactNode;
@@ -80,9 +69,7 @@ export function Action({
       <Link
         href={href}
         className={classes}
-        {...(isExternalHref(href)
-          ? { target: "_blank", rel: "noopener noreferrer" }
-          : null)}
+        {...externalLinkProps(href)}
         {...linkProps}
       >
         {children}
@@ -118,9 +105,7 @@ export function ActionLink({
         "link-slide group/link inline-flex items-center gap-2 text-sm font-bold",
         className,
       )}
-      {...(isExternalHref(href)
-        ? { target: "_blank", rel: "noopener noreferrer" }
-        : null)}
+      {...externalLinkProps(href)}
       {...rest}
     >
       {children}
@@ -136,7 +121,12 @@ export function IconAction({
   label,
   ...rest
 }: (AsLink | AsButton) & { label: string }) {
-  const classes = cn(base, tones[tone], "size-10 px-0 [&_svg]:size-4", className);
+  const classes = cn(
+    base,
+    tones[tone],
+    "size-10 px-0 [&_svg]:size-4",
+    className,
+  );
 
   if ("href" in rest && typeof rest.href === "string") {
     const { href, ...linkProps } = rest as AsLink;
@@ -145,9 +135,7 @@ export function IconAction({
         href={href}
         aria-label={label}
         className={classes}
-        {...(isExternalHref(href)
-          ? { target: "_blank", rel: "noopener noreferrer" }
-          : null)}
+        {...externalLinkProps(href)}
         {...linkProps}
       >
         {children}

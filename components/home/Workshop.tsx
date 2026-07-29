@@ -23,10 +23,6 @@ import { LOGOS } from "@/components/ui/logos";
 import { ToolQuip } from "@/components/home/ToolQuip";
 import { cn } from "@/lib/utils";
 
-/**
- * Tools I actually reach for, grouped by what they're for. Grouping is the
- * point: a flat marquee of 21 logos told you nothing except that logos exist.
- */
 type Tool = {
   name: string;
   logo: string;
@@ -129,10 +125,15 @@ export function Workshop() {
         />
 
         <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+          {/* Columns, not a grid: the groups run 2 to 7 tools long, and a grid
+              aligns their rows, leaving dead space under the short ones. */}
           <Surface className="overflow-hidden p-6 sm:p-7">
-            <div className="grid gap-7 sm:grid-cols-2">
+            <div className="gap-x-8 sm:columns-2">
               {toolGroups.map((group) => (
-                <div key={group.heading}>
+                <div
+                  key={group.heading}
+                  className="mb-7 break-inside-avoid last:mb-0"
+                >
                   <Eyebrow as="h3" className="mb-4">
                     <span className="text-brand [&_svg]:size-3.5">
                       {group.icon}
@@ -146,14 +147,11 @@ export function Workshop() {
                         name={tool.name}
                         quips={tool.quips ?? []}
                       >
-                        {/* Logos sit in a neutral well so their brand colours
-                            read as artwork rather than as UI accents. */}
                         <span
                           className={cn(
                             "grid size-9 shrink-0 place-items-center rounded-2 border border-line bg-paper-sink group-hover/tool:border-brand-quiet",
-                            // `.tool-spin` owns its own transition: Tailwind's
-                            // `transition-colors` does not include transform,
-                            // and the utilities layer would win over it.
+                            // `transition-colors` omits transform and would win
+                            // on layer order, so `.tool-spin` transitions alone.
                             tool.quips
                               ? "tool-spin"
                               : "transition-colors duration-200 ease-(--ease-paper)",

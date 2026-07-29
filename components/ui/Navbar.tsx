@@ -116,49 +116,53 @@ const Navbar = () => {
         {/* Kept mounted and inert when closed so it can animate shut. */}
         <div className="sheet md:hidden" data-open={menuOpen}>
           <div>
-            <nav
-              id="mobile-nav"
-              aria-label="Primary"
-              aria-hidden={!menuOpen}
-              className="glass mt-2 rounded-4 p-2"
-            >
-              {navLinks.map((link, index) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                  tabIndex={menuOpen ? undefined : -1}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    transitionDelay: menuOpen ? `${70 + index * 45}ms` : "0ms",
-                  }}
-                  className={cn(
-                    "t-h3 flex items-baseline justify-between rounded-3 px-3 py-3 no-underline",
-                    "transition-[opacity,transform] duration-200 ease-(--ease-paper)",
-                    menuOpen
-                      ? "translate-x-0 opacity-100"
-                      : "-translate-x-2 opacity-0",
-                    isActive(link.href)
-                      ? "bg-brand-wash text-brand"
-                      : "text-ink hover:bg-paper-sink",
-                  )}
-                >
-                  {link.label}
-                  <span className="t-meta">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </Link>
-              ))}
-              <Action
-                tone="ink"
-                size="lg"
-                onClick={startChat}
-                tabIndex={menuOpen ? undefined : -1}
-                className="mt-2 w-full"
+            <div className="sheet-pad">
+              <nav
+                id="mobile-nav"
+                aria-label="Primary"
+                aria-hidden={!menuOpen}
+                className="glass mt-2 rounded-4 p-2"
               >
-                <MessageCircle /> Ask my AI
-              </Action>
-            </nav>
+                {navLinks.map((link, index) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={isActive(link.href) ? "page" : undefined}
+                    tabIndex={menuOpen ? undefined : -1}
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      transitionDelay: menuOpen
+                        ? `${70 + index * 45}ms`
+                        : "0ms",
+                    }}
+                    className={cn(
+                      "t-h3 flex items-baseline justify-between rounded-3 px-3 py-3 no-underline",
+                      "transition-[opacity,transform] duration-200 ease-(--ease-paper)",
+                      menuOpen
+                        ? "translate-x-0 opacity-100"
+                        : "-translate-x-2 opacity-0",
+                      isActive(link.href)
+                        ? "bg-brand-wash text-brand"
+                        : "text-ink hover:bg-paper-sink",
+                    )}
+                  >
+                    {link.label}
+                    <span className="t-meta">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </Link>
+                ))}
+                <Action
+                  tone="ink"
+                  size="lg"
+                  onClick={startChat}
+                  tabIndex={menuOpen ? undefined : -1}
+                  className="mt-2 w-full"
+                >
+                  <MessageCircle /> Ask my AI
+                </Action>
+              </nav>
+            </div>
           </div>
         </div>
       </div>

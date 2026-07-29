@@ -45,11 +45,7 @@ export function Display({
 }) {
   if (typeof children === "string") {
     return (
-      <LiftText
-        id={id}
-        as={Tag as "h1"}
-        className={cn("t-display", className)}
-      >
+      <LiftText id={id} as={Tag as "h1"} className={cn("t-display", className)}>
         {children}
       </LiftText>
     );
@@ -74,7 +70,7 @@ export function Title({
   id?: string;
   level?: 1 | 2 | 3;
 }) {
-  const Tag = (`h${level}` as const) satisfies ElementType;
+  const Tag = `h${level}` as const satisfies ElementType;
 
   if (typeof children === "string") {
     return (
@@ -115,14 +111,6 @@ export function Meta({
   return <Tag className={cn("t-meta", className)}>{children}</Tag>;
 }
 
-/**
- * Emphasised words inside a display line — a drawn highlight rather than a
- * colour swap, so the sentence still reads as one sentence.
- */
-export function MarkBrand({ children }: { children: ReactNode }) {
-  return <span className="mark-brand">{children}</span>;
-}
-
 /** Markdown / long-form body copy. */
 export function Prose({
   children,
@@ -143,6 +131,9 @@ export function Rule({
   hairline?: boolean;
 }) {
   return (
-    <hr role="presentation" className={cn(hairline ? "hairline" : "rule", className)} />
+    <hr
+      role="presentation"
+      className={cn(hairline ? "hairline" : "rule", className)}
+    />
   );
 }

@@ -77,6 +77,12 @@ export function LocationMap() {
           "bottom-right",
         );
 
+        // It renders expanded and collapses on the first pan or zoom, neither
+        // of which can happen on a non-interactive map.
+        container
+          .querySelector(".maplibregl-ctrl-attrib")
+          ?.classList.remove("maplibregl-compact-show");
+
         const pin = document.createElement("div");
         pin.className = "map-pin";
         pin.innerHTML =

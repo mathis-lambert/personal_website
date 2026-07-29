@@ -1,11 +1,19 @@
 "use client";
 
-import { ArrowUpRight, Check, Copy, Github, Linkedin, Mail } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  Github,
+  Linkedin,
+  Mail,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Eyebrow, Page, Title } from "@/components/ds";
+import { externalLinkProps, isExternalHref } from "@/lib/ui/links";
 
 /**
  * In production this is the release tag (`v3.0.1`), set from `github.ref_name`
@@ -32,7 +40,10 @@ const columns = [
     heading: "Elsewhere",
     links: [
       { label: "GitHub", href: "https://github.com/mathis-lambert" },
-      { label: "LinkedIn", href: "https://www.linkedin.com/in/mathis-lambert/" },
+      {
+        label: "LinkedIn",
+        href: "https://www.linkedin.com/in/mathis-lambert/",
+      },
     ],
   },
 ];
@@ -92,14 +103,12 @@ const Footer = () => {
                 </Eyebrow>
                 <ul className="space-y-2.5">
                   {column.links.map((link) => {
-                    const external = link.href.startsWith("http");
+                    const external = isExternalHref(link.href);
                     return (
                       <li key={link.href}>
                         <Link
                           href={link.href}
-                          {...(external
-                            ? { target: "_blank", rel: "noopener noreferrer" }
-                            : null)}
+                          {...externalLinkProps(link.href)}
                           className="group inline-flex items-center gap-1.5 text-sm font-bold text-ink-invert/70 no-underline transition-colors duration-200 hover:text-ink-invert"
                         >
                           {link.label}
