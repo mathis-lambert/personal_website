@@ -999,6 +999,26 @@
     transition: transform 320ms var(--ease-out-back);
   }
 
+  /* Tools --------------------------------------------------------------- */
+
+  /* One full turn on hover, not a perpetual spinner: the logo acknowledges the
+     pointer and settles. Only the coding tools carry it, which is what makes it
+     read as a wink rather than as decoration. */
+  .tool-spin {
+    /* Explicitly rotate(0), not `none`: transitioning from `none` to
+       rotate(360deg) can decompose to identity-to-identity and animate
+       nothing. Matching function lists make the angle interpolate. */
+    transform: rotate(0deg);
+    transition:
+      transform var(--t-4) var(--ease-out-back),
+      border-color 200ms var(--ease-paper);
+  }
+
+  .tool-row:hover .tool-spin,
+  .tool-row:focus-within .tool-spin {
+    transform: rotate(360deg);
+  }
+
   /* Squiggle ----------------------------------------------------------- */
 
   /* A drawn rule. `pathLength="1"` on the path normalises its length, so the
@@ -1436,6 +1456,11 @@
   .lift-letter {
     transform: none;
     transition: none;
+  }
+
+  .tool-row:hover .tool-spin,
+  .tool-row:focus-within .tool-spin {
+    transform: none;
   }
 
   /* Buttons stay put; the colour change alone carries the hover. */

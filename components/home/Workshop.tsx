@@ -21,6 +21,7 @@ import { LocationMap } from "@/components/ui/LocationMap";
 import SvgIcon from "@/components/ui/SvgIcon";
 import { LOGOS } from "@/components/ui/logos";
 import { ToolQuip } from "@/components/home/ToolQuip";
+import { cn } from "@/lib/utils";
 
 /**
  * Tools I actually reach for, grouped by what they're for. Grouping is the
@@ -44,24 +45,36 @@ const toolGroups: {
     icon: <TerminalSquare />,
     tools: [
       {
-        name: "Claude Code",
-        logo: LOGOS.claude,
-        quips: [
-          "wrote this list",
-          "and this quip",
-          "we don't talk about the git history",
-          "yes, it reviewed itself",
-        ],
-      },
-      {
         name: "Codex",
         logo: LOGOS.openaiLight,
         dark: LOGOS.openaiDark,
         quips: [
           "second opinion",
           "for when the first one lies",
-          "tests, allegedly",
+          "tests, allegedly \u{1F91E}",
           "it's 2026",
+          "reviewed by a rival \u{1F440}",
+          "ships at 2am \u{1F319}",
+          "\u{1F480}",
+          "no notes",
+          "the tabs stay open",
+          "asked it twice, same answer, shipped",
+        ],
+      },
+      {
+        name: "Claude Code",
+        logo: LOGOS.claude,
+        quips: [
+          "wrote this list",
+          "and this quip \u{1F643}",
+          "we don't talk about the git history",
+          "yes, it reviewed itself",
+          "sue me",
+          "read the whole repo, twice \u{1F9E0}",
+          "blames the linter \u{1F9F9}",
+          "\u{1F602} it's fine",
+          "'just one more refactor'",
+          "somehow also wrote the migration",
         ],
       },
     ],
@@ -75,6 +88,8 @@ const toolGroups: {
       { name: "Hugging Face", logo: LOGOS.huggingface },
       { name: "Mistral", logo: LOGOS.mistralLight, dark: LOGOS.mistralDark },
       { name: "OpenAI", logo: LOGOS.openaiLight, dark: LOGOS.openaiDark },
+      { name: "LangChain", logo: LOGOS.langchain },
+      { name: "LangGraph", logo: LOGOS.langgraph },
     ],
   },
   {
@@ -133,7 +148,17 @@ export function Workshop() {
                       >
                         {/* Logos sit in a neutral well so their brand colours
                             read as artwork rather than as UI accents. */}
-                        <span className="grid size-9 shrink-0 place-items-center rounded-2 border border-line bg-paper-sink transition-colors duration-200 ease-(--ease-paper) group-hover/tool:border-brand-quiet">
+                        <span
+                          className={cn(
+                            "grid size-9 shrink-0 place-items-center rounded-2 border border-line bg-paper-sink group-hover/tool:border-brand-quiet",
+                            // `.tool-spin` owns its own transition: Tailwind's
+                            // `transition-colors` does not include transform,
+                            // and the utilities layer would win over it.
+                            tool.quips
+                              ? "tool-spin"
+                              : "transition-colors duration-200 ease-(--ease-paper)",
+                          )}
+                        >
                           <SvgIcon
                             path={tool.logo}
                             darkPath={tool.dark}

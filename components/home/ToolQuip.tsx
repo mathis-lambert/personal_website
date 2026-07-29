@@ -34,7 +34,7 @@ export function ToolQuip({
 
   return (
     <li
-      className="group/tool flex items-center gap-3"
+      className="tool-row group/tool flex items-center gap-3"
       onPointerEnter={(event) => {
         if (event.pointerType !== "touch") show();
       }}
