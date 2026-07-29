@@ -3,7 +3,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import { useLetterLift } from "./LiftText";
-import { cn } from "@/lib/utils";
 
 export type StreamSegment = string | { mark: string } | { break: true };
 
@@ -64,31 +63,27 @@ export function TokenStream({
   const nodes: ReactNode[] = [];
 
   const push = (text: string, mark: boolean) => {
+    // Always collect locally, then either wrap the lot in one mark (so its
+    // rule is continuous) or spill it straight out.
+    const parts: ReactNode[] = [];
+
     for (const part of text.split(/(\s+)/)) {
       if (!part) continue;
 
       // Whitespace goes out as a bare text node: wrapped in an inline-block it
       // would collapse to zero width and weld the words together.
       if (/^\s+$/.test(part)) {
-        nodes.push(part);
+        parts.push(part);
         continue;
       }
 
       const chunks = chunkWord(part);
       const first = index;
 
-      nodes.push(
+      parts.push(
         <span
           key={`w-${first}-${part}`}
-          className={cn(
-            "inline-block whitespace-nowrap",
-            mark && "mark-brand mark-draw",
-          )}
-          style={
-            mark
-              ? ({ "--mark-delay": `${markDelay}ms` } as CSSProperties)
-              : undefined
-          }
+          className="inline-block whitespace-nowrap"
         >
           {/* A chunk is the unit that arrives; a letter is the unit the pointer
               lifts. Both live on the same span: `--token-delay` drives the
@@ -123,6 +118,20 @@ export function TokenStream({
       );
 
       index += chunks.length;
+    }
+
+    if (mark) {
+      nodes.push(
+        <span
+          key={`m-${index}`}
+          className="mark-brand mark-draw"
+          style={{ "--mark-delay": `${markDelay}ms` } as CSSProperties}
+        >
+          {parts}
+        </span>,
+      );
+    } else {
+      nodes.push(...parts);
     }
   };
 

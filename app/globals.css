@@ -648,19 +648,16 @@
 
   /* Marks & rules ------------------------------------------------------ */
 
+  /* Painted as a background rather than an ::after bar: a marked phrase of
+     several words then draws one continuous rule, and splits correctly if it
+     wraps. An absolutely positioned bar had to be per-word, which showed as a
+     gap between each one. */
   .mark-brand {
-    position: relative;
     color: var(--brand);
-    white-space: nowrap;
-  }
-  .mark-brand::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    bottom: -0.02em;
-    height: 0.055em;
-    border-radius: 9999px;
-    background: var(--brand);
+    background-image: linear-gradient(var(--brand), var(--brand));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 0.055em;
   }
 
   /* A drawn rule that takes the section's ink. */
@@ -930,15 +927,14 @@
   /* The underline draws itself once, left to right, after the headline has
      finished arriving — the one flourish on the page that is purely a flourish,
      so it gets to be the thing you notice. */
-  .mark-draw::after {
-    transform: scaleX(0);
-    transform-origin: left center;
+  .mark-draw {
+    background-size: 0% 0.055em;
     animation: mark-draw 620ms var(--ease) var(--mark-delay, 700ms) forwards;
   }
 
   @keyframes mark-draw {
     to {
-      transform: scaleX(1);
+      background-size: 100% 0.055em;
     }
   }
 
@@ -1409,8 +1405,8 @@
     transition: none;
   }
 
-  .mark-draw::after {
-    transform: none;
+  .mark-draw {
+    background-size: 100% 0.055em;
     animation: none;
   }
 

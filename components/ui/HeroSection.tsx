@@ -13,7 +13,7 @@ import type { ReactNode } from "react";
 import {
   Action,
   Eyebrow,
-  Lead,
+  LiftText,
   Page,
   Reveal,
   Squiggle,
@@ -81,25 +81,24 @@ export const HeroSection = () => {
             </div>
           </Reveal>
 
+          {/* The name is the stable, human thing, so it gets the pointer lift.
+              The line describing him is the one the machine writes, so it gets
+              the token stream. */}
+          <h1 id="hero-title" className="t-display">
+            <LiftText>Mathis Lambert</LiftText>
+            <span className="text-coral">.</span>
+          </h1>
+
           <TokenStream
-            id="hero-title"
-            className="t-display"
+            as="p"
+            className="t-lead mt-6"
+            startDelay={520}
             segments={[
-              "I make AI ",
-              { mark: "useful" },
-              " and software feel human.",
+              "Software engineer. I build ",
+              { mark: "AI systems" },
+              ", agentic workflows and data pipelines.",
             ]}
           />
-
-          <Reveal delay={380}>
-            <Lead className="mt-7">
-              I&apos;m Mathis, an AI engineer at Free Pro and a student at CPE
-              Lyon. I work on retrieval that returns the right passage, pipelines
-              that hold up under real traffic, and evaluations that catch a model
-              getting quietly worse. This site runs on that same stack, so you
-              can ask it about my work instead of reading all of it.
-            </Lead>
-          </Reveal>
 
           <Reveal delay={440}>
             <div className="mt-8 flex flex-wrap gap-2.5">
