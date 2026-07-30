@@ -25,7 +25,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
       onChange={(event) => onChange(event.target.value)}
       placeholder={placeholder}
       aria-label={ariaLabel || placeholder}
-      className="h-11 w-full rounded-full border border-line bg-paper pl-11 pr-10 text-sm text-ink outline-none transition-colors duration-200 ease-(--ease-paper) placeholder:text-ink-faint hover:border-line-strong focus:border-brand [&::-webkit-search-cancel-button]:hidden"
+      className="h-11 w-full rounded-full border border-line bg-paper pl-11 pr-10 text-base text-ink outline-none transition-colors duration-200 ease-(--ease-paper) placeholder:text-ink-faint hover:border-line-strong focus:border-brand md:text-sm [&::-webkit-search-cancel-button]:hidden"
     />
     {value ? (
       <button

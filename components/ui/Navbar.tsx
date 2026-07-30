@@ -3,7 +3,7 @@
 import { Menu, MessageCircle, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Action, IconAction, LiftText, Wordmark } from "@/components/ds";
 import { useTheme } from "@/components/theme-provider";
@@ -24,7 +24,7 @@ const navLinks = [
 const Navbar = () => {
   const pathname = usePathname();
   const { openChat } = useChat();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, systemTheme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -41,12 +41,43 @@ const Navbar = () => {
     openChat();
   }, [openChat]);
 
+  const shiftTimer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (shiftTimer.current) window.clearTimeout(shiftTimer.current);
+    },
+    [],
+  );
+
+  const toggleTheme = useCallback(() => {
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+
+    // The transition lives on a class rather than in the stylesheet, so it
+    // covers the switch and nothing else.
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      root.classList.add("theme-shift");
+      if (shiftTimer.current) window.clearTimeout(shiftTimer.current);
+      shiftTimer.current = window.setTimeout(
+        () => root.classList.remove("theme-shift"),
+        320,
+      );
+    }
+
+    /* Landing back on what the device already wants stores "system", not the
+       colour. Otherwise one tap pins the site for good and it stops following
+       the phone into night mode ever again — and with two states there would be
+       no way back. Diverging from the device stays a deliberate, sticky choice. */
+    setTheme(next === systemTheme ? "system" : next);
+  }, [resolvedTheme, systemTheme, setTheme]);
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <header className="sticky top-0 z-[200] pt-3 sm:pt-4">
-      <div className="page">
+      {/* Positioning context for the mobile sheet, which hangs off the bar. */}
+      <div className="page relative">
         <div className="glass flex h-16 items-center justify-between gap-3 rounded-full pl-4 pr-2.5 sm:pl-5 sm:pr-3">
           <Link
             href="/"
@@ -83,9 +114,7 @@ const Navbar = () => {
             <IconAction
               tone="ghost"
               label="Toggle colour theme"
-              onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
+              onClick={toggleTheme}
             >
               <Sun className="hidden dark:block" />
               <Moon className="dark:hidden" />

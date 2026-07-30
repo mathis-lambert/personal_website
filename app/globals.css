@@ -895,9 +895,16 @@
   .sheet {
     display: grid;
     grid-template-rows: 0fr;
-    /* Wider than the page so the clip below has room for the panel's shadow;
-       `.sheet-pad` insets the panel back to page width. */
-    margin-inline: calc(var(--gutter) * -1);
+    /* Out of flow, or opening it grows the sticky header by its own height and
+       the document with it — 300px of layout appearing above the reader's
+       scroll position. Chrome's scroll anchoring absorbs that; Safari's does
+       not, and the page visibly slides. Anchored to the bar instead, an open
+       menu costs no layout at all.
+       Insets resolve against the padding box, so `inset-inline: 0` already
+       spans the gutters that `.sheet-pad` gives the shadow back. */
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-0.5rem);
@@ -1154,6 +1161,21 @@
   }
   .fold[data-open="true"] {
     grid-template-rows: 1fr;
+  }
+
+  /* Day to night, eased. Every colour on the page moves at once, so this is
+     scoped to the length of the switch and torn down after: left on
+     permanently it would put a 260ms lag under every hover on the site. */
+  .theme-shift,
+  .theme-shift *,
+  .theme-shift *::before,
+  .theme-shift *::after {
+    transition-property:
+      background-color, border-color, color, fill, stroke, box-shadow,
+      text-decoration-color !important;
+    transition-duration: 260ms !important;
+    transition-timing-function: var(--ease) !important;
+    transition-delay: 0s !important;
   }
 
   /* Motion ------------------------------------------------------------- */

@@ -119,7 +119,9 @@ const FloatingChatInput: React.FC<{ placeholder?: string }> = ({
             readOnly={isLoading}
             aria-label="Ask the portfolio assistant"
             style={{ minHeight: MIN_HEIGHT, maxHeight: MAX_HEIGHT }}
-            className="block w-full resize-none bg-transparent py-3 pl-4 pr-13 text-sm leading-snug text-ink outline-none [field-sizing:content] placeholder:text-ink-faint"
+            // 16px on a phone, or iOS zooms the page in on focus and leaves
+            // the layout distorted. Back to 14px once there is a pointer.
+            className="block w-full resize-none bg-transparent py-3 pl-4 pr-13 text-base leading-snug text-ink outline-none [field-sizing:content] placeholder:text-ink-faint md:text-sm"
           />
           <button
             type="submit"
