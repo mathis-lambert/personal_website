@@ -34,6 +34,12 @@ export function TokenStream({
   startDelay = 160,
   as: Tag = "h1",
   id,
+  /**
+   * Whether the letters answer the pointer. Worth it on a headline; on a
+   * paragraph it means measuring several hundred rects on hover and writing as
+   * many custom properties per frame, for an effect nobody reads prose to see.
+   */
+  lift = true,
 }: {
   segments: StreamSegment[];
   className?: string;
@@ -41,6 +47,7 @@ export function TokenStream({
   startDelay?: number;
   as?: "h1" | "h2" | "p" | "div" | "span";
   id?: string;
+  lift?: boolean;
 }) {
   // Count first, so the marked word knows when the whole headline has landed:
   // the underline draws itself after the last token, not on top of it.
@@ -146,7 +153,12 @@ export function TokenStream({
   }
 
   return (
-    <Tag id={id} ref={ref as never} className={className} {...handlers}>
+    <Tag
+      id={id}
+      ref={ref as never}
+      className={className}
+      {...(lift ? handlers : null)}
+    >
       {nodes}
     </Tag>
   );

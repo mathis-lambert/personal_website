@@ -1114,6 +1114,48 @@
     background-size: 160px 160px;
   }
 
+  /* Timeline ------------------------------------------------------------ */
+
+  /* One row's span on the group's axis. The track is the full period, the fill
+     is this entry's slice of it. */
+  .span-track {
+    position: relative;
+    display: block;
+    height: 3px;
+    border-radius: 999px;
+    background-color: var(--line);
+  }
+
+  .span-fill {
+    position: absolute;
+    inset-block: 0;
+    border-radius: 999px;
+    background-color: var(--brand);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--t-3) var(--ease-out-soft);
+    /* After the row itself has arrived, so the bars draw as a second beat. */
+    transition-delay: calc(var(--reveal-delay, 0ms) + 180ms);
+  }
+
+  .reveal[data-shown="true"] .span-fill {
+    transform: scaleX(1);
+  }
+
+  /* A disclosure that animates to a height nobody had to hard-code. */
+  .fold {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--t-menu) var(--ease-out-soft);
+  }
+  .fold > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .fold[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
   /* Motion ------------------------------------------------------------- */
 
   .reveal {
@@ -1441,6 +1483,15 @@
   .reveal {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  /* Drawn instantly rather than not at all: the bar is data, not decoration. */
+  .span-fill {
+    transform: scaleX(1);
+    transition: none;
+  }
+  .fold {
     transition: none;
   }
 
