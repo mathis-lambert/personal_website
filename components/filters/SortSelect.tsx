@@ -25,7 +25,11 @@ const SortSelect: React.FC<SortSelectProps> = ({
   label = "Sort by",
   options = SORT_OPTIONS,
 }) => (
-  <Select value={String(value)} onValueChange={onChange}>
+  <Select
+    items={[...options]}
+    value={String(value)}
+    onValueChange={(next) => next !== null && onChange(next)}
+  >
     <SelectTrigger aria-label={label} className="gap-2.5">
       <ArrowDownUp className="size-3.5 text-ink-faint" />
       <SelectValue placeholder={label} />

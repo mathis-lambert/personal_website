@@ -76,10 +76,13 @@ function Rail({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <Button variant="ghost" size="sm" asChild className="justify-start">
-          <Link href="/" target="_blank" rel="noreferrer">
-            <ExternalLink /> View site
-          </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="justify-start"
+          render={<Link href="/" target="_blank" rel="noreferrer" />}
+        >
+          <ExternalLink /> View site
         </Button>
         <Button
           variant="ghost"
@@ -121,10 +124,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
       <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-paper-lift/90 px-4 backdrop-blur lg:hidden">
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Open navigation">
-              <Menu />
-            </Button>
+          <SheetTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Open navigation"
+              />
+            }
+          >
+            <Menu />
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
             <SheetHeader className="sr-only">

@@ -49,7 +49,7 @@ export function EditorialLibrary({ kind }: { kind: EditorialKind }) {
         title={kind === "notes" ? "Writing desk" : "Project stories"}
         description={kind === "notes" ? "Draft, shape, and publish field notes." : "Turn shipped work into case studies worth reading."}
         count={data?.length}
-        actions={<Button size="sm" asChild><Link href={`/admin/${kind}/new`}><Plus /> New {noun.toLowerCase()}</Link></Button>}
+        actions={<Button size="sm" render={<Link href={`/admin/${kind}/new`} />}><Plus /> New {noun.toLowerCase()}</Button>}
       />
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -95,7 +95,7 @@ export function EditorialLibrary({ kind }: { kind: EditorialKind }) {
           })}
         </div>
       ) : (
-        <Empty title={query || status !== "all" ? "Nothing matches this view." : `No ${kind} yet.`} hint={query || status !== "all" ? "Try another status or search term." : `Create your first ${noun.toLowerCase()} and start writing.`} action={<Button asChild><Link href={`/admin/${kind}/new`}><Plus /> New {noun.toLowerCase()}</Link></Button>} />
+        <Empty title={query || status !== "all" ? "Nothing matches this view." : `No ${kind} yet.`} hint={query || status !== "all" ? "Try another status or search term." : `Create your first ${noun.toLowerCase()} and start writing.`} action={<Button render={<Link href={`/admin/${kind}/new`} />}><Plus /> New {noun.toLowerCase()}</Button>} />
       )}
     </>
   );

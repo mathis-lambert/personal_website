@@ -17,10 +17,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import {
+  archiveEditorialItem,
   deleteEditorialItem,
   getEditorialItem,
+  publishEditorialItem,
+  rollbackEditorialItem,
   saveEditorialItem,
-  updateEditorialPublication,
 } from "@/api/editorial";
 import { EditorialSettings } from "@/admin/editorial/EditorialSettings";
 import {
@@ -122,7 +124,8 @@ export function EditorialWorkspace({
           slug: current.slug || item.slug || "",
           editorialStatus: item.editorialStatus ?? current.editorialStatus,
           draftRevision: item.draftRevision,
-          publishedRevision: item.publishedRevision,
+          publishedDraftRevision: item.publishedDraftRevision,
+          publishedVersion: item.publishedVersion,
           publishedAt: item.publishedAt,
           hasUnpublishedChanges: !!item.hasUnpublishedChanges,
           updatedAt: item.updatedAt,
@@ -184,7 +187,7 @@ export function EditorialWorkspace({
     const saved = await persist(draft);
     if (!saved?._id) return;
     try {
-      const item = await updateEditorialPublication(kind, saved._id, "publish");
+      const { item } = await publishEditorialItem(kind, saved._id);
       setDraft(draftFromItem(kind, item));
       setDirty(false);
       setSaveState("saved");
@@ -201,11 +204,32 @@ export function EditorialWorkspace({
   const archive = async () => {
     if (!draft._id) return;
     try {
-      const item = await updateEditorialPublication(kind, draft._id, "archive");
+      const item = await archiveEditorialItem(kind, draft._id);
       setDraft(draftFromItem(kind, item));
       toast.success("Removed from the public site");
     } catch (error) {
       toast.error((error as Error).message);
+    }
+  };
+
+  const rollback = async (version: number) => {
+    if (!draft._id) return;
+    try {
+      const { item, publication } = await rollbackEditorialItem(
+        kind,
+        draft._id,
+        version,
+      );
+      setDraft(draftFromItem(kind, item));
+      revision.current += 1;
+      setDirty(false);
+      setSaveState("saved");
+      toast.success(
+        `Version ${version} restored as publication ${publication.version}`,
+      );
+    } catch (error) {
+      toast.error((error as Error).message);
+      throw error;
     }
   };
 
@@ -233,8 +257,8 @@ export function EditorialWorkspace({
   return (
     <div data-ink={kind === "notes" ? "azure" : "coral"} className="min-h-screen bg-paper-sink/55">
       <header className="sticky top-0 z-40 flex h-[4.5rem] items-center gap-3 border-b border-line bg-paper-lift/92 px-3 backdrop-blur-xl sm:px-5">
-        <Button variant="ghost" size="icon" asChild aria-label={`Back to ${kind}`}>
-          <Link href={`/admin/${kind}`}><ArrowLeft /></Link>
+        <Button variant="ghost" size="icon" render={<Link href={`/admin/${kind}`} />} aria-label={`Back to ${kind}`}>
+          <ArrowLeft />
         </Button>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-sm font-semibold text-ink">{draft.title || `New ${kind === "notes" ? "note" : "project"}`}</p>
@@ -250,7 +274,7 @@ export function EditorialWorkspace({
           </p>
         </div>
 
-        <ToggleGroup type="single" value={mode} onValueChange={(value) => value && setMode(value as typeof mode)} variant="outline" size="sm" className="hidden sm:flex">
+        <ToggleGroup value={[mode]} onValueChange={(value) => value[0] && setMode(value[0] as typeof mode)} variant="outline" size="sm" className="hidden sm:flex">
           <ToggleGroupItem value="compose"><FilePenLine /> Compose</ToggleGroupItem>
           <ToggleGroupItem value="preview"><Eye /> Read</ToggleGroupItem>
         </ToggleGroup>
@@ -282,7 +306,7 @@ export function EditorialWorkspace({
 
         <main className="min-w-0">
           <div className="flex justify-center border-b border-line bg-paper-lift px-3 py-2 sm:hidden">
-            <ToggleGroup type="single" value={mode} onValueChange={(value) => value && setMode(value as typeof mode)} variant="outline" size="sm">
+            <ToggleGroup value={[mode]} onValueChange={(value) => value[0] && setMode(value[0] as typeof mode)} variant="outline" size="sm">
               <ToggleGroupItem value="compose"><FilePenLine /> Compose</ToggleGroupItem>
               <ToggleGroupItem value="preview"><Eye /> Read</ToggleGroupItem>
             </ToggleGroup>
@@ -317,7 +341,7 @@ export function EditorialWorkspace({
         <aside className="hidden border-l border-line bg-paper/70 xl:block">
           <div className="sticky top-[4.5rem] max-h-[calc(100vh-4.5rem)] overflow-y-auto">
             <div className="px-5 pt-6"><p className="t-eyebrow text-ink-faint">Document settings</p></div>
-            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onDelete={() => setDeleteOpen(true)} />
+            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onRollback={rollback} onDelete={() => setDeleteOpen(true)} />
           </div>
         </aside>
       </div>
@@ -330,7 +354,7 @@ export function EditorialWorkspace({
               <p className="font-display font-bold">Document settings</p>
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(false)} aria-label="Close settings"><X /></Button>
             </div>
-            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onDelete={() => setDeleteOpen(true)} />
+            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onRollback={rollback} onDelete={() => setDeleteOpen(true)} />
           </aside>
         </div>
       ) : null}

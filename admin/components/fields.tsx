@@ -92,7 +92,11 @@ export function Field({
             aria-describedby={described}
           />
         ) : spec.type === "select" ? (
-          <Select name={spec.name} defaultValue={value || undefined}>
+          <Select
+            items={spec.options}
+            name={spec.name}
+            defaultValue={value || undefined}
+          >
             <SelectTrigger id={id} aria-describedby={described}>
               <SelectValue placeholder="Choose one" />
             </SelectTrigger>

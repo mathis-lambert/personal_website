@@ -115,7 +115,8 @@ export interface Project {
   isFeatured?: boolean;
   editorialStatus?: EditorialStatus;
   draftRevision?: number;
-  publishedRevision?: number;
+  publishedDraftRevision?: number;
+  publishedVersion?: number;
   publishedAt?: string;
   hasUnpublishedChanges?: boolean;
   createdAt?: string;
@@ -185,7 +186,8 @@ export interface Note {
   isFeatured?: boolean;
   editorialStatus?: EditorialStatus;
   draftRevision?: number;
-  publishedRevision?: number;
+  publishedDraftRevision?: number;
+  publishedVersion?: number;
   publishedAt?: string;
   hasUnpublishedChanges?: boolean;
   createdAt?: string;

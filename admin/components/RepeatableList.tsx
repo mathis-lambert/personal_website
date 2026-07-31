@@ -62,7 +62,7 @@ export function Bound({
           className="mt-1"
         />
       ) : type === "select" ? (
-        <Select value={String(value)} onValueChange={(next) => set(next)}>
+        <Select items={options} value={String(value)} onValueChange={(next) => next !== null && set(next)}>
           <SelectTrigger id={id}>
             <SelectValue />
           </SelectTrigger>

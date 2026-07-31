@@ -31,11 +31,13 @@ export function MaintenanceDialog() {
           <Action size="sm" onClick={() => window.location.reload()}>
             Reload
           </Action>
-          <DialogClose asChild>
-            <Action tone="ink" size="sm">
-              Have a look around
-            </Action>
-          </DialogClose>
+          <DialogClose
+            render={
+              <Action tone="ink" size="sm">
+                Have a look around
+              </Action>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

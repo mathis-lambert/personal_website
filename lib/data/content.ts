@@ -1,23 +1,31 @@
 import {
   ObjectId,
   type Collection,
-  type Filter,
   type OptionalId,
 } from "mongodb";
 
 import {
+  type EditorialContentDocument,
   type NoteDocument,
-  type NoteSnapshotDocument,
   type ProjectDocument,
-  type ProjectSnapshotDocument,
   type ResumeDocument,
   type TimelineDocument,
+  getEditorialContentCollection,
   getNotesCollection,
   getExperiencesCollection,
   getProjectsCollection,
   getResumeCollection,
   getStudiesCollection,
 } from "@/lib/db/collections";
+import {
+  deleteContentPublications,
+  deleteCollectionPublications,
+  getPublishedItem,
+  getPublishedItems,
+  isPublishedSlugInUse,
+  serializeEditorialDocument,
+  withoutEditorialInternals,
+} from "@/lib/data/publications";
 import type {
   AdminCollectionName,
   AdminListCollectionName,
@@ -72,24 +80,6 @@ const coerceStringArray = (value: unknown): string[] =>
         .filter(Boolean)
     : [];
 
-const EDITORIAL_INTERNAL_FIELDS = [
-  "_id",
-  "id",
-  "createdAt",
-  "updatedAt",
-  "editorialStatus",
-  "draftRevision",
-  "publishedRevision",
-  "publishedAt",
-  "published",
-  "hasUnpublishedChanges",
-] as const;
-
-const removeEditorialInternals = (value: Record<string, unknown>) => {
-  for (const field of EDITORIAL_INTERNAL_FIELDS) delete value[field];
-  return value;
-};
-
 const buildProjectDocument = (
   input: Project | Record<string, unknown>,
   slug: string,
@@ -97,7 +87,7 @@ const buildProjectDocument = (
 ): OptionalId<ProjectDocument> => {
   const data = input as Partial<Project>;
   const { title, date, technologies, ...rest } = data;
-  const cleanRest = removeEditorialInternals({
+  const cleanRest = withoutEditorialInternals({
     ...(rest as Record<string, unknown>),
   });
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
@@ -121,7 +111,7 @@ const buildNoteDocument = (
 ): OptionalId<NoteDocument> => {
   const data = input as Partial<Note>;
   const { title, excerpt, content, date, tags, metrics, ...rest } = data;
-  const cleanRest = removeEditorialInternals({
+  const cleanRest = withoutEditorialInternals({
     ...(rest as Record<string, unknown>),
   });
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
@@ -162,86 +152,11 @@ const ensureUniqueInSet = (set: Set<string>, base: string): string => {
   return candidate;
 };
 
-/** The two slug-addressed document shapes, as one type for the shared paths. */
-type ContentDocument = ProjectDocument | NoteDocument;
-type ContentSnapshot = ProjectSnapshotDocument | NoteSnapshotDocument;
-
-const snapshotFromDocument = (doc: ContentDocument): ContentSnapshot => {
-  const {
-    _id: _id,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    editorialStatus: _editorialStatus,
-    draftRevision: _draftRevision,
-    publishedRevision: _publishedRevision,
-    publishedAt: _publishedAt,
-    published: _published,
-    hasUnpublishedChanges: _hasUnpublishedChanges,
-    ...snapshot
-  } = doc;
-  void _id;
-  void _createdAt;
-  void _updatedAt;
-  void _editorialStatus;
-  void _draftRevision;
-  void _publishedRevision;
-  void _publishedAt;
-  void _published;
-  void _hasUnpublishedChanges;
-  return snapshot as ContentSnapshot;
-};
-
 /**
  * A stored document as the API hands it out: Mongo's bookkeeping dropped and the
  * ObjectId flattened to a string.
  */
-const stripContent = <T>(
-  doc: ContentDocument | null | undefined,
-): T | null => {
-  if (!doc) return null;
-  const {
-    _id: mongoId,
-    createdAt,
-    updatedAt,
-    publishedAt,
-    published: _published,
-    order: _order,
-    ...rest
-  } = doc;
-  void _published;
-  void _order;
-  const editorialStatus = doc.editorialStatus ?? "published";
-  const draftRevision = doc.draftRevision ?? 1;
-  const publishedRevision =
-    doc.publishedRevision ??
-    (editorialStatus === "published" ? draftRevision : undefined);
-  return {
-    ...rest,
-    _id: mongoId ? String(mongoId) : "",
-    editorialStatus,
-    draftRevision,
-    publishedRevision,
-    publishedAt: publishedAt?.toISOString(),
-    hasUnpublishedChanges:
-      editorialStatus === "published" &&
-      publishedRevision !== undefined &&
-      draftRevision !== publishedRevision,
-    createdAt: createdAt?.toISOString(),
-    updatedAt: updatedAt?.toISOString(),
-  } as T;
-};
-
-const stripPublishedContent = <T>(doc: ContentDocument): T => {
-  if (!doc.published) return stripContent<T>(doc)!;
-  return {
-    ...doc.published,
-    _id: doc._id ? String(doc._id) : "",
-    editorialStatus: "published",
-    publishedAt: doc.publishedAt?.toISOString(),
-    createdAt: doc.createdAt?.toISOString(),
-    updatedAt: doc.publishedAt?.toISOString(),
-  } as T;
-};
+const stripContent = serializeEditorialDocument;
 
 const stripTimeline = (
   doc: TimelineDocument | null | undefined,
@@ -277,34 +192,28 @@ const stripResume = (
   return rest as ResumeData;
 };
 
-const ensureUniqueSlugDb = async <T extends { slug?: string }>(
-  collection: Collection<T>,
+const ensureUniqueSlugDb = async (
+  collectionName: "projects" | "notes",
+  collection: Collection<EditorialContentDocument>,
   base: string,
   excludeObjectId?: ObjectId,
 ): Promise<string> => {
   let candidate = base || "item";
   let suffix = 2;
   while (true) {
-    const filter: Filter<T> =
-      excludeObjectId != null
-        ? ({
-            $and: [
-              { _id: { $ne: excludeObjectId } },
-              {
-                $or: [
-                  { slug: candidate },
-                  { "published.slug": candidate },
-                ],
-              },
-            ],
-          } as unknown as Filter<T>)
-        : ({
-            $or: [{ slug: candidate }, { "published.slug": candidate }],
-          } as unknown as Filter<T>);
-    const existing = await collection.findOne(filter, {
-      projection: { _id: 1 },
-    });
-    if (!existing) return candidate;
+    const existing = await collection.findOne(
+      {
+        slug: candidate,
+        ...(excludeObjectId ? { _id: { $ne: excludeObjectId } } : {}),
+      },
+      { projection: { _id: 1 } },
+    );
+    const publishedSlugExists = await isPublishedSlugInUse(
+      collectionName,
+      candidate,
+      excludeObjectId,
+    );
+    if (!existing && !publishedSlugExists) return candidate;
     candidate = `${base}-${suffix}`;
     suffix += 1;
   }
@@ -358,98 +267,44 @@ export async function getCollection<T extends AdminCollectionName>(
   }
 }
 
-const publicContentFilter = {
-  editorialStatus: { $nin: ["draft", "archived"] },
-} as const;
-
 export async function getAllProjects(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Project[]> {
+  if (!options.includeUnpublished) return getPublishedItems("projects");
   const collection = await getProjectsCollection();
   const docs = await collection
-    .find(options.includeUnpublished ? {} : publicContentFilter)
+    .find()
     .sort({ date: -1, title: 1 })
     .toArray();
   if (!docs.length) {
     console.info("No project entries found in the database.");
     return [];
   }
-  const projects = docs.map((doc) =>
-    options.includeUnpublished
-      ? stripContent<Project>(doc)!
-      : stripPublishedContent<Project>(doc),
-  );
-  return projects.sort(
-    (a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime() ||
-      a.title.localeCompare(b.title),
-  );
+  return docs.map((doc) => stripContent<Project>(doc)!).filter(Boolean);
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const collection = await getProjectsCollection();
-  const objectId = parseObjectId(slug);
-  const slugFilter = {
-    $or: [
-      { "published.slug": slug },
-      { slug, published: { $exists: false } },
-    ],
-  };
-  const doc = await collection.findOne(
-    objectId
-      ? { $and: [{ $or: [{ _id: objectId }, slugFilter] }, publicContentFilter] }
-      : { $and: [slugFilter, publicContentFilter] },
-  );
-  if (!doc) {
-    console.info("No project entry found for the requested slug or id.");
-    return null;
-  }
-  return stripPublishedContent<Project>(doc);
+  return getPublishedItem("projects", slug);
 }
 
 export async function getAllNotes(
   options: { includeUnpublished?: boolean } = {},
 ): Promise<Note[]> {
+  if (!options.includeUnpublished) return getPublishedItems("notes");
   const collection = await getNotesCollection();
   const docs = await collection
-    .find(options.includeUnpublished ? {} : publicContentFilter)
+    .find()
     .sort({ date: -1, title: 1 })
     .toArray();
   if (!docs.length) {
     console.info("No note entries found in the database.");
     return [];
   }
-  const notes = docs.map((doc) =>
-    options.includeUnpublished
-      ? stripContent<Note>(doc)!
-      : stripPublishedContent<Note>(doc),
-  );
-  return notes.sort(
-    (a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime() ||
-      a.title.localeCompare(b.title),
-  );
+  return docs.map((doc) => stripContent<Note>(doc)!).filter(Boolean);
 }
 
 export async function getNoteBySlug(slug: string): Promise<Note | null> {
-  const collection = await getNotesCollection();
-  const objectId = parseObjectId(slug);
-  const slugFilter = {
-    $or: [
-      { "published.slug": slug },
-      { slug, published: { $exists: false } },
-    ],
-  };
-  const doc = await collection.findOne(
-    objectId
-      ? { $and: [{ $or: [{ _id: objectId }, slugFilter] }, publicContentFilter] }
-      : { $and: [slugFilter, publicContentFilter] },
-  );
-  if (!doc) {
-    console.info("No note entry found for the requested slug or id.");
-    return null;
-  }
-  return stripPublishedContent<Note>(doc);
+  return getPublishedItem("notes", slug);
 }
 
 export async function getAdminContentItem(
@@ -547,12 +402,10 @@ async function replaceResume(data: ResumeData): Promise<void> {
  */
 const slugCollections = {
   projects: {
-    getCollection: getProjectsCollection,
     build: buildProjectDocument,
     fallbackSlug: "project",
   },
   notes: {
-    getCollection: getNotesCollection,
     build: buildNoteDocument,
     fallbackSlug: "note",
   },
@@ -563,16 +416,8 @@ type SlugCollectionName = keyof typeof slugCollections;
 const isSlugCollection = (name: string): name is SlugCollectionName =>
   name in slugCollections;
 
-/**
- * The driver types each collection separately and there is no useful supertype
- * of `Collection<ProjectDocument>` and `Collection<NoteDocument>`, so the shared
- * code works against the document union. This is the only cast, and it is here
- * rather than at each of the eight call sites it replaces.
- */
 const openSlugCollection = async (name: SlugCollectionName) =>
-  (await slugCollections[name].getCollection()) as unknown as Collection<
-    ContentDocument
-  >;
+  getEditorialContentCollection(name);
 
 export async function createProjectOrNote(
   collection: SlugCollectionName,
@@ -582,6 +427,7 @@ export async function createProjectOrNote(
   const col = await openSlugCollection(collection);
 
   const slug = await ensureUniqueSlugDb(
+    collection,
     col,
     slugify(asString(item.slug) || asString(item.title) || fallbackSlug),
   );
@@ -590,7 +436,7 @@ export async function createProjectOrNote(
     ...doc,
     editorialStatus: "draft" as const,
     draftRevision: 1,
-  } as OptionalId<ContentDocument>;
+  } as OptionalId<EditorialContentDocument>;
   const result = await col.insertOne(draftDoc);
 
   return {
@@ -598,7 +444,7 @@ export async function createProjectOrNote(
     item: stripContent<Project | Note>({
       ...draftDoc,
       _id: result.insertedId,
-    } as ContentDocument)!,
+    } as EditorialContentDocument)!,
   };
 }
 
@@ -617,13 +463,14 @@ export async function updateItem(
     const objectId = parseObjectId(itemId);
     if (!objectId) throw new Error("Invalid item id");
 
-    const safePatch = removeEditorialInternals({ ...patch });
+    const safePatch = withoutEditorialInternals(patch);
     const updates: Record<string, unknown> = {
       ...safePatch,
       updatedAt: new Date(),
     };
     if (patch.slug) {
       updates.slug = await ensureUniqueSlugDb(
+        collection,
         col,
         slugify(String(patch.slug)),
         objectId,
@@ -670,58 +517,6 @@ export async function updateItem(
   return stripTimeline(updated)!;
 }
 
-export async function publishContentItem(
-  collection: SlugCollectionName,
-  itemId: string,
-): Promise<Project | Note> {
-  const col = await openSlugCollection(collection);
-  const objectId = parseObjectId(itemId);
-  if (!objectId) throw new Error("Invalid item id");
-
-  const current = await col.findOne({ _id: objectId });
-  if (!current) throw new Error("Item not found");
-
-  const draftRevision = current.draftRevision ?? 1;
-  const publishedAt = new Date();
-  const publication: Record<string, unknown> = {
-    published: snapshotFromDocument(current),
-    editorialStatus: "published",
-    draftRevision,
-    publishedRevision: draftRevision,
-    publishedAt,
-  };
-  const revisionFilter =
-    current.draftRevision === undefined
-      ? { draftRevision: { $exists: false } }
-      : { draftRevision: current.draftRevision };
-  const updated = await col.findOneAndUpdate(
-    { _id: objectId, ...revisionFilter },
-    { $set: publication },
-    { returnDocument: "after" },
-  );
-  if (!updated) {
-    throw new Error("The draft changed while it was being published. Try again.");
-  }
-  return stripContent<Project | Note>(updated)!;
-}
-
-export async function archiveContentItem(
-  collection: SlugCollectionName,
-  itemId: string,
-): Promise<Project | Note> {
-  const col = await openSlugCollection(collection);
-  const objectId = parseObjectId(itemId);
-  if (!objectId) throw new Error("Invalid item id");
-
-  const updated = await col.findOneAndUpdate(
-    { _id: objectId },
-    { $set: { editorialStatus: "archived", updatedAt: new Date() } },
-    { returnDocument: "after" },
-  );
-  if (!updated) throw new Error("Item not found");
-  return stripContent<Project | Note>(updated)!;
-}
-
 const resequenceTimeline = async (col: Collection<TimelineDocument>) => {
   const docs = await col
     .find({}, { projection: { _id: 1 } })
@@ -744,6 +539,7 @@ export async function deleteItem(
     if (!objectId) throw new Error("Invalid item id");
     const deleted = await col.findOneAndDelete({ _id: objectId });
     if (!deleted) throw new Error("Item not found");
+    await deleteContentPublications(collection, objectId);
     return stripContent<Project | Note>(deleted)!;
   }
 
@@ -805,12 +601,17 @@ export async function replaceCollection(
       const slugSource =
         asString(record.slug) || asString(record.title) || `${name}-${index + 1}`;
 
-      return build(record, ensureUniqueInSet(slugs, slugify(slugSource)), now);
+      return {
+        ...build(record, ensureUniqueInSet(slugs, slugify(slugSource)), now),
+        editorialStatus: "draft" as const,
+        draftRevision: 1,
+      };
     });
 
     await col.deleteMany({});
+    await deleteCollectionPublications(name);
     if (docs.length) {
-      await col.insertMany(docs as OptionalId<ContentDocument>[]);
+      await col.insertMany(docs as OptionalId<EditorialContentDocument>[]);
     }
     return;
   }

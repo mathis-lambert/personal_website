@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 
 import { MediaLibraryDialog } from "@/admin/editorial/MediaLibraryDialog";
+import { PublicationHistory } from "@/admin/editorial/PublicationHistory";
 import type { EditorialDraft } from "@/admin/editorial/model";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { mediaAssetUrl } from "@/types/media";
 
+const PROJECT_STATUS_OPTIONS = [
+  { value: "in-progress", label: "In progress" },
+  { value: "completed", label: "Completed" },
+  { value: "archived", label: "Archived" },
+];
+
 const Section = ({
   title,
   icon,
@@ -49,7 +56,7 @@ const Section = ({
     <CollapsibleTrigger className="group flex w-full items-center gap-2 text-left t-eyebrow text-ink">
       <span className="text-brand [&_svg]:size-3.5">{icon}</span>
       {title}
-      <ChevronDown className="ml-auto size-3.5 transition-transform group-data-[state=open]:rotate-180" />
+      <ChevronDown className="ml-auto size-3.5 transition-transform group-data-panel-open:rotate-180" />
     </CollapsibleTrigger>
     <CollapsibleContent className="space-y-4 pt-4">{children}</CollapsibleContent>
   </Collapsible>
@@ -92,11 +99,13 @@ export function EditorialSettings({
   draft,
   onPatch,
   onArchive,
+  onRollback,
   onDelete,
 }: {
   draft: EditorialDraft;
   onPatch: (patch: Partial<EditorialDraft>) => void;
   onArchive?: () => void;
+  onRollback?: (version: number) => Promise<void>;
   onDelete?: () => void;
 }) {
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -143,6 +152,19 @@ export function EditorialSettings({
             <Archive /> Archive from public site
           </Button>
         ) : null}
+        {draft._id && onRollback ? (
+          <PublicationHistory
+            key={draft.publishedVersion ?? 0}
+            kind={draft.kind}
+            itemId={draft._id}
+            currentVersion={
+              draft.editorialStatus === "published"
+                ? draft.publishedVersion
+                : undefined
+            }
+            onRollback={onRollback}
+          />
+        ) : null}
       </Section>
 
       <Section title="Classification" icon={<Tag />}>
@@ -156,12 +178,14 @@ export function EditorialSettings({
           <>
             <div className="space-y-1.5">
               <Label className="t-meta text-ink-muted">Project status</Label>
-              <Select value={draft.projectStatus} onValueChange={(projectStatus) => onPatch({ projectStatus: projectStatus as EditorialDraft["projectStatus"] })}>
+              <Select items={PROJECT_STATUS_OPTIONS} value={draft.projectStatus} onValueChange={(projectStatus) => projectStatus !== null && onPatch({ projectStatus: projectStatus as EditorialDraft["projectStatus"] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="in-progress">In progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
+                  {PROJECT_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

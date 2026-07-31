@@ -47,6 +47,12 @@ const RANGES = [
   { label: "30d", hours: 24 * 30 },
 ] as const;
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "All conversations" },
+  { value: "active", label: "Completed" },
+  { value: "errored", label: "Errored" },
+];
+
 /**
  * The conversation log: turns in sequence, visitor on the left. Model,
  * duration and errors sit in the margin, out of the way of reading.
@@ -187,8 +193,10 @@ const DiscussionsPage: React.FC = () => {
         />
 
         <Select
+          items={STATUS_OPTIONS}
           value={status}
           onValueChange={(value) =>
+            value !== null &&
             setStatus(value as "all" | "active" | "errored")
           }
         >
@@ -196,9 +204,11 @@ const DiscussionsPage: React.FC = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All conversations</SelectItem>
-            <SelectItem value="active">Completed</SelectItem>
-            <SelectItem value="errored">Errored</SelectItem>
+            {STATUS_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

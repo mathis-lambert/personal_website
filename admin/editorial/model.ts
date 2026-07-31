@@ -4,9 +4,13 @@ import type {
   Project,
   ProjectStatus,
 } from "@/types";
+import type {
+  EditorialCollection,
+  EditorialItem as StoredEditorialItem,
+} from "@/types/editorial";
 
-export type EditorialKind = "projects" | "notes";
-export type EditorialItem = Project | Note;
+export type EditorialKind = EditorialCollection;
+export type EditorialItem = StoredEditorialItem;
 
 export type EditorialDraft = {
   kind: EditorialKind;
@@ -38,7 +42,8 @@ export type EditorialDraft = {
   docsUrl: string;
   videoUrl: string;
   draftRevision?: number;
-  publishedRevision?: number;
+  publishedDraftRevision?: number;
+  publishedVersion?: number;
   publishedAt?: string;
   hasUnpublishedChanges: boolean;
   updatedAt?: string;
@@ -120,7 +125,8 @@ export const draftFromItem = (
       canonicalUrl: note.links?.canonical ?? "",
       discussionUrl: note.links?.discussion ?? "",
       draftRevision: note.draftRevision,
-      publishedRevision: note.publishedRevision,
+      publishedDraftRevision: note.publishedDraftRevision,
+      publishedVersion: note.publishedVersion,
       publishedAt: note.publishedAt,
       hasUnpublishedChanges: !!note.hasUnpublishedChanges,
       updatedAt: note.updatedAt,
@@ -154,7 +160,8 @@ export const draftFromItem = (
     docsUrl: project.links?.docs ?? "",
     videoUrl: project.links?.video ?? "",
     draftRevision: project.draftRevision,
-    publishedRevision: project.publishedRevision,
+    publishedDraftRevision: project.publishedDraftRevision,
+    publishedVersion: project.publishedVersion,
     publishedAt: project.publishedAt,
     hasUnpublishedChanges: !!project.hasUnpublishedChanges,
     updatedAt: project.updatedAt,

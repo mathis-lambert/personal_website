@@ -15,15 +15,18 @@ import {
   List,
   ListOrdered,
   Loader2,
+  Minus,
   Quote,
   Redo2,
   Undo2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { uploadMediaAsset } from "@/api/media";
+import { EditorialCodeBlock } from "@/admin/editorial/extensions/editorial-code-block";
 import { MediaLibraryDialog } from "@/admin/editorial/MediaLibraryDialog";
+import { SlashCommandMenu } from "@/admin/editorial/SlashCommandMenu";
 import { Toggle } from "@/components/ui/toggle";
 import { mediaAssetUrl, type MediaAsset } from "@/types/media";
 
@@ -39,9 +42,13 @@ export function RichMarkdownEditor({
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ link: { openOnClick: false } }),
+      StarterKit.configure({
+        codeBlock: false,
+        link: { openOnClick: false },
+      }),
+      EditorialCodeBlock,
       ImageExtension.configure({ allowBase64: false }),
-      Placeholder.configure({ placeholder: "Start writing…" }),
+      Placeholder.configure({ placeholder: "Start writing… Type / for commands" }),
       Markdown,
     ],
     content: value,
@@ -54,6 +61,14 @@ export function RichMarkdownEditor({
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor || editor.getMarkdown() === value) return;
+    editor.commands.setContent(value, {
+      contentType: "markdown",
+      emitUpdate: false,
+    });
+  }, [editor, value]);
 
   if (!editor) return <div className="min-h-[52vh]" />;
 
@@ -103,7 +118,11 @@ export function RichMarkdownEditor({
 
   return (
     <>
-      <div className="sticky top-[4.5rem] z-10 mb-8 flex flex-wrap items-center gap-0.5 rounded-full border border-line bg-paper-lift/90 p-1.5 shadow-1 backdrop-blur">
+      <div
+        role="toolbar"
+        aria-label="Formatting tools"
+        className="fixed bottom-5 left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-paper-lift/92 p-1.5 shadow-lift-2 backdrop-blur"
+      >
         {tool("Undo", <Undo2 />, false, () => editor.chain().focus().undo().run())}
         {tool("Redo", <Redo2 />, false, () => editor.chain().focus().redo().run())}
         <span className="mx-1 h-5 w-px bg-line" />
@@ -114,6 +133,7 @@ export function RichMarkdownEditor({
         {tool("Numbered list", <ListOrdered />, editor.isActive("orderedList"), () => editor.chain().focus().toggleOrderedList().run())}
         {tool("Quote", <Quote />, editor.isActive("blockquote"), () => editor.chain().focus().toggleBlockquote().run())}
         {tool("Code block", <Code2 />, editor.isActive("codeBlock"), () => editor.chain().focus().toggleCodeBlock().run())}
+        {tool("Divider", <Minus />, false, () => editor.chain().focus().setHorizontalRule().run())}
         {tool("Link", <Link2 />, editor.isActive("link"), addLink)}
         {tool(uploading ? "Uploading image" : "Image", uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />, false, () => setMediaOpen(true))}
       </div>
@@ -136,6 +156,7 @@ export function RichMarkdownEditor({
       >
         <EditorContent editor={editor} className="editorial-canvas" />
       </div>
+      <SlashCommandMenu editor={editor} openMediaLibrary={() => setMediaOpen(true)} />
       <MediaLibraryDialog open={mediaOpen} onOpenChange={setMediaOpen} onSelect={insertImage} />
     </>
   );

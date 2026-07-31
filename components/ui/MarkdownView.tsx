@@ -72,6 +72,11 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
   className,
 }) => {
   const components: Options["components"] = {
+    // React Markdown normally wraps fenced code in a <pre>. CodeBlock already
+    // owns its surface, spacing and overflow, so keeping both creates a bulky
+    // double card around every snippet.
+    pre: ({ children }) => <>{children}</>,
+
     img: ({ src, alt, width, height }) => {
       if (typeof src !== "string") return null;
       const w = typeof width === "string" ? parseInt(width, 10) : width;
@@ -107,11 +112,13 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
         mdNode?.position?.start.line !== mdNode?.position?.end.line ||
         (mdNode?.value?.includes("\n") ?? false);
 
-      if (!isBlock || !match) {
+      if (!isBlock) {
         return <code className={codeClassName}>{children}</code>;
       }
 
-      if (match[1] === "mermaid") {
+      const language = match?.[1] ?? "text";
+
+      if (language === "mermaid") {
         return (
           <div className="my-7">
             <MermaidDiagram source={code} />
@@ -119,7 +126,7 @@ const MarkdownView: React.FC<MarkdownViewProps> = ({
         );
       }
 
-      return <CodeBlock code={code} language={match[1]} />;
+      return <CodeBlock code={code} language={language} />;
     },
   };
 

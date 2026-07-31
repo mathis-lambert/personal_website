@@ -5,7 +5,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Features
 
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
-- Full-screen editorial workspace for project stories and notes, with Markdown-backed rich editing, private autosave, immutable published snapshots, faithful preview, and explicit publishing controls.
+- Full-screen editorial workspace for project stories and notes, with Markdown-backed rich editing, private autosave, immutable publication history, one-click rollback, faithful preview, and explicit publishing controls.
 - Admin media library with server-side WebP optimization and responsive variants stored on S3-compatible object storage.
 - Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE.
 - Mandatory API analytics wrapper (`withApiAnalytics`) on all API routes except `/api/health` and NextAuth, with redacted structured logs in MongoDB.
@@ -21,6 +21,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 - Next.js 16 / React 19 / TypeScript with standalone output.
 - MongoDB for content, analytics logs (`api_request_logs`, `ui_events`), and chat transcript monitoring (`chat_conversation_turns`).
 - S3-compatible storage for editorial media; MongoDB stores searchable `media_assets` metadata while immutable image variants are served through the CDN.
+- Append-only `content_publications` records keep every public version separate from the mutable project and note drafts.
 - Docker multi-stage build (`Dockerfile`) producing a single runtime image.
 - Compose files: `development/docker-compose.yml` (local dev with Mongo), `compose.dev.yaml` (local prod build), `compose.prod.yaml` (server deploy with Traefik labels).
 - GitHub Actions `.github/workflows/cd.yaml` builds/pushes `ghcr.io/<owner>/personal-website` on tags and redeploys to the Raspberry Pi host.
