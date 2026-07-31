@@ -77,14 +77,14 @@ export function ReadingShell({
       </Page>
 
       {cover ? (
-        <Page className="pb-14">
+        <Page narrow className="pb-14">
           <div className="frame relative aspect-[16/9] w-full">
             <Image
               src={cover}
               alt={coverAlt ?? ""}
               fill
               priority
-              sizes="(max-width: 1200px) 92vw, 72rem"
+              sizes="(max-width: 768px) 92vw, 48rem"
               className="object-cover"
             />
           </div>

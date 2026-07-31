@@ -15,9 +15,34 @@ import { cn } from "@/lib/utils";
  */
 
 function Select({
+  open,
+  defaultOpen,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />;
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(
+    defaultOpen ?? false,
+  );
+  const isOpen = open ?? uncontrolledOpen;
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    document.body.setAttribute("data-select-open", "true");
+    return () => document.body.removeAttribute("data-select-open");
+  }, [isOpen]);
+
+  return (
+    <SelectPrimitive.Root
+      data-slot="select"
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={(nextOpen) => {
+        setUncontrolledOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+      }}
+      {...props}
+    />
+  );
 }
 
 function SelectGroup({

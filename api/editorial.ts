@@ -34,6 +34,24 @@ export const saveEditorialItem = async (draft: EditorialDraft) => {
   return ((await response.json()) as { item: EditorialItem }).item;
 };
 
+export const updateEditorialPublication = async (
+  kind: EditorialDraft["kind"],
+  id: string,
+  action: "publish" | "archive",
+) => {
+  const response = await fetchWithTimeout(
+    `/api/admin/${kind}/${id}/publication`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+      timeoutMs: 15_000,
+    },
+  );
+  if (!response.ok) throw new Error(await errorMessage(response));
+  return ((await response.json()) as { item: EditorialItem }).item;
+};
+
 export const deleteEditorialItem = async (
   kind: EditorialDraft["kind"],
   id: string,

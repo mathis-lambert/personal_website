@@ -16,7 +16,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { deleteEditorialItem, getEditorialItem, saveEditorialItem } from "@/api/editorial";
+import {
+  deleteEditorialItem,
+  getEditorialItem,
+  saveEditorialItem,
+  updateEditorialPublication,
+} from "@/api/editorial";
 import { EditorialSettings } from "@/admin/editorial/EditorialSettings";
 import {
   createEditorialDraft,
@@ -70,16 +75,35 @@ export function EditorialWorkspace({
   useEffect(() => {
     if (!itemId) return;
     const controller = new AbortController();
+    let cancelled = false;
     void getEditorialItem(kind, itemId, controller.signal)
-      .then((item) => setDraft(draftFromItem(kind, item)))
-      .catch((error) => toast.error((error as Error).message))
-      .finally(() => setLoading(false));
-    return () => controller.abort();
+      .then((item) => {
+        if (!cancelled) setDraft(draftFromItem(kind, item));
+      })
+      .catch((error) => {
+        if (!cancelled && !controller.signal.aborted) {
+          toast.error((error as Error).message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort(new DOMException("Editor closed", "AbortError"));
+    };
   }, [itemId, kind]);
 
   const patch = useCallback((next: Partial<EditorialDraft>) => {
     revision.current += 1;
-    setDraft((current) => ({ ...current, ...next }));
+    setDraft((current) => ({
+      ...current,
+      ...next,
+      hasUnpublishedChanges:
+        current.editorialStatus === "published"
+          ? true
+          : current.hasUnpublishedChanges,
+    }));
     setDirty(true);
   }, []);
 
@@ -96,6 +120,11 @@ export function EditorialWorkspace({
           ...current,
           _id: item._id,
           slug: current.slug || item.slug || "",
+          editorialStatus: item.editorialStatus ?? current.editorialStatus,
+          draftRevision: item.draftRevision,
+          publishedRevision: item.publishedRevision,
+          publishedAt: item.publishedAt,
+          hasUnpublishedChanges: !!item.hasUnpublishedChanges,
           updatedAt: item.updatedAt,
         }));
         if (revision.current === startedRevision) setDirty(false);
@@ -152,10 +181,32 @@ export function EditorialWorkspace({
       toast.error("Add a title, introduction and body before publishing.");
       return;
     }
-    const next = { ...draft, editorialStatus: "published" as const };
-    setDraft(next);
-    const item = await persist(next);
-    if (item) toast.success(draft.editorialStatus === "published" ? "Updated" : "Published");
+    const saved = await persist(draft);
+    if (!saved?._id) return;
+    try {
+      const item = await updateEditorialPublication(kind, saved._id, "publish");
+      setDraft(draftFromItem(kind, item));
+      setDirty(false);
+      setSaveState("saved");
+      toast.success(
+        draft.editorialStatus === "published"
+          ? "Your new version is live"
+          : "Published",
+      );
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
+  const archive = async () => {
+    if (!draft._id) return;
+    try {
+      const item = await updateEditorialPublication(kind, draft._id, "archive");
+      setDraft(draftFromItem(kind, item));
+      toast.success("Removed from the public site");
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
   };
 
   const remove = async () => {
@@ -174,6 +225,10 @@ export function EditorialWorkspace({
   }
 
   const preview = previewFromDraft(draft);
+  const isLive = draft.editorialStatus === "published";
+  const canPublish =
+    saveState !== "saving" &&
+    (!isLive || dirty || draft.hasUnpublishedChanges);
 
   return (
     <div data-ink={kind === "notes" ? "azure" : "coral"} className="min-h-screen bg-paper-sink/55">
@@ -185,7 +240,13 @@ export function EditorialWorkspace({
           <p className="truncate font-display text-sm font-semibold text-ink">{draft.title || `New ${kind === "notes" ? "note" : "project"}`}</p>
           <p className={cn("t-meta flex items-center gap-1.5", saveState === "error" ? "text-destructive" : "text-ink-faint")}>
             {saveState === "saving" ? <Loader2 className="size-3 animate-spin" /> : saveState === "saved" ? <Check className="size-3 text-turquoise" /> : dirty ? <span className="size-1.5 rounded-full bg-coral" /> : null}
-            {saveState === "saving" ? "Saving…" : saveState === "error" ? "Save failed" : dirty ? "Unsaved changes" : draft._id ? "Saved" : "Draft not saved yet"}
+            {saveState === "saving" ? "Saving privately…" : saveState === "error" ? "Save failed" : dirty ? "Unsaved changes" : draft._id ? "Work saved" : "Draft not saved yet"}
+            {isLive ? <span aria-hidden="true">·</span> : null}
+            {isLive ? (
+              <span className={draft.hasUnpublishedChanges || dirty ? "text-coral" : "text-turquoise"}>
+                {draft.hasUnpublishedChanges || dirty ? "new version not published" : "live version up to date"}
+              </span>
+            ) : null}
           </p>
         </div>
 
@@ -195,7 +256,7 @@ export function EditorialWorkspace({
         </ToggleGroup>
         <Button variant="outline" size="icon" className="xl:hidden" onClick={() => setSettingsOpen(true)} aria-label="Open settings"><PanelRight /></Button>
         <Button variant="outline" size="sm" onClick={() => void persist()} disabled={!draft.title.trim() || saveState === "saving"} className="hidden sm:inline-flex"><Save /> Save</Button>
-        <Button size="sm" onClick={() => void publish()} disabled={saveState === "saving"}><Send /> <span className="hidden sm:inline">{draft.editorialStatus === "published" ? "Update" : "Publish"}</span></Button>
+        <Button size="sm" onClick={() => void publish()} disabled={!canPublish}><Send /> <span className="hidden sm:inline">{isLive ? (draft.hasUnpublishedChanges || dirty ? "Publish changes" : "Published") : "Publish"}</span></Button>
       </header>
 
       <div className="mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-[112rem] xl:grid-cols-[15rem_minmax(0,1fr)_19rem]">
@@ -256,7 +317,7 @@ export function EditorialWorkspace({
         <aside className="hidden border-l border-line bg-paper/70 xl:block">
           <div className="sticky top-[4.5rem] max-h-[calc(100vh-4.5rem)] overflow-y-auto">
             <div className="px-5 pt-6"><p className="t-eyebrow text-ink-faint">Document settings</p></div>
-            <EditorialSettings draft={draft} onPatch={patch} onDelete={() => setDeleteOpen(true)} />
+            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onDelete={() => setDeleteOpen(true)} />
           </div>
         </aside>
       </div>
@@ -269,7 +330,7 @@ export function EditorialWorkspace({
               <p className="font-display font-bold">Document settings</p>
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(false)} aria-label="Close settings"><X /></Button>
             </div>
-            <EditorialSettings draft={draft} onPatch={patch} onDelete={() => setDeleteOpen(true)} />
+            <EditorialSettings draft={draft} onPatch={patch} onArchive={() => void archive()} onDelete={() => setDeleteOpen(true)} />
           </aside>
         </div>
       ) : null}

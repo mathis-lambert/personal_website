@@ -1,25 +1,20 @@
 import "server-only";
 import { z } from "zod";
 import { tool } from "langchain";
-import { ObjectId } from "mongodb";
 
 import { searchVectorStore } from "@/lib/ai/client";
 import { safeJsonStringify, toJsonable } from "@/lib/ai/json";
 import {
-  getNotesCollection,
   getExperiencesCollection,
-  getProjectsCollection,
   getResumeCollection,
   getStudiesCollection,
 } from "@/lib/db/collections";
-
-const parseObjectId = (value: string): ObjectId | null => {
-  try {
-    return new ObjectId(value);
-  } catch {
-    return null;
-  }
-};
+import {
+  getAllNotes,
+  getAllProjects,
+  getNoteBySlug,
+  getProjectBySlug,
+} from "@/lib/data/content";
 
 const createTool = <TInput extends z.ZodTypeAny>(config: {
   name: string;
@@ -55,27 +50,21 @@ export const buildSelfTools = () => {
     description: "Returns a lightweight list of Mathis projects.",
     schema: z.object({}).strict(),
     handler: async () => {
-      const collection = await getProjectsCollection();
-      const docs = await collection
-        .find(
-          { editorialStatus: { $nin: ["draft", "archived"] } },
-          {
-            projection: {
-              _id: 0,
-              title: 1,
-              slug: 1,
-              subtitle: 1,
-              technologies: 1,
-              categories: 1,
-              links: 1,
-              date: 1,
-              ai_context: 1,
-            },
-          },
-        )
-        .sort({ date: -1, title: 1 })
-        .toArray();
-      return toJsonable(docs);
+      const projects = await getAllProjects();
+      return toJsonable(
+        projects.map(
+          ({ title, slug, subtitle, technologies, categories, links, date, ai_context }) => ({
+            title,
+            slug,
+            subtitle,
+            technologies,
+            categories,
+            links,
+            date,
+            ai_context,
+          }),
+        ),
+      );
     },
   });
 
@@ -84,37 +73,7 @@ export const buildSelfTools = () => {
     description: "Fetches details for a specific project by slug.",
     schema: z.object({ slug: z.string().min(1) }).strict(),
     handler: async ({ slug }) => {
-      const collection = await getProjectsCollection();
-      const objectId = parseObjectId(slug);
-      const doc = await collection.findOne(
-        objectId
-          ? {
-              $and: [
-                { $or: [{ slug }, { _id: objectId }] },
-                { editorialStatus: { $nin: ["draft", "archived"] } },
-              ],
-            }
-          : { slug, editorialStatus: { $nin: ["draft", "archived"] } },
-        {
-          projection: {
-            _id: 0,
-            title: 1,
-            slug: 1,
-            subtitle: 1,
-            description: 1,
-            content: 1,
-            links: 1,
-            date: 1,
-            technologies: 1,
-            categories: 1,
-            highlights: 1,
-            role: 1,
-            client: 1,
-            teamSize: 1,
-            ai_context: 1,
-          },
-        },
-      );
+      const doc = await getProjectBySlug(slug);
 
       if (!doc) {
         return {
@@ -123,7 +82,38 @@ export const buildSelfTools = () => {
         };
       }
 
-      return toJsonable(doc);
+      const {
+        title,
+        slug: projectSlug,
+        subtitle,
+        description,
+        content,
+        links,
+        date,
+        technologies,
+        categories,
+        highlights,
+        role,
+        client,
+        teamSize,
+        ai_context,
+      } = doc;
+      return toJsonable({
+        title,
+        slug: projectSlug,
+        subtitle,
+        description,
+        content,
+        links,
+        date,
+        technologies,
+        categories,
+        highlights,
+        role,
+        client,
+        teamSize,
+        ai_context,
+      });
     },
   });
 
@@ -132,27 +122,18 @@ export const buildSelfTools = () => {
     description: "Returns a lightweight list of Mathis notes.",
     schema: z.object({}).strict(),
     handler: async () => {
-      const collection = await getNotesCollection();
-      const docs = await collection
-        .find(
-          { editorialStatus: { $nin: ["draft", "archived"] } },
-          {
-            projection: {
-              _id: 0,
-              title: 1,
-              slug: 1,
-              excerpt: 1,
-              tags: 1,
-              links: 1,
-              date: 1,
-              author: 1,
-              ai_context: 1,
-            },
-          },
-        )
-        .sort({ date: -1, title: 1 })
-        .toArray();
-      return toJsonable(docs);
+      const notes = await getAllNotes();
+      return toJsonable(
+        notes.map(({ title, slug, excerpt, tags, links, date, author }) => ({
+          title,
+          slug,
+          excerpt,
+          tags,
+          links,
+          date,
+          author,
+        })),
+      );
     },
   });
 
@@ -161,32 +142,7 @@ export const buildSelfTools = () => {
     description: "Fetches details for a specific note by slug.",
     schema: z.object({ slug: z.string().min(1) }).strict(),
     handler: async ({ slug }) => {
-      const collection = await getNotesCollection();
-      const objectId = parseObjectId(slug);
-      const doc = await collection.findOne(
-        objectId
-          ? {
-              $and: [
-                { $or: [{ slug }, { _id: objectId }] },
-                { editorialStatus: { $nin: ["draft", "archived"] } },
-              ],
-            }
-          : { slug, editorialStatus: { $nin: ["draft", "archived"] } },
-        {
-          projection: {
-            _id: 0,
-            title: 1,
-            slug: 1,
-            excerpt: 1,
-            content: 1,
-            tags: 1,
-            links: 1,
-            date: 1,
-            author: 1,
-            ai_context: 1,
-          },
-        },
-      );
+      const doc = await getNoteBySlug(slug);
 
       if (!doc) {
         return {
@@ -195,7 +151,17 @@ export const buildSelfTools = () => {
         };
       }
 
-      return toJsonable(doc);
+      const { title, slug: noteSlug, excerpt, content, tags, links, date, author } = doc;
+      return toJsonable({
+        title,
+        slug: noteSlug,
+        excerpt,
+        content,
+        tags,
+        links,
+        date,
+        author,
+      });
     },
   });
 

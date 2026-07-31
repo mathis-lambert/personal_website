@@ -114,6 +114,10 @@ export interface Project {
   status?: ProjectStatus;
   isFeatured?: boolean;
   editorialStatus?: EditorialStatus;
+  draftRevision?: number;
+  publishedRevision?: number;
+  publishedAt?: string;
+  hasUnpublishedChanges?: boolean;
   createdAt?: string;
   updatedAt?: string;
   // Structured fields
@@ -180,6 +184,10 @@ export interface Note {
   categories?: string[];
   isFeatured?: boolean;
   editorialStatus?: EditorialStatus;
+  draftRevision?: number;
+  publishedRevision?: number;
+  publishedAt?: string;
+  hasUnpublishedChanges?: boolean;
   createdAt?: string;
   updatedAt?: string;
   links?: NoteLinks;

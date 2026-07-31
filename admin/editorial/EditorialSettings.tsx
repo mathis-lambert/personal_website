@@ -1,7 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronDown, ImagePlus, Link2, Settings2, Tag, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ChevronDown,
+  CircleCheck,
+  Clock3,
+  ImagePlus,
+  Link2,
+  Settings2,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
 import { MediaLibraryDialog } from "@/admin/editorial/MediaLibraryDialog";
@@ -81,35 +91,58 @@ const ListField = ({
 export function EditorialSettings({
   draft,
   onPatch,
+  onArchive,
   onDelete,
 }: {
   draft: EditorialDraft;
   onPatch: (patch: Partial<EditorialDraft>) => void;
+  onArchive?: () => void;
   onDelete?: () => void;
 }) {
   const [mediaOpen, setMediaOpen] = useState(false);
+  const hasPrivateVersion =
+    draft.editorialStatus === "published" && draft.hasUnpublishedChanges;
 
   return (
     <div className="px-5 pb-8">
       <Section title="Publishing" icon={<Settings2 />} defaultOpen>
-        <div className="space-y-1.5">
-          <Label className="t-meta text-ink-muted">Editorial status</Label>
-          <Select value={draft.editorialStatus} onValueChange={(editorialStatus) => onPatch({ editorialStatus: editorialStatus as EditorialDraft["editorialStatus"] })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              {draft.editorialStatus === "published" ? (
-                <SelectItem value="published">Published</SelectItem>
-              ) : null}
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="rounded-3 border border-line bg-paper px-3.5 py-3">
+          <p className="flex items-center gap-2 text-sm font-bold text-ink">
+            {draft.editorialStatus === "published" ? (
+              hasPrivateVersion ? <Clock3 className="size-4 text-coral" /> : <CircleCheck className="size-4 text-turquoise" />
+            ) : draft.editorialStatus === "archived" ? (
+              <Archive className="size-4 text-ink-faint" />
+            ) : (
+              <Clock3 className="size-4 text-brand" />
+            )}
+            {draft.editorialStatus === "published"
+              ? hasPrivateVersion
+                ? "Private edits saved"
+                : "Published"
+              : draft.editorialStatus === "archived"
+                ? "Archived"
+                : "Private draft"}
+          </p>
+          <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">
+            {draft.editorialStatus === "published"
+              ? hasPrivateVersion
+                ? "The live site still shows the previous version until you publish again."
+                : "The saved version and the live site are identical."
+              : draft.editorialStatus === "archived"
+                ? "This document is saved but no longer visible on the public site."
+                : "Saving keeps your work private. Use Publish when it is ready."}
+          </p>
         </div>
-        <TextField label="Publication date" type="date" value={draft.date} onChange={(date) => onPatch({ date })} />
+        <TextField label="Date for the next publication" type="date" value={draft.date} onChange={(date) => onPatch({ date })} />
         <div className="flex items-center justify-between gap-3 rounded-2 border border-line px-3 py-2.5">
           <Label htmlFor="editorial-featured" className="text-sm">Feature on home</Label>
           <Switch id="editorial-featured" checked={draft.isFeatured} onCheckedChange={(isFeatured) => onPatch({ isFeatured })} />
         </div>
+        {draft.editorialStatus === "published" && onArchive ? (
+          <Button variant="outline" className="w-full" onClick={onArchive}>
+            <Archive /> Archive from public site
+          </Button>
+        ) : null}
       </Section>
 
       <Section title="Classification" icon={<Tag />}>

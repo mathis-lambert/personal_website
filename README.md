@@ -5,7 +5,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Features
 
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
-- Full-screen editorial workspace for project stories and notes, with Markdown-backed rich editing, autosave, faithful preview, drafts, and publishing controls.
+- Full-screen editorial workspace for project stories and notes, with Markdown-backed rich editing, private autosave, immutable published snapshots, faithful preview, and explicit publishing controls.
 - Admin media library with server-side WebP optimization and responsive variants stored on S3-compatible object storage.
 - Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE.
 - Mandatory API analytics wrapper (`withApiAnalytics`) on all API routes except `/api/health` and NextAuth, with redacted structured logs in MongoDB.

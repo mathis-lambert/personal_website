@@ -37,6 +37,10 @@ export type EditorialDraft = {
   repoUrl: string;
   docsUrl: string;
   videoUrl: string;
+  draftRevision?: number;
+  publishedRevision?: number;
+  publishedAt?: string;
+  hasUnpublishedChanges: boolean;
   updatedAt?: string;
 };
 
@@ -86,6 +90,7 @@ export const createEditorialDraft = (kind: EditorialKind): EditorialDraft => ({
   repoUrl: "",
   docsUrl: "",
   videoUrl: "",
+  hasUnpublishedChanges: false,
 });
 
 export const draftFromItem = (
@@ -114,6 +119,10 @@ export const draftFromItem = (
       readTimeMin: note.readTimeMin,
       canonicalUrl: note.links?.canonical ?? "",
       discussionUrl: note.links?.discussion ?? "",
+      draftRevision: note.draftRevision,
+      publishedRevision: note.publishedRevision,
+      publishedAt: note.publishedAt,
+      hasUnpublishedChanges: !!note.hasUnpublishedChanges,
       updatedAt: note.updatedAt,
     };
   }
@@ -144,6 +153,10 @@ export const draftFromItem = (
     repoUrl: project.links?.repo ?? "",
     docsUrl: project.links?.docs ?? "",
     videoUrl: project.links?.video ?? "",
+    draftRevision: project.draftRevision,
+    publishedRevision: project.publishedRevision,
+    publishedAt: project.publishedAt,
+    hasUnpublishedChanges: !!project.hasUnpublishedChanges,
     updatedAt: project.updatedAt,
   };
 };
@@ -157,7 +170,6 @@ export const editorialPayload = (draft: EditorialDraft) => {
     date: draft.date || today(),
     content: draft.content,
     categories: draft.categories,
-    editorialStatus: draft.editorialStatus,
     isFeatured: draft.isFeatured,
     media: {
       thumbnailUrl: optional(draft.thumbnailUrl),

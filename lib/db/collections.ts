@@ -6,7 +6,13 @@ import type {
   ObjectId,
 } from "mongodb";
 
-import type { Note, Project, ResumeData, TimelineEntry } from "@/types";
+import type {
+  EditorialStatus,
+  Note,
+  Project,
+  ResumeData,
+  TimelineEntry,
+} from "@/types";
 import type { AgentMessage, AgentUsage } from "@/types/agent";
 import type { MediaAsset, MediaVariant } from "@/types/media";
 
@@ -18,11 +24,34 @@ type BaseDocument = Document & {
   updatedAt?: Date;
 };
 
-export type ProjectDocument = Omit<Project, "_id" | "createdAt" | "updatedAt"> &
-  BaseDocument;
+type EditorialRuntimeField =
+  | "_id"
+  | "createdAt"
+  | "updatedAt"
+  | "editorialStatus"
+  | "draftRevision"
+  | "publishedRevision"
+  | "publishedAt"
+  | "hasUnpublishedChanges";
 
-export type NoteDocument = Omit<Note, "_id" | "createdAt" | "updatedAt"> &
-  BaseDocument;
+export type ProjectSnapshotDocument = Omit<Project, EditorialRuntimeField>;
+export type NoteSnapshotDocument = Omit<Note, EditorialRuntimeField>;
+
+type PublicationDocument<TSnapshot> = {
+  editorialStatus?: EditorialStatus;
+  draftRevision?: number;
+  publishedRevision?: number;
+  publishedAt?: Date;
+  published?: TSnapshot;
+};
+
+export type ProjectDocument = ProjectSnapshotDocument &
+  BaseDocument &
+  PublicationDocument<ProjectSnapshotDocument>;
+
+export type NoteDocument = NoteSnapshotDocument &
+  BaseDocument &
+  PublicationDocument<NoteSnapshotDocument>;
 
 export type TimelineDocument = TimelineEntry &
   BaseDocument & {
@@ -215,6 +244,7 @@ const ensureIndexes = async () => {
         COLLECTION_NAMES.projects,
         [
           { key: { slug: 1 }, unique: true, sparse: true },
+          { key: { "published.slug": 1 }, unique: true, sparse: true },
           { key: { date: -1 } },
         ],
       ],
@@ -222,6 +252,7 @@ const ensureIndexes = async () => {
         COLLECTION_NAMES.notes,
         [
           { key: { slug: 1 }, unique: true, sparse: true },
+          { key: { "published.slug": 1 }, unique: true, sparse: true },
           { key: { date: -1 } },
         ],
       ],
