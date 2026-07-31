@@ -14,6 +14,7 @@
     "migrate:status": "node --env-file=.env migrations/run.mjs --status"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1100.0",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/lato": "^5.2.6",
     "@langchain/core": "^1.1.18",
@@ -24,6 +25,12 @@
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-slot": "^1.2.4",
+    "@tiptap/extension-image": "^3.29.2",
+    "@tiptap/extension-link": "^3.29.2",
+    "@tiptap/extension-placeholder": "^3.29.2",
+    "@tiptap/markdown": "^3.29.2",
+    "@tiptap/react": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "culori": "^4.0.2",
@@ -34,8 +41,8 @@
     "maplibre-gl": "^5.24.0",
     "mermaid": "^11.10.1",
     "mongodb": "^6.12.0",
-    "next": "^16.2.11",
-    "next-auth": "^4.24.13",
+    "next": "^16.2.12",
+    "next-auth": "^4.24.15",
     "next-themes": "^0.4.6",
     "pdf-lib": "^1.17.1",
     "radix-ui": "^1.6.4",
@@ -48,6 +55,7 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "sharp": "^0.35.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.6"
@@ -68,6 +76,12 @@
     "typescript": "^5"
   },
   "allowScripts": {
-    "sharp@0.34.5": true
+    "sharp@0.34.5": true,
+    "sharp@0.35.3": true
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.25"
+    }
   }
 }

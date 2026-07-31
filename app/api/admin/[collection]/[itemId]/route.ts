@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { withApiAnalytics } from "@/lib/analytics/server";
 import {
   deleteItem,
+  getAdminContentItem,
   listCollections,
   updateItem,
   type AdminCollectionName,
@@ -16,6 +17,22 @@ const isValidCollection = (name: string): name is AdminCollectionName =>
 type AdminParams = {
   collection: string;
   itemId: string;
+};
+
+const getHandler = async (
+  _req: NextRequest,
+  { params }: { params: Promise<AdminParams> },
+) => {
+  const { collection, itemId } = await params;
+  if (!(await requireAdminSession())) {
+    return NextResponse.json({ detail: "Unauthorized" }, { status: 401 });
+  }
+  if (collection !== "projects" && collection !== "notes") {
+    return NextResponse.json({ detail: "Unsupported collection" }, { status: 400 });
+  }
+  const item = await getAdminContentItem(collection, itemId);
+  if (!item) return NextResponse.json({ detail: "Not found" }, { status: 404 });
+  return NextResponse.json({ item });
 };
 
 const patchHandler = async (
@@ -82,6 +99,15 @@ export const PATCH = withApiAnalytics(
     actorType: "admin",
   },
   patchHandler,
+);
+
+export const GET = withApiAnalytics(
+  {
+    route: "/api/admin/:collection/:itemId",
+    actorType: "admin",
+    captureRequestBody: false,
+  },
+  getHandler,
 );
 
 export const DELETE = withApiAnalytics(

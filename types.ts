@@ -76,6 +76,7 @@ export interface TimelineEntry {
 // ---------------- Projects / Works DTO ----------------
 
 export type ProjectStatus = "completed" | "in-progress" | "archived";
+export type EditorialStatus = "draft" | "published" | "archived";
 
 export interface ProjectLinks {
   live?: string; // Live demo or website
@@ -112,6 +113,9 @@ export interface Project {
   categories?: string[];
   status?: ProjectStatus;
   isFeatured?: boolean;
+  editorialStatus?: EditorialStatus;
+  createdAt?: string;
+  updatedAt?: string;
   // Structured fields
   links?: ProjectLinks;
   media?: ProjectMedia;
@@ -175,6 +179,9 @@ export interface Note {
   tags: string[];
   categories?: string[];
   isFeatured?: boolean;
+  editorialStatus?: EditorialStatus;
+  createdAt?: string;
+  updatedAt?: string;
   links?: NoteLinks;
   media?: NoteMedia;
   metrics?: NoteMetrics;

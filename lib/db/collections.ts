@@ -8,6 +8,7 @@ import type {
 
 import type { Note, Project, ResumeData, TimelineEntry } from "@/types";
 import type { AgentMessage, AgentUsage } from "@/types/agent";
+import type { MediaAsset, MediaVariant } from "@/types/media";
 
 import { getMongoDb } from "./client";
 
@@ -17,9 +18,11 @@ type BaseDocument = Document & {
   updatedAt?: Date;
 };
 
-export type ProjectDocument = Omit<Project, "_id"> & BaseDocument;
+export type ProjectDocument = Omit<Project, "_id" | "createdAt" | "updatedAt"> &
+  BaseDocument;
 
-export type NoteDocument = Omit<Note, "_id"> & BaseDocument;
+export type NoteDocument = Omit<Note, "_id" | "createdAt" | "updatedAt"> &
+  BaseDocument;
 
 export type TimelineDocument = TimelineEntry &
   BaseDocument & {
@@ -27,6 +30,14 @@ export type TimelineDocument = TimelineEntry &
   };
 
 export type ResumeDocument = ResumeData & BaseDocument;
+
+export type MediaAssetDocument = Omit<
+  MediaAsset,
+  "_id" | "createdAt" | "updatedAt" | "variants"
+> &
+  BaseDocument & {
+    variants: MediaVariant[];
+  };
 
 export type ApiRequestLogDocument = BaseDocument & {
   kind: "api_request";
@@ -119,6 +130,7 @@ export const COLLECTION_NAMES = {
   apiRequestLogs: "api_request_logs",
   uiEvents: "ui_events",
   chatConversationTurns: "chat_conversation_turns",
+  mediaAssets: "media_assets",
 } as const;
 
 let indexesPromise: Promise<void> | null = null;
@@ -216,6 +228,13 @@ const ensureIndexes = async () => {
       [COLLECTION_NAMES.experiences, [{ key: { order: 1 } }]],
       [COLLECTION_NAMES.studies, [{ key: { order: 1 } }]],
       [COLLECTION_NAMES.resume, []],
+      [
+        COLLECTION_NAMES.mediaAssets,
+        [
+          { key: { createdAt: -1 } },
+          { key: { "variants.key": 1 }, unique: true },
+        ],
+      ],
       [
         COLLECTION_NAMES.apiRequestLogs,
         [
@@ -327,3 +346,6 @@ export const getChatConversationTurnsCollection = () =>
   getCollection<ChatConversationTurnDocument>(
     COLLECTION_NAMES.chatConversationTurns,
   );
+
+export const getMediaAssetsCollection = () =>
+  getCollection<MediaAssetDocument>(COLLECTION_NAMES.mediaAssets);

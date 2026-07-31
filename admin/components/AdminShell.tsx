@@ -107,6 +107,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/admin";
   // Closed from the link's own click handler, not from an effect on the path.
   const [navOpen, setNavOpen] = useState(false);
+  const isEditorialWorkspace = /^\/admin\/(notes|projects)\/(new|[^/]+)$/.test(pathname);
+
+  if (isEditorialWorkspace) {
+    return <div className="min-h-screen bg-paper">{children}</div>;
+  }
 
   return (
     <div data-ink={inkForPath(pathname)} className="min-h-screen bg-paper">

@@ -58,7 +58,7 @@ export const buildSelfTools = () => {
       const collection = await getProjectsCollection();
       const docs = await collection
         .find(
-          {},
+          { editorialStatus: { $nin: ["draft", "archived"] } },
           {
             projection: {
               _id: 0,
@@ -87,7 +87,14 @@ export const buildSelfTools = () => {
       const collection = await getProjectsCollection();
       const objectId = parseObjectId(slug);
       const doc = await collection.findOne(
-        objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+        objectId
+          ? {
+              $and: [
+                { $or: [{ slug }, { _id: objectId }] },
+                { editorialStatus: { $nin: ["draft", "archived"] } },
+              ],
+            }
+          : { slug, editorialStatus: { $nin: ["draft", "archived"] } },
         {
           projection: {
             _id: 0,
@@ -128,7 +135,7 @@ export const buildSelfTools = () => {
       const collection = await getNotesCollection();
       const docs = await collection
         .find(
-          {},
+          { editorialStatus: { $nin: ["draft", "archived"] } },
           {
             projection: {
               _id: 0,
@@ -157,7 +164,14 @@ export const buildSelfTools = () => {
       const collection = await getNotesCollection();
       const objectId = parseObjectId(slug);
       const doc = await collection.findOne(
-        objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+        objectId
+          ? {
+              $and: [
+                { $or: [{ slug }, { _id: objectId }] },
+                { editorialStatus: { $nin: ["draft", "archived"] } },
+              ],
+            }
+          : { slug, editorialStatus: { $nin: ["draft", "archived"] } },
         {
           projection: {
             _id: 0,

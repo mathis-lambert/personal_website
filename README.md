@@ -5,6 +5,8 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 ## Features
 
 - Public pages for projects, articles, experiences, studies, and a downloadable resume.
+- Full-screen editorial workspace for project stories and notes, with Markdown-backed rich editing, autosave, faithful preview, drafts, and publishing controls.
+- Admin media library with server-side WebP optimization and responsive variants stored on S3-compatible object storage.
 - Chat assistant UI that calls `/api/agent`, proxying to `ML_API_BASE_URL` with SSE.
 - Mandatory API analytics wrapper (`withApiAnalytics`) on all API routes except `/api/health` and NextAuth, with redacted structured logs in MongoDB.
 - Dedicated chat transcript observability for `/api/agent` with a turns-only source (`chat_conversation_turns`) and conversation summaries aggregated at read time (redacted input/output).
@@ -18,6 +20,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 
 - Next.js 16 / React 19 / TypeScript with standalone output.
 - MongoDB for content, analytics logs (`api_request_logs`, `ui_events`), and chat transcript monitoring (`chat_conversation_turns`).
+- S3-compatible storage for editorial media; MongoDB stores searchable `media_assets` metadata while immutable image variants are served through the CDN.
 - Docker multi-stage build (`Dockerfile`) producing a single runtime image.
 - Compose files: `development/docker-compose.yml` (local dev with Mongo), `compose.dev.yaml` (local prod build), `compose.prod.yaml` (server deploy with Traefik labels).
 - GitHub Actions `.github/workflows/cd.yaml` builds/pushes `ghcr.io/<owner>/personal-website` on tags and redeploys to the Raspberry Pi host.
@@ -29,6 +32,7 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 - Provide runtime secrets: `PUBLIC_BASE_URL`, `ML_API_BASE_URL`, `ML_API_KEY`, `LLM_MODEL_NAME`, `ML_API_VECTOR_STORE_ID`, `NEXTAUTH_SECRET`, `ADMIN_USERNAME`/`ADMIN_PASSWORD` (or `INTERNAL_API_*`), `MONGODB_URI`/`MONGODB_DB`, and `ANALYTICS_HASH_SALT`.
 - Optional retention tuning: `ANALYTICS_LOG_RETENTION_DAYS`, `CHAT_LOG_RETENTION_DAYS`.
 - Optional transcript truncation tuning: `CHAT_LOG_MAX_TEXT_CHARS`.
+- Media storage: `MEDIA_S3_BUCKET`, `MEDIA_S3_REGION`, `MEDIA_S3_ENDPOINT`, `MEDIA_S3_FORCE_PATH_STYLE`, `MEDIA_S3_ACCESS_KEY_ID`, `MEDIA_S3_SECRET_ACCESS_KEY`, and `MEDIA_PUBLIC_BASE_URL`.
 - `NEXTAUTH_URL` should point at the external URL in production when using NextAuth callbacks.
 
 ## Run locally
@@ -52,6 +56,8 @@ Next.js (App Router) app that powers mathislambert.fr. The site, API routes (cha
 - `POST /api/agent` — agentic Responses API proxy (SSE supported).
 - `GET /api/resume/export` — latest resume PDF export.
 - `POST /api/analytics/track` — ingest UI analytics events.
+- `GET|POST /api/admin/media` — list and upload optimized editorial media.
+- `PATCH|DELETE /api/admin/media/:assetId` — update metadata or remove a media asset.
 - `/api/auth/[...nextauth]` — credentials login for `/admin`.
 - `/api/admin/*` — protected CRUD + analytics endpoints:
 - `/api/admin/analytics/overview`

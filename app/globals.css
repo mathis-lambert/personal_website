@@ -1495,6 +1495,43 @@
   color: var(--ink);
 }
 
+/* ── Editorial atelier ───────────────────────────────────────────────── */
+
+.editorial-canvas .ProseMirror {
+  min-height: 52vh;
+  caret-color: var(--brand);
+}
+
+.editorial-canvas .ProseMirror > *:first-child {
+  margin-top: 0;
+}
+
+.editorial-canvas .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--ink-faint);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.editorial-canvas .ProseMirror img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-block: 2rem;
+  border-radius: var(--r-4);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.editorial-canvas .ProseMirror-selectednode {
+  outline: 3px solid var(--brand-quiet);
+  outline-offset: 4px;
+}
+
+.editorial-canvas .ProseMirror:focus-visible {
+  outline: none;
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

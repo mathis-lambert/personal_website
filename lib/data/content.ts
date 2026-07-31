@@ -153,17 +153,14 @@ const stripContent = <T>(
   doc: ContentDocument | null | undefined,
 ): T | null => {
   if (!doc) return null;
-  const {
-    _id: mongoId,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    order: _order,
-    ...rest
-  } = doc;
-  void _createdAt;
-  void _updatedAt;
+  const { _id: mongoId, createdAt, updatedAt, order: _order, ...rest } = doc;
   void _order;
-  return { ...rest, _id: mongoId ? String(mongoId) : "" } as T;
+  return {
+    ...rest,
+    _id: mongoId ? String(mongoId) : "",
+    createdAt: createdAt?.toISOString(),
+    updatedAt: updatedAt?.toISOString(),
+  } as T;
 };
 
 const stripTimeline = (
@@ -258,9 +255,9 @@ export async function getCollection<T extends AdminCollectionName>(
 ): Promise<CollectionData<T>> {
   switch (name) {
     case "projects":
-      return (await getAllProjects()) as CollectionData<T>;
+      return (await getAllProjects({ includeUnpublished: true })) as CollectionData<T>;
     case "notes":
-      return (await getAllNotes()) as CollectionData<T>;
+      return (await getAllNotes({ includeUnpublished: true })) as CollectionData<T>;
     case "experiences":
       return (await getExperiences()) as CollectionData<T>;
     case "studies":
@@ -272,9 +269,18 @@ export async function getCollection<T extends AdminCollectionName>(
   }
 }
 
-export async function getAllProjects(): Promise<Project[]> {
+const publicContentFilter = {
+  editorialStatus: { $nin: ["draft", "archived"] },
+} as const;
+
+export async function getAllProjects(
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Project[]> {
   const collection = await getProjectsCollection();
-  const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  const docs = await collection
+    .find(options.includeUnpublished ? {} : publicContentFilter)
+    .sort({ date: -1, title: 1 })
+    .toArray();
   if (!docs.length) {
     console.info("No project entries found in the database.");
     return [];
@@ -286,7 +292,9 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   const collection = await getProjectsCollection();
   const objectId = parseObjectId(slug);
   const doc = await collection.findOne(
-    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+    objectId
+      ? { $and: [{ $or: [{ slug }, { _id: objectId }] }, publicContentFilter] }
+      : { slug, ...publicContentFilter },
   );
   if (!doc) {
     console.info("No project entry found for the requested slug or id.");
@@ -295,9 +303,14 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return stripContent<Project>(doc);
 }
 
-export async function getAllNotes(): Promise<Note[]> {
+export async function getAllNotes(
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Note[]> {
   const collection = await getNotesCollection();
-  const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  const docs = await collection
+    .find(options.includeUnpublished ? {} : publicContentFilter)
+    .sort({ date: -1, title: 1 })
+    .toArray();
   if (!docs.length) {
     console.info("No note entries found in the database.");
     return [];
@@ -309,13 +322,25 @@ export async function getNoteBySlug(slug: string): Promise<Note | null> {
   const collection = await getNotesCollection();
   const objectId = parseObjectId(slug);
   const doc = await collection.findOne(
-    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
+    objectId
+      ? { $and: [{ $or: [{ slug }, { _id: objectId }] }, publicContentFilter] }
+      : { slug, ...publicContentFilter },
   );
   if (!doc) {
     console.info("No note entry found for the requested slug or id.");
     return null;
   }
   return stripContent<Note>(doc);
+}
+
+export async function getAdminContentItem(
+  collection: "projects" | "notes",
+  itemId: string,
+): Promise<Project | Note | null> {
+  const col = await openSlugCollection(collection);
+  const objectId = parseObjectId(itemId);
+  if (!objectId) return null;
+  return stripContent<Project | Note>(await col.findOne({ _id: objectId }));
 }
 
 export async function getExperiences(): Promise<TimelineEntry[]> {
