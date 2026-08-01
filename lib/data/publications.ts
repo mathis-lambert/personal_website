@@ -175,14 +175,41 @@ export async function getPublishedItem(
   slug: string,
 ): Promise<EditorialItem | null> {
   const contents = await getEditorialContentCollection(collection);
-  const contentId = ObjectId.isValid(slug) ? new ObjectId(slug) : undefined;
   const rows = await contents
+    .aggregate<PublishedRow>(currentPublicationPipeline(collection, { slug }))
+    .limit(1)
+    .toArray();
+  if (rows[0]) return serializePublishedRow(rows[0]);
+
+  // Public routes are slug-first. ObjectId lookup only preserves legacy links;
+  // it must not make a valid 24-character hexadecimal slug unreachable.
+  if (!ObjectId.isValid(slug)) return null;
+  const byId = await contents
     .aggregate<PublishedRow>(
-      currentPublicationPipeline(collection, contentId ? { contentId } : { slug }),
+      currentPublicationPipeline(collection, { contentId: new ObjectId(slug) }),
     )
     .limit(1)
     .toArray();
-  return rows[0] ? serializePublishedRow(rows[0]) : null;
+  return byId[0] ? serializePublishedRow(byId[0]) : null;
+}
+
+export async function getPublishedContentSlug(
+  collection: EditorialCollection,
+  itemId: string,
+): Promise<string | null> {
+  if (!ObjectId.isValid(itemId)) return null;
+  const contents = await getEditorialContentCollection(collection);
+  const rows = await contents
+    .aggregate<PublishedRow>(
+      currentPublicationPipeline(collection, {
+        contentId: new ObjectId(itemId),
+      }),
+    )
+    .limit(1)
+    .toArray();
+  const row = rows[0];
+  if (!row) return null;
+  return row.publication.snapshot.slug || itemId;
 }
 
 export async function isPublishedSlugInUse(

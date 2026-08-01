@@ -13,6 +13,7 @@ services:
     environment:
       NODE_ENV: production
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      NEXTAUTH_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
       ML_API_BASE_URL: ${ML_API_BASE_URL}
       ML_API_KEY: ${ML_API_KEY}
       LLM_MODEL_NAME: ${LLM_MODEL_NAME:-openai/gpt-oss-120b}

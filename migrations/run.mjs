@@ -79,7 +79,12 @@ try {
       const note = (message) => console.log(`   ${message}`);
 
       const startedAt = Date.now();
-      await migration.up(db, { apply: APPLY, log, note });
+      await migration.up(db, {
+        apply: APPLY,
+        log,
+        note,
+        pendingMigrationIds: pending.map(({ id }) => id),
+      });
 
       if (APPLY) {
         await db.collection(LEDGER).insertOne({

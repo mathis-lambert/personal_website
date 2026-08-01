@@ -9,19 +9,33 @@ export const description =
   "Move embedded snapshots into immutable publication history";
 
 const embeddedPublicationIndex = "published.slug_1";
+const snapshotMigrationId = "004-editorial-publication-snapshots";
 
-export async function up(db, { apply, log, note }) {
+export async function up(
+  db,
+  { apply, log, note, pendingMigrationIds = [] },
+) {
   const publications = db.collection("content_publications");
+  const previewsSnapshotInitialization =
+    !apply && pendingMigrationIds.includes(snapshotMigrationId);
 
   for (const collectionName of ["projects", "notes"]) {
     const contents = db.collection(collectionName);
-    const documents = await contents.find({ published: { $exists: true } }).toArray();
+    const sourceFilter = previewsSnapshotInitialization
+      ? {
+          $or: [
+            { published: { $exists: true } },
+            { editorialStatus: { $nin: ["draft", "archived"] } },
+          ],
+        }
+      : { published: { $exists: true } };
+    const documents = await contents.find(sourceFilter).toArray();
     const missingSnapshot = await contents.countDocuments({
       editorialStatus: "published",
       published: { $exists: false },
       publishedVersion: { $exists: false },
     });
-    if (missingSnapshot > 0) {
+    if (missingSnapshot > 0 && !previewsSnapshotInitialization) {
       throw new Error(
         `${missingSnapshot} published ${collectionName} have no snapshot to migrate`,
       );

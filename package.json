@@ -1,11 +1,12 @@
 {
   "name": "app",
-  "version": "2.3.0",
+  "version": "3.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --test tests/migrations/*.test.mjs",
     "lint": "eslint",
     "check:api-analytics": "node scripts/check-api-analytics.mjs",
     "seed:dev": "node --env-file=.env scripts/seed-dev.mjs",

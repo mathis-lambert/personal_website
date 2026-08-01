@@ -1,12 +1,13 @@
 # syntax=docker/dockerfile:1
-FROM node:24-slim AS base
+FROM node:22-slim AS base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 
 FROM base AS deps
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=optional
 
 FROM deps AS dev
 ENV NODE_ENV=development
@@ -38,13 +39,18 @@ ENV NEXT_PUBLIC_MAINTENANCE_MODE=${NEXT_PUBLIC_MAINTENANCE_MODE}
 COPY . .
 RUN npm run build
 
-FROM node:22-slim AS runner
+FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=3000
-WORKDIR /app
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+# Next's output tracer can retain Sharp's native addon without the matching
+# libvips shared library. Copy the platform-selected optional packages as one
+# unit so the standalone image always contains a compatible pair.
+COPY --from=builder /app/node_modules/@img ./node_modules/@img
+COPY --from=builder /app/node_modules/sharp ./node_modules/sharp
+RUN node -e "require('sharp')"
 
 EXPOSE 3000
 CMD ["node", "server.js"]

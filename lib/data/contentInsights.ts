@@ -3,6 +3,7 @@ import {
   getProjectsCollection,
   getUiEventsCollection,
 } from "@/lib/db/collections";
+import { getPublishedContentSlug } from "@/lib/data/publications";
 import {
   analyticsRange,
   emptyAnalyticsBuckets,
@@ -13,7 +14,6 @@ import type {
   ContentInsights,
   ContentPerformanceItem,
 } from "@/types/analytics";
-import { ObjectId } from "mongodb";
 
 const publicWindow = (start: Date, end: Date) => ({
   timestamp: { $gte: start, $lte: end },
@@ -40,16 +40,10 @@ export async function resolveContentAnalyticsSlug(
   kind: ContentAnalyticsKind,
   itemId: string,
 ): Promise<string | null> {
-  if (!ObjectId.isValid(itemId)) return null;
-  const collection =
-    kind === "project"
-      ? await getProjectsCollection()
-      : await getNotesCollection();
-  const item = await collection.findOne(
-    { _id: new ObjectId(itemId) },
-    { projection: { slug: 1 } },
+  return getPublishedContentSlug(
+    kind === "project" ? "projects" : "notes",
+    itemId,
   );
-  return item ? item.slug || itemId : null;
 }
 
 const countDistinctVisitors = async (
