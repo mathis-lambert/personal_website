@@ -8,7 +8,7 @@
 
 export { CardGrid, EmptyState, Page, Section, SectionHeader } from "./Page";
 export { Surface } from "./Surface";
-export { Display, Eyebrow, Lead, Meta, Prose, Rule, Title } from "./Text";
+export { Display, Eyebrow, Lead, Meta, Rule, Title } from "./Text";
 export { Tag, TagList } from "./Tag";
 export { Action, ActionLink, IconAction } from "./Action";
 export { Reveal } from "./Reveal";
@@ -16,4 +16,4 @@ export { LiftText } from "./LiftText";
 export { Squiggle } from "./Squiggle";
 export { Wordmark } from "./Wordmark";
 export { AmbientField } from "./AmbientField";
-export { TokenStream, type StreamSegment } from "./TokenStream";
+export { TokenStream } from "./TokenStream";

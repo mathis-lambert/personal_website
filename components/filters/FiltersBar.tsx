@@ -11,7 +11,7 @@ import MultiSelectDropdown, {
 import SearchInput from "@/components/filters/SearchInput";
 import SortSelect from "@/components/filters/SortSelect";
 
-export interface FiltersBarSection {
+interface FiltersBarSection {
   type: "multiselect";
   label: string;
   items: MultiSelectItem[];

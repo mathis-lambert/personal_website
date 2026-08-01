@@ -36,7 +36,7 @@ import {
 } from "@/lib/resume/localization";
 import { externalLinkProps } from "@/lib/ui/links";
 import { cn } from "@/lib/utils";
-import type { ResumeData } from "@/types";
+import type { ResumeData } from "@/types/resume";
 
 /** A CV section: icon tile, title, count, then content. No container. */
 function Block({

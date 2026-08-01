@@ -17,9 +17,9 @@ import {
   SectionHeader,
   Surface,
 } from "@/components/ds";
-import { LocationMap } from "@/components/ui/LocationMap";
-import SvgIcon from "@/components/ui/SvgIcon";
-import { LOGOS } from "@/components/ui/logos";
+import { LocationMap } from "@/components/home/LocationMap";
+import SvgIcon from "@/components/home/SvgIcon";
+import { LOGOS } from "@/lib/ui/logos";
 import { ToolQuip } from "@/components/home/ToolQuip";
 import { cn } from "@/lib/utils";
 

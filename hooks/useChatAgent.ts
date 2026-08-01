@@ -3,7 +3,7 @@ import { useEffect, useReducer, useRef } from "react";
 import type { AgentRequest, AgentResponse } from "@/types/agent";
 import { callAgentApi } from "@/api/agentClient";
 
-export type AgentState = {
+type AgentState = {
   result: string;
   response: AgentResponse | null;
   isLoading: boolean;

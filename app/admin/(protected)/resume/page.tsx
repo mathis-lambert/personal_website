@@ -1,4 +1,4 @@
-import ResumePage from "@/admin/pages/ResumePage";
+import ResumePage from "@/components/admin/screens/ResumePage";
 
 export const metadata = {
   title: "Admin · Resume",

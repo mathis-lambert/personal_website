@@ -1,6 +1,6 @@
 import type React from "react";
 
-import MarkdownView from "@/components/ui/MarkdownView";
+import MarkdownView from "@/components/content/MarkdownView";
 
 /** The visitor's turn: solid ink, so authorship is obvious at a glance. */
 const UserMessage: React.FC<{ content: string }> = ({ content }) => (

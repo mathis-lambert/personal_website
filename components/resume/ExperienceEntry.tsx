@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Tag } from "@/components/ds";
 import { resumeLabels, type ResumeLocale } from "@/lib/resume/localization";
 import { cn } from "@/lib/utils";
-import type { Experience } from "@/types";
+import type { Experience } from "@/types/resume";
 
 /**
  * One role. Badges carry the hierarchy; a hairline separates rows. The role

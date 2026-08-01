@@ -4,6 +4,7 @@ import {
   ExternalLink,
   FileText,
   Layers,
+  PencilLine,
   PlayCircle,
   Sparkles,
 } from "lucide-react";
@@ -15,15 +16,18 @@ import {
   DetailNotFound,
   DetailSection,
 } from "@/components/content/ReadingShell";
+import { ContentShareActions } from "@/components/content/ContentShareActions";
+import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
 import { Action, Rule, TagList } from "@/components/ds";
-import MarkdownView from "@/components/ui/MarkdownView";
+import MarkdownView from "@/components/content/MarkdownView";
 import { resolveProjectStatus } from "@/lib/content/projectStatus";
 import { formatDate } from "@/lib/format";
-import type { Project } from "@/types";
+import type { Project } from "@/types/content";
 
 const ProjectView: React.FC<{
   project: Project | null | undefined;
-}> = ({ project }) => {
+  canEdit?: boolean;
+}> = ({ project, canEdit = false }) => {
   if (!project) {
     return (
       <DetailNotFound
@@ -40,6 +44,15 @@ const ProjectView: React.FC<{
 
   const status = resolveProjectStatus(project.status);
   const date = formatDate(project.date, "long");
+  const updatedDate = formatDate(
+    project.publishedAt ?? project.updatedAt,
+    "long",
+  );
+  const coverDetails = [
+    project.role,
+    project.client,
+    ...project.technologies,
+  ].filter(Boolean) as string[];
 
   const links = [
     project.links?.live && {
@@ -85,27 +98,51 @@ const ProjectView: React.FC<{
       deck={project.subtitle || project.description}
       meta={[
         `${project.status === "in-progress" ? "Updated" : "Shipped"} ${date}`,
+        updatedDate ? `Last updated ${updatedDate}` : undefined,
         project.role,
         project.client,
       ]}
       cover={project.media?.imageUrl || project.media?.thumbnailUrl}
       coverAlt={`Cover image for ${project.title}`}
+      generatedCover={
+        <GeneratedEditorialCover
+          kind="project"
+          title={project.title}
+          eyebrow={status.kicker}
+          date={formatDate(project.date, "monthYear")}
+          details={coverDetails}
+        />
+      }
       aside={
-        links.length > 0 ? (
-          <div className="flex flex-wrap gap-2.5">
-            {links.map((link) => (
-              <Action
-                key={link.href}
-                href={link.href}
-                tone={link.tone}
-                size="sm"
-              >
-                {link.icon}
-                {link.label}
-              </Action>
-            ))}
-          </div>
-        ) : null
+        <div className="flex flex-wrap gap-2.5">
+          {links.map((link) => (
+            <Action
+              key={link.href}
+              href={link.href}
+              tone={link.tone}
+              size="sm"
+            >
+              {link.icon}
+              {link.label}
+            </Action>
+          ))}
+          {canEdit ? (
+            <Action
+              href={`/admin/projects/${project._id}`}
+              tone="brand"
+              size="sm"
+            >
+              <PencilLine />
+              Edit project
+            </Action>
+          ) : null}
+          <ContentShareActions
+            kind="project"
+            slug={project.slug ?? project._id}
+            title={project.title}
+            text={project.subtitle || project.description}
+          />
+        </div>
       }
     >
       <MarkdownView content={project.content || ""} />

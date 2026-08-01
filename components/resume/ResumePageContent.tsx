@@ -5,7 +5,7 @@ import { useOptimistic, useTransition } from "react";
 
 import ResumeView from "@/components/resume/ResumeView";
 import { type ResumeLocale } from "@/lib/resume/localization";
-import type { ResumeData } from "@/types";
+import type { ResumeData } from "@/types/resume";
 
 export function ResumePageContent({
   resume,

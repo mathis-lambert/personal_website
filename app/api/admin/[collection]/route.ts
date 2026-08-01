@@ -1,11 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { withApiAnalytics } from "@/lib/analytics/server";
-import {
-  createProjectOrNote,
-  type AdminCollectionName,
-} from "@/lib/data/content";
+import { createProjectOrNote } from "@/lib/data/content";
 import { requireAdminSession } from "@/lib/auth/helpers";
+import type { AdminCollectionName } from "@/types/admin";
 
 const creatable = new Set<AdminCollectionName>(["projects", "notes"]);
 

@@ -40,7 +40,7 @@ function toMonths(token: string, nowMonths: number): number | null {
   return month < 0 ? null : Number(parts[2]) * 12 + month;
 }
 
-export type TimelineBar = {
+type TimelineBar = {
   /** Percent of the group's axis. */
   left: number;
   width: number;

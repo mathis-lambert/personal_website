@@ -10,6 +10,8 @@ migrations/
   001-baseline.mjs      loads the versioned snapshot into an empty database
   002-notes-rename.mjs  articles -> notes
   003-timeline-visibility.mjs  initializes missing experience and study hide flags
+  004-editorial-publication-snapshots.mjs  initializes the first public snapshot
+  005-publication-history.mjs  moves snapshots into immutable version history
   baseline/
     data.json          every content document, _id stripped
     schema.json        every field path, its types, how many documents have it

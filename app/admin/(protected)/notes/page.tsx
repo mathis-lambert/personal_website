@@ -1,8 +1,7 @@
-import { CollectionScreen } from "@/admin/components/CollectionScreen";
-import { notesConfig } from "@/admin/collections";
+import { EditorialLibrary } from "@/components/admin/editorial/EditorialLibrary";
 
 export const metadata = { title: "Admin · Notes" };
 
 export default function Page() {
-  return <CollectionScreen config={notesConfig} />;
+  return <EditorialLibrary kind="notes" />;
 }

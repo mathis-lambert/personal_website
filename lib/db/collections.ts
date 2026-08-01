@@ -6,8 +6,19 @@ import type {
   ObjectId,
 } from "mongodb";
 
-import type { Note, Project, ResumeData, TimelineEntry } from "@/types";
+import type {
+  EditorialStatus,
+  TimelineEntry,
+} from "@/types/content";
+import type { ResumeData } from "@/types/resume";
 import type { AgentMessage, AgentUsage } from "@/types/agent";
+import type { MediaAsset, MediaVariant } from "@/types/media";
+import type {
+  EditorialCollection,
+  EditorialSnapshot,
+  NoteSnapshot,
+  ProjectSnapshot,
+} from "@/types/editorial";
 
 import { getMongoDb } from "./client";
 
@@ -17,9 +28,33 @@ type BaseDocument = Document & {
   updatedAt?: Date;
 };
 
-export type ProjectDocument = Omit<Project, "_id"> & BaseDocument;
+type PublicationDocument = {
+  editorialStatus?: EditorialStatus;
+  draftRevision?: number;
+  publishedDraftRevision?: number;
+  publishedVersion?: number;
+  publishedAt?: Date;
+};
 
-export type NoteDocument = Omit<Note, "_id"> & BaseDocument;
+export type ProjectDocument = ProjectSnapshot &
+  BaseDocument &
+  PublicationDocument;
+
+export type NoteDocument = NoteSnapshot &
+  BaseDocument &
+  PublicationDocument;
+
+export type EditorialContentDocument = ProjectDocument | NoteDocument;
+
+export type ContentPublicationDocument = BaseDocument & {
+  contentId: ObjectId;
+  collection: EditorialCollection;
+  version: number;
+  snapshot: EditorialSnapshot;
+  sourceDraftRevision: number;
+  restoredFromVersion?: number;
+  publishedAt: Date;
+};
 
 export type TimelineDocument = TimelineEntry &
   BaseDocument & {
@@ -27,6 +62,14 @@ export type TimelineDocument = TimelineEntry &
   };
 
 export type ResumeDocument = ResumeData & BaseDocument;
+
+export type MediaAssetDocument = Omit<
+  MediaAsset,
+  "_id" | "createdAt" | "updatedAt" | "variants"
+> &
+  BaseDocument & {
+    variants: MediaVariant[];
+  };
 
 export type ApiRequestLogDocument = BaseDocument & {
   kind: "api_request";
@@ -119,6 +162,8 @@ export const COLLECTION_NAMES = {
   apiRequestLogs: "api_request_logs",
   uiEvents: "ui_events",
   chatConversationTurns: "chat_conversation_turns",
+  mediaAssets: "media_assets",
+  contentPublications: "content_publications",
 } as const;
 
 let indexesPromise: Promise<void> | null = null;
@@ -195,6 +240,12 @@ const ensureIndexes = async () => {
         if (hasLegacyIdIndex) {
           await collection.dropIndex("id_1");
         }
+        const hasEmbeddedPublicationSlugIndex = indexes.find(
+          (idx) => idx.name === "published.slug_1",
+        );
+        if (hasEmbeddedPublicationSlugIndex) {
+          await collection.dropIndex("published.slug_1");
+        }
       }),
     );
 
@@ -217,6 +268,24 @@ const ensureIndexes = async () => {
       [COLLECTION_NAMES.studies, [{ key: { order: 1 } }]],
       [COLLECTION_NAMES.resume, []],
       [
+        COLLECTION_NAMES.mediaAssets,
+        [
+          { key: { createdAt: -1 } },
+          { key: { "variants.key": 1 }, unique: true },
+        ],
+      ],
+      [
+        COLLECTION_NAMES.contentPublications,
+        [
+          {
+            key: { collection: 1, contentId: 1, version: 1 },
+            unique: true,
+          },
+          { key: { collection: 1, contentId: 1, publishedAt: -1 } },
+          { key: { collection: 1, "snapshot.slug": 1 } },
+        ],
+      ],
+      [
         COLLECTION_NAMES.apiRequestLogs,
         [
           { key: { timestamp: -1 } },
@@ -232,6 +301,17 @@ const ensureIndexes = async () => {
           { key: { timestamp: -1 } },
           { key: { name: 1, timestamp: -1 } },
           { key: { path: 1, timestamp: -1 } },
+          { key: { "actor.type": 1, name: 1, timestamp: -1 } },
+          { key: { "actor.type": 1, path: 1, timestamp: -1 } },
+          {
+            key: {
+              "actor.type": 1,
+              name: 1,
+              "properties.slug": 1,
+              timestamp: -1,
+            },
+            sparse: true,
+          },
           { key: { sessionId: 1, timestamp: -1 }, sparse: true },
         ],
       ],
@@ -308,6 +388,18 @@ export const getProjectsCollection = () =>
 export const getNotesCollection = () =>
   getCollection<NoteDocument>(COLLECTION_NAMES.notes);
 
+/**
+ * Shared access for operations that are identical across editorial content.
+ * Mongo's invariant Collection<T> type cannot represent the project/note union,
+ * so the single driver boundary cast lives here instead of in domain modules.
+ */
+export const getEditorialContentCollection = async (
+  name: EditorialCollection,
+): Promise<Collection<EditorialContentDocument>> =>
+  (name === "projects"
+    ? await getProjectsCollection()
+    : await getNotesCollection()) as unknown as Collection<EditorialContentDocument>;
+
 export const getExperiencesCollection = () =>
   getCollection<TimelineDocument>(COLLECTION_NAMES.experiences);
 
@@ -326,4 +418,12 @@ export const getUiEventsCollection = () =>
 export const getChatConversationTurnsCollection = () =>
   getCollection<ChatConversationTurnDocument>(
     COLLECTION_NAMES.chatConversationTurns,
+  );
+
+export const getMediaAssetsCollection = () =>
+  getCollection<MediaAssetDocument>(COLLECTION_NAMES.mediaAssets);
+
+export const getContentPublicationsCollection = () =>
+  getCollection<ContentPublicationDocument>(
+    COLLECTION_NAMES.contentPublications,
   );

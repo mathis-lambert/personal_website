@@ -384,6 +384,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -1163,21 +1164,6 @@
     grid-template-rows: 1fr;
   }
 
-  /* Day to night, eased. Every colour on the page moves at once, so this is
-     scoped to the length of the switch and torn down after: left on
-     permanently it would put a 260ms lag under every hover on the site. */
-  .theme-shift,
-  .theme-shift *,
-  .theme-shift *::before,
-  .theme-shift *::after {
-    transition-property:
-      background-color, border-color, color, fill, stroke, box-shadow,
-      text-decoration-color !important;
-    transition-duration: 260ms !important;
-    transition-timing-function: var(--ease) !important;
-    transition-delay: 0s !important;
-  }
-
   /* Motion ------------------------------------------------------------- */
 
   .reveal {
@@ -1323,6 +1309,15 @@
     padding: 0;
     border: 0;
     background: none;
+    font-size: inherit;
+  }
+  .prose-paper .editorial-code-block code {
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
     font-size: inherit;
   }
 
@@ -1493,6 +1488,43 @@
 
 .katex {
   color: var(--ink);
+}
+
+/* ── Editorial atelier ───────────────────────────────────────────────── */
+
+.editorial-canvas .ProseMirror {
+  min-height: 52vh;
+  caret-color: var(--brand);
+}
+
+.editorial-canvas .ProseMirror > *:first-child {
+  margin-top: 0;
+}
+
+.editorial-canvas .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--ink-faint);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.editorial-canvas .ProseMirror img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-block: 2rem;
+  border-radius: var(--r-4);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+.editorial-canvas .ProseMirror-selectednode {
+  outline: 3px solid var(--brand-quiet);
+  outline-offset: 4px;
+}
+
+.editorial-canvas .ProseMirror:focus-visible {
+  outline: none;
 }
 
 /* ── Reduced motion ────────────────────────────────────────────────────── */

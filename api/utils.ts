@@ -21,7 +21,10 @@ export async function fetchWithTimeout(
   const { timeoutMs = 10_000, signal, headers, authToken, ...rest } = init ?? {};
 
   const controller = new AbortController();
-  const onParentAbort = () => controller.abort();
+  const onParentAbort = () =>
+    controller.abort(
+      signal?.reason ?? new DOMException("Request cancelled", "AbortError"),
+    );
   if (signal) {
     if (signal.aborted) onParentAbort();
     else signal.addEventListener("abort", onParentAbort);

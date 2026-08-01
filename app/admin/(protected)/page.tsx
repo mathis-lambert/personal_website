@@ -1,4 +1,4 @@
-import DashboardPage from "@/admin/pages/DashboardPage";
+import DashboardPage from "@/components/admin/screens/DashboardPage";
 
 export const metadata = {
   title: "Admin Dashboard",

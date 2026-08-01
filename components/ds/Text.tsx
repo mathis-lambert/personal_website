@@ -111,17 +111,6 @@ export function Meta({
   return <Tag className={cn("t-meta", className)}>{children}</Tag>;
 }
 
-/** Markdown / long-form body copy. */
-export function Prose({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return <div className={cn("prose-paper", className)}>{children}</div>;
-}
-
 /** A drawn rule. Replaces every decorative border on the site. */
 export function Rule({
   className,

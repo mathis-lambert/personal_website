@@ -7,11 +7,10 @@ import { BsGithub } from "react-icons/bs";
 
 import { trackUiEvent } from "@/api/analytics";
 import { ContentCard } from "@/components/content/ContentCard";
+import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
 import { resolveProjectStatus } from "@/lib/content/projectStatus";
 import { formatDate } from "@/lib/format";
-import type { Project } from "@/types";
-
-const FALLBACK_COVER = "/images/projects/personal-website/thumb.png";
+import type { Project } from "@/types/content";
 
 const ProjectCard: React.FC<{ project: Project; priority?: boolean }> = ({
   project,
@@ -46,10 +45,18 @@ const ProjectCard: React.FC<{ project: Project; priority?: boolean }> = ({
         },
       ]}
       tags={project.technologies}
-      image={
-        project.media?.thumbnailUrl || project.media?.imageUrl || FALLBACK_COVER
-      }
+      image={project.media?.thumbnailUrl || project.media?.imageUrl}
       imageAlt={`Cover image for ${project.title}`}
+      generatedCover={
+        <GeneratedEditorialCover
+          compact
+          kind="project"
+          title={project.title}
+          eyebrow={status.kicker}
+          date={formatDate(project.date, "monthYear")}
+          details={project.technologies}
+        />
+      }
       priority={priority}
       featured={Boolean(project.isFeatured)}
       cta="Read the write-up"

@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { useLetterLift } from "./LiftText";
 
-export type StreamSegment = string | { mark: string } | { break: true };
+type StreamSegment = string | { mark: string } | { break: true };
 
 /** Roughly how a tokeniser would carve a word up: short words whole, long ones split. */
 function chunkWord(word: string): string[] {

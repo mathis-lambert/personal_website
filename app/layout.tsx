@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppProviders } from "@/providers";
+import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
 const baseUrl = process.env.PUBLIC_BASE_URL || "https://mathislambert.fr";

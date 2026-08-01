@@ -5,9 +5,9 @@ import {
   getCollection,
   listCollections,
   replaceCollection,
-  type AdminCollectionName,
 } from "@/lib/data/content";
 import { requireAdminSession } from "@/lib/auth/helpers";
+import type { AdminCollectionName } from "@/types/admin";
 
 const isValidCollection = (name: string): name is AdminCollectionName =>
   listCollections().includes(name as AdminCollectionName);

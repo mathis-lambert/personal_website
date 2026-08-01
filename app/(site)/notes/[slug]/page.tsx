@@ -1,6 +1,7 @@
 import NoteView from "@/components/notes/NoteView";
+import { requireAdminSession } from "@/lib/auth/helpers";
 import { getNoteBySlug } from "@/lib/data/content";
-import type { Note } from "@/types";
+import type { Note } from "@/types/content";
 import { notFound } from "next/navigation";
 
 type Params = { slug: string };
@@ -23,9 +24,12 @@ export default async function NoteDetailPage({
   params: Params;
 }) {
   const { slug } = await params;
-  const note = (await getNoteBySlug(slug)) as Note | null;
+  const [note, canEdit] = await Promise.all([
+    getNoteBySlug(slug) as Promise<Note | null>,
+    requireAdminSession(),
+  ]);
   if (!note) {
     notFound();
   }
-  return <NoteView note={note} />;
+  return <NoteView note={note} canEdit={canEdit} />;
 }

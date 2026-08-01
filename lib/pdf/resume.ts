@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { PDFFont, PDFPage } from "pdf-lib";
 
-import type { ResumeContent } from "@/types";
+import type { ResumeContent } from "@/types/resume";
 import {
   createEmptyResumeContent,
   resumeLabels,

@@ -1,29 +1,41 @@
 import {
   ObjectId,
   type Collection,
-  type Filter,
   type OptionalId,
 } from "mongodb";
 
 import {
+  type EditorialContentDocument,
   type NoteDocument,
   type ProjectDocument,
   type ResumeDocument,
   type TimelineDocument,
+  getEditorialContentCollection,
   getNotesCollection,
   getExperiencesCollection,
   getProjectsCollection,
   getResumeCollection,
   getStudiesCollection,
 } from "@/lib/db/collections";
+import {
+  deleteContentPublications,
+  deleteCollectionPublications,
+  getPublishedItem,
+  getPublishedItems,
+  isPublishedSlugInUse,
+  serializeEditorialDocument,
+  withoutEditorialInternals,
+} from "@/lib/data/publications";
+import type {
+  Note,
+  Project,
+  TimelineEntry,
+} from "@/types/content";
 import type {
   AdminCollectionName,
   AdminListCollectionName,
-  Note,
-  Project,
-  ResumeData,
-  TimelineEntry,
-} from "@/types";
+} from "@/types/admin";
+import type { ResumeData } from "@/types/resume";
 
 type CollectionData<T> = T extends "resume"
   ? ResumeData | null
@@ -77,9 +89,9 @@ const buildProjectDocument = (
 ): OptionalId<ProjectDocument> => {
   const data = input as Partial<Project>;
   const { title, date, technologies, ...rest } = data;
-  const cleanRest = { ...(rest as Record<string, unknown>) };
-  delete cleanRest.id;
-  delete cleanRest._id;
+  const cleanRest = withoutEditorialInternals({
+    ...(rest as Record<string, unknown>),
+  });
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
 
   const doc: OptionalId<ProjectDocument> = {
@@ -101,9 +113,9 @@ const buildNoteDocument = (
 ): OptionalId<NoteDocument> => {
   const data = input as Partial<Note>;
   const { title, excerpt, content, date, tags, metrics, ...rest } = data;
-  const cleanRest = { ...(rest as Record<string, unknown>) };
-  delete cleanRest.id;
-  delete cleanRest._id;
+  const cleanRest = withoutEditorialInternals({
+    ...(rest as Record<string, unknown>),
+  });
   const createdAt = asDate((input as { createdAt?: unknown }).createdAt);
 
   const doc: OptionalId<NoteDocument> = {
@@ -142,29 +154,11 @@ const ensureUniqueInSet = (set: Set<string>, base: string): string => {
   return candidate;
 };
 
-/** The two slug-addressed document shapes, as one type for the shared paths. */
-type ContentDocument = ProjectDocument | NoteDocument;
-
 /**
  * A stored document as the API hands it out: Mongo's bookkeeping dropped and the
  * ObjectId flattened to a string.
  */
-const stripContent = <T>(
-  doc: ContentDocument | null | undefined,
-): T | null => {
-  if (!doc) return null;
-  const {
-    _id: mongoId,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    order: _order,
-    ...rest
-  } = doc;
-  void _createdAt;
-  void _updatedAt;
-  void _order;
-  return { ...rest, _id: mongoId ? String(mongoId) : "" } as T;
-};
+const stripContent = serializeEditorialDocument;
 
 const stripTimeline = (
   doc: TimelineDocument | null | undefined,
@@ -200,25 +194,28 @@ const stripResume = (
   return rest as ResumeData;
 };
 
-const ensureUniqueSlugDb = async <T extends { slug?: string }>(
-  collection: Collection<T>,
+const ensureUniqueSlugDb = async (
+  collectionName: "projects" | "notes",
+  collection: Collection<EditorialContentDocument>,
   base: string,
   excludeObjectId?: ObjectId,
 ): Promise<string> => {
   let candidate = base || "item";
   let suffix = 2;
   while (true) {
-    const filter: Filter<T> =
-      excludeObjectId != null
-        ? ({
-            slug: candidate,
-            _id: { $ne: excludeObjectId },
-          } as unknown as Filter<T>)
-        : ({ slug: candidate } as unknown as Filter<T>);
-    const existing = await collection.findOne(filter, {
-      projection: { _id: 1 },
-    });
-    if (!existing) return candidate;
+    const existing = await collection.findOne(
+      {
+        slug: candidate,
+        ...(excludeObjectId ? { _id: { $ne: excludeObjectId } } : {}),
+      },
+      { projection: { _id: 1 } },
+    );
+    const publishedSlugExists = await isPublishedSlugInUse(
+      collectionName,
+      candidate,
+      excludeObjectId,
+    );
+    if (!existing && !publishedSlugExists) return candidate;
     candidate = `${base}-${suffix}`;
     suffix += 1;
   }
@@ -258,9 +255,9 @@ export async function getCollection<T extends AdminCollectionName>(
 ): Promise<CollectionData<T>> {
   switch (name) {
     case "projects":
-      return (await getAllProjects()) as CollectionData<T>;
+      return (await getAllProjects({ includeUnpublished: true })) as CollectionData<T>;
     case "notes":
-      return (await getAllNotes()) as CollectionData<T>;
+      return (await getAllNotes({ includeUnpublished: true })) as CollectionData<T>;
     case "experiences":
       return (await getExperiences()) as CollectionData<T>;
     case "studies":
@@ -272,9 +269,15 @@ export async function getCollection<T extends AdminCollectionName>(
   }
 }
 
-export async function getAllProjects(): Promise<Project[]> {
+export async function getAllProjects(
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Project[]> {
+  if (!options.includeUnpublished) return getPublishedItems("projects");
   const collection = await getProjectsCollection();
-  const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  const docs = await collection
+    .find()
+    .sort({ date: -1, title: 1 })
+    .toArray();
   if (!docs.length) {
     console.info("No project entries found in the database.");
     return [];
@@ -283,21 +286,18 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const collection = await getProjectsCollection();
-  const objectId = parseObjectId(slug);
-  const doc = await collection.findOne(
-    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
-  );
-  if (!doc) {
-    console.info("No project entry found for the requested slug or id.");
-    return null;
-  }
-  return stripContent<Project>(doc);
+  return getPublishedItem("projects", slug);
 }
 
-export async function getAllNotes(): Promise<Note[]> {
+export async function getAllNotes(
+  options: { includeUnpublished?: boolean } = {},
+): Promise<Note[]> {
+  if (!options.includeUnpublished) return getPublishedItems("notes");
   const collection = await getNotesCollection();
-  const docs = await collection.find().sort({ date: -1, title: 1 }).toArray();
+  const docs = await collection
+    .find()
+    .sort({ date: -1, title: 1 })
+    .toArray();
   if (!docs.length) {
     console.info("No note entries found in the database.");
     return [];
@@ -306,16 +306,17 @@ export async function getAllNotes(): Promise<Note[]> {
 }
 
 export async function getNoteBySlug(slug: string): Promise<Note | null> {
-  const collection = await getNotesCollection();
-  const objectId = parseObjectId(slug);
-  const doc = await collection.findOne(
-    objectId ? { $or: [{ slug }, { _id: objectId }] } : { slug },
-  );
-  if (!doc) {
-    console.info("No note entry found for the requested slug or id.");
-    return null;
-  }
-  return stripContent<Note>(doc);
+  return getPublishedItem("notes", slug);
+}
+
+export async function getAdminContentItem(
+  collection: "projects" | "notes",
+  itemId: string,
+): Promise<Project | Note | null> {
+  const col = await openSlugCollection(collection);
+  const objectId = parseObjectId(itemId);
+  if (!objectId) return null;
+  return stripContent<Project | Note>(await col.findOne({ _id: objectId }));
 }
 
 export async function getExperiences(): Promise<TimelineEntry[]> {
@@ -403,12 +404,10 @@ async function replaceResume(data: ResumeData): Promise<void> {
  */
 const slugCollections = {
   projects: {
-    getCollection: getProjectsCollection,
     build: buildProjectDocument,
     fallbackSlug: "project",
   },
   notes: {
-    getCollection: getNotesCollection,
     build: buildNoteDocument,
     fallbackSlug: "note",
   },
@@ -419,16 +418,8 @@ type SlugCollectionName = keyof typeof slugCollections;
 const isSlugCollection = (name: string): name is SlugCollectionName =>
   name in slugCollections;
 
-/**
- * The driver types each collection separately and there is no useful supertype
- * of `Collection<ProjectDocument>` and `Collection<NoteDocument>`, so the shared
- * code works against the document union. This is the only cast, and it is here
- * rather than at each of the eight call sites it replaces.
- */
 const openSlugCollection = async (name: SlugCollectionName) =>
-  (await slugCollections[name].getCollection()) as unknown as Collection<
-    ContentDocument
-  >;
+  getEditorialContentCollection(name);
 
 export async function createProjectOrNote(
   collection: SlugCollectionName,
@@ -438,15 +429,24 @@ export async function createProjectOrNote(
   const col = await openSlugCollection(collection);
 
   const slug = await ensureUniqueSlugDb(
+    collection,
     col,
     slugify(asString(item.slug) || asString(item.title) || fallbackSlug),
   );
   const doc = build(item, slug, new Date());
-  const result = await col.insertOne(doc as OptionalId<ContentDocument>);
+  const draftDoc = {
+    ...doc,
+    editorialStatus: "draft" as const,
+    draftRevision: 1,
+  } as OptionalId<EditorialContentDocument>;
+  const result = await col.insertOne(draftDoc);
 
   return {
     _id: String(result.insertedId),
-    item: stripContent<Project | Note>({ ...doc, _id: result.insertedId })!,
+    item: stripContent<Project | Note>({
+      ...draftDoc,
+      _id: result.insertedId,
+    } as EditorialContentDocument)!,
   };
 }
 
@@ -465,15 +465,14 @@ export async function updateItem(
     const objectId = parseObjectId(itemId);
     if (!objectId) throw new Error("Invalid item id");
 
-    const safePatch = { ...patch };
-    delete safePatch._id;
-    delete safePatch.id;
+    const safePatch = withoutEditorialInternals(patch);
     const updates: Record<string, unknown> = {
       ...safePatch,
       updatedAt: new Date(),
     };
     if (patch.slug) {
       updates.slug = await ensureUniqueSlugDb(
+        collection,
         col,
         slugify(String(patch.slug)),
         objectId,
@@ -482,7 +481,7 @@ export async function updateItem(
 
     const updated = await col.findOneAndUpdate(
       { _id: objectId },
-      { $set: updates },
+      { $set: updates, $inc: { draftRevision: 1 } },
       { returnDocument: "after" },
     );
     if (!updated) throw new Error("Item not found");
@@ -542,6 +541,7 @@ export async function deleteItem(
     if (!objectId) throw new Error("Invalid item id");
     const deleted = await col.findOneAndDelete({ _id: objectId });
     if (!deleted) throw new Error("Item not found");
+    await deleteContentPublications(collection, objectId);
     return stripContent<Project | Note>(deleted)!;
   }
 
@@ -603,12 +603,17 @@ export async function replaceCollection(
       const slugSource =
         asString(record.slug) || asString(record.title) || `${name}-${index + 1}`;
 
-      return build(record, ensureUniqueInSet(slugs, slugify(slugSource)), now);
+      return {
+        ...build(record, ensureUniqueInSet(slugs, slugify(slugSource)), now),
+        editorialStatus: "draft" as const,
+        draftRevision: 1,
+      };
     });
 
     await col.deleteMany({});
+    await deleteCollectionPublications(name);
     if (docs.length) {
-      await col.insertMany(docs as OptionalId<ContentDocument>[]);
+      await col.insertMany(docs as OptionalId<EditorialContentDocument>[]);
     }
     return;
   }
@@ -624,6 +629,3 @@ export async function replaceCollection(
     await col.insertMany(docs);
   }
 }
-
-// Re-export types for downstream API routes
-export type { AdminCollectionName, AdminListCollectionName } from "@/types";
