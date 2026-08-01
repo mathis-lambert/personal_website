@@ -1,13 +1,13 @@
 import { Archive, CheckCircle2, CircleDot, type LucideIcon } from "lucide-react";
 
-import type { ProjectStatus } from "@/types";
+import type { ProjectStatus } from "@/types/content";
 
 /**
  * The one project-status table. `label` is the status itself (filters, admin);
  * `kicker` is what a card calls a project in that status (editorial voice).
  * `icon` is the component, not an element, so this module stays free of JSX.
  */
-export const PROJECT_STATUSES = {
+const PROJECT_STATUSES = {
   "in-progress": {
     label: "In progress",
     kicker: "In progress",

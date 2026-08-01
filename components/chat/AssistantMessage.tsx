@@ -2,8 +2,8 @@
 
 import type React from "react";
 
-import LoadingDots from "@/components/ui/LoadingDots";
-import MarkdownView from "@/components/ui/MarkdownView";
+import LoadingDots from "@/components/chat/LoadingDots";
+import MarkdownView from "@/components/content/MarkdownView";
 
 /** The assistant's turn: a paper surface, same as every other card. */
 const AssistantMessage: React.FC<{ content: string; isLoading?: boolean }> = ({

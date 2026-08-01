@@ -16,7 +16,7 @@ import {
   uniqueSorted,
   type SortOrder,
 } from "@/lib/content/sort";
-import type { Note } from "@/types";
+import type { Note } from "@/types/content";
 
 const NotesList: React.FC<{ notes: Note[] }> = ({ notes }) => {
   const [searchQuery, setSearchQuery] = useState("");

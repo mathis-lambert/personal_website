@@ -4,7 +4,7 @@ import {
   getExperiences,
   getStudies,
 } from "@/lib/data/content";
-import type { Note, Project } from "@/types";
+import type { Note, Project } from "@/types/content";
 import { HomePageContent } from "@/components/home/HomePageContent";
 import { byNewest } from "@/lib/content/sort";
 

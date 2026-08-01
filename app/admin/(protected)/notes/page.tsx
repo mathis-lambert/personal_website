@@ -1,4 +1,4 @@
-import { EditorialLibrary } from "@/admin/editorial/EditorialLibrary";
+import { EditorialLibrary } from "@/components/admin/editorial/EditorialLibrary";
 
 export const metadata = { title: "Admin · Notes" };
 

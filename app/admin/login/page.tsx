@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import LoginPage from "@/admin/pages/LoginPage";
+import LoginPage from "@/components/admin/screens/LoginPage";
 import { authOptions } from "@/lib/auth/options";
 import { getServerSession } from "next-auth";
 

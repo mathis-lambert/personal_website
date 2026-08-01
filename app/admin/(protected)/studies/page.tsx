@@ -1,5 +1,5 @@
-import { CollectionScreen } from "@/admin/components/CollectionScreen";
-import { studiesConfig } from "@/admin/collections";
+import { CollectionScreen } from "@/components/admin/shared/CollectionScreen";
+import { studiesConfig } from "@/components/admin/config/collections";
 
 export const metadata = { title: "Admin · Studies" };
 

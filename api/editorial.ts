@@ -1,6 +1,6 @@
 import { fetchWithTimeout } from "@/api/utils";
-import type { EditorialDraft, EditorialItem } from "@/admin/editorial/model";
-import { editorialPayload } from "@/admin/editorial/model";
+import type { EditorialDraft, EditorialItem } from "@/lib/editorial/draft";
+import { editorialPayload } from "@/lib/editorial/draft";
 import type { EditorialPublicationSummary } from "@/types/editorial";
 
 const errorMessage = async (response: Response) => {
@@ -88,6 +88,18 @@ export const rollbackEditorialItem = (
   id: string,
   sourceVersion: number,
 ) => createEditorialPublication(kind, id, sourceVersion);
+
+export const discardEditorialChanges = async (
+  kind: EditorialDraft["kind"],
+  id: string,
+) => {
+  const response = await fetchWithTimeout(
+    `/api/admin/${kind}/${id}/publications`,
+    { method: "PATCH", timeoutMs: 15_000 },
+  );
+  if (!response.ok) throw new Error(await errorMessage(response));
+  return ((await response.json()) as { item: EditorialItem }).item;
+};
 
 export const archiveEditorialItem = async (
   kind: EditorialDraft["kind"],

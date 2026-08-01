@@ -1,22 +1,23 @@
 "use client";
 
-import { Check, Link as LinkIcon, Linkedin, Share2 } from "lucide-react";
+import { PencilLine } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
 
 import {
   ReadingShell,
   DetailNotFound,
 } from "@/components/content/ReadingShell";
+import { ContentShareActions } from "@/components/content/ContentShareActions";
+import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
 import { Action } from "@/components/ds";
-import MarkdownView from "@/components/ui/MarkdownView";
-import { trackUiEvent } from "@/api/analytics";
+import MarkdownView from "@/components/content/MarkdownView";
 import { formatDate } from "@/lib/format";
-import type { Note } from "@/types";
+import type { Note } from "@/types/content";
 
-const NoteView: React.FC<{ note: Note | null | undefined }> = ({ note }) => {
-  const [copied, setCopied] = useState(false);
-
+const NoteView: React.FC<{
+  note: Note | null | undefined;
+  canEdit?: boolean;
+}> = ({ note, canEdit = false }) => {
   if (!note) {
     return (
       <DetailNotFound
@@ -32,48 +33,13 @@ const NoteView: React.FC<{ note: Note | null | undefined }> = ({ note }) => {
   }
 
   const slug = note.slug ?? note._id;
-
-  const track = (channel: string) =>
-    void trackUiEvent({ name: "note_share", properties: { slug, channel } });
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      track("copy_link");
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* clipboard unavailable */
-    }
-  };
-
-  const share = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: note.title,
-          text: note.excerpt || note.title,
-          url,
-        });
-        track("native");
-        return;
-      } catch {
-        /* dismissed — fall through to copying */
-      }
-    }
-    await copyLink();
-  };
-
-  const shareOnLinkedIn = () => {
-    track("linkedin");
-    window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`,
-      "share",
-      "width=580,height=420",
-    );
-  };
-
+  const updatedDate = formatDate(note.publishedAt ?? note.updatedAt, "long");
+  const coverDetails = [
+    typeof note.readTimeMin === "number"
+      ? `${note.readTimeMin} min read`
+      : undefined,
+    ...note.tags,
+  ].filter(Boolean) as string[];
 
   return (
     <ReadingShell
@@ -87,6 +53,7 @@ const NoteView: React.FC<{ note: Note | null | undefined }> = ({ note }) => {
       deck={note.excerpt}
       meta={[
         formatDate(note.date, "long"),
+        updatedDate ? `Last updated ${updatedDate}` : undefined,
         typeof note.readTimeMin === "number"
           ? `${note.readTimeMin} min read`
           : undefined,
@@ -95,21 +62,33 @@ const NoteView: React.FC<{ note: Note | null | undefined }> = ({ note }) => {
       tags={note.tags}
       cover={note.media?.imageUrl || note.media?.thumbnailUrl}
       coverAlt={`Cover image for ${note.title}`}
+      generatedCover={
+        <GeneratedEditorialCover
+          kind="note"
+          title={note.title}
+          eyebrow={note.tags?.[0] ?? "Note"}
+          date={formatDate(note.date, "monthYear")}
+          details={coverDetails}
+        />
+      }
       aside={
-        // One share row, three real actions. The old header carried five
-        // buttons — like, share, Twitter, LinkedIn, copy — each with its own
-        // colour, and the like count only ever lived in local state.
         <div className="flex flex-wrap gap-2.5">
-          <Action size="sm" onClick={share}>
-            <Share2 /> Share
-          </Action>
-          <Action size="sm" onClick={shareOnLinkedIn}>
-            <Linkedin /> LinkedIn
-          </Action>
-          <Action size="sm" onClick={copyLink}>
-            {copied ? <Check /> : <LinkIcon />}
-            {copied ? "Copied" : "Copy link"}
-          </Action>
+          {canEdit ? (
+            <Action
+              href={`/admin/notes/${note._id}`}
+              tone="brand"
+              size="sm"
+            >
+              <PencilLine />
+              Edit note
+            </Action>
+          ) : null}
+          <ContentShareActions
+            kind="note"
+            slug={slug}
+            title={note.title}
+            text={note.excerpt}
+          />
         </div>
       }
       footer={

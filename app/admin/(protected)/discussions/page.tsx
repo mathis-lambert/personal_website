@@ -1,4 +1,4 @@
-import DiscussionsPage from "@/admin/pages/DiscussionsPage";
+import DiscussionsPage from "@/components/admin/screens/DiscussionsPage";
 
 export const metadata = {
   title: "Admin · Discussions",

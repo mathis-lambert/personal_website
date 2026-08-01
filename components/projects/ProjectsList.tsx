@@ -17,7 +17,7 @@ import {
   uniqueSorted,
   type SortOrder,
 } from "@/lib/content/sort";
-import type { Project } from "@/types";
+import type { Project } from "@/types/content";
 
 const ProjectsList: React.FC<{ projects: Project[] }> = ({ projects }) => {
   const [searchQuery, setSearchQuery] = useState("");

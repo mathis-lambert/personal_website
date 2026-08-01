@@ -1,4 +1,4 @@
-export type AgentRole = "system" | "user" | "assistant" | "tool";
+type AgentRole = "system" | "user" | "assistant" | "tool";
 
 export interface AgentMessage {
   role: AgentRole;

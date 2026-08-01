@@ -1,6 +1,6 @@
 import { Meta } from "@/components/ds";
 import { cn } from "@/lib/utils";
-import type { Certification } from "@/types";
+import type { Certification } from "@/types/resume";
 
 /** Certification status reads through opacity of the one accent, not four hues. */
 const statusStyle: Record<string, string> = {

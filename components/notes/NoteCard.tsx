@@ -5,10 +5,9 @@ import type React from "react";
 
 import { trackUiEvent } from "@/api/analytics";
 import { ContentCard } from "@/components/content/ContentCard";
+import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
 import { formatDate } from "@/lib/format";
-import type { Note } from "@/types";
-
-const FALLBACK_COVER = "/images/notes/agentic-ai-rag/thumb.png";
+import type { Note } from "@/types/content";
 
 const NoteCard: React.FC<{ note: Note; priority?: boolean }> = ({
   note,
@@ -32,10 +31,18 @@ const NoteCard: React.FC<{ note: Note; priority?: boolean }> = ({
         },
       ]}
       tags={note.tags}
-      image={
-        note.media?.thumbnailUrl || note.media?.imageUrl || FALLBACK_COVER
-      }
+      image={note.media?.thumbnailUrl || note.media?.imageUrl}
       imageAlt={`Cover image for ${note.title}`}
+      generatedCover={
+        <GeneratedEditorialCover
+          compact
+          kind="note"
+          title={note.title}
+          eyebrow={note.tags?.[0] ?? "Note"}
+          date={formatDate(note.date, "monthYear")}
+          details={note.tags}
+        />
+      }
       priority={priority}
       featured={Boolean(note.isFeatured)}
       cta="Read the note"

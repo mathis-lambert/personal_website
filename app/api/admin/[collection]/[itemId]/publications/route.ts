@@ -4,6 +4,7 @@ import { withApiAnalytics } from "@/lib/analytics/server";
 import { requireAdminSession } from "@/lib/auth/helpers";
 import {
   archivePublishedContent,
+  discardUnpublishedContentChanges,
   listContentPublications,
   publishContentDraft,
   rollbackContentPublication,
@@ -101,6 +102,23 @@ const deleteHandler = async (
   }
 };
 
+const patchHandler = async (
+  _req: NextRequest,
+  { params }: { params: Promise<Params> },
+) => {
+  const request = await resolveRequest(params);
+  if (request instanceof NextResponse) return request;
+  try {
+    const item = await discardUnpublishedContentChanges(
+      request.collection,
+      request.itemId,
+    );
+    return NextResponse.json({ ok: true, item });
+  } catch (error) {
+    return errorResponse(error);
+  }
+};
+
 const analytics = {
   route: "/api/admin/:collection/:itemId/publications",
   actorType: "admin" as const,
@@ -111,6 +129,7 @@ export const GET = withApiAnalytics(
   getHandler,
 );
 export const POST = withApiAnalytics(analytics, postHandler);
+export const PATCH = withApiAnalytics(analytics, patchHandler);
 export const DELETE = withApiAnalytics(
   { ...analytics, captureRequestBody: false },
   deleteHandler,

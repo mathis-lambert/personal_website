@@ -1,4 +1,4 @@
-import { EditorialWorkspace } from "@/admin/editorial/EditorialWorkspace";
+import { EditorialWorkspace } from "@/components/admin/editorial/EditorialWorkspace";
 
 export const metadata = { title: "Edit project · Admin" };
 

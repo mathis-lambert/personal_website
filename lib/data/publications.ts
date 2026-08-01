@@ -11,7 +11,7 @@ import {
   type ContentPublicationDocument,
   type EditorialContentDocument,
 } from "@/lib/db/collections";
-import type { Note, Project } from "@/types";
+import type { Note, Project } from "@/types/content";
 import type {
   EditorialCollection,
   EditorialItem,
@@ -406,6 +406,65 @@ export async function rollbackContentPublication(
     await discardPublication(publication._id);
     throw error;
   }
+}
+
+export async function discardUnpublishedContentChanges(
+  collection: EditorialCollection,
+  itemId: string,
+): Promise<EditorialItem> {
+  const contentId = parseContentId(itemId);
+  const contents = await getEditorialContentCollection(collection);
+  const publications = await getContentPublicationsCollection();
+  const current = await contents.findOne({ _id: contentId });
+  if (!current) throw new Error("Item not found");
+  if (
+    current.editorialStatus !== "published" ||
+    current.publishedVersion === undefined
+  ) {
+    throw new Error("This item has no live publication to restore");
+  }
+
+  const publication = await publications.findOne({
+    collection,
+    contentId,
+    version: current.publishedVersion,
+  });
+  if (!publication) throw new Error("Live publication not found");
+  await assertPublicationSlugAvailable(
+    collection,
+    contents,
+    contentId,
+    publication.snapshot.slug,
+  );
+
+  const draftRevision = (current.draftRevision ?? 1) + 1;
+  const updatedAt = new Date();
+  const replacement = {
+    ...publication.snapshot,
+    _id: contentId,
+    editorialStatus: "published" as const,
+    draftRevision,
+    publishedDraftRevision: draftRevision,
+    publishedVersion: publication.version,
+    publishedAt: publication.publishedAt,
+    createdAt: current.createdAt ?? publication.publishedAt,
+    updatedAt,
+  } as EditorialContentDocument;
+  const revisionFilter =
+    current.draftRevision === undefined
+      ? { draftRevision: { $exists: false } }
+      : { draftRevision: current.draftRevision };
+  const result = await contents.replaceOne(
+    { _id: contentId, ...revisionFilter },
+    replacement,
+  );
+  if (result.modifiedCount !== 1) {
+    throw new Error(
+      "The draft changed while its edits were being discarded. Try again.",
+    );
+  }
+
+  return serializeEditorialDocument(replacement)!;
 }
 
 export async function archivePublishedContent(

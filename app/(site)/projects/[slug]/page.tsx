@@ -1,6 +1,7 @@
 import ProjectView from "@/components/projects/ProjectView";
+import { requireAdminSession } from "@/lib/auth/helpers";
 import { getProjectBySlug } from "@/lib/data/content";
-import type { Project } from "@/types";
+import type { Project } from "@/types/content";
 import { notFound } from "next/navigation";
 
 type Params = { slug: string };
@@ -23,9 +24,12 @@ export default async function ProjectDetailPage({
   params: Params;
 }) {
   const { slug } = await params;
-  const project = (await getProjectBySlug(slug)) as Project | null;
+  const [project, canEdit] = await Promise.all([
+    getProjectBySlug(slug) as Promise<Project | null>,
+    requireAdminSession(),
+  ]);
   if (!project) {
     notFound();
   }
-  return <ProjectView project={project} />;
+  return <ProjectView project={project} canEdit={canEdit} />;
 }

@@ -14,8 +14,8 @@ import { AskBand } from "@/components/home/AskBand";
 import { Path } from "@/components/home/Path";
 import { Workshop } from "@/components/home/Workshop";
 import ProjectCard from "@/components/projects/ProjectCard";
-import { HeroSection } from "@/components/ui/HeroSection";
-import type { Note, Project, TimelineEntry } from "@/types";
+import { HeroSection } from "@/components/home/HeroSection";
+import type { Note, Project, TimelineEntry } from "@/types/content";
 
 type HomePageContentProps = {
   featuredProjects: Project[];

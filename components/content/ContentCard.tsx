@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { Surface, TagList } from "@/components/ds";
 import { cn } from "@/lib/utils";
 
-export type CardMeta = { icon?: ReactNode; text: string };
+type CardMeta = { icon?: ReactNode; text: string };
 
 export type ContentCardProps = {
   href: string;
@@ -22,6 +22,7 @@ export type ContentCardProps = {
   tags?: string[];
   image?: string;
   imageAlt?: string;
+  generatedCover?: ReactNode;
   priority?: boolean;
   sizes?: string;
   featured?: boolean;
@@ -49,6 +50,7 @@ export function ContentCard({
   tags = [],
   image,
   imageAlt,
+  generatedCover,
   priority = false,
   sizes = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 22rem",
   featured = false,
@@ -70,16 +72,20 @@ export function ContentCard({
         onClick={onOpen}
         className="flex flex-1 flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
       >
-        {image ? (
+        {image || generatedCover ? (
           <div className="frame r-stone-inset-top relative m-2.5 mb-0 h-40 sm:h-44">
-            <Image
-              src={image}
-              alt={imageAlt ?? ""}
-              fill
-              sizes={sizes}
-              priority={priority}
-              className="object-cover"
-            />
+            {image ? (
+              <Image
+                src={image}
+                alt={imageAlt ?? ""}
+                fill
+                sizes={sizes}
+                priority={priority}
+                className="object-cover"
+              />
+            ) : (
+              generatedCover
+            )}
             {featured ? (
               <span className="tag absolute left-2.5 top-2.5 gap-1 border-coral/35 bg-paper-lift/90 text-coral backdrop-blur-sm">
                 <Star className="size-3" /> Featured

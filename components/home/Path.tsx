@@ -19,7 +19,7 @@ import {
 } from "@/components/ds";
 import { toTimeline } from "@/lib/content/timeline";
 import { cn } from "@/lib/utils";
-import type { TimelineEntry } from "@/types";
+import type { TimelineEntry } from "@/types/content";
 
 /**
  * A record you read as a chart.

@@ -9,6 +9,7 @@ type UiEventName =
   | "project_external_open"
   | "note_open"
   | "note_share"
+  | "content_share"
   | "resume_export_click";
 
 type TrackEventPayload = {

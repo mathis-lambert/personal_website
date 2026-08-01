@@ -8,9 +8,9 @@ import type {
 
 import type {
   EditorialStatus,
-  ResumeData,
   TimelineEntry,
-} from "@/types";
+} from "@/types/content";
+import type { ResumeData } from "@/types/resume";
 import type { AgentMessage, AgentUsage } from "@/types/agent";
 import type { MediaAsset, MediaVariant } from "@/types/media";
 import type {
@@ -301,6 +301,17 @@ const ensureIndexes = async () => {
           { key: { timestamp: -1 } },
           { key: { name: 1, timestamp: -1 } },
           { key: { path: 1, timestamp: -1 } },
+          { key: { "actor.type": 1, name: 1, timestamp: -1 } },
+          { key: { "actor.type": 1, path: 1, timestamp: -1 } },
+          {
+            key: {
+              "actor.type": 1,
+              name: 1,
+              "properties.slug": 1,
+              timestamp: -1,
+            },
+            sparse: true,
+          },
           { key: { sessionId: 1, timestamp: -1 }, sparse: true },
         ],
       ],

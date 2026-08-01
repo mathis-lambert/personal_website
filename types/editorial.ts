@@ -1,9 +1,9 @@
-import type { Note, Project } from "@/types";
+import type { Note, Project } from "@/types/content";
 
 export type EditorialCollection = "projects" | "notes";
 export type EditorialItem = Project | Note;
 
-export type EditorialRuntimeField =
+type EditorialRuntimeField =
   | "_id"
   | "createdAt"
   | "updatedAt"

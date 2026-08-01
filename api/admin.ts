@@ -3,21 +3,17 @@ import type {
   AdminConversationDetailResponse,
   AdminConversationsListResponse,
   AdminConversationTurnsResponse,
-  AdminCollectionName,
-  AdminInsights,
-  AdminListCollectionName,
-  Note,
-  Project,
-  ResumeData,
-} from "@/types";
+} from "@/types/conversations";
 import type {
-  AdminCreateNoteInput,
-  AdminCreateProjectInput,
-  AdminUpdateNoteInput,
-  AdminUpdateProjectInput,
+  AdminCollectionName,
   AdminUpdateResumeInput,
-} from "@/admin/types";
-import type { TimelineEntry as TimelineData } from "@/types";
+} from "@/types/admin";
+import type {
+  AdminInsights,
+  ContentAnalyticsKind,
+  ContentInsights,
+} from "@/types/analytics";
+import type { ResumeData } from "@/types/resume";
 
 /** Options every read shares: who is asking, and how to cancel. */
 export type ReadOptions = { token?: string; signal?: AbortSignal };
@@ -74,79 +70,13 @@ export async function replaceCollection(
     throw new Error(`Failed to replace ${collection}: ${res.status}`);
 }
 
-export async function createItem(
-  collection: "projects",
-  item: AdminCreateProjectInput,
-  token?: string,
-): Promise<{ ok: boolean; _id: string; item: Project }>;
-export async function createItem(
-  collection: "notes",
-  item: AdminCreateNoteInput,
-  token?: string,
-): Promise<{ ok: boolean; _id: string; item: Note }>;
-export async function createItem(
-  collection: Extract<AdminCollectionName, "projects" | "notes">,
-  item: AdminCreateProjectInput | AdminCreateNoteInput,
-  token?: string,
-): Promise<{ ok: boolean; _id: string; item: Project | Note }> {
-  const res = await fetchWithTimeout(`/api/admin/${collection}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
-    timeoutMs: 10000,
-    authToken: token,
-  });
-  if (!res.ok)
-    throw new Error(`Failed to create ${collection} item: ${res.status}`);
-  return (await res.json()) as {
-    ok: boolean;
-    _id: string;
-    item: Project | Note;
-  };
-}
-
-export async function updateItem(
-  collection: "projects",
-  id: string,
-  patch: AdminUpdateProjectInput,
-  token?: string,
-): Promise<{ ok: boolean; item: Project }>;
 export async function updateItem(
   collection: "resume",
   id: string,
   patch: AdminUpdateResumeInput,
   token?: string,
-): Promise<{ ok: boolean; item: ResumeData }>;
-export async function updateItem(
-  collection: "notes",
-  id: string,
-  patch: AdminUpdateNoteInput,
-  token?: string,
-): Promise<{ ok: boolean; item: Note }>;
-export async function updateItem(
-  collection: "experiences",
-  id: string,
-  patch: TimelineData,
-  token?: string,
-): Promise<{ ok: boolean; item: TimelineData }>;
-export async function updateItem(
-  collection: "studies",
-  id: string,
-  patch: TimelineData,
-  token?: string,
-): Promise<{ ok: boolean; item: TimelineData }>;
-export async function updateItem(
-  collection: AdminCollectionName,
-  id: string,
-  patch: unknown,
-  token?: string,
-): Promise<{ ok: boolean; item: unknown }> {
-  const url =
-    collection === "resume"
-      ? `/api/admin/resume`
-      : `/api/admin/${collection}/${encodeURIComponent(id)}`;
-
-  const res = await fetchWithTimeout(url, {
+): Promise<{ ok: boolean; item: ResumeData }> {
+  const res = await fetchWithTimeout("/api/admin/resume", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
@@ -155,24 +85,7 @@ export async function updateItem(
   });
   if (!res.ok)
     throw new Error(`Failed to update ${collection}#${id}: ${res.status}`);
-  return (await res.json()) as { ok: boolean; item: unknown };
-}
-
-export async function deleteItem(
-  collection: AdminListCollectionName,
-  id: string,
-  token?: string,
-) {
-  const res = await fetchWithTimeout(
-    `/api/admin/${collection}/${encodeURIComponent(id)}`,
-    {
-      method: "DELETE",
-      timeoutMs: 8000,
-      authToken: token,
-    },
-  );
-  if (!res.ok)
-    throw new Error(`Failed to delete ${collection}#${id}: ${res.status}`);
+  return (await res.json()) as { ok: boolean; item: ResumeData };
 }
 
 /** Everything the Overview screen shows, in one request. */
@@ -184,6 +97,24 @@ export async function getInsights(
   return readJson<AdminInsights>(
     withQuery("/api/admin/insights", qs),
     "insights",
+    options,
+    15_000,
+  );
+}
+
+export async function getContentInsights(
+  params: {
+    kind: ContentAnalyticsKind;
+    itemId: string;
+    start: string;
+    end: string;
+  },
+  options?: ReadOptions,
+): Promise<ContentInsights> {
+  const qs = new URLSearchParams(params);
+  return readJson<ContentInsights>(
+    withQuery("/api/admin/analytics/content", qs),
+    `${params.kind} analytics`,
     options,
     15_000,
   );

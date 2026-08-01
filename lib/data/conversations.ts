@@ -10,7 +10,7 @@ import type {
   AdminConversationTurnsResponse,
   ChatConversationDetail,
   ChatConversationTurnItem,
-} from "@/types";
+} from "@/types/conversations";
 
 type AggregatedConversation = {
   conversationId: string;

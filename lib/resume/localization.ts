@@ -6,7 +6,7 @@ import type {
   ResumeData,
   TechnicalSkills,
   Certification,
-} from "@/types";
+} from "@/types/resume";
 
 export type ResumeLocale = "en" | "fr";
 

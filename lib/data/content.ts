@@ -27,13 +27,15 @@ import {
   withoutEditorialInternals,
 } from "@/lib/data/publications";
 import type {
-  AdminCollectionName,
-  AdminListCollectionName,
   Note,
   Project,
-  ResumeData,
   TimelineEntry,
-} from "@/types";
+} from "@/types/content";
+import type {
+  AdminCollectionName,
+  AdminListCollectionName,
+} from "@/types/admin";
+import type { ResumeData } from "@/types/resume";
 
 type CollectionData<T> = T extends "resume"
   ? ResumeData | null
@@ -627,6 +629,3 @@ export async function replaceCollection(
     await col.insertMany(docs);
   }
 }
-
-// Re-export types for downstream API routes
-export type { AdminCollectionName, AdminListCollectionName } from "@/types";

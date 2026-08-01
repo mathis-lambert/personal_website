@@ -14,6 +14,7 @@ const UI_EVENT_NAMES = [
   "project_external_open",
   "note_open",
   "note_share",
+  "content_share",
   "resume_export_click",
 ] as const;
 
