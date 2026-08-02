@@ -6,6 +6,7 @@ node_modules/
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.claude
 
 # Next.js and builds
 .next/

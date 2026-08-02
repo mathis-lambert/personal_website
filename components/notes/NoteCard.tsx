@@ -5,7 +5,7 @@ import type React from "react";
 
 import { trackUiEvent } from "@/api/analytics";
 import { ContentCard } from "@/components/content/ContentCard";
-import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
+import { EditorialCover } from "@/components/content/EditorialCover";
 import { formatDate } from "@/lib/format";
 import type { Note } from "@/types/content";
 
@@ -34,13 +34,13 @@ const NoteCard: React.FC<{ note: Note; priority?: boolean }> = ({
       image={note.media?.thumbnailUrl || note.media?.imageUrl}
       imageAlt={`Cover image for ${note.title}`}
       generatedCover={
-        <GeneratedEditorialCover
+        <EditorialCover
           compact
           kind="note"
           title={note.title}
-          eyebrow={note.tags?.[0] ?? "Note"}
           date={formatDate(note.date, "monthYear")}
           details={note.tags}
+          seed={note.slug ?? note._id}
         />
       }
       priority={priority}

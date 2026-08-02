@@ -8,13 +8,22 @@ type Params = { slug: string };
 
 export const dynamic = "force-dynamic";
 
+/** No `openGraph.images` here on purpose: it would override `opengraph-image.tsx`. */
 export async function generateMetadata({ params }: { params: Params }) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
   if (!project) return { title: "Project not found" };
+  const description = project.subtitle || project.description;
   return {
     title: `${project.title} – Project`,
-    description: project.subtitle || project.description,
+    description,
+    openGraph: {
+      title: project.title,
+      description,
+      type: "article" as const,
+      url: `/projects/${project.slug || project._id}`,
+    },
+    twitter: { card: "summary_large_image" as const },
   };
 }
 

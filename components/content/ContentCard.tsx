@@ -87,7 +87,7 @@ export function ContentCard({
               generatedCover
             )}
             {featured ? (
-              <span className="tag absolute left-2.5 top-2.5 gap-1 border-coral/35 bg-paper-lift/90 text-coral backdrop-blur-sm">
+              <span className="tag absolute right-2.5 top-2.5 gap-1 border-coral/35 bg-paper-lift/90 text-coral backdrop-blur-sm">
                 <Star className="size-3" /> Featured
               </span>
             ) : null}

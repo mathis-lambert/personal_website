@@ -8,7 +8,7 @@ import {
   DetailNotFound,
 } from "@/components/content/ReadingShell";
 import { ContentShareActions } from "@/components/content/ContentShareActions";
-import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
+import { EditorialCover } from "@/components/content/EditorialCover";
 import { Action } from "@/components/ds";
 import MarkdownView from "@/components/content/MarkdownView";
 import { formatDate } from "@/lib/format";
@@ -34,12 +34,6 @@ const NoteView: React.FC<{
 
   const slug = note.slug ?? note._id;
   const updatedDate = formatDate(note.publishedAt ?? note.updatedAt, "long");
-  const coverDetails = [
-    typeof note.readTimeMin === "number"
-      ? `${note.readTimeMin} min read`
-      : undefined,
-    ...note.tags,
-  ].filter(Boolean) as string[];
 
   return (
     <ReadingShell
@@ -63,12 +57,12 @@ const NoteView: React.FC<{
       cover={note.media?.imageUrl || note.media?.thumbnailUrl}
       coverAlt={`Cover image for ${note.title}`}
       generatedCover={
-        <GeneratedEditorialCover
+        <EditorialCover
           kind="note"
           title={note.title}
-          eyebrow={note.tags?.[0] ?? "Note"}
           date={formatDate(note.date, "monthYear")}
-          details={coverDetails}
+          details={note.tags}
+          seed={slug}
         />
       }
       aside={

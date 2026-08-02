@@ -17,7 +17,7 @@ import {
   DetailSection,
 } from "@/components/content/ReadingShell";
 import { ContentShareActions } from "@/components/content/ContentShareActions";
-import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
+import { EditorialCover } from "@/components/content/EditorialCover";
 import { Action, Rule, TagList } from "@/components/ds";
 import MarkdownView from "@/components/content/MarkdownView";
 import { resolveProjectStatus } from "@/lib/content/projectStatus";
@@ -48,12 +48,6 @@ const ProjectView: React.FC<{
     project.publishedAt ?? project.updatedAt,
     "long",
   );
-  const coverDetails = [
-    project.role,
-    project.client,
-    ...project.technologies,
-  ].filter(Boolean) as string[];
-
   const links = [
     project.links?.live && {
       href: project.links.live,
@@ -105,12 +99,12 @@ const ProjectView: React.FC<{
       cover={project.media?.imageUrl || project.media?.thumbnailUrl}
       coverAlt={`Cover image for ${project.title}`}
       generatedCover={
-        <GeneratedEditorialCover
+        <EditorialCover
           kind="project"
           title={project.title}
-          eyebrow={status.kicker}
           date={formatDate(project.date, "monthYear")}
-          details={coverDetails}
+          details={project.technologies}
+          seed={project.slug ?? project._id}
         />
       }
       aside={

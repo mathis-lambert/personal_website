@@ -15,7 +15,7 @@ import { EditorialClassification } from "@/components/admin/editorial/EditorialC
 import { EditorialPublishingSettings } from "@/components/admin/editorial/EditorialPublishingSettings";
 import { MediaLibraryDialog } from "@/components/admin/editorial/MediaLibraryDialog";
 import type { EditorialDraft } from "@/lib/editorial/draft";
-import { GeneratedEditorialCover } from "@/components/content/GeneratedEditorialCover";
+import { EditorialCover } from "@/components/content/EditorialCover";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -83,13 +83,13 @@ export function EditorialSettings({
           </div>
         ) : (
           <div className="aspect-video overflow-hidden rounded-3 border border-line">
-            <GeneratedEditorialCover
+            <EditorialCover
               compact
               kind={draft.kind === "notes" ? "note" : "project"}
               title={draft.title || "Untitled"}
-              eyebrow={draft.kind === "notes" ? draft.tags[0] || "Note" : "Project"}
               date={formatDate(draft.date, "monthYear")}
               details={draft.kind === "notes" ? draft.tags : draft.technologies}
+              seed={draft.slug}
             />
           </div>
         )}
