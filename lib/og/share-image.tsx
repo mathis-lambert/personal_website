@@ -1,17 +1,15 @@
+import "server-only";
+
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 
 import { EditorialCover } from "@/components/content/EditorialCover";
 import { COVER_PALETTE, clampText, coverInk, type CoverKind } from "@/lib/content/cover";
 import { loadOgFonts } from "@/lib/og/fonts";
 
 /**
- * The picture a shared link previews. Always carries the title, because a link
- * in a channel or a timeline arrives with the page's heading collapsed to one
- * grey line and the image doing the work.
- *
- * With a photograph, the title is set over it under a scrim; without one, the
- * generated cover stands in. The card on the site never gets this overlay — a
- * photo there already sits under a real heading.
+ * The picture a shared link previews: the title over the cover photograph, or
+ * the generated cover when there isn't one.
  */
 
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
@@ -33,13 +31,20 @@ export type ShareImageInput = {
 };
 
 /**
- * A relative path is a legal value in the database and would otherwise reach
- * Satori as an unfetchable string, failing the whole image rather than one part.
+ * Covers are stored as WebP, which Satori cannot decode — given a width and
+ * height it draws nothing and leaves the overlay on an empty frame. Decode to
+ * JPEG here, cropped to the frame. Undefined on any failure, so an unreachable
+ * CDN costs the photograph rather than the whole preview.
  */
-const absoluteUrl = (value: string | undefined, base: string): string | undefined => {
-  if (!value) return undefined;
+const loadPhoto = async (cover: string, base: string): Promise<string | undefined> => {
   try {
-    return new URL(value, base).toString();
+    const response = await fetch(new URL(cover, base), { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) return undefined;
+    const jpeg = await sharp(Buffer.from(await response.arrayBuffer()))
+      .resize(width, height, { fit: "cover" })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+    return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
   } catch {
     return undefined;
   }
@@ -49,8 +54,10 @@ export async function renderShareImage(
   { kind, title, cover, date, details = [], seed }: ShareImageInput,
   baseUrl: string,
 ): Promise<ImageResponse> {
-  const fonts = await loadOgFonts();
-  const photo = absoluteUrl(cover, baseUrl);
+  const [fonts, photo] = await Promise.all([
+    loadOgFonts(),
+    cover ? loadPhoto(cover, baseUrl) : undefined,
+  ]);
 
   return new ImageResponse(
     photo ? (
@@ -105,8 +112,7 @@ function PhotoShareCard({
         backgroundColor: COVER_PALETTE.ink,
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- next/image has
-          no meaning inside ImageResponse; Satori rasterises this itself. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- no next/image inside ImageResponse */}
       <img src={photo} alt="" width={width} height={height} style={{ objectFit: "cover" }} />
 
       <div

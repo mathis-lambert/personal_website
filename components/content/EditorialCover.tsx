@@ -11,10 +11,9 @@ import {
 /**
  * The cover a project or note gets when there is no photograph.
  *
- * Rendered twice from this one tree: by React for cards, detail pages and the
- * admin preview, and by Satori for the 1200×630 share image. Satori reads
- * neither Tailwind classes nor `var()`, so everything here is inline styles in
- * a flexbox subset. Geometry is written once in the 1200×630 space below.
+ * Rendered from this one tree by React for cards and detail pages, and by
+ * Satori for the share image — hence inline styles in a flexbox subset, since
+ * Satori reads neither Tailwind classes nor `var()`.
  */
 
 const DESIGN_WIDTH = 1200;
@@ -174,9 +173,9 @@ export function EditorialCover({
   fixed?: boolean;
 }) {
   const g = compact ? GEOMETRY.compact : GEOMETRY.full;
-  // Scale by whichever axis is tighter, like `object-fit: contain`. Cards are a
-  // fixed height in a column of variable width, so sizing off width alone makes
-  // a wide card's type overrun the height and lose its last line.
+  // Whichever axis is tighter, like `object-fit: contain`: cards are a fixed
+  // height in a column of variable width, and sizing off width alone clips the
+  // title on a wide one.
   const u = fixed
     ? (n: number) => n
     : (n: number) =>
@@ -237,7 +236,7 @@ export function EditorialCover({
           style={{
             display: "flex",
             flexGrow: 1,
-            // Clip rather than grow: an over-long title loses its last line
+            // Clip rather than grow, so an over-long title loses its last line
             // instead of pushing the rail off the frame.
             minHeight: 0,
             overflow: "hidden",

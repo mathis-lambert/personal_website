@@ -2,13 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 /**
- * Static TrueType instances of the two faces `globals.css` loads as variable
- * woff2 — Satori can read neither woff2 nor a variable axis. Same family names,
- * so `EditorialCover` names one font stack and both renderers resolve it.
- *
- * They sit under `public/` because the Dockerfile copies that directory into
- * the runtime image wholesale; anywhere else and the standalone build would
- * have to be told to trace them. Nothing requests them over HTTP.
+ * Static TrueType of the two faces `globals.css` loads as variable woff2, which
+ * Satori can read neither of. Under `public/` because the Dockerfile already
+ * copies that directory into the runtime image; nothing requests them over HTTP.
  */
 const FACES = [
   { file: "bricolage-grotesque-latin-600-normal.ttf", name: "Bricolage Grotesque", weight: 600 },

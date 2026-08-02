@@ -43,12 +43,9 @@ const randomFrom = (seed: number) => {
 export const ROSE_SPOKES = 32;
 
 /**
- * Spoke lengths, each 0..1.
- *
- * A seal, not a chart: it plots nothing, and its job is to make two coverless
- * notes recognisably different at thumbnail size. Built from narrow gaussian
- * lobes rather than noise — wide lobes overlap into a constant and every post
- * comes out the same sunburst.
+ * Spoke lengths, each 0..1. A seal, not a chart: it plots nothing, it just
+ * makes two coverless posts distinguishable at thumbnail size. Narrow gaussian
+ * lobes rather than noise — wide ones overlap into the same sunburst every time.
  */
 export const windRose = (seed: number): number[] => {
   const random = randomFrom(seed);
