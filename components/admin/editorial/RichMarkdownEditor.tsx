@@ -20,6 +20,7 @@ import {
   Minus,
   Quote,
   Redo2,
+  Sigma,
   Undo2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -165,6 +166,8 @@ export function RichMarkdownEditor({
         {tool("Numbered list", <ListOrdered />, editor.isActive("orderedList"), () => editor.chain().focus().toggleOrderedList().run())}
         {tool("Quote", <Quote />, editor.isActive("blockquote"), () => editor.chain().focus().toggleBlockquote().run())}
         {tool("Code block", <Code2 />, editor.isActive("codeBlock"), () => editor.chain().focus().toggleCodeBlock().run())}
+        {tool("Inline formula", <Sigma />, editor.isActive("mathInline"), () => editor.chain().focus().insertContent({ type: "mathInline", attrs: { latex: "x_k" } }).run())}
+        {tool("Display formula", <Sigma className="size-5" />, editor.isActive("mathBlock"), () => editor.chain().focus().insertContent({ type: "mathBlock", attrs: { latex: String.raw`\sum_{k=0}^{N-1} x_k` } }).run())}
         {tool("Divider", <Minus />, false, () => editor.chain().focus().setHorizontalRule().run())}
         {tool("Link", <Link2 />, editor.isActive("link"), openLinkMenu)}
         {tool(uploading ? "Uploading image" : "Image", uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />, false, () => setMediaOpen(true))}
