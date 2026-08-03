@@ -9,14 +9,23 @@ import {
   Minus,
   Pilcrow,
   Quote,
+  SquareFunction,
+  SquareSigma,
   Workflow,
   type LucideIcon,
 } from "lucide-react";
+
+import {
+  DEFAULT_BLOCK_MATH,
+  DEFAULT_INLINE_MATH,
+  type MathEditorRequest,
+} from "@/lib/editorial/math";
 
 type SlashCommandContext = {
   editor: Editor;
   range: { from: number; to: number };
   openMediaLibrary: () => void;
+  openMathEditor: (request: MathEditorRequest) => void;
 };
 
 export type SlashCommand = {
@@ -87,6 +96,28 @@ const SLASH_COMMANDS: SlashCommand[] = [
     keywords: ["code", "fence", "snippet"],
     icon: Code2,
     run: (context) => chainAt(context).setCodeBlock().run(),
+  },
+  {
+    id: "inline-equation",
+    label: "Inline equation",
+    description: "Insert LaTeX inside the current paragraph",
+    keywords: ["equation", "formula", "math", "latex", "inline"],
+    icon: SquareFunction,
+    run: (context) => {
+      chainAt(context).run();
+      context.openMathEditor({ kind: "inline", latex: DEFAULT_INLINE_MATH });
+    },
+  },
+  {
+    id: "equation-block",
+    label: "Equation block",
+    description: "Insert a centered display equation",
+    keywords: ["equation", "formula", "math", "latex", "block", "display"],
+    icon: SquareSigma,
+    run: (context) => {
+      chainAt(context).run();
+      context.openMathEditor({ kind: "block", latex: DEFAULT_BLOCK_MATH });
+    },
   },
   {
     id: "mermaid",

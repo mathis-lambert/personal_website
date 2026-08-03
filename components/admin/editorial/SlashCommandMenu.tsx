@@ -8,6 +8,7 @@ import {
   filterSlashCommands,
   type SlashCommand,
 } from "@/components/admin/editorial/slashCommands";
+import type { MathEditorRequest } from "@/lib/editorial/math";
 
 type MenuState = {
   query: string;
@@ -19,9 +20,11 @@ type MenuState = {
 export function SlashCommandMenu({
   editor,
   openMediaLibrary,
+  openMathEditor,
 }: {
   editor: Editor;
   openMediaLibrary: () => void;
+  openMathEditor: (request: MathEditorRequest) => void;
 }) {
   const [menu, setMenu] = useState<MenuState>();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -67,9 +70,9 @@ export function SlashCommandMenu({
     (command: SlashCommand) => {
       if (!menu) return;
       setMenu(undefined);
-      command.run({ editor, range: menu.range, openMediaLibrary });
+      command.run({ editor, range: menu.range, openMediaLibrary, openMathEditor });
     },
-    [editor, menu, openMediaLibrary],
+    [editor, menu, openMathEditor, openMediaLibrary],
   );
 
   useEffect(() => {
