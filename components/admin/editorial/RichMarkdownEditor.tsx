@@ -27,6 +27,7 @@ import { toast } from "sonner";
 
 import { uploadMediaAsset } from "@/api/media";
 import { EditorialCodeBlock } from "@/components/admin/editorial/extensions/EditorialCodeBlock";
+import { EditorialMathBlock, EditorialMathInline } from "@/components/admin/editorial/extensions/EditorialMath";
 import { LinkBubbleMenu } from "@/components/admin/editorial/LinkBubbleMenu";
 import { MediaLibraryDialog } from "@/components/admin/editorial/MediaLibraryDialog";
 import { SlashCommandMenu } from "@/components/admin/editorial/SlashCommandMenu";
@@ -51,6 +52,8 @@ export function RichMarkdownEditor({
         link: { openOnClick: false },
       }),
       EditorialCodeBlock,
+      EditorialMathBlock,
+      EditorialMathInline,
       ImageExtension.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder: "Start writing… Type / for commands" }),
       Markdown,
