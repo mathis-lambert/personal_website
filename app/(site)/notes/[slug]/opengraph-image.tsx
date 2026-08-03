@@ -11,7 +11,9 @@ export const alt = "Note by Mathis Lambert";
 export const size = SHARE_IMAGE_SIZE;
 export const contentType = SHARE_IMAGE_CONTENT_TYPE;
 
-export const dynamic = "force-dynamic";
+// Content changes are uncommon; let Next reuse generated images instead of
+// invoking Satori and Sharp for every crawler request.
+export const revalidate = 3600;
 
 export default async function NoteShareImage({
   params,

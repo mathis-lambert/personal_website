@@ -15,9 +15,29 @@ import { loadOgFonts } from "@/lib/og/fonts";
 export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
 export const SHARE_IMAGE_CONTENT_TYPE = "image/png";
 
+const SHARE_IMAGE_CACHE_CONTROL =
+  "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
+const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
+const MAX_SOURCE_PIXELS = 40_000_000;
+const PHOTO_CACHE_TTL_MS = 60 * 60 * 1000;
+const PHOTO_CACHE_MAX_ENTRIES = 12;
+
 const { width, height } = SHARE_IMAGE_SIZE;
 
 const RULE_ON_DARK = "rgba(255, 255, 255, 0.28)";
+
+type PhotoCacheEntry = {
+  expiresAt: number;
+  value: Promise<string | undefined>;
+};
+
+const photoCache = new Map<string, PhotoCacheEntry>();
+
+// libvips otherwise keeps a sizeable process-wide cache and uses one worker
+// per CPU. OG images are latency-insensitive and generated infrequently, so a
+// small cache and a single worker give the server a predictable memory ceiling.
+sharp.cache({ memory: 16, files: 0, items: PHOTO_CACHE_MAX_ENTRIES });
+sharp.concurrency(1);
 
 export type ShareImageInput = {
   kind: CoverKind;
@@ -36,18 +56,68 @@ export type ShareImageInput = {
  * JPEG here, cropped to the frame. Undefined on any failure, so an unreachable
  * CDN costs the photograph rather than the whole preview.
  */
-const loadPhoto = async (cover: string, base: string): Promise<string | undefined> => {
+const decodePhoto = async (url: URL): Promise<string | undefined> => {
   try {
-    const response = await fetch(new URL(cover, base), { signal: AbortSignal.timeout(5000) });
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!response.ok) return undefined;
-    const jpeg = await sharp(Buffer.from(await response.arrayBuffer()))
-      .resize(width, height, { fit: "cover" })
-      .jpeg({ quality: 82 })
-      .toBuffer();
-    return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
+
+    const declaredSize = Number(response.headers.get("content-length"));
+    if (Number.isFinite(declaredSize) && declaredSize > MAX_SOURCE_BYTES) return undefined;
+
+    const source = Buffer.from(await response.arrayBuffer());
+    if (source.byteLength > MAX_SOURCE_BYTES) return undefined;
+
+    const pipeline = sharp(source, {
+      failOn: "error",
+      limitInputPixels: MAX_SOURCE_PIXELS,
+      sequentialRead: true,
+    });
+
+    try {
+      const jpeg = await pipeline
+        .rotate()
+        .resize(width, height, { fit: "cover", withoutEnlargement: true })
+        .jpeg({ quality: 82 })
+        .toBuffer();
+      return `data:image/jpeg;base64,${jpeg.toString("base64")}`;
+    } finally {
+      pipeline.destroy();
+    }
   } catch {
     return undefined;
   }
+};
+
+const loadPhoto = async (cover: string, base: string): Promise<string | undefined> => {
+  let url: URL;
+  try {
+    url = new URL(cover, base);
+  } catch {
+    return undefined;
+  }
+
+  const key = url.toString();
+  const now = Date.now();
+  const cached = photoCache.get(key);
+  if (cached && cached.expiresAt > now) {
+    photoCache.delete(key);
+    photoCache.set(key, cached);
+    return cached.value;
+  }
+  if (cached) photoCache.delete(key);
+
+  const value = decodePhoto(url);
+  photoCache.set(key, { expiresAt: now + PHOTO_CACHE_TTL_MS, value });
+
+  while (photoCache.size > PHOTO_CACHE_MAX_ENTRIES) {
+    const oldest = photoCache.keys().next().value;
+    if (oldest === undefined) break;
+    photoCache.delete(oldest);
+  }
+
+  const decoded = await value;
+  if (!decoded) photoCache.delete(key);
+  return decoded;
 };
 
 export async function renderShareImage(
@@ -78,7 +148,11 @@ export async function renderShareImage(
         seed={seed}
       />
     ),
-    { ...SHARE_IMAGE_SIZE, fonts },
+    {
+      ...SHARE_IMAGE_SIZE,
+      fonts,
+      headers: { "Cache-Control": SHARE_IMAGE_CACHE_CONTROL },
+    },
   );
 }
 
