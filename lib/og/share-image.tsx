@@ -5,6 +5,7 @@ import sharp from "sharp";
 
 import { EditorialCover } from "@/components/content/EditorialCover";
 import { COVER_PALETTE, clampText, coverInk, type CoverKind } from "@/lib/content/cover";
+import { createConcurrencyLimiter, readBoundedResponse } from "@/lib/og/bounded-processing";
 import { loadOgFonts } from "@/lib/og/fonts";
 
 /**
@@ -21,6 +22,7 @@ const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
 const MAX_SOURCE_PIXELS = 40_000_000;
 const PHOTO_CACHE_TTL_MS = 60 * 60 * 1000;
 const PHOTO_CACHE_MAX_ENTRIES = 12;
+const MAX_CONCURRENT_PHOTO_DECODES = 2;
 
 const { width, height } = SHARE_IMAGE_SIZE;
 
@@ -32,6 +34,7 @@ type PhotoCacheEntry = {
 };
 
 const photoCache = new Map<string, PhotoCacheEntry>();
+const limitPhotoDecode = createConcurrencyLimiter(MAX_CONCURRENT_PHOTO_DECODES);
 
 // libvips otherwise keeps a sizeable process-wide cache and uses one worker
 // per CPU. OG images are latency-insensitive and generated infrequently, so a
@@ -57,15 +60,12 @@ export type ShareImageInput = {
  * CDN costs the photograph rather than the whole preview.
  */
 const decodePhoto = async (url: URL): Promise<string | undefined> => {
-  try {
+  return limitPhotoDecode(async () => {
+    try {
     const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!response.ok) return undefined;
 
-    const declaredSize = Number(response.headers.get("content-length"));
-    if (Number.isFinite(declaredSize) && declaredSize > MAX_SOURCE_BYTES) return undefined;
-
-    const source = Buffer.from(await response.arrayBuffer());
-    if (source.byteLength > MAX_SOURCE_BYTES) return undefined;
+    const source = await readBoundedResponse(response, MAX_SOURCE_BYTES);
 
     const pipeline = sharp(source, {
       failOn: "error",
@@ -83,9 +83,10 @@ const decodePhoto = async (url: URL): Promise<string | undefined> => {
     } finally {
       pipeline.destroy();
     }
-  } catch {
-    return undefined;
-  }
+    } catch {
+      return undefined;
+    }
+  });
 };
 
 const loadPhoto = async (cover: string, base: string): Promise<string | undefined> => {

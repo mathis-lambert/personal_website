@@ -1,6 +1,7 @@
 "use client";
 
-import { mergeAttributes, Node, type NodeViewProps } from "@tiptap/core";
+import { InputRule, mergeAttributes, Node, nodePasteRule, type NodeViewProps } from "@tiptap/core";
+import type { NodeType } from "@tiptap/pm/model";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import katex from "katex";
 import { useMemo } from "react";
@@ -23,6 +24,26 @@ function MathNodeView({ node, updateAttributes }: NodeViewProps) {
 }
 
 const mathAttributes = { latex: { default: "" } };
+const inlineMathInput = /(?<!\\)(?<!\$)\$((?:\\.|[^$\n\\])+)\$$/;
+const blockMathInput = /^\$\$([^$\n]+)\$\$$/;
+const inlineMathPaste = /(?<!\\)(?<!\$)\$((?:\\.|[^$\n\\])+)\$(?!\$)/g;
+const blockMathPaste = /\$\$\s*([\s\S]+?)\s*\$\$/g;
+
+const mathInputRule = (type: NodeType, find: RegExp) =>
+  new InputRule({
+    find: (text) => {
+      const match = find.exec(text);
+      if (!match) return null;
+      return { text: match[0], index: match.index, data: { latex: match[1] } };
+    },
+    handler: ({ state, range, match }) => {
+      state.tr.replaceWith(
+        range.from,
+        range.to,
+        type.create({ latex: String(match.data?.latex ?? "") }),
+      );
+    },
+  });
 
 export const EditorialMathBlock = Node.create({
   name: MATH_BLOCK_TOKEN,
@@ -36,6 +57,18 @@ export const EditorialMathBlock = Node.create({
   markdownTokenizer: mathBlockTokenizer,
   parseMarkdown: (token, helpers) => helpers.createNode(MATH_BLOCK_TOKEN, token.attributes),
   renderMarkdown: (node) => `$$\n${node.attrs?.latex ?? ""}\n$$`,
+  addInputRules() {
+    return [mathInputRule(this.type, blockMathInput)];
+  },
+  addPasteRules() {
+    return [
+      nodePasteRule({
+        find: blockMathPaste,
+        type: this.type,
+        getAttributes: (match) => ({ latex: match[1].trim() }),
+      }),
+    ];
+  },
   addNodeView: () => ReactNodeViewRenderer(MathNodeView),
 });
 
@@ -51,5 +84,17 @@ export const EditorialMathInline = Node.create({
   markdownTokenizer: mathInlineTokenizer,
   parseMarkdown: (token, helpers) => helpers.createNode(MATH_INLINE_TOKEN, token.attributes),
   renderMarkdown: (node) => `$${node.attrs?.latex ?? ""}$`,
+  addInputRules() {
+    return [mathInputRule(this.type, inlineMathInput)];
+  },
+  addPasteRules() {
+    return [
+      nodePasteRule({
+        find: inlineMathPaste,
+        type: this.type,
+        getAttributes: (match) => ({ latex: match[1] }),
+      }),
+    ];
+  },
   addNodeView: () => ReactNodeViewRenderer(MathNodeView),
 });
