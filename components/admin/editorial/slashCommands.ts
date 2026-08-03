@@ -9,14 +9,24 @@ import {
   Minus,
   Pilcrow,
   Quote,
+  SquareFunction,
+  SquareSigma,
+  Table2,
   Workflow,
   type LucideIcon,
 } from "lucide-react";
+
+import {
+  DEFAULT_BLOCK_MATH,
+  DEFAULT_INLINE_MATH,
+  type MathEditorRequest,
+} from "@/lib/editorial/math";
 
 type SlashCommandContext = {
   editor: Editor;
   range: { from: number; to: number };
   openMediaLibrary: () => void;
+  openMathEditor: (request: MathEditorRequest) => void;
 };
 
 export type SlashCommand = {
@@ -89,6 +99,28 @@ const SLASH_COMMANDS: SlashCommand[] = [
     run: (context) => chainAt(context).setCodeBlock().run(),
   },
   {
+    id: "inline-equation",
+    label: "Inline equation",
+    description: "Insert LaTeX inside the current paragraph",
+    keywords: ["equation", "formula", "math", "latex", "inline"],
+    icon: SquareFunction,
+    run: (context) => {
+      chainAt(context).run();
+      context.openMathEditor({ kind: "inline", latex: DEFAULT_INLINE_MATH });
+    },
+  },
+  {
+    id: "equation-block",
+    label: "Equation block",
+    description: "Insert a centered display equation",
+    keywords: ["equation", "formula", "math", "latex", "block", "display"],
+    icon: SquareSigma,
+    run: (context) => {
+      chainAt(context).run();
+      context.openMathEditor({ kind: "block", latex: DEFAULT_BLOCK_MATH });
+    },
+  },
+  {
     id: "mermaid",
     label: "Mermaid diagram",
     description: "Edit and render a diagram inline",
@@ -96,6 +128,17 @@ const SLASH_COMMANDS: SlashCommand[] = [
     icon: Workflow,
     run: (context) =>
       chainAt(context).setCodeBlock({ language: "mermaid" }).run(),
+  },
+  {
+    id: "table",
+    label: "Table",
+    description: "Insert a table with a header row",
+    keywords: ["table", "grid", "data", "rows", "columns"],
+    icon: Table2,
+    run: (context) =>
+      chainAt(context)
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
   },
   {
     id: "divider",

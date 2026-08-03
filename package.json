@@ -1,6 +1,6 @@
 {
   "name": "app",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,7 +22,9 @@
     "@langchain/openai": "^1.2.4",
     "@tiptap/extension-code-block": "^3.29.2",
     "@tiptap/extension-image": "^3.29.2",
+    "@tiptap/extension-mathematics": "^3.29.2",
     "@tiptap/extension-placeholder": "^3.29.2",
+    "@tiptap/extension-table": "^3.29.2",
     "@tiptap/markdown": "^3.29.2",
     "@tiptap/react": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",

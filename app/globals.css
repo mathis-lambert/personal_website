@@ -1341,16 +1341,33 @@
 
   .prose-paper table {
     width: 100%;
-    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.9375rem;
   }
   .prose-paper th,
   .prose-paper td {
-    padding: 0.6em 0.75em;
+    min-width: 7rem;
+    padding: 0.7em 0.85em;
+    border-right: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
     text-align: left;
+    vertical-align: top;
+  }
+  .prose-paper tr > :last-child {
+    border-right: 0;
+  }
+  .prose-paper tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  .prose-paper tbody tr:nth-child(even) td {
+    background: color-mix(in oklab, var(--paper-sink) 62%, transparent);
   }
   .prose-paper th {
+    background: var(--paper-sink);
     font-family: var(--font-mono);
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -1509,31 +1526,80 @@
   caret-color: var(--brand);
 }
 
-.editorial-math-block {
-  display: grid;
-  gap: 0.75rem;
-  margin-block: 1.5rem;
-  padding: 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-3);
-  background: var(--paper-lift);
+.editorial-canvas .tableWrapper {
+  margin-block: 1.75rem;
+  overflow-x: auto;
+  padding-block: 0.25rem;
 }
 
-.editorial-math-block textarea,
-.editorial-math-inline input {
-  border: 1px solid var(--line);
+.editorial-canvas .tableWrapper table {
+  margin: 0;
+}
+
+.editorial-canvas .tableWrapper .selectedCell {
+  position: relative;
+}
+
+.editorial-canvas .tableWrapper .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  content: "";
+  background: var(--brand-quiet);
+}
+
+.editorial-canvas .tableWrapper .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  z-index: 2;
+  width: 4px;
+  pointer-events: none;
+  background: var(--brand);
+}
+
+.editorial-canvas .ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.editorial-canvas .tiptap-mathematics-render--editable {
+  cursor: pointer;
+  transition:
+    background-color var(--t-1) var(--ease),
+    box-shadow var(--t-1) var(--ease);
+}
+
+.editorial-canvas .tiptap-mathematics-render--editable[data-type="inline-math"] {
+  display: inline-flex;
+  margin-inline: 0.12em;
+  padding-inline: 0.28em;
   border-radius: var(--r-2);
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.8rem;
-  outline: none;
+  background: var(--paper-sink);
+  vertical-align: baseline;
 }
 
-.editorial-math-block textarea { width: 100%; resize: vertical; padding: 0.65rem 0.75rem; }
-.editorial-math-inline { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.15rem 0.3rem; border-radius: var(--r-2); background: var(--paper-lift); }
-.editorial-math-inline input { width: 8rem; padding: 0.25rem 0.4rem; }
-.editorial-math-preview { max-width: 100%; overflow-x: auto; }
+.editorial-canvas .tiptap-mathematics-render--editable[data-type="block-math"] {
+  max-width: 100%;
+  margin-block: 1.75rem;
+  overflow-x: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-4);
+  background: var(--paper-lift);
+  text-align: center;
+}
+
+.editorial-canvas .tiptap-mathematics-render--editable:hover {
+  background: var(--brand-quiet);
+  box-shadow: 0 0 0 2px var(--brand-quiet);
+}
+
+.editorial-canvas :is(.inline-math-error, .block-math-error) {
+  color: var(--brand);
+  font-family: var(--font-mono), monospace;
+}
 
 .editorial-canvas .ProseMirror > *:first-child {
   margin-top: 0;

@@ -20,7 +20,9 @@ import {
   Minus,
   Quote,
   Redo2,
-  Sigma,
+  SquareFunction,
+  SquareSigma,
+  Table2,
   Undo2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,11 +30,28 @@ import { toast } from "sonner";
 
 import { uploadMediaAsset } from "@/api/media";
 import { EditorialCodeBlock } from "@/components/admin/editorial/extensions/EditorialCodeBlock";
-import { EditorialMathBlock, EditorialMathInline } from "@/components/admin/editorial/extensions/EditorialMath";
+import {
+  EditorialBlockMath,
+  EditorialInlineMath,
+} from "@/components/admin/editorial/extensions/EditorialMath";
+import {
+  EditorialTable,
+  EditorialTableCell,
+  EditorialTableHeader,
+  EditorialTableRow,
+} from "@/components/admin/editorial/extensions/EditorialTable";
+import { MathEditorDialog } from "@/components/admin/editorial/MathEditorDialog";
 import { LinkBubbleMenu } from "@/components/admin/editorial/LinkBubbleMenu";
 import { MediaLibraryDialog } from "@/components/admin/editorial/MediaLibraryDialog";
 import { SlashCommandMenu } from "@/components/admin/editorial/SlashCommandMenu";
+import { TableBubbleMenu } from "@/components/admin/editorial/TableBubbleMenu";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  DEFAULT_BLOCK_MATH,
+  DEFAULT_INLINE_MATH,
+  type MathEditorRequest,
+  type MathKind,
+} from "@/lib/editorial/math";
 import { mediaAssetUrl, type MediaAsset } from "@/types/media";
 
 export function RichMarkdownEditor({
@@ -45,6 +64,7 @@ export function RichMarkdownEditor({
   const [mediaOpen, setMediaOpen] = useState(false);
   const [linkMenuRequested, setLinkMenuRequested] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [mathEditor, setMathEditor] = useState<MathEditorRequest>();
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -53,11 +73,23 @@ export function RichMarkdownEditor({
         link: { openOnClick: false },
       }),
       EditorialCodeBlock,
-      EditorialMathBlock,
-      EditorialMathInline,
+      EditorialBlockMath.configure({
+        katexOptions: { displayMode: true, throwOnError: false },
+        onClick: (node, pos) =>
+          setMathEditor({ kind: "block", latex: String(node.attrs.latex), pos }),
+      }),
+      EditorialInlineMath.configure({
+        katexOptions: { displayMode: false, throwOnError: false },
+        onClick: (node, pos) =>
+          setMathEditor({ kind: "inline", latex: String(node.attrs.latex), pos }),
+      }),
+      EditorialTable,
+      EditorialTableRow,
+      EditorialTableHeader,
+      EditorialTableCell,
       ImageExtension.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder: "Start writing… Type / for commands" }),
-      Markdown,
+      Markdown.configure({ markedOptions: { gfm: true } }),
     ],
     content: value,
     contentType: "markdown",
@@ -113,6 +145,40 @@ export function RichMarkdownEditor({
     editor.view.dispatch(editor.state.tr.setMeta("editorial-link-menu", "open"));
   };
 
+  const openNewMath = (kind: MathKind) => {
+    setMathEditor({
+      kind,
+      latex: kind === "inline" ? DEFAULT_INLINE_MATH : DEFAULT_BLOCK_MATH,
+    });
+  };
+
+  const saveMath = (latex: string) => {
+    if (!mathEditor) return;
+    const chain = editor.chain().focus();
+    if (mathEditor.kind === "inline") {
+      if (mathEditor.pos === undefined) chain.insertInlineMath({ latex });
+      else chain.updateInlineMath({ latex, pos: mathEditor.pos });
+    } else if (mathEditor.pos === undefined) {
+      chain.insertBlockMath({ latex });
+    } else {
+      chain.updateBlockMath({ latex, pos: mathEditor.pos });
+    }
+    chain.run();
+    setMathEditor(undefined);
+  };
+
+  const deleteMath = () => {
+    if (!mathEditor || mathEditor.pos === undefined) return;
+    const chain = editor.chain().focus();
+    if (mathEditor.kind === "inline") {
+      chain.deleteInlineMath({ pos: mathEditor.pos });
+    } else {
+      chain.deleteBlockMath({ pos: mathEditor.pos });
+    }
+    chain.run();
+    setMathEditor(undefined);
+  };
+
   const insertImage = (asset: MediaAsset) => {
     const src = mediaAssetUrl(asset, 1280);
     if (src) editor.chain().focus().setImage({ src, alt: asset.alt }).run();
@@ -166,8 +232,29 @@ export function RichMarkdownEditor({
         {tool("Numbered list", <ListOrdered />, editor.isActive("orderedList"), () => editor.chain().focus().toggleOrderedList().run())}
         {tool("Quote", <Quote />, editor.isActive("blockquote"), () => editor.chain().focus().toggleBlockquote().run())}
         {tool("Code block", <Code2 />, editor.isActive("codeBlock"), () => editor.chain().focus().toggleCodeBlock().run())}
-        {tool("Inline formula", <Sigma />, editor.isActive("mathInline"), () => editor.chain().focus().insertContent({ type: "mathInline", attrs: { latex: "x_k" } }).run())}
-        {tool("Display formula", <Sigma className="size-5" />, editor.isActive("mathBlock"), () => editor.chain().focus().insertContent({ type: "mathBlock", attrs: { latex: String.raw`\sum_{k=0}^{N-1} x_k` } }).run())}
+        {tool(
+          "Inline equation",
+          <SquareFunction />,
+          editor.isActive("inlineMath"),
+          () => openNewMath("inline"),
+        )}
+        {tool(
+          "Equation block",
+          <SquareSigma />,
+          editor.isActive("blockMath"),
+          () => openNewMath("block"),
+        )}
+        {tool(
+          "Table",
+          <Table2 />,
+          editor.isActive("table"),
+          () =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run(),
+        )}
         {tool("Divider", <Minus />, false, () => editor.chain().focus().setHorizontalRule().run())}
         {tool("Link", <Link2 />, editor.isActive("link"), openLinkMenu)}
         {tool(uploading ? "Uploading image" : "Image", uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />, false, () => setMediaOpen(true))}
@@ -191,13 +278,26 @@ export function RichMarkdownEditor({
       >
         <EditorContent editor={editor} className="editorial-canvas" />
       </div>
-      <SlashCommandMenu editor={editor} openMediaLibrary={() => setMediaOpen(true)} />
+      <SlashCommandMenu
+        editor={editor}
+        openMediaLibrary={() => setMediaOpen(true)}
+        openMathEditor={setMathEditor}
+      />
       <LinkBubbleMenu
         editor={editor}
         requested={linkMenuRequested}
         onRequestedChange={setLinkMenuRequested}
       />
+      <TableBubbleMenu editor={editor} />
       <MediaLibraryDialog open={mediaOpen} onOpenChange={setMediaOpen} onSelect={insertImage} />
+      <MathEditorDialog
+        request={mathEditor}
+        onOpenChange={(open) => {
+          if (!open) setMathEditor(undefined);
+        }}
+        onSave={saveMath}
+        onDelete={deleteMath}
+      />
     </>
   );
 }
