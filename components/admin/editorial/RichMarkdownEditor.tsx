@@ -22,6 +22,7 @@ import {
   Redo2,
   SquareFunction,
   SquareSigma,
+  Table2,
   Undo2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -33,10 +34,17 @@ import {
   EditorialBlockMath,
   EditorialInlineMath,
 } from "@/components/admin/editorial/extensions/EditorialMath";
+import {
+  EditorialTable,
+  EditorialTableCell,
+  EditorialTableHeader,
+  EditorialTableRow,
+} from "@/components/admin/editorial/extensions/EditorialTable";
 import { MathEditorDialog } from "@/components/admin/editorial/MathEditorDialog";
 import { LinkBubbleMenu } from "@/components/admin/editorial/LinkBubbleMenu";
 import { MediaLibraryDialog } from "@/components/admin/editorial/MediaLibraryDialog";
 import { SlashCommandMenu } from "@/components/admin/editorial/SlashCommandMenu";
+import { TableBubbleMenu } from "@/components/admin/editorial/TableBubbleMenu";
 import { Toggle } from "@/components/ui/toggle";
 import {
   DEFAULT_BLOCK_MATH,
@@ -75,9 +83,13 @@ export function RichMarkdownEditor({
         onClick: (node, pos) =>
           setMathEditor({ kind: "inline", latex: String(node.attrs.latex), pos }),
       }),
+      EditorialTable,
+      EditorialTableRow,
+      EditorialTableHeader,
+      EditorialTableCell,
       ImageExtension.configure({ allowBase64: false }),
       Placeholder.configure({ placeholder: "Start writing… Type / for commands" }),
-      Markdown,
+      Markdown.configure({ markedOptions: { gfm: true } }),
     ],
     content: value,
     contentType: "markdown",
@@ -232,6 +244,17 @@ export function RichMarkdownEditor({
           editor.isActive("blockMath"),
           () => openNewMath("block"),
         )}
+        {tool(
+          "Table",
+          <Table2 />,
+          editor.isActive("table"),
+          () =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run(),
+        )}
         {tool("Divider", <Minus />, false, () => editor.chain().focus().setHorizontalRule().run())}
         {tool("Link", <Link2 />, editor.isActive("link"), openLinkMenu)}
         {tool(uploading ? "Uploading image" : "Image", uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />, false, () => setMediaOpen(true))}
@@ -265,6 +288,7 @@ export function RichMarkdownEditor({
         requested={linkMenuRequested}
         onRequestedChange={setLinkMenuRequested}
       />
+      <TableBubbleMenu editor={editor} />
       <MediaLibraryDialog open={mediaOpen} onOpenChange={setMediaOpen} onSelect={insertImage} />
       <MathEditorDialog
         request={mathEditor}

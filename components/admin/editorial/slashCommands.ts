@@ -11,6 +11,7 @@ import {
   Quote,
   SquareFunction,
   SquareSigma,
+  Table2,
   Workflow,
   type LucideIcon,
 } from "lucide-react";
@@ -127,6 +128,17 @@ const SLASH_COMMANDS: SlashCommand[] = [
     icon: Workflow,
     run: (context) =>
       chainAt(context).setCodeBlock({ language: "mermaid" }).run(),
+  },
+  {
+    id: "table",
+    label: "Table",
+    description: "Insert a table with a header row",
+    keywords: ["table", "grid", "data", "rows", "columns"],
+    icon: Table2,
+    run: (context) =>
+      chainAt(context)
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
   },
   {
     id: "divider",

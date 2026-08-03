@@ -4,6 +4,7 @@ import { BlockMath, InlineMath } from "@tiptap/extension-mathematics";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
+import { TableKit } from "@tiptap/extension-table";
 import { MarkdownManager } from "@tiptap/markdown";
 
 import {
@@ -14,6 +15,24 @@ import {
 test("inline math is recognized as soon as the closing dollar is typed", () => {
   const match = INLINE_MATH_INPUT_REGEX.exec(String.raw`Here is $u_k$`);
   assert.equal(match?.[1], String.raw`u_k`);
+});
+
+test("GFM tables survive Markdown parsing and serialization", () => {
+  const manager = new MarkdownManager({
+    extensions: [Document, Paragraph, Text, TableKit],
+    markedOptions: { gfm: true },
+  });
+  const markdown = `| Metric | Before | After |
+| --- | ---: | ---: |
+| Memory | 55% | 45% |
+| CPU | 40% | 6% |`;
+
+  const document = manager.parse(markdown);
+  const output = manager.serialize(document);
+
+  assert.equal(document.content?.[0]?.type, "table");
+  assert.match(output, /\| Metric\s+\| Before\s+\| After\s+\|/);
+  assert.match(output, /\| Memory\s+\| 55%\s+\| 45%\s+\|/);
 });
 
 test("block math keeps LaTeX commands and subscripts intact", () => {
