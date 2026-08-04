@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Notes - Mathis Lambert",
   description: "Field notes on AI, retrieval and systems, by Mathis Lambert.",
+  alternates: { canonical: "/notes" },
 };
 
 export default async function NotesPage() {

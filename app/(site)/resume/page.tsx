@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Resume - Mathis Lambert",
   description: "Professional experience and skills of Mathis Lambert.",
+  alternates: { canonical: "/resume" },
 };
 
 export default async function ResumePage({
